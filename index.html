@@ -13,11 +13,29 @@ html.pp-prelogin #loginOverlay{
 }
 html.pp-authenticated body>*{visibility:visible!important}
 </style>
-<script id="pp-login-first-paint-v13-script">
+<script id="pp-login-first-paint-v44-script">
 (function(){
-  document.documentElement.classList.add('pp-prelogin');
+  const SESSION_KEY='pp_secure_session_v44';
+  const LIMIT_MS=5*60*1000;
+
+  function readSession(){
+    try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null')}catch(e){return null}
+  }
+  function sessionIsValid(){
+    const s=readSession();
+    if(!s || !s.authenticated || !s.profile)return false;
+    if(s.hiddenAt && (Date.now()-Number(s.hiddenAt)>=LIMIT_MS))return false;
+    return true;
+  }
+
+  if(sessionIsValid()){
+    document.documentElement.classList.add('pp-authenticated');
+  }else{
+    document.documentElement.classList.add('pp-prelogin');
+  }
 
   function showLoginImmediately(){
+    if(sessionIsValid())return;
     var overlay=document.getElementById('loginOverlay');
     if(overlay){
       overlay.style.display='flex';
@@ -39,8 +57,11 @@ html.pp-authenticated body>*{visibility:visible!important}
     var overlay=document.getElementById('loginOverlay');
     if(overlay){
       overlay.style.visibility='hidden';
+      overlay.style.pointerEvents='none';
     }
   };
+
+  window.ppSessionV44Early={readSession,sessionIsValid,SESSION_KEY,LIMIT_MS};
 })();
 </script>
 
@@ -183,6 +204,71 @@ img,svg,canvas{max-width:100%}.filterbar{max-width:100%}.filterbar>*{max-width:1
 @media(max-width:820px){.topbar{padding:7px!important}.topinner{border-radius:16px!important}.account-mini{flex:1 1 auto!important;max-width:none!important}.account-mini .account-bank-dot{display:none}.topinner .actions #backupBtn{display:none!important}.topinner .actions .primary{padding:8px 9px!important;font-size:11px!important}.nav{top:76px!important;right:8px!important;width:min(300px,calc(100vw - 16px))!important;max-height:calc(100vh - 88px)!important}.premium-trend-head{flex-direction:column}.trend-svg{height:210px!important}.capacity-shell{grid-template-columns:1fr!important}.six-strip{grid-template-columns:repeat(2,minmax(0,1fr))!important}.card-deck{grid-template-columns:1fr!important}.credit-card{grid-template-columns:1fr!important}.credit-card .brandline,.credit-card .footer{grid-column:1!important}.credit-card .footer{align-items:flex-start}.card-detail-grid{grid-template-columns:1fr 1fr!important}}
 @media(max-width:600px){.main{padding:10px 8px 60px!important}.profile-man{width:36px;height:36px}.account-mini{padding:6px 8px!important}.account-mini strong{font-size:10.5px!important}.account-mini small{font-size:9px!important}.topinner .actions .primary{width:34px;height:34px;padding:0!important;font-size:0!important;border-radius:11px!important}.topinner .actions .primary:after{content:"+";font-size:20px}.menu-trigger{width:34px!important;height:34px!important}.hero{gap:10px}.hero h1{font-size:25px!important}.hero .filterbar{width:100%;display:grid;grid-template-columns:1fr 1fr}.hero .filterbar select{width:100%}.kpis,#dashboardKpis,.summary-strip,.card-summary,.annual-premium,.plan-grid{grid-template-columns:1fr 1fr!important}.kpi,.mini,.annual-card,.plan-card{padding:11px!important}.grid2{gap:8px}.premium-trend{padding:13px 10px 10px!important}.trend-svg{height:190px!important}.trend-legend{flex-wrap:wrap}.six-strip{grid-template-columns:1fr!important}.section-tools{align-items:flex-start}.section-tools .filterbar{width:100%}.period-visual-trigger,.filterbar select,.filterbar input,.filterbar button{min-height:40px}.tablewrap{border-radius:12px}table{min-width:760px!important}.card-detail-grid{grid-template-columns:1fr!important}.projection-hero-card{align-items:flex-start;flex-direction:column}.projection-hero-card b{font-size:22px}#projecao .month-cards{grid-template-columns:1fr 1fr!important}}
 @media(max-width:390px){.account-mini small{max-width:145px}.kpis,#dashboardKpis,.summary-strip,.card-summary,.annual-premium,.plan-grid{grid-template-columns:1fr!important}#projecao .month-cards{grid-template-columns:1fr!important}}
+</style>
+
+
+<style id="pp-backup-v43-style">
+#backupRestoreInputV43{display:none!important}
+.cloud-backup-box{margin-top:14px;padding-top:14px;border-top:1px solid #e8edf3}
+.cloud-backup-box strong{display:block;margin-bottom:5px;color:#172b4d;font-size:12px}
+.cloud-backup-box p{margin:0 0 10px!important;font-size:10.5px!important;color:#667085!important}
+.cloud-backup-actions{display:flex;gap:8px;flex-wrap:wrap}
+.cloud-backup-actions button{border:0;border-radius:11px;padding:10px 12px;font-size:10.5px;font-weight:800;cursor:pointer}
+.cloud-backup-download{background:#172b4d;color:#fff}
+.cloud-backup-restore{background:#f2f4f7;color:#344054}
+</style>
+
+
+<style id="pp-session-v44-style">
+#sessionTimerV44{
+  display:flex;align-items:center;gap:7px;min-width:118px;padding:7px 10px;
+  border:1px solid #e7eaf0;border-radius:12px;background:#fff;color:#344054;
+  box-shadow:0 4px 12px rgba(16,24,40,.04);user-select:none
+}
+#sessionTimerV44 .session-clock-icon{font-size:15px;line-height:1}
+#sessionTimerV44 .session-time{
+  font-variant-numeric:tabular-nums;font-size:13px;font-weight:900;color:#172b4d;
+  min-width:38px;text-align:center
+}
+#sessionTimerV44 .session-state{font-size:8.5px;font-weight:800;color:#667085;line-height:1.1}
+#sessionTimerV44.is-away{border-color:#ffd39e;background:#fff8ef}
+#sessionTimerV44.is-away .session-time{color:#e56f00}
+#sessionTimerV44.is-locked{border-color:#f1b5b5;background:#fff5f5}
+#sessionTimerV44.is-locked .session-time{color:#b42318}
+
+#sessionLockV44{
+  position:fixed;inset:0;z-index:120000;background:rgba(7,16,31,.78);
+  backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:18px
+}
+#sessionLockV44 .session-lock-card{
+  width:min(430px,96vw);background:#fff;border-radius:28px;padding:26px;
+  box-shadow:0 38px 110px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.75)
+}
+#sessionLockV44 .session-lock-icon{
+  width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#ff8a00,#ffb44d);
+  display:grid;place-items:center;color:#fff;font-size:25px;margin-bottom:17px
+}
+#sessionLockV44 h2{margin:0;font-size:25px;letter-spacing:-.035em;color:#172033}
+#sessionLockV44 p{margin:7px 0 18px;color:#7b8798;font-size:12px;line-height:1.5}
+#sessionLockV44 label{display:block;font-size:10px;font-weight:900;color:#667085;margin-bottom:6px}
+#sessionLockV44 input{
+  width:100%;font-size:18px;letter-spacing:.15em;padding:12px 13px;border:1px solid #dfe4ea;
+  border-radius:13px;outline:none
+}
+#sessionLockV44 input:focus{border-color:#ff8a00;box-shadow:0 0 0 3px rgba(255,138,0,.12)}
+#sessionLockV44 .session-lock-error{min-height:18px;margin-top:6px;color:#b42318;font-size:10.5px;font-weight:800}
+#sessionLockV44 .session-unlock{
+  width:100%;margin-top:5px;padding:12px;border:0;border-radius:14px;background:#13a26b;color:#fff;font-weight:900
+}
+#sessionLockV44 .session-security-note{
+  margin-top:13px;padding:10px 12px;background:#f7f9fc;border-radius:12px;color:#667085;font-size:9.5px;line-height:1.45
+}
+@media(max-width:760px){
+  #sessionTimerV44{min-width:84px;padding:6px 8px;gap:5px}
+  #sessionTimerV44 .session-state{display:none}
+  #sessionTimerV44 .session-clock-icon{font-size:13px}
+  #sessionTimerV44 .session-time{font-size:12px}
+}
 </style>
 
 </head>
@@ -6410,6 +6496,14 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
              <button type="button" class="cloud-secondary" id="cloudLoadNow">Baixar da nuvem</button>
              <button type="button" class="cloud-secondary" id="cloudSyncNow">Salvar agora</button>
              <button type="button" class="cloud-primary" id="cloudSignOut">Sair da nuvem</button>
+           </div>
+           <div class="cloud-backup-box">
+             <strong>Backup completo</strong>
+             <p>Guarde uma cópia de Marcos e Christian no seu aparelho.</p>
+             <div class="cloud-backup-actions">
+               <button type="button" class="cloud-backup-download" id="backupDownloadV43">Baixar backup</button>
+               <button type="button" class="cloud-backup-restore" id="backupRestoreV43">Restaurar backup</button>
+             </div>
            </div>`
         : `<div class="cloud-grid">
              <div><label>E-mail da nuvem</label><input id="cloudEmail" type="email" autocomplete="email" placeholder="seu@email.com"></div>
@@ -6420,12 +6514,25 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
              <button type="button" class="cloud-primary" id="cloudSignIn">Entrar</button>
              <button type="button" class="cloud-secondary" id="cloudSignUp">Criar conta</button>
            </div>
-           <div class="cloud-note"><b>Importante:</b> cada celular/computador precisa entrar uma vez nesta mesma conta. Depois a sessão fica salva neste aparelho.</div>`
+           <div class="cloud-note"><b>Importante:</b> cada celular/computador precisa entrar uma vez nesta mesma conta. Depois a sessão fica salva neste aparelho.</div>
+           <div class="cloud-backup-box">
+             <strong>Backup local</strong>
+             <p>Você também pode baixar ou restaurar uma cópia completa sem entrar na nuvem.</p>
+             <div class="cloud-backup-actions">
+               <button type="button" class="cloud-backup-download" id="backupDownloadV43">Baixar backup</button>
+               <button type="button" class="cloud-backup-restore" id="backupRestoreV43">Restaurar backup</button>
+             </div>
+           </div>`
       }
     </section>`;
     document.body.appendChild(ov);
     ov.querySelector('.cloud-close').onclick=closeAuth;
     ov.onclick=e=>{if(e.target===ov)closeAuth()};
+
+    const bd=document.getElementById('backupDownloadV43');
+    const br=document.getElementById('backupRestoreV43');
+    if(bd)bd.onclick=()=>window.ppBackupV43?.download?.();
+    if(br)br.onclick=()=>window.ppBackupV43?.chooseRestore?.();
 
     if(currentUser){
       document.getElementById('cloudSyncNow').onclick=async()=>{await upsertNow();closeAuth()};
@@ -6534,7 +6641,103 @@ html.pp-christian-empty #incomeCommitCard,
 html.pp-christian-empty #installmentCapacityCard,
 html.pp-christian-empty #dashboardScope{display:none!important}
 </style>
-<script id="pp-profile-independent-runtime-v42">
+
+<script id="pp-backup-v43">
+(function(){
+  const PREFIXES=['planejador_','financeiro_marcos_'];
+  const isManaged=k=>PREFIXES.some(p=>String(k||'').startsWith(p));
+
+  function collect(){
+    try{window.ppV42SaveProfileState?.()}catch(e){}
+    const data={};
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&isManaged(k))data[k]=localStorage.getItem(k);
+    }
+    return {
+      type:'PlanejadorPessoalBackup',
+      format_version:1,
+      app_version:'v43',
+      created_at:new Date().toISOString(),
+      active_profile:localStorage.getItem('planejador_active_profile')||'Marcos',
+      data
+    };
+  }
+
+  function stamp(){
+    const d=new Date(),z=n=>String(n).padStart(2,'0');
+    return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}_${z(d.getHours())}-${z(d.getMinutes())}`;
+  }
+
+  function download(){
+    const backup=collect();
+    const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`Planejador_Pessoal_Backup_${stamp()}.json`;
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    try{toast('Backup completo baixado.')}catch(e){}
+  }
+
+  function valid(b){
+    return !!(b&&b.type==='PlanejadorPessoalBackup'&&b.data&&typeof b.data==='object'&&Object.keys(b.data).length);
+  }
+
+  function chooseRestore(){
+    let input=document.getElementById('backupRestoreInputV43');
+    if(!input){
+      input=document.createElement('input');
+      input.type='file';input.accept='.json,application/json';input.id='backupRestoreInputV43';
+      document.body.appendChild(input);
+      input.addEventListener('change',async()=>{
+        const file=input.files?.[0];input.value='';if(!file)return;
+        try{
+          const backup=JSON.parse(await file.text());
+          if(!valid(backup))throw new Error('invalid');
+          const dt=backup.created_at?new Date(backup.created_at).toLocaleString('pt-BR'):'data não informada';
+          const ok=confirm(`Restaurar o backup ${file.name}?\
+\
+Criado em: ${dt}\
+\
+Os dados atuais deste navegador serão substituídos.`);
+          if(ok)restore(backup);
+        }catch(e){alert('Este arquivo não é um backup válido do Planejador Pessoal.')}
+      });
+    }
+    input.click();
+  }
+
+  function restore(backup){
+    if(!valid(backup))return;
+    const rm=[];
+    for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&isManaged(k))rm.push(k)}
+    rm.forEach(k=>localStorage.removeItem(k));
+    Object.entries(backup.data).forEach(([k,v])=>{if(isManaged(k)&&v!=null)localStorage.setItem(k,String(v))});
+    sessionStorage.removeItem('pp_cloud_hydrated_v42');
+    sessionStorage.setItem('pp_backup_restored_v43','1');
+    location.reload();
+  }
+
+  function syncRestored(){
+    if(sessionStorage.getItem('pp_backup_restored_v43')!=='1')return;
+    sessionStorage.removeItem('pp_backup_restored_v43');
+    let n=0;
+    const t=setInterval(async()=>{
+      n++;
+      if(window.ppCloud?.save){
+        clearInterval(t);
+        try{await window.ppCloud.save();toast?.('Backup restaurado e sincronizado.')}catch(e){}
+      }else if(n>20)clearInterval(t);
+    },500);
+  }
+
+  window.ppBackupV43={download,chooseRestore,collect};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncRestored);
+  else syncRestored();
+})();
+</script>\n<script id="pp-profile-independent-runtime-v42">
 (function(){
   const PM=window.__ppV41Profile;
   if(!PM)return;
@@ -6729,6 +6932,326 @@ html.pp-christian-empty #dashboardScope{display:none!important}
   },160);
 
   window.ppV42SaveProfileState=saveCurrent;
+})();
+</script>
+
+
+<script id="pp-session-v44">
+(function(){
+  const SESSION_KEY='pp_secure_session_v44';
+  const WORKSPACE_KEY='pp_secure_workspace_v44';
+  const LIMIT_MS=5*60*1000;
+  let hiddenAt=null;
+  let ticker=null;
+  let locked=false;
+
+  function activeProfile(){
+    return localStorage.getItem('planejador_active_profile')||'Marcos';
+  }
+  function profilePass(profile){
+    return localStorage.getItem('planejador_password_'+profile)||'123456';
+  }
+  function readSession(){
+    try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null')}catch(e){return null}
+  }
+  function writeSession(extra){
+    const prev=readSession()||{};
+    const next=Object.assign({},prev,{
+      authenticated:true,
+      profile:activeProfile(),
+      hiddenAt:hiddenAt,
+      updatedAt:Date.now()
+    },extra||{});
+    sessionStorage.setItem(SESSION_KEY,JSON.stringify(next));
+    return next;
+  }
+  function clearSession(){
+    sessionStorage.removeItem(SESSION_KEY);
+  }
+
+  function ensureTimer(){
+    let el=document.getElementById('sessionTimerV44');
+    if(el)return el;
+    el=document.createElement('div');
+    el.id='sessionTimerV44';
+    el.title='A sessão só expira após 5 minutos com o Planejador fora de visualização.';
+    el.innerHTML='<span class="session-clock-icon">⏱</span><span class="session-time">05:00</span><span class="session-state">sessão ativa</span>';
+    const actions=document.querySelector('.topinner .actions');
+    if(actions)actions.insertBefore(el,actions.firstChild);
+    else document.body.appendChild(el);
+    return el;
+  }
+
+  function fmt(ms){
+    const sec=Math.max(0,Math.ceil(ms/1000));
+    const m=Math.floor(sec/60),s=sec%60;
+    return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+
+  function paintTimer(){
+    const el=ensureTimer();
+    const time=el.querySelector('.session-time');
+    const state=el.querySelector('.session-state');
+
+    el.classList.toggle('is-away',!!hiddenAt&&!locked);
+    el.classList.toggle('is-locked',locked);
+
+    if(locked){
+      time.textContent='00:00';
+      state.textContent='bloqueado';
+      return;
+    }
+    if(hiddenAt){
+      const left=LIMIT_MS-(Date.now()-hiddenAt);
+      time.textContent=fmt(left);
+      state.textContent='fora da tela';
+    }else{
+      time.textContent='05:00';
+      state.textContent='sessão ativa';
+    }
+  }
+
+  function currentView(){
+    return document.querySelector('.view.active')?.id ||
+      document.querySelector('#nav button.active')?.dataset.view || 'dashboard';
+  }
+
+  function captureWorkspace(){
+    try{
+      const draft={view:currentView(),scrollY:window.scrollY||0,openModals:[],fields:{},savedAt:Date.now()};
+      document.querySelectorAll('.modalback.open,#profilePanelModal.open').forEach(m=>{
+        if(m.id)draft.openModals.push(m.id);
+      });
+      document.querySelectorAll('input,select,textarea').forEach(el=>{
+        if(!el.id || el.type==='password' || el.type==='file')return;
+        if(el.closest('#loginOverlay,#sessionLockV44,#cloudAuthV40'))return;
+        draft.fields[el.id]=el.type==='checkbox'||el.type==='radio'
+          ? {checked:el.checked,type:el.type}
+          : {value:el.value,type:el.type};
+      });
+      sessionStorage.setItem(WORKSPACE_KEY,JSON.stringify(draft));
+    }catch(e){}
+  }
+
+  function restoreWorkspace(){
+    let d=null;
+    try{d=JSON.parse(sessionStorage.getItem(WORKSPACE_KEY)||'null')}catch(e){}
+    if(!d)return;
+
+    const restore=()=>{
+      try{
+        if(d.view && document.getElementById(d.view) && typeof window.showView==='function'){
+          window.showView(d.view);
+        }
+        Object.entries(d.fields||{}).forEach(([id,v])=>{
+          const el=document.getElementById(id);
+          if(!el || el.type==='password'||el.type==='file')return;
+          if(v && (v.type==='checkbox'||v.type==='radio'))el.checked=!!v.checked;
+          else if(v && Object.prototype.hasOwnProperty.call(v,'value'))el.value=v.value;
+        });
+        (d.openModals||[]).forEach(id=>{
+          document.getElementById(id)?.classList.add('open');
+        });
+        if(Number.isFinite(Number(d.scrollY))){
+          setTimeout(()=>window.scrollTo(0,Number(d.scrollY)),30);
+        }
+      }catch(e){}
+    };
+    setTimeout(restore,220);
+    setTimeout(restore,800);
+  }
+
+  function markAuthenticated(){
+    locked=false;
+    hiddenAt=null;
+    writeSession({authenticated:true,hiddenAt:null,profile:activeProfile()});
+    document.documentElement.classList.remove('pp-prelogin');
+    document.documentElement.classList.add('pp-authenticated');
+    paintTimer();
+  }
+
+  function validStoredSession(){
+    const s=readSession();
+    if(!s || !s.authenticated || !s.profile)return false;
+    if(s.hiddenAt && Date.now()-Number(s.hiddenAt)>=LIMIT_MS)return false;
+    return true;
+  }
+
+  function removeStartupLoginIfSessionValid(){
+    if(!validStoredSession())return false;
+    const s=readSession();
+    if(s.profile && s.profile!==activeProfile()){
+      localStorage.setItem('planejador_active_profile',s.profile);
+    }
+    hiddenAt=null;
+    locked=false;
+    writeSession({hiddenAt:null});
+    document.documentElement.classList.remove('pp-prelogin');
+    document.documentElement.classList.add('pp-authenticated');
+
+    const kill=()=>{
+      const ov=document.getElementById('loginOverlay');
+      if(ov)ov.remove();
+      try{window.ppRevealAppAfterLogin?.()}catch(e){}
+    };
+    kill();setTimeout(kill,60);setTimeout(kill,260);setTimeout(kill,900);
+    restoreWorkspace();
+    return true;
+  }
+
+  function lockNow(){
+    if(locked)return;
+    locked=true;
+    captureWorkspace();
+    writeSession({authenticated:false,hiddenAt:hiddenAt||Date.now(),lockedAt:Date.now()});
+    paintTimer();
+
+    document.getElementById('sessionLockV44')?.remove();
+    const profile=activeProfile();
+    const ov=document.createElement('div');
+    ov.id='sessionLockV44';
+    ov.innerHTML=`<div class="session-lock-card">
+      <div class="session-lock-icon">🔒</div>
+      <h2>Sessão protegida</h2>
+      <p>O Planejador ficou fora de visualização por 5 minutos. Informe a senha de <b>${profile}</b> para continuar exatamente de onde parou.</p>
+      <label>Senha de ${profile}</label>
+      <input id="sessionUnlockPassV44" type="password" autocomplete="current-password" placeholder="••••••">
+      <div class="session-lock-error" id="sessionUnlockErrorV44"></div>
+      <button type="button" class="session-unlock" id="sessionUnlockBtnV44">Desbloquear</button>
+      <div class="session-security-note">Se você apenas trocar de aba e voltar antes de 5 minutos, nenhuma senha será solicitada. O cronômetro é reiniciado para 05:00 quando o Planejador volta à tela.</div>
+    </div>`;
+    document.body.appendChild(ov);
+
+    const unlock=()=>{
+      const input=document.getElementById('sessionUnlockPassV44');
+      const err=document.getElementById('sessionUnlockErrorV44');
+      if((input?.value||'')!==profilePass(activeProfile())){
+        if(err)err.textContent='Senha incorreta.';
+        if(input){input.value='';input.focus()}
+        return;
+      }
+      ov.remove();
+      markAuthenticated();
+      restoreWorkspace();
+    };
+    document.getElementById('sessionUnlockBtnV44').onclick=unlock;
+    document.getElementById('sessionUnlockPassV44').onkeydown=e=>{if(e.key==='Enter')unlock()};
+    setTimeout(()=>document.getElementById('sessionUnlockPassV44')?.focus(),30);
+  }
+
+  function startHiddenCountdown(){
+    if(locked)return;
+    hiddenAt=Date.now();
+    captureWorkspace();
+    writeSession({hiddenAt});
+    paintTimer();
+    clearInterval(ticker);
+    ticker=setInterval(()=>{
+      paintTimer();
+      if(hiddenAt && Date.now()-hiddenAt>=LIMIT_MS){
+        clearInterval(ticker);
+        ticker=null;
+        lockNow();
+      }
+    },1000);
+  }
+
+  function returnVisible(){
+    clearInterval(ticker);ticker=null;
+    if(locked)return;
+    const stored=readSession();
+    const started=hiddenAt || Number(stored?.hiddenAt||0) || null;
+    if(started && Date.now()-started>=LIMIT_MS){
+      hiddenAt=started;
+      lockNow();
+      return;
+    }
+    hiddenAt=null;
+    writeSession({hiddenAt:null,authenticated:true});
+    paintTimer();
+  }
+
+  function onVisibility(){
+    if(document.hidden)startHiddenCountdown();
+    else returnVisible();
+  }
+
+  // Detect a successful normal login without changing the existing password logic.
+  function watchLoginAttempt(e){
+    const btn=e.target?.closest?.('#loginSubmit');
+    const enter=e.type==='keydown' && e.target?.id==='loginPassword' && e.key==='Enter';
+    if(!btn && !enter)return;
+
+    const overlay=document.getElementById('loginOverlay');
+    if(!overlay)return;
+    const chosen=overlay.querySelector('.profile-choice.active')?.dataset.profile||activeProfile();
+    const pass=overlay.querySelector('#loginPassword')?.value||'';
+    if(pass===profilePass(chosen)){
+      setTimeout(()=>{
+        markAuthenticated();
+        sessionStorage.removeItem(WORKSPACE_KEY);
+      },20);
+    }
+  }
+
+  document.addEventListener('click',watchLoginAttempt,true);
+  document.addEventListener('keydown',watchLoginAttempt,true);
+
+  // Preserve current page and in-progress fields before leaving the page/app.
+  window.addEventListener('pagehide',()=>{
+    if(!locked){
+      if(!hiddenAt)hiddenAt=Date.now();
+      captureWorkspace();
+      writeSession({hiddenAt});
+    }
+  });
+  window.addEventListener('beforeunload',captureWorkspace);
+  document.addEventListener('visibilitychange',onVisibility);
+
+  // Keep the selected section so a reload/mobile suspension doesn't return to Visão geral.
+  const oldShow=window.showView;
+  if(typeof oldShow==='function'){
+    window.showView=function(id){
+      const r=oldShow.apply(this,arguments);
+      try{
+        const d=JSON.parse(sessionStorage.getItem(WORKSPACE_KEY)||'{}');
+        d.view=id;d.savedAt=Date.now();
+        sessionStorage.setItem(WORKSPACE_KEY,JSON.stringify(d));
+      }catch(e){}
+      return r;
+    };
+  }
+
+  // If the session was already valid before scripts initialized, bypass login safely.
+  const auto=removeStartupLoginIfSessionValid();
+
+  if(!auto){
+    paintTimer();
+  }else{
+    markAuthenticated();
+  }
+
+  // Re-check once the legacy login constructor has run.
+  setTimeout(()=>{
+    if(validStoredSession()&&!locked){
+      document.getElementById('loginOverlay')?.remove();
+      try{window.ppRevealAppAfterLogin?.()}catch(e){}
+      restoreWorkspace();
+    }
+    ensureTimer();
+    paintTimer();
+  },180);
+
+  setInterval(()=>{
+    if(!document.hidden&&!locked)paintTimer();
+  },1000);
+
+  window.ppSessionV44={
+    lock:lockNow,
+    captureWorkspace,
+    restoreWorkspace,
+    remaining:()=>hiddenAt?Math.max(0,LIMIT_MS-(Date.now()-hiddenAt)):LIMIT_MS
+  };
 })();
 </script>
 
