@@ -7224,17 +7224,13 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
 })();
 </script>
 
-<script id="pp-supabase-cloud-v62">
+<script id="pp-supabase-cloud-v64">
 (function(){
   const SUPABASE_URL='https://pjotjwkugkyagwafcntb.supabase.co';
   const SUPABASE_KEY='sb_publishable_cNqoA3LlkHpOckIYUlEqQw_PKnw4B0S';
-  const TABLE='planner_state';
-  const HISTORY_TABLE='planner_state_history';
-  const APP_VERSION='v62';
+  const TABLE='planner_profile_state_v64';
+  const APP_VERSION='v64';
   const DEVICE_KEY='planejador_cloud_device_v60';
-  const LOCAL_PROFILE_REVS='ppsync_profile_revisions_v62';
-  const LOCAL_GLOBAL_REV='ppsync_global_revision_v62';
-  const LOCAL_LAST_REMOTE='ppsync_last_remote_v62';
   const PM=window.__ppV41Profile;
 
   if(!window.supabase?.createClient||!PM)return;
@@ -7246,16 +7242,15 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
 
   let currentUser=null;
   let realtimeChannel=null;
-  let initialResolved=false;
-  let applyingRemote=false;
+  let monitorTimer=null;
   let saveTimer=null;
-  let pollTimer=null;
-  let lastWorkingSig='';
-  let lastGlobalSig='';
-  let lastCloudSignature='';
-  let statusText='';
+  let applyingRemote=false;
+  let initialized=false;
 
-  function now(){return Date.now()}
+  const revs={};               // server revisions by profile
+  const dirty=new Set();       // profiles with local unsaved changes
+  const sigs={};               // last observed local signatures
+
   function deviceId(){
     let d=localStorage.getItem(DEVICE_KEY);
     if(!d){
@@ -7266,23 +7261,11 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
   }
   function activeProfile(){return localStorage.getItem('planejador_active_profile')||'Marcos'}
   function stateKey(p){return PM.stateKey?PM.stateKey(p):'planejador_profile_state_'+p+'_v41'}
-  function parse(k,fallback){
-    try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(fallback))}catch(e){return fallback}
-  }
   function stable(v){
     if(v===null||typeof v!=='object')return JSON.stringify(v);
     if(Array.isArray(v))return '['+v.map(stable).join(',')+']';
     return '{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+stable(v[k])).join(',')+'}';
   }
-  function profileRevs(){return parse(LOCAL_PROFILE_REVS,{})||{}}
-  function setProfileRevs(v){localStorage.setItem(LOCAL_PROFILE_REVS,JSON.stringify(v||{}))}
-  function globalRev(){return Number(localStorage.getItem(LOCAL_GLOBAL_REV)||0)}
-  function setGlobalRev(v){localStorage.setItem(LOCAL_GLOBAL_REV,String(Number(v)||0))}
-  function touchProfile(p,ts=now()){
-    const r=profileRevs();r[p]=Math.max(Number(r[p]||0),Number(ts)||now());setProfileRevs(r);return r[p];
-  }
-  function touchGlobal(ts=now()){const v=Math.max(globalRev(),Number(ts)||now());setGlobalRev(v);return v}
-
   function cleanProfileState(state){
     const out={};
     Object.entries(state||{}).forEach(([k,v])=>{
@@ -7290,86 +7273,39 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     });
     return out;
   }
-  function syncActiveSnapshot({touch=false}={}){
-    if(applyingRemote)return;
+  function captureActive(){
     const p=activeProfile();
-    const state=cleanProfileState(PM.captureShared());
-    PM.saveState(p,state);
-    if(touch)touchProfile(p);
+    const s=cleanProfileState(PM.captureShared());
+    PM.saveState(p,s);
+    return {profile:p,state:s};
   }
-  function registry(){
-    let arr=[];
-    try{arr=JSON.parse(localStorage.getItem('planejador_profiles_v46')||'[]')}catch(e){}
-    if(!Array.isArray(arr))arr=[];
-    const names=new Map(arr.filter(x=>x&&x.name).map(x=>[String(x.name).toLowerCase(),x]));
-    if(!names.has('marcos'))names.set('marcos',{name:'Marcos',builtin:true});
-    if(!names.has('christian'))names.set('christian',{name:'Christian',builtin:true});
-    return [...names.values()];
+  function readLocalProfile(p){
+    if(p===activeProfile())return cleanProfileState(PM.captureShared());
+    return cleanProfileState(PM.readState(p)||{});
   }
-  function profileNames(){
-    const names=new Set(registry().map(x=>x.name));
-    for(let i=0;i<localStorage.length;i++){
-      const k=localStorage.key(i)||'';
-      const mm=k.match(/^planejador_profile_state_(.+)_v41$/);
-      if(mm)names.add(mm[1]);
-    }
-    names.add(activeProfile());
-    return [...names];
-  }
-  function localProfiles(){
-    const out={};
-    profileNames().forEach(p=>{
-      let s=PM.readState(p);
-      if(p===activeProfile())s=cleanProfileState(PM.captureShared());
-      if(s)out[p]=cleanProfileState(s);
-    });
-    return out;
-  }
-  function localPasswords(){
-    const out={};
-    profileNames().forEach(p=>{
+  function localSig(p){return stable(readLocalProfile(p))}
+  function globalState(){
+    const registry=(()=>{
+      let arr=[];try{arr=JSON.parse(localStorage.getItem('planejador_profiles_v46')||'[]')}catch(e){}
+      if(!Array.isArray(arr))arr=[];
+      return arr;
+    })();
+    const passwords={};
+    const profiles=new Set(registry.map(x=>x?.name).filter(Boolean));
+    profiles.add('Marcos');profiles.add('Christian');
+    profiles.forEach(p=>{
       const v=localStorage.getItem('planejador_password_'+p);
-      if(v!=null)out[p]=v;
+      if(v!=null)passwords[p]=v;
     });
-    return out;
-  }
-  function localRgps(){
-    const out={};
+    const rgps={};
     for(let i=0;i<localStorage.length;i++){
       const k=localStorage.key(i)||'';
-      if(k.startsWith('rgps_'))out[k]=localStorage.getItem(k);
+      if(k.startsWith('rgps_'))rgps[k]=localStorage.getItem(k);
     }
-    return out;
+    return {registry,passwords,rgps};
   }
-  function globalPayload(){
-    return {
-      registry:registry(),
-      passwords:localPasswords(),
-      rgps:localRgps()
-    };
-  }
-  function buildCanonical(){
-    syncActiveSnapshot({touch:false});
-    return {
-      app_version:APP_VERSION,
-      source_device:deviceId(),
-      exported_at:new Date().toISOString(),
-      profiles:localProfiles(),
-      profile_revisions:profileRevs(),
-      global:globalPayload(),
-      global_revision:globalRev()
-    };
-  }
-  function canonicalSignature(c){
-    return stable({
-      profiles:c?.profiles||{},
-      profile_revisions:c?.profile_revisions||{},
-      global:c?.global||{},
-      global_revision:Number(c?.global_revision||0)
-    });
-  }
+  function globalSig(){return stable(globalState())}
   function status(mode,text){
-    statusText=text||'Nuvem';
     let el=document.getElementById('cloudStatusV40');
     if(!el){
       el=document.createElement('div');
@@ -7378,326 +7314,295 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       document.body.appendChild(el);
     }
     el.className=mode||'';
-    const span=el.querySelector('span');if(span)span.textContent=statusText;
+    const span=el.querySelector('span');if(span)span.textContent=text||'Nuvem';
     const btn=el.querySelector('button');if(btn)btn.onclick=()=>openAuth();
   }
 
-  function workingSignature(){return stable(cleanProfileState(PM.captureShared()))}
-  function globalSignature(){return stable(globalPayload())}
-
-  function detectLocalChanges(){
-    if(applyingRemote||!initialResolved)return;
-    const w=workingSignature();
-    if(lastWorkingSig&&w!==lastWorkingSig){
-      syncActiveSnapshot({touch:true});
-      lastWorkingSig=workingSignature();
-      scheduleSave(120,'profile-change');
-    }else if(!lastWorkingSig)lastWorkingSig=w;
-
-    const g=globalSignature();
-    if(lastGlobalSig&&g!==lastGlobalSig){
-      touchGlobal();
-      lastGlobalSig=globalSignature();
-      scheduleSave(120,'global-change');
-    }else if(!lastGlobalSig)lastGlobalSig=g;
+  async function fetchRow(profile){
+    if(!currentUser)return null;
+    const {data,error}=await sb.from(TABLE)
+      .select('profile,state,revision,updated_at,source_device')
+      .eq('user_id',currentUser.id)
+      .eq('profile',profile)
+      .maybeSingle();
+    if(error){console.error('fetchRow',profile,error);return null}
+    return data||null;
   }
 
-  function mergeCanonical(local,remote){
-    const L=local||{},R=remote||{};
-    const out={
-      app_version:APP_VERSION,
-      source_device:deviceId(),
-      exported_at:new Date().toISOString(),
-      profiles:{},
-      profile_revisions:{},
-      global:{},
-      global_revision:0
-    };
-    const names=new Set([
-      ...Object.keys(L.profiles||{}),
-      ...Object.keys(R.profiles||{}),
-      ...Object.keys(L.profile_revisions||{}),
-      ...Object.keys(R.profile_revisions||{})
-    ]);
-    names.forEach(p=>{
-      const lr=Number(L.profile_revisions?.[p]||0);
-      const rr=Number(R.profile_revisions?.[p]||0);
-      if(rr>lr){
-        if(R.profiles?.[p])out.profiles[p]=R.profiles[p];
-        out.profile_revisions[p]=rr;
-      }else{
-        if(L.profiles?.[p])out.profiles[p]=L.profiles[p];
-        out.profile_revisions[p]=lr;
-      }
-    });
-    const lg=Number(L.global_revision||0),rg=Number(R.global_revision||0);
-    if(rg>lg){
-      out.global=R.global||{};
-      out.global_revision=rg;
-    }else{
-      out.global=L.global||{};
-      out.global_revision=lg;
-    }
-    return out;
+  async function loadAllRows(){
+    if(!currentUser)return [];
+    const {data,error}=await sb.from(TABLE)
+      .select('profile,state,revision,updated_at,source_device')
+      .eq('user_id',currentUser.id);
+    if(error){console.error('loadAllRows',error);return []}
+    return data||[];
   }
 
-  function applyCanonical(c,{reload=true}={}){
-    if(!c||c.app_version!==APP_VERSION)return false;
-    const localR=profileRevs();
-    const remoteR=c.profile_revisions||{};
-    const active=activeProfile();
-    let activeChanged=false;
-
+  function applyProfile(profile,state,revision,{reload=true}={}){
+    if(!state)return;
     applyingRemote=true;
     try{
-      Object.entries(c.profiles||{}).forEach(([p,state])=>{
-        const rr=Number(remoteR[p]||0),lr=Number(localR[p]||0);
-        if(rr>lr){
-          PM.saveState(p,cleanProfileState(state));
-          localR[p]=rr;
-          if(p===active){
-            PM.applyState(cleanProfileState(state));
-            activeChanged=true;
-          }
-        }
-      });
-      setProfileRevs(localR);
-
-      const rg=Number(c.global_revision||0),lg=globalRev();
-      if(rg>lg){
-        const g=c.global||{};
-        if(Array.isArray(g.registry))localStorage.setItem('planejador_profiles_v46',JSON.stringify(g.registry));
-        Object.entries(g.passwords||{}).forEach(([p,v])=>localStorage.setItem('planejador_password_'+p,String(v)));
-        // Replace only RGPS cloud-managed keys; never touch financial profile data here.
-        const remoteRgps=g.rgps||{};
-        const localRgpsKeys=[];
-        for(let i=0;i<localStorage.length;i++){
-          const k=localStorage.key(i)||'';
-          if(k.startsWith('rgps_'))localRgpsKeys.push(k);
-        }
-        localRgpsKeys.forEach(k=>{if(!(k in remoteRgps))localStorage.removeItem(k)});
-        Object.entries(remoteRgps).forEach(([k,v])=>localStorage.setItem(k,String(v)));
-        setGlobalRev(rg);
+      PM.saveState(profile,cleanProfileState(state));
+      revs[profile]=Number(revision||0);
+      dirty.delete(profile);
+      sigs[profile]=stable(cleanProfileState(state));
+      if(profile===activeProfile()){
+        PM.applyState(cleanProfileState(state));
       }
     }finally{applyingRemote=false}
 
-    lastWorkingSig=workingSignature();
-    lastGlobalSig=globalSignature();
-    lastCloudSignature=canonicalSignature(c);
-    localStorage.setItem(LOCAL_LAST_REMOTE,JSON.stringify({
-      at:new Date().toISOString(),
-      source:c.source_device||null
-    }));
+    if(profile===activeProfile()){
+      if(reload){
+        try{window.ppSessionV47?.captureWorkspace?.()}catch(e){}
+        setTimeout(()=>location.reload(),30);
+      }else{
+        try{
+          window.renderAll?.();
+          window.renderDashboard?.();
+          window.renderCards?.();
+          window.renderLancamentos?.();
+          window.renderFgts?.();
+          window.renderDebts?.();
+          window.renderAssets?.();
+          window.renderInvestments?.();
+          window.renderPrevidencia?.();
+        }catch(e){}
+      }
+    }
+  }
+
+  function applyGlobal(state,revision){
+    if(!state)return;
+    applyingRemote=true;
+    try{
+      if(Array.isArray(state.registry))localStorage.setItem('planejador_profiles_v46',JSON.stringify(state.registry));
+      Object.entries(state.passwords||{}).forEach(([p,v])=>localStorage.setItem('planejador_password_'+p,String(v)));
+
+      const remoteRgps=state.rgps||{};
+      const localRgps=[];
+      for(let i=0;i<localStorage.length;i++){
+        const k=localStorage.key(i)||'';
+        if(k.startsWith('rgps_'))localRgps.push(k);
+      }
+      localRgps.forEach(k=>{if(!(k in remoteRgps))localStorage.removeItem(k)});
+      Object.entries(remoteRgps).forEach(([k,v])=>localStorage.setItem(k,String(v)));
+
+      revs.__GLOBAL__=Number(revision||0);
+      dirty.delete('__GLOBAL__');
+      sigs.__GLOBAL__=stable(globalState());
+    }finally{applyingRemote=false}
+  }
+
+  async function rpcSave(profile,state,expected){
+    const {data,error}=await sb.rpc('save_planner_profile_v64',{
+      p_profile:profile,
+      p_state:state,
+      p_expected_revision:Number(expected||0),
+      p_source_device:deviceId()
+    });
+    if(error){console.error('save RPC',profile,error);return {ok:false,error}}
+    const row=Array.isArray(data)?data[0]:data;
+    return row||{ok:false};
+  }
+
+  async function saveProfile(profile,reason='change'){
+    if(!currentUser||applyingRemote||!initialized)return false;
+    const state=profile==='__GLOBAL__'?globalState():readLocalProfile(profile);
+    const expected=Number(revs[profile]||0);
+
+    status('saving','Salvando…');
+    const res=await rpcSave(profile,state,expected);
+    if(res.ok){
+      revs[profile]=Number(res.revision||expected+1);
+      dirty.delete(profile);
+      sigs[profile]=stable(state);
+      status('online','Sincronizado agora');
+      return true;
+    }
+
+    if(res.conflict){
+      // Critical rule: NEVER silently overwrite unsaved local changes.
+      // If this profile is dirty, fetch remote, preserve local, and save again only after
+      // rebasing revision. We do not apply remote over local.
+      const remote=await fetchRow(profile);
+      if(!remote)return false;
+
+      if(dirty.has(profile)){
+        revs[profile]=Number(remote.revision||0);
+        const retry=await rpcSave(profile,state,revs[profile]);
+        if(retry.ok){
+          revs[profile]=Number(retry.revision||revs[profile]+1);
+          dirty.delete(profile);
+          sigs[profile]=stable(state);
+          status('online','Sincronizado agora');
+          return true;
+        }
+        status('error','Conflito ao salvar');
+        return false;
+      }
+
+      if(profile==='__GLOBAL__')applyGlobal(remote.state,remote.revision);
+      else applyProfile(profile,remote.state,remote.revision,{reload:false});
+      status('online','Atualizado da nuvem');
+      return true;
+    }
+
+    status('error','Erro ao salvar');
+    return false;
+  }
+
+  function scheduleSave(profile,delay=120,reason='change'){
+    if(!currentUser||!initialized||applyingRemote)return;
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(()=>saveProfile(profile,reason),delay);
+  }
+
+  function detectChanges(){
+    if(applyingRemote||!initialized)return;
+
+    const p=activeProfile();
+    const s=localSig(p);
+    if(!(p in sigs))sigs[p]=s;
+    if(s!==sigs[p]){
+      PM.saveState(p,readLocalProfile(p));
+      sigs[p]=s;
+      dirty.add(p);
+      scheduleSave(p,90,'local-profile-change');
+    }
+
+    const gs=globalSig();
+    if(!('__GLOBAL__' in sigs))sigs.__GLOBAL__=gs;
+    if(gs!==sigs.__GLOBAL__){
+      sigs.__GLOBAL__=gs;
+      dirty.add('__GLOBAL__');
+      scheduleSave('__GLOBAL__',90,'local-global-change');
+    }
+  }
+
+  async function updateNow({reload=true}={}){
+    if(!currentUser)return false;
+    detectChanges();
+
+    // Flush local modifications FIRST. This prevents "Atualizar agora" from restoring old data.
+    const pending=[...dirty];
+    for(const p of pending)await saveProfile(p,'pre-update-flush');
+
+    const rows=await loadAllRows();
+    let activeChanged=false;
+    for(const row of rows){
+      const p=row.profile;
+      const serverRev=Number(row.revision||0);
+      const localRev=Number(revs[p]||0);
+
+      if(p==='__GLOBAL__'){
+        if(serverRev>localRev&&!dirty.has(p))applyGlobal(row.state,serverRev);
+        continue;
+      }
+
+      if(serverRev>localRev&&!dirty.has(p)){
+        const before=localSig(p);
+        applyProfile(p,row.state,serverRev,{reload:false});
+        if(p===activeProfile()&&before!==stable(row.state||{}))activeChanged=true;
+      }
+    }
+
     status('online','Sincronizado agora');
     if(activeChanged&&reload){
       try{window.ppSessionV47?.captureWorkspace?.()}catch(e){}
       setTimeout(()=>location.reload(),30);
-    }else{
-      try{
-        window.renderAll?.();
-        window.renderDashboard?.();
-        window.renderCards?.();
-        window.renderLancamentos?.();
-        window.renderFgts?.();
-        window.renderDebts?.();
-        window.renderAssets?.();
-        window.renderInvestments?.();
-        window.renderPrevidencia?.();
-      }catch(e){}
     }
-    return activeChanged;
-  }
-
-  async function fetchRemote(){
-    if(!currentUser)return {row:null,error:null};
-    const {data,error}=await sb.from(TABLE).select('data,updated_at,schema_version').eq('user_id',currentUser.id).maybeSingle();
-    return {row:data,error};
-  }
-
-  async function archiveRemote(row){
-    if(!row||!currentUser)return;
-    try{
-      await sb.from(HISTORY_TABLE).insert({
-        user_id:currentUser.id,
-        data:row.data||{},
-        schema_version:Number(row.schema_version||1),
-        source_updated_at:row.updated_at||null
-      });
-    }catch(e){console.warn('Cloud history archive failed',e)}
-  }
-
-  async function upsertCanonical(c,reason){
-    if(!currentUser)return false;
-    status('saving','Salvando…');
-    const {data,error}=await sb.from(TABLE).upsert({
-      user_id:currentUser.id,
-      data:{...c,save_reason:reason||'change'},
-      schema_version:2
-    },{onConflict:'user_id'}).select('updated_at').single();
-    if(error){
-      console.error('Supabase v62 save error',error);
-      status('error','Erro ao salvar');
-      return false;
-    }
-    lastCloudSignature=canonicalSignature(c);
-    status('online','Sincronizado agora');
     return true;
   }
 
-  async function saveNow(reason='change'){
-    if(!currentUser||applyingRemote||!initialResolved)return false;
-    clearTimeout(saveTimer);
-
-    // Capture the active profile synchronously BEFORE touching the cloud.
-    syncActiveSnapshot({touch:false});
-    let local=buildCanonical();
-
-    const {row,error}=await fetchRemote();
-    if(error){status('error','Erro ao comparar nuvem');return false}
-
-    let merged=local;
-    if(row?.data?.app_version===APP_VERSION){
-      merged=mergeCanonical(local,row.data);
-      // If the server contains a newer profile/global change, apply it locally before saving the merged copy.
-      applyCanonical(merged,{reload:false});
-    }
-
-    const newSig=canonicalSignature(merged);
-    const oldSig=row?.data?.app_version===APP_VERSION?canonicalSignature(row.data):'';
-    if(newSig===oldSig){
-      status('online','Já está sincronizado');
-      return true;
-    }
-
-    if(row)await archiveRemote(row);
-    return await upsertCanonical(merged,reason);
-  }
-
-  function scheduleSave(delay=180,reason='change'){
-    if(!currentUser||!initialResolved||applyingRemote)return;
-    clearTimeout(saveTimer);
-    saveTimer=setTimeout(()=>saveNow(reason),delay);
-  }
-
-  async function pull({force=false,reload=true,reason='manual'}={}){
-    if(!currentUser)return false;
-    detectLocalChanges();
-    // If this device changed locally, push/merge it first so "Atualizar" can never discard it.
-    if(saveTimer){clearTimeout(saveTimer);saveTimer=null;await saveNow('pre-pull-'+reason)}
-
-    const {row,error}=await fetchRemote();
-    if(error){status('error','Erro ao atualizar');return false}
-    if(!row)return false;
-
-    if(row.data?.app_version!==APP_VERSION){
-      // Old cloud formats are never allowed to overwrite v62 local data.
-      await saveNow('upgrade-old-cloud');
-      return false;
-    }
-
-    const local=buildCanonical();
-    const merged=mergeCanonical(local,row.data);
-    const changed=canonicalSignature(merged)!==canonicalSignature(local);
-
-    if(changed||force){
-      applyCanonical(merged,{reload});
-      // If local had something newer too, persist the merge back to server.
-      if(canonicalSignature(merged)!==canonicalSignature(row.data)){
-        await archiveRemote(row);
-        await upsertCanonical(merged,'merge-'+reason);
-      }
-      return changed;
-    }
-    status('online','Já está atualizado');
-    return false;
-  }
-
-  async function initializeCloud(){
+  async function initialize(){
     status('saving','Sincronizando…');
-    syncActiveSnapshot({touch:false});
-    const {row,error}=await fetchRemote();
-    if(error){
-      console.error(error);
-      initialResolved=true;
-      status('error','Erro na nuvem');
-      startMonitor();
-      subscribeRealtime();
-      return;
-    }
+    const rows=await loadAllRows();
 
-    if(!row||row.data?.app_version!==APP_VERSION){
-      // Safe migration rule: an old/empty cloud copy can NEVER erase current browser data.
-      const t=now();
-      const revs=profileRevs();
-      profileNames().forEach(p=>{if(!Number(revs[p]||0))revs[p]=t});
-      setProfileRevs(revs);
-      if(!globalRev())setGlobalRev(t);
-      const local=buildCanonical();
-      initialResolved=true;
-      startMonitor();
-      if(row)await archiveRemote(row);
-      await upsertCanonical(local,'v62-safe-migration');
-      subscribeRealtime();
-      return;
-    }
+    // Existing v64 cloud rows are authoritative ONLY on a fresh browser with no local snapshot.
+    // Existing local profile states are preserved and pushed if the cloud row is absent.
+    const by=new Map(rows.map(r=>[r.profile,r]));
 
-    const localRevs=profileRevs();
-    const remoteRevs=row.data.profile_revisions||{};
-    const hasLocalRevs=Object.values(localRevs).some(v=>Number(v)>0)||globalRev()>0;
+    const registry=(()=>{
+      let arr=[];try{arr=JSON.parse(localStorage.getItem('planejador_profiles_v46')||'[]')}catch(e){}
+      if(!Array.isArray(arr))arr=[];
+      const names=new Set(arr.map(x=>x?.name).filter(Boolean));
+      names.add('Marcos');names.add('Christian');names.add(activeProfile());
+      return [...names];
+    })();
 
-    if(!hasLocalRevs){
-      // New device/browser: server is authoritative because this device has no v62 edits yet.
-      const zeroLocal={
-        app_version:APP_VERSION,source_device:deviceId(),profiles:{},profile_revisions:{},
-        global:{},global_revision:0
-      };
-      const merged=mergeCanonical(zeroLocal,row.data);
-      applyCanonical(merged,{reload:false});
-    }else{
-      const merged=mergeCanonical(buildCanonical(),row.data);
-      applyCanonical(merged,{reload:false});
-      if(canonicalSignature(merged)!==canonicalSignature(row.data)){
-        await archiveRemote(row);
-        await upsertCanonical(merged,'startup-merge');
+    for(const p of registry){
+      const remote=by.get(p);
+      const localRaw=PM.readState(p);
+      if(remote){
+        revs[p]=Number(remote.revision||0);
+        if(localRaw){
+          // Preserve local data on first v64 run.
+          sigs[p]=stable(cleanProfileState(localRaw));
+        }else{
+          applyProfile(p,remote.state,remote.revision,{reload:false});
+        }
+      }else{
+        revs[p]=0;
+        sigs[p]=localSig(p);
       }
     }
 
-    initialResolved=true;
-    lastWorkingSig=workingSignature();
-    lastGlobalSig=globalSignature();
+    const g=by.get('__GLOBAL__');
+    if(g){
+      revs.__GLOBAL__=Number(g.revision||0);
+      sigs.__GLOBAL__=globalSig();
+    }else{
+      revs.__GLOBAL__=0;
+      sigs.__GLOBAL__=globalSig();
+    }
+
+    initialized=true;
     startMonitor();
     subscribeRealtime();
+
+    // Push any local profiles that don't yet exist on v64.
+    for(const p of registry){
+      if(!by.get(p)){
+        dirty.add(p);
+        await saveProfile(p,'v64-initial-seed');
+      }
+    }
+    if(!g){
+      dirty.add('__GLOBAL__');
+      await saveProfile('__GLOBAL__','v64-initial-global');
+    }
+
     status('online','Tempo real ativo');
   }
 
   function startMonitor(){
-    if(pollTimer)return;
-    lastWorkingSig=workingSignature();
-    lastGlobalSig=globalSignature();
-    pollTimer=setInterval(detectLocalChanges,250);
+    if(monitorTimer)return;
+    monitorTimer=setInterval(detectChanges,150);
   }
 
   function subscribeRealtime(){
     if(!currentUser||realtimeChannel)return;
-    realtimeChannel=sb.channel('planner-state-v62-'+currentUser.id)
+    realtimeChannel=sb.channel('planner-profile-v64-'+currentUser.id)
       .on('postgres_changes',{
-        event:'UPDATE',schema:'public',table:TABLE,filter:'user_id=eq.'+currentUser.id
+        event:'*',schema:'public',table:TABLE,filter:'user_id=eq.'+currentUser.id
       },async payload=>{
-        const remote=payload.new?.data;
-        if(!remote||remote.app_version!==APP_VERSION)return;
-        if(remote.source_device===deviceId())return;
+        const row=payload.new||null;
+        if(!row||row.source_device===deviceId())return;
+        const p=row.profile;
+        const serverRev=Number(row.revision||0);
+        const localRev=Number(revs[p]||0);
+        if(serverRev<=localRev)return;
 
-        detectLocalChanges();
-        if(saveTimer){
-          clearTimeout(saveTimer);saveTimer=null;
-          await saveNow('local-before-realtime');
-          return; // our save creates a fresh realtime event containing the merged state
+        detectChanges();
+        if(dirty.has(p)){
+          // Local unsaved change wins its own save cycle; don't overwrite it.
+          await saveProfile(p,'realtime-conflict-local-wins');
+          return;
         }
-        const merged=mergeCanonical(buildCanonical(),remote);
-        const localSig=canonicalSignature(buildCanonical());
-        if(canonicalSignature(merged)!==localSig){
-          applyCanonical(merged,{reload:true});
-        }
+
+        if(p==='__GLOBAL__')applyGlobal(row.state,serverRev);
+        else applyProfile(p,row.state,serverRev,{reload:true});
+        status('online','Atualizado em tempo real');
       })
       .subscribe(s=>{if(s==='SUBSCRIBED')status('online','Tempo real ativo')});
   }
@@ -7710,20 +7615,17 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
   }
 
   function closeAuth(){document.getElementById('cloudAuthV40')?.remove()}
-
   function openAuth(){
     document.getElementById('cloudAuthV40')?.remove();
     const ov=document.createElement('div');ov.id='cloudAuthV40';
-    const last=parse(LOCAL_LAST_REMOTE,null);
-    const lastTxt=last?.at?new Date(last.at).toLocaleString('pt-BR'):'—';
     ov.innerHTML=`<section class="cloud-card">
       <button type="button" class="cloud-close" aria-label="Fechar">×</button>
-      <h2>${currentUser?'Sincronização segura em tempo real':'Conectar à nuvem'}</h2>
+      <h2>${currentUser?'Sincronização segura':'Conectar à nuvem'}</h2>
       <p>${currentUser
-        ? 'As alterações são salvas por perfil e mescladas entre os aparelhos. Exclusões feitas por você também são sincronizadas.'
-        : 'Entre com a mesma conta de nuvem em todos os aparelhos.'}</p>
+        ? 'Cada perfil é salvo separadamente. Alterações locais são enviadas antes de qualquer atualização da nuvem.'
+        : 'Use a mesma conta de nuvem no computador e no celular.'}</p>
       ${currentUser
-        ? `<div class="cloud-note"><b>Conta conectada:</b><br>${String(currentUser.email||'').replace(/</g,'&lt;')}<br><small>Última atualização recebida: ${lastTxt}</small><br><small>Proteção: cópia anterior arquivada antes de cada alteração da nuvem.</small></div>
+        ? `<div class="cloud-note"><b>Conta conectada:</b><br>${String(currentUser.email||'').replace(/</g,'&lt;')}<br><small>Versão de sincronização: v64 transacional</small></div>
            <div class="cloud-actions">
              <button type="button" class="cloud-secondary" id="cloudLoadNow">Atualizar agora</button>
              <button type="button" class="cloud-secondary" id="cloudSyncNow">Salvar agora</button>
@@ -7731,7 +7633,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
            </div>
            <div class="cloud-backup-box">
              <strong>Backup completo</strong>
-             <p>Guarde uma cópia adicional dos perfis no seu aparelho.</p>
+             <p>Guarde uma cópia adicional dos perfis no aparelho.</p>
              <div class="cloud-backup-actions">
                <button type="button" class="cloud-backup-download" id="backupDownloadV43">Baixar backup</button>
                <button type="button" class="cloud-backup-restore" id="backupRestoreV43">Restaurar backup</button>
@@ -7760,20 +7662,24 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
 
     if(currentUser){
       document.getElementById('cloudSyncNow').onclick=async()=>{
-        detectLocalChanges();
-        await saveNow('manual-save');
+        detectChanges();
+        const pending=[...dirty];
+        if(!pending.length){
+          dirty.add(activeProfile());
+        }
+        for(const p of [...dirty])await saveProfile(p,'manual-save');
         close();
       };
       document.getElementById('cloudLoadNow').onclick=async()=>{
-        await pull({force:true,reload:true,reason:'manual-refresh'});
+        await updateNow({reload:true});
         close();
       };
       document.getElementById('cloudSignOut').onclick=async()=>{
-        detectLocalChanges();
-        await saveNow('before-cloud-signout');
+        detectChanges();
+        for(const p of [...dirty])await saveProfile(p,'before-cloud-signout');
         await unsubscribeRealtime();
         await sb.auth.signOut();
-        currentUser=null;initialResolved=false;close();status('','Nuvem desconectada');
+        currentUser=null;initialized=false;close();status('','Nuvem desconectada');
       };
       return;
     }
@@ -7792,7 +7698,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       const c=credentials();if(!c)return;
       const {data,error}=await sb.auth.signInWithPassword({email:c.email,password:c.password});
       if(error){c.errorEl.textContent=error.message;return}
-      currentUser=data.user;close();await initializeCloud();
+      currentUser=data.user;close();await initialize();
     };
     document.getElementById('cloudSignUp').onclick=async()=>{
       const c=credentials();if(!c)return;
@@ -7803,62 +7709,71 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
         c.errorEl.textContent='Conta criada. Confirme o e-mail e depois clique em Entrar.';
         return;
       }
-      currentUser=data.user;close();await initializeCloud();
+      currentUser=data.user;close();await initialize();
     };
   }
 
-  document.addEventListener('visibilitychange',()=>{
-    if(!document.hidden&&currentUser&&initialResolved)setTimeout(()=>pull({reload:true,reason:'visibility'}),100);
-  });
-  window.addEventListener('focus',()=>{
-    if(currentUser&&initialResolved)setTimeout(()=>pull({reload:true,reason:'focus'}),100);
-  });
-  window.addEventListener('online',()=>{
-    if(currentUser&&initialResolved)setTimeout(()=>pull({reload:true,reason:'online'}),120);
-  });
-  window.addEventListener('beforeunload',()=>{try{syncActiveSnapshot({touch:false})}catch(e){}});
-
-  // Explicit mutations: save profile snapshot immediately instead of waiting for the 250ms monitor.
+  // Explicit user mutations: mark dirty immediately.
   document.addEventListener('click',e=>{
-    if(e.target.closest?.(
+    const hit=e.target.closest?.(
       '#saveTx,#saveCardPurchase,#saveCard,#saveAsset,#saveInvestment,#saveFgts,#saveDebt,'+
       '#cardDeleteConfirm,#v19DeleteCard,#v19Active,#v19Cancelled,'+
       '[data-action="delete"],[data-action="archive"],[data-action="pay"],[data-action="advance"]'
-    )){
+    );
+    if(hit){
       setTimeout(()=>{
-        if(applyingRemote)return;
-        const w=workingSignature();
-        if(w!==lastWorkingSig){
-          syncActiveSnapshot({touch:true});
-          lastWorkingSig=workingSignature();
-          scheduleSave(80,'explicit-action');
-        }
-      },40);
+        if(applyingRemote||!initialized)return;
+        const p=activeProfile();
+        PM.saveState(p,readLocalProfile(p));
+        sigs[p]=localSig(p);
+        dirty.add(p);
+        scheduleSave(p,60,'explicit-action');
+      },30);
     }
   },true);
+
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden&&currentUser&&initialized)setTimeout(()=>updateNow({reload:true}),120);
+  });
+  window.addEventListener('focus',()=>{
+    if(currentUser&&initialized)setTimeout(()=>updateNow({reload:true}),120);
+  });
+  window.addEventListener('online',()=>{
+    if(currentUser&&initialized)setTimeout(()=>updateNow({reload:true}),150);
+  });
 
   async function init(){
     status('saving','Conectando à nuvem…');
     const {data}=await sb.auth.getSession();
     currentUser=data.session?.user||null;
-    if(currentUser)await initializeCloud();
+    if(currentUser)await initialize();
     else{status('','Entre na nuvem neste aparelho');setTimeout(openAuth,700)}
 
     sb.auth.onAuthStateChange((event,session)=>{
       currentUser=session?.user||null;
-      if(event==='SIGNED_IN'&&currentUser&&!initialResolved)setTimeout(initializeCloud,0);
+      if(event==='SIGNED_IN'&&currentUser&&!initialized)setTimeout(initialize,0);
       if(event==='SIGNED_OUT'){
-        unsubscribeRealtime();initialResolved=false;status('','Entre na nuvem neste aparelho');
+        unsubscribeRealtime();initialized=false;status('','Entre na nuvem neste aparelho');
       }
     });
   }
 
-  window.ppCloud=window.ppCloudV60=window.ppCloudV62={
+  window.ppCloud=window.ppCloudV64={
     open:openAuth,
-    save:()=>saveNow('api'),
-    load:()=>pull({force:true,reload:true,reason:'api'}),
-    pull,
-    syncActiveSnapshot,
+    save:async()=>{
+      detectChanges();
+      const p=activeProfile();
+      dirty.add(p);
+      return saveProfile(p,'api');
+    },
+    load:()=>updateNow({reload:true}),
+    updateNow,
+    markDirty:(p=activeProfile())=>{
+      PM.saveState(p,readLocalProfile(p));
+      sigs[p]=localSig(p);
+      dirty.add(p);
+      scheduleSave(p,60,'mark-dirty');
+    },
     client:sb,
     version:APP_VERSION
   };
@@ -7993,7 +7908,7 @@ Os dados atuais deste navegador serão substituídos.`);
     if(internal)return;
     internal=true;
     try{PM.saveState(active(),PM.captureShared())}finally{internal=false}
-    try{window.ppCloudV62?.syncActiveSnapshot?.({touch:true})}catch(e){}
+    try{window.ppCloudV64?.markDirty?.()}catch(e){}
     try{window.ppCloud?.save?.()}catch(e){}
   }
 
