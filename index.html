@@ -7224,13 +7224,61 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
 })();
 </script>
 
-<script id="pp-supabase-cloud-v64">
+
+<script id="pp-v65-card-duplicate-repair">
+(function(){
+  function score(c){
+    let s=0;
+    if(c?.color)s+=4;if(c?.last4)s+=4;if(c?.cardType)s+=4;
+    if(Number(c?.limit)>0)s+=3;
+    if(Number(c?.closeDay)&&Number(c.closeDay)!==10)s++;
+    if(Number(c?.dueDay)&&Number(c.dueDay)!==18)s++;
+    if(c?.brand&&c.brand!=='Crédito')s++;
+    if(c?.name&&!/^Itaú$/i.test(c.name)&&!/^Banco Inter$/i.test(c.name))s++;
+    return s;
+  }
+  function dedupe(raw){
+    try{
+      const arr=JSON.parse(raw||'[]');if(!Array.isArray(arr))return raw;
+      const map=new Map();
+      for(const c of arr){
+        if(!c||!c.id)continue;
+        const p=map.get(String(c.id));
+        if(!p||score(c)>score(p))map.set(String(c.id),c);
+      }
+      return JSON.stringify([...map.values()]);
+    }catch(e){return raw}
+  }
+  try{
+    const PM=window.__ppV41Profile;
+    if(!PM)return;
+    ['Marcos','Christian',...(JSON.parse(localStorage.getItem('planejador_profiles_v46')||'[]').map(x=>x?.name).filter(Boolean))].forEach(p=>{
+      const st=PM.readState(p)||{};
+      const k='financeiro_marcos_cards_v3';
+      if(st[k]!=null){
+        const fixed=dedupe(st[k]);
+        if(fixed!==st[k]){st[k]=fixed;PM.saveState(p,st)}
+      }
+      if((localStorage.getItem('planejador_active_profile')||'Marcos')===p){
+        const raw=localStorage.getItem(k);
+        if(raw!=null){
+          const fixed=dedupe(raw);
+          if(fixed!==raw)localStorage.setItem(k,fixed);
+        }
+      }
+    });
+  }catch(e){console.warn('card duplicate repair',e)}
+})();
+</script>
+
+<script id="pp-supabase-cloud-v65">
 (function(){
   const SUPABASE_URL='https://pjotjwkugkyagwafcntb.supabase.co';
   const SUPABASE_KEY='sb_publishable_cNqoA3LlkHpOckIYUlEqQw_PKnw4B0S';
-  const TABLE='planner_profile_state_v64';
-  const APP_VERSION='v64';
+  const TABLE='planner_key_state_v65';
+  const APP_VERSION='v65';
   const DEVICE_KEY='planejador_cloud_device_v60';
+  const INIT_PREFIX='ppsync_v65_initialized_';
   const PM=window.__ppV41Profile;
 
   if(!window.supabase?.createClient||!PM)return;
@@ -7242,14 +7290,13 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
 
   let currentUser=null;
   let realtimeChannel=null;
-  let monitorTimer=null;
-  let saveTimer=null;
-  let applyingRemote=false;
   let initialized=false;
-
-  const revs={};               // server revisions by profile
-  const dirty=new Set();       // profiles with local unsaved changes
-  const sigs={};               // last observed local signatures
+  let applyingRemote=false;
+  let monitorTimer=null;
+  const revisions=new Map();   // profile|key -> server revision
+  const observed=new Map();    // profile|key -> last local value
+  const dirty=new Set();       // profile|key pending save
+  const saveTimers=new Map();
 
   function deviceId(){
     let d=localStorage.getItem(DEVICE_KEY);
@@ -7260,12 +7307,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     return d;
   }
   function activeProfile(){return localStorage.getItem('planejador_active_profile')||'Marcos'}
-  function stateKey(p){return PM.stateKey?PM.stateKey(p):'planejador_profile_state_'+p+'_v41'}
-  function stable(v){
-    if(v===null||typeof v!=='object')return JSON.stringify(v);
-    if(Array.isArray(v))return '['+v.map(stable).join(',')+']';
-    return '{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+stable(v[k])).join(',')+'}';
-  }
+  function rk(p,k){return p+'||'+k}
   function cleanProfileState(state){
     const out={};
     Object.entries(state||{}).forEach(([k,v])=>{
@@ -7273,38 +7315,62 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     });
     return out;
   }
-  function captureActive(){
-    const p=activeProfile();
-    const s=cleanProfileState(PM.captureShared());
-    PM.saveState(p,s);
-    return {profile:p,state:s};
+  function registryNames(){
+    let arr=[];
+    try{arr=JSON.parse(localStorage.getItem('planejador_profiles_v46')||'[]')}catch(e){}
+    if(!Array.isArray(arr))arr=[];
+    const names=new Set(arr.map(x=>x?.name).filter(Boolean));
+    names.add('Marcos');names.add('Christian');names.add(activeProfile());
+    return [...names];
   }
-  function readLocalProfile(p){
+  function profileState(p){
     if(p===activeProfile())return cleanProfileState(PM.captureShared());
     return cleanProfileState(PM.readState(p)||{});
   }
-  function localSig(p){return stable(readLocalProfile(p))}
   function globalState(){
-    const registry=(()=>{
-      let arr=[];try{arr=JSON.parse(localStorage.getItem('planejador_profiles_v46')||'[]')}catch(e){}
-      if(!Array.isArray(arr))arr=[];
-      return arr;
-    })();
-    const passwords={};
-    const profiles=new Set(registry.map(x=>x?.name).filter(Boolean));
-    profiles.add('Marcos');profiles.add('Christian');
-    profiles.forEach(p=>{
-      const v=localStorage.getItem('planejador_password_'+p);
-      if(v!=null)passwords[p]=v;
+    const out={};
+    const reg=localStorage.getItem('planejador_profiles_v46');
+    if(reg!=null)out['planejador_profiles_v46']=reg;
+    registryNames().forEach(p=>{
+      const k='planejador_password_'+p,v=localStorage.getItem(k);
+      if(v!=null)out[k]=v;
     });
-    const rgps={};
     for(let i=0;i<localStorage.length;i++){
       const k=localStorage.key(i)||'';
-      if(k.startsWith('rgps_'))rgps[k]=localStorage.getItem(k);
+      if(k.startsWith('rgps_'))out[k]=localStorage.getItem(k);
     }
-    return {registry,passwords,rgps};
+    return out;
   }
-  function globalSig(){return stable(globalState())}
+  function sanitizeCardsValue(value){
+    try{
+      const arr=JSON.parse(value||'[]');
+      if(!Array.isArray(arr))return value;
+      const score=c=>{
+        if(!c||typeof c!=='object')return -1;
+        let s=0;
+        if(c.color)s+=4;
+        if(c.last4)s+=4;
+        if(c.cardType)s+=4;
+        if(Number(c.limit)>0)s+=3;
+        if(Number(c.closeDay)&&Number(c.closeDay)!==10)s+=1;
+        if(Number(c.dueDay)&&Number(c.dueDay)!==18)s+=1;
+        if(c.brand&&c.brand!=='Crédito')s+=1;
+        if(c.name&&!/^Itaú$/i.test(c.name)&&!/^Banco Inter$/i.test(c.name))s+=1;
+        return s;
+      };
+      const map=new Map();
+      for(const c of arr){
+        if(!c||!c.id)continue;
+        const prev=map.get(String(c.id));
+        if(!prev||score(c)>score(prev))map.set(String(c.id),c);
+      }
+      return JSON.stringify([...map.values()]);
+    }catch(e){return value}
+  }
+  function normalizeValue(key,value){
+    if(key==='financeiro_marcos_cards_v3')return sanitizeCardsValue(value);
+    return value;
+  }
   function status(mode,text){
     let el=document.getElementById('cloudStatusV40');
     if(!el){
@@ -7317,301 +7383,268 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     const span=el.querySelector('span');if(span)span.textContent=text||'Nuvem';
     const btn=el.querySelector('button');if(btn)btn.onclick=()=>openAuth();
   }
-
-  async function fetchRow(profile){
-    if(!currentUser)return null;
-    const {data,error}=await sb.from(TABLE)
-      .select('profile,state,revision,updated_at,source_device')
-      .eq('user_id',currentUser.id)
-      .eq('profile',profile)
-      .maybeSingle();
-    if(error){console.error('fetchRow',profile,error);return null}
-    return data||null;
-  }
-
-  async function loadAllRows(){
-    if(!currentUser)return [];
-    const {data,error}=await sb.from(TABLE)
-      .select('profile,state,revision,updated_at,source_device')
-      .eq('user_id',currentUser.id);
-    if(error){console.error('loadAllRows',error);return []}
-    return data||[];
-  }
-
-  function applyProfile(profile,state,revision,{reload=true}={}){
-    if(!state)return;
-    applyingRemote=true;
-    try{
-      PM.saveState(profile,cleanProfileState(state));
-      revs[profile]=Number(revision||0);
-      dirty.delete(profile);
-      sigs[profile]=stable(cleanProfileState(state));
-      if(profile===activeProfile()){
-        PM.applyState(cleanProfileState(state));
-      }
-    }finally{applyingRemote=false}
-
+  function setProfileKey(profile,key,value){
+    value=normalizeValue(key,value);
+    const state=profileState(profile);
+    if(value===null||value===undefined)delete state[key];
+    else state[key]=String(value);
+    PM.saveState(profile,state);
     if(profile===activeProfile()){
-      if(reload){
-        try{window.ppSessionV47?.captureWorkspace?.()}catch(e){}
-        setTimeout(()=>location.reload(),30);
-      }else{
-        try{
-          window.renderAll?.();
-          window.renderDashboard?.();
-          window.renderCards?.();
-          window.renderLancamentos?.();
-          window.renderFgts?.();
-          window.renderDebts?.();
-          window.renderAssets?.();
-          window.renderInvestments?.();
-          window.renderPrevidencia?.();
-        }catch(e){}
-      }
+      if(value===null||value===undefined)localStorage.removeItem(key);
+      else localStorage.setItem(key,String(value));
     }
   }
-
-  function applyGlobal(state,revision){
-    if(!state)return;
-    applyingRemote=true;
-    try{
-      if(Array.isArray(state.registry))localStorage.setItem('planejador_profiles_v46',JSON.stringify(state.registry));
-      Object.entries(state.passwords||{}).forEach(([p,v])=>localStorage.setItem('planejador_password_'+p,String(v)));
-
-      const remoteRgps=state.rgps||{};
-      const localRgps=[];
-      for(let i=0;i<localStorage.length;i++){
-        const k=localStorage.key(i)||'';
-        if(k.startsWith('rgps_'))localRgps.push(k);
-      }
-      localRgps.forEach(k=>{if(!(k in remoteRgps))localStorage.removeItem(k)});
-      Object.entries(remoteRgps).forEach(([k,v])=>localStorage.setItem(k,String(v)));
-
-      revs.__GLOBAL__=Number(revision||0);
-      dirty.delete('__GLOBAL__');
-      sigs.__GLOBAL__=stable(globalState());
-    }finally{applyingRemote=false}
+  function setGlobalKey(key,value){
+    if(value===null||value===undefined)localStorage.removeItem(key);
+    else localStorage.setItem(key,String(value));
   }
-
-  async function rpcSave(profile,state,expected){
-    const {data,error}=await sb.rpc('save_planner_profile_v64',{
+  async function fetchRows(){
+    const {data,error}=await sb.from(TABLE)
+      .select('profile,storage_key,value,revision,deleted,updated_at,source_device')
+      .eq('user_id',currentUser.id);
+    if(error){console.error('v65 fetchRows',error);return []}
+    return data||[];
+  }
+  async function rpcSave(profile,key,value,deleted,expected){
+    const {data,error}=await sb.rpc('save_planner_key_v65',{
       p_profile:profile,
-      p_state:state,
+      p_storage_key:key,
+      p_value:value,
+      p_deleted:!!deleted,
       p_expected_revision:Number(expected||0),
       p_source_device:deviceId()
     });
-    if(error){console.error('save RPC',profile,error);return {ok:false,error}}
-    const row=Array.isArray(data)?data[0]:data;
-    return row||{ok:false};
-  }
-
-  async function saveProfile(profile,reason='change'){
-    if(!currentUser||applyingRemote||!initialized)return false;
-    const state=profile==='__GLOBAL__'?globalState():readLocalProfile(profile);
-    const expected=Number(revs[profile]||0);
-
-    status('saving','Salvando…');
-    const res=await rpcSave(profile,state,expected);
-    if(res.ok){
-      revs[profile]=Number(res.revision||expected+1);
-      dirty.delete(profile);
-      sigs[profile]=stable(state);
-      status('online','Sincronizado agora');
-      return true;
+    if(error){
+      console.error('v65 save error',profile,key,error);
+      status('error','Erro ao salvar na nuvem');
+      return null;
     }
+    return Array.isArray(data)?data[0]:data;
+  }
+  async function saveOne(profile,key,reason='change'){
+    if(!currentUser||!initialized||applyingRemote)return false;
+    const token=rk(profile,key);
+    let value;
+    if(profile==='__GLOBAL__')value=globalState()[key]??null;
+    else value=profileState(profile)[key]??null;
+    value=value==null?null:normalizeValue(key,String(value));
+
+    let expected=Number(revisions.get(token)||0);
+    let res=await rpcSave(profile,key,value,value===null,expected);
+    if(!res)return false;
 
     if(res.conflict){
-      // Critical rule: NEVER silently overwrite unsaved local changes.
-      // If this profile is dirty, fetch remote, preserve local, and save again only after
-      // rebasing revision. We do not apply remote over local.
-      const remote=await fetchRow(profile);
-      if(!remote)return false;
-
-      if(dirty.has(profile)){
-        revs[profile]=Number(remote.revision||0);
-        const retry=await rpcSave(profile,state,revs[profile]);
-        if(retry.ok){
-          revs[profile]=Number(retry.revision||revs[profile]+1);
-          dirty.delete(profile);
-          sigs[profile]=stable(state);
-          status('online','Sincronizado agora');
-          return true;
-        }
+      // Local change wins only for this specific storage key.
+      expected=Number(res.revision||0);
+      revisions.set(token,expected);
+      res=await rpcSave(profile,key,value,value===null,expected);
+      if(!res||!res.ok){
         status('error','Conflito ao salvar');
         return false;
       }
-
-      if(profile==='__GLOBAL__')applyGlobal(remote.state,remote.revision);
-      else applyProfile(profile,remote.state,remote.revision,{reload:false});
-      status('online','Atualizado da nuvem');
+    }
+    if(res.ok){
+      revisions.set(token,Number(res.revision||expected+1));
+      observed.set(token,value);
+      dirty.delete(token);
+      status('online','Sincronizado agora');
       return true;
     }
-
-    status('error','Erro ao salvar');
     return false;
   }
-
-  function scheduleSave(profile,delay=120,reason='change'){
-    if(!currentUser||!initialized||applyingRemote)return;
-    clearTimeout(saveTimer);
-    saveTimer=setTimeout(()=>saveProfile(profile,reason),delay);
+  function scheduleSave(profile,key,delay=80){
+    const token=rk(profile,key);
+    dirty.add(token);
+    clearTimeout(saveTimers.get(token));
+    saveTimers.set(token,setTimeout(()=>saveOne(profile,key),delay));
   }
-
-  function detectChanges(){
-    if(applyingRemote||!initialized)return;
-
-    const p=activeProfile();
-    const s=localSig(p);
-    if(!(p in sigs))sigs[p]=s;
-    if(s!==sigs[p]){
-      PM.saveState(p,readLocalProfile(p));
-      sigs[p]=s;
-      dirty.add(p);
-      scheduleSave(p,90,'local-profile-change');
+  function scanProfile(profile){
+    const state=profileState(profile);
+    const prefix=profile+'||';
+    const currentKeys=new Set(Object.keys(state));
+    for(const [token,last] of observed){
+      if(!token.startsWith(prefix))continue;
+      const key=token.slice(prefix.length);
+      if(!currentKeys.has(key)&&last!==null)scheduleSave(profile,key,80);
     }
-
-    const gs=globalSig();
-    if(!('__GLOBAL__' in sigs))sigs.__GLOBAL__=gs;
-    if(gs!==sigs.__GLOBAL__){
-      sigs.__GLOBAL__=gs;
-      dirty.add('__GLOBAL__');
-      scheduleSave('__GLOBAL__',90,'local-global-change');
-    }
-  }
-
-  async function updateNow({reload=true}={}){
-    if(!currentUser)return false;
-    detectChanges();
-
-    // Flush local modifications FIRST. This prevents "Atualizar agora" from restoring old data.
-    const pending=[...dirty];
-    for(const p of pending)await saveProfile(p,'pre-update-flush');
-
-    const rows=await loadAllRows();
-    let activeChanged=false;
-    for(const row of rows){
-      const p=row.profile;
-      const serverRev=Number(row.revision||0);
-      const localRev=Number(revs[p]||0);
-
-      if(p==='__GLOBAL__'){
-        if(serverRev>localRev&&!dirty.has(p))applyGlobal(row.state,serverRev);
+    for(const [key,raw] of Object.entries(state)){
+      const value=normalizeValue(key,String(raw));
+      const token=rk(profile,key);
+      if(!observed.has(token)){
+        observed.set(token,value);
         continue;
       }
-
-      if(serverRev>localRev&&!dirty.has(p)){
-        const before=localSig(p);
-        applyProfile(p,row.state,serverRev,{reload:false});
-        if(p===activeProfile()&&before!==stable(row.state||{}))activeChanged=true;
+      if(observed.get(token)!==value){
+        // Write sanitized cards back locally so duplicates disappear permanently.
+        if(key==='financeiro_marcos_cards_v3'&&String(raw)!==value)setProfileKey(profile,key,value);
+        observed.set(token,value);
+        scheduleSave(profile,key,70);
       }
     }
-
-    status('online','Sincronizado agora');
-    if(activeChanged&&reload){
-      try{window.ppSessionV47?.captureWorkspace?.()}catch(e){}
-      setTimeout(()=>location.reload(),30);
-    }
-    return true;
   }
-
-  async function initialize(){
-    status('saving','Sincronizando…');
-    const rows=await loadAllRows();
-
-    // Existing v64 cloud rows are authoritative ONLY on a fresh browser with no local snapshot.
-    // Existing local profile states are preserved and pushed if the cloud row is absent.
-    const by=new Map(rows.map(r=>[r.profile,r]));
-
-    const registry=(()=>{
-      let arr=[];try{arr=JSON.parse(localStorage.getItem('planejador_profiles_v46')||'[]')}catch(e){}
-      if(!Array.isArray(arr))arr=[];
-      const names=new Set(arr.map(x=>x?.name).filter(Boolean));
-      names.add('Marcos');names.add('Christian');names.add(activeProfile());
-      return [...names];
-    })();
-
-    for(const p of registry){
-      const remote=by.get(p);
-      const localRaw=PM.readState(p);
-      if(remote){
-        revs[p]=Number(remote.revision||0);
-        if(localRaw){
-          // Preserve local data on first v64 run.
-          sigs[p]=stable(cleanProfileState(localRaw));
-        }else{
-          applyProfile(p,remote.state,remote.revision,{reload:false});
-        }
-      }else{
-        revs[p]=0;
-        sigs[p]=localSig(p);
+  function scanGlobal(){
+    const state=globalState(),profile='__GLOBAL__',prefix=profile+'||';
+    const currentKeys=new Set(Object.keys(state));
+    for(const [token,last] of observed){
+      if(!token.startsWith(prefix))continue;
+      const key=token.slice(prefix.length);
+      if(!currentKeys.has(key)&&last!==null)scheduleSave(profile,key,80);
+    }
+    for(const [key,raw] of Object.entries(state)){
+      const token=rk(profile,key),value=String(raw);
+      if(!observed.has(token)){observed.set(token,value);continue}
+      if(observed.get(token)!==value){
+        observed.set(token,value);
+        scheduleSave(profile,key,70);
       }
     }
-
-    const g=by.get('__GLOBAL__');
-    if(g){
-      revs.__GLOBAL__=Number(g.revision||0);
-      sigs.__GLOBAL__=globalSig();
+  }
+  function scan(){
+    if(!initialized||applyingRemote)return;
+    scanProfile(activeProfile());
+    scanGlobal();
+  }
+  async function seedFromThisDevice(){
+    status('saving','Criando base segura…');
+    for(const p of registryNames()){
+      const state=profileState(p);
+      for(const [key,raw] of Object.entries(state)){
+        const value=normalizeValue(key,String(raw));
+        if(key==='financeiro_marcos_cards_v3'&&String(raw)!==value)setProfileKey(p,key,value);
+        const res=await rpcSave(p,key,value,false,0);
+        if(res?.ok){
+          const token=rk(p,key);
+          revisions.set(token,Number(res.revision||1));
+          observed.set(token,value);
+        }
+      }
+    }
+    for(const [key,raw] of Object.entries(globalState())){
+      const value=String(raw),res=await rpcSave('__GLOBAL__',key,value,false,0);
+      if(res?.ok){
+        const token=rk('__GLOBAL__',key);
+        revisions.set(token,Number(res.revision||1));
+        observed.set(token,value);
+      }
+    }
+  }
+  async function pullRows(rows,{reload=true}={}){
+    let changedActive=false;
+    applyingRemote=true;
+    try{
+      for(const row of rows){
+        const token=rk(row.profile,row.storage_key);
+        revisions.set(token,Number(row.revision||0));
+        const incoming=row.deleted?null:normalizeValue(row.storage_key,row.value);
+        observed.set(token,incoming);
+        if(row.profile==='__GLOBAL__'){
+          setGlobalKey(row.storage_key,incoming);
+        }else{
+          const before=profileState(row.profile)[row.storage_key]??null;
+          if(String(before??'')!==String(incoming??'')){
+            setProfileKey(row.profile,row.storage_key,incoming);
+            if(row.profile===activeProfile())changedActive=true;
+          }
+        }
+      }
+    }finally{applyingRemote=false}
+    if(changedActive&&reload){
+      try{window.ppSessionV47?.captureWorkspace?.()}catch(e){}
+      setTimeout(()=>location.reload(),40);
     }else{
-      revs.__GLOBAL__=0;
-      sigs.__GLOBAL__=globalSig();
+      try{
+        window.renderAll?.();window.renderDashboard?.();window.renderCards?.();
+        window.renderLancamentos?.();window.renderFgts?.();window.renderDebts?.();
+        window.renderAssets?.();window.renderInvestments?.();window.renderPrevidencia?.();
+      }catch(e){}
+    }
+  }
+  async function initialize(){
+    const rows=await fetchRows();
+    const initKey=INIT_PREFIX+currentUser.id;
+
+    if(!rows.length){
+      // First v65 device becomes the one-time canonical seed.
+      await seedFromThisDevice();
+      localStorage.setItem(initKey,'1');
+    }else if(localStorage.getItem(initKey)!=='1'){
+      // First v65 opening on another browser/device: copy canonical key-by-key state.
+      await pullRows(rows,{reload:false});
+      localStorage.setItem(initKey,'1');
+    }else{
+      // Returning v65 device: only apply server keys that are newer; dirty local keys are never overwritten.
+      await pullRows(rows,{reload:false});
     }
 
+    // Ensure every observed active profile key starts from the same baseline.
+    scanProfile(activeProfile());
+    scanGlobal();
     initialized=true;
     startMonitor();
     subscribeRealtime();
-
-    // Push any local profiles that don't yet exist on v64.
-    for(const p of registry){
-      if(!by.get(p)){
-        dirty.add(p);
-        await saveProfile(p,'v64-initial-seed');
-      }
-    }
-    if(!g){
-      dirty.add('__GLOBAL__');
-      await saveProfile('__GLOBAL__','v64-initial-global');
-    }
-
     status('online','Tempo real ativo');
   }
-
   function startMonitor(){
     if(monitorTimer)return;
-    monitorTimer=setInterval(detectChanges,150);
+    monitorTimer=setInterval(scan,180);
   }
-
   function subscribeRealtime(){
     if(!currentUser||realtimeChannel)return;
-    realtimeChannel=sb.channel('planner-profile-v64-'+currentUser.id)
+    realtimeChannel=sb.channel('planner-key-v65-'+currentUser.id)
       .on('postgres_changes',{
         event:'*',schema:'public',table:TABLE,filter:'user_id=eq.'+currentUser.id
       },async payload=>{
-        const row=payload.new||null;
+        const row=payload.new||payload.old;
         if(!row||row.source_device===deviceId())return;
-        const p=row.profile;
+        const token=rk(row.profile,row.storage_key);
         const serverRev=Number(row.revision||0);
-        const localRev=Number(revs[p]||0);
+        const localRev=Number(revisions.get(token)||0);
         if(serverRev<=localRev)return;
 
-        detectChanges();
-        if(dirty.has(p)){
-          // Local unsaved change wins its own save cycle; don't overwrite it.
-          await saveProfile(p,'realtime-conflict-local-wins');
+        scan();
+        if(dirty.has(token)){
+          // Same key changed locally too: keep the explicit local action and rebase just this key.
+          revisions.set(token,serverRev);
+          await saveOne(row.profile,row.storage_key,'realtime-conflict');
           return;
         }
 
-        if(p==='__GLOBAL__')applyGlobal(row.state,serverRev);
-        else applyProfile(p,row.state,serverRev,{reload:true});
+        await pullRows([row],{reload:true});
         status('online','Atualizado em tempo real');
       })
       .subscribe(s=>{if(s==='SUBSCRIBED')status('online','Tempo real ativo')});
   }
-
-  async function unsubscribeRealtime(){
-    if(realtimeChannel){
-      try{await sb.removeChannel(realtimeChannel)}catch(e){}
-      realtimeChannel=null;
+  async function updateNow(){
+    if(!currentUser)return;
+    scan();
+    for(const token of [...dirty]){
+      const i=token.indexOf('||');
+      await saveOne(token.slice(0,i),token.slice(i+2),'pre-refresh');
     }
+    const rows=await fetchRows();
+    // Never overwrite a key still dirty locally.
+    const safe=rows.filter(r=>!dirty.has(rk(r.profile,r.storage_key)));
+    await pullRows(safe,{reload:true});
+    status('online','Sincronizado agora');
+  }
+  async function saveNow(){
+    if(!currentUser)return;
+    scan();
+    const p=activeProfile();
+    const state=profileState(p);
+    // Force-save only keys whose local value differs from observed. If none, nothing stale is resent.
+    for(const [key,raw] of Object.entries(state)){
+      const token=rk(p,key),value=normalizeValue(key,String(raw));
+      if(observed.get(token)!==value){
+        observed.set(token,value);
+        dirty.add(token);
+      }
+    }
+    for(const token of [...dirty]){
+      const i=token.indexOf('||');
+      await saveOne(token.slice(0,i),token.slice(i+2),'manual');
+    }
+    status('online','Sincronizado agora');
   }
 
   function closeAuth(){document.getElementById('cloudAuthV40')?.remove()}
@@ -7620,12 +7653,12 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     const ov=document.createElement('div');ov.id='cloudAuthV40';
     ov.innerHTML=`<section class="cloud-card">
       <button type="button" class="cloud-close" aria-label="Fechar">×</button>
-      <h2>${currentUser?'Sincronização segura':'Conectar à nuvem'}</h2>
+      <h2>${currentUser?'Sincronização por alteração':'Conectar à nuvem'}</h2>
       <p>${currentUser
-        ? 'Cada perfil é salvo separadamente. Alterações locais são enviadas antes de qualquer atualização da nuvem.'
+        ? 'Agora cada tipo de dado é sincronizado separadamente. Alterar um lançamento não reenvia cartões antigos, e alterar um cartão não substitui FGTS, dívidas ou outros dados.'
         : 'Use a mesma conta de nuvem no computador e no celular.'}</p>
       ${currentUser
-        ? `<div class="cloud-note"><b>Conta conectada:</b><br>${String(currentUser.email||'').replace(/</g,'&lt;')}<br><small>Versão de sincronização: v64 transacional</small></div>
+        ? `<div class="cloud-note"><b>Conta conectada:</b><br>${String(currentUser.email||'').replace(/</g,'&lt;')}<br><small>Sincronização v65 por chave · tempo real</small></div>
            <div class="cloud-actions">
              <button type="button" class="cloud-secondary" id="cloudLoadNow">Atualizar agora</button>
              <button type="button" class="cloud-secondary" id="cloudSyncNow">Salvar agora</button>
@@ -7661,29 +7694,16 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     if(br)br.onclick=()=>window.ppBackupV43?.chooseRestore?.();
 
     if(currentUser){
-      document.getElementById('cloudSyncNow').onclick=async()=>{
-        detectChanges();
-        const pending=[...dirty];
-        if(!pending.length){
-          dirty.add(activeProfile());
-        }
-        for(const p of [...dirty])await saveProfile(p,'manual-save');
-        close();
-      };
-      document.getElementById('cloudLoadNow').onclick=async()=>{
-        await updateNow({reload:true});
-        close();
-      };
+      document.getElementById('cloudSyncNow').onclick=async()=>{await saveNow();close()};
+      document.getElementById('cloudLoadNow').onclick=async()=>{await updateNow();close()};
       document.getElementById('cloudSignOut').onclick=async()=>{
-        detectChanges();
-        for(const p of [...dirty])await saveProfile(p,'before-cloud-signout');
-        await unsubscribeRealtime();
+        await saveNow();
+        if(realtimeChannel){try{await sb.removeChannel(realtimeChannel)}catch(e){} realtimeChannel=null}
         await sb.auth.signOut();
         currentUser=null;initialized=false;close();status('','Nuvem desconectada');
       };
       return;
     }
-
     function credentials(){
       const email=document.getElementById('cloudEmail').value.trim();
       const password=document.getElementById('cloudPassword').value;
@@ -7713,33 +7733,14 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     };
   }
 
-  // Explicit user mutations: mark dirty immediately.
-  document.addEventListener('click',e=>{
-    const hit=e.target.closest?.(
-      '#saveTx,#saveCardPurchase,#saveCard,#saveAsset,#saveInvestment,#saveFgts,#saveDebt,'+
-      '#cardDeleteConfirm,#v19DeleteCard,#v19Active,#v19Cancelled,'+
-      '[data-action="delete"],[data-action="archive"],[data-action="pay"],[data-action="advance"]'
-    );
-    if(hit){
-      setTimeout(()=>{
-        if(applyingRemote||!initialized)return;
-        const p=activeProfile();
-        PM.saveState(p,readLocalProfile(p));
-        sigs[p]=localSig(p);
-        dirty.add(p);
-        scheduleSave(p,60,'explicit-action');
-      },30);
-    }
-  },true);
-
   document.addEventListener('visibilitychange',()=>{
-    if(!document.hidden&&currentUser&&initialized)setTimeout(()=>updateNow({reload:true}),120);
+    if(!document.hidden&&currentUser&&initialized)setTimeout(updateNow,120);
   });
   window.addEventListener('focus',()=>{
-    if(currentUser&&initialized)setTimeout(()=>updateNow({reload:true}),120);
+    if(currentUser&&initialized)setTimeout(updateNow,120);
   });
   window.addEventListener('online',()=>{
-    if(currentUser&&initialized)setTimeout(()=>updateNow({reload:true}),150);
+    if(currentUser&&initialized)setTimeout(updateNow,150);
   });
 
   async function init(){
@@ -7748,31 +7749,23 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     currentUser=data.session?.user||null;
     if(currentUser)await initialize();
     else{status('','Entre na nuvem neste aparelho');setTimeout(openAuth,700)}
-
     sb.auth.onAuthStateChange((event,session)=>{
       currentUser=session?.user||null;
       if(event==='SIGNED_IN'&&currentUser&&!initialized)setTimeout(initialize,0);
       if(event==='SIGNED_OUT'){
-        unsubscribeRealtime();initialized=false;status('','Entre na nuvem neste aparelho');
+        initialized=false;status('','Entre na nuvem neste aparelho');
       }
     });
   }
 
-  window.ppCloud=window.ppCloudV64={
+  window.ppCloud=window.ppCloudV65={
     open:openAuth,
-    save:async()=>{
-      detectChanges();
-      const p=activeProfile();
-      dirty.add(p);
-      return saveProfile(p,'api');
-    },
-    load:()=>updateNow({reload:true}),
+    save:saveNow,
+    load:updateNow,
     updateNow,
-    markDirty:(p=activeProfile())=>{
-      PM.saveState(p,readLocalProfile(p));
-      sigs[p]=localSig(p);
-      dirty.add(p);
-      scheduleSave(p,60,'mark-dirty');
+    markDirty:(profile=activeProfile())=>{
+      scanProfile(profile);
+      scanGlobal();
     },
     client:sb,
     version:APP_VERSION
@@ -7908,7 +7901,7 @@ Os dados atuais deste navegador serão substituídos.`);
     if(internal)return;
     internal=true;
     try{PM.saveState(active(),PM.captureShared())}finally{internal=false}
-    try{window.ppCloudV64?.markDirty?.()}catch(e){}
+    try{window.ppCloudV65?.markDirty?.()}catch(e){}
     try{window.ppCloud?.save?.()}catch(e){}
   }
 
