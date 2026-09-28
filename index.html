@@ -1117,6 +1117,33 @@ html.pp-session-resume-v45 #loginOverlay{display:none!important}
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20512%20512%27%3E%0A%3Crect%20width%3D%27512%27%20height%3D%27512%27%20rx%3D%27112%27%20fill%3D%27%23FF6A00%27%2F%3E%0A%3Crect%20x%3D%2792%27%20y%3D%27150%27%20width%3D%27328%27%20height%3D%27212%27%20rx%3D%2734%27%20fill%3D%27none%27%20stroke%3D%27white%27%20stroke-width%3D%2730%27%2F%3E%0A%3Crect%20x%3D%2792%27%20y%3D%27202%27%20width%3D%27328%27%20height%3D%2746%27%20fill%3D%27white%27%2F%3E%0A%3Crect%20x%3D%27132%27%20y%3D%27292%27%20width%3D%2792%27%20height%3D%2722%27%20rx%3D%2711%27%20fill%3D%27white%27%2F%3E%0A%3Crect%20x%3D%27244%27%20y%3D%27292%27%20width%3D%2754%27%20height%3D%2722%27%20rx%3D%2711%27%20fill%3D%27white%27%20opacity%3D%27.88%27%2F%3E%0A%3C%2Fsvg%3E">
 <meta name="theme-color" content="#FF6A00">
 <meta name="msapplication-TileColor" content="#FF6A00">
+
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<style id="pp-v66-cloud-visibility">
+#cloudStatusV40.pp-v66-offline{background:#fff4ed!important;border-color:#f97066!important}
+#cloudStatusV40.pp-v66-offline i{background:#d92d20!important}
+#cloudStatusV40.pp-v66-offline span{color:#912018!important;font-weight:900!important}
+#ppV66Version{
+  display:inline-flex;align-items:center;justify-content:center;
+  height:20px;padding:0 7px;border-radius:999px;
+  background:#fff1e8;color:#c4320a;border:1px solid #ffd6ae;
+  font:900 9px Roboto,Arial,sans-serif;margin-left:4px
+}
+#ppV66CloudWarning{
+  position:fixed;left:50%;bottom:72px;transform:translateX(-50%);
+  z-index:99998;max-width:min(92vw,440px);width:max-content;
+  background:#7a271a;color:#fff;border-radius:15px;padding:10px 12px;
+  box-shadow:0 12px 28px rgba(16,24,40,.22);
+  font:700 10px/1.35 Roboto,Arial,sans-serif;display:none
+}
+#ppV66CloudWarning button{
+  border:0;background:#fff;color:#7a271a;border-radius:9px;padding:6px 9px;
+  margin-left:8px;font:900 9px Roboto,Arial;cursor:pointer
+}
+</style>
+
 </head>
 <body><div class="app">
 <header class="topbar"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button data-view="dashboard" class="active">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="projecao">Projeção</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx>+ Lançamento</button></div></div></header>
@@ -7271,14 +7298,16 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
 })();
 </script>
 
-<script id="pp-supabase-cloud-v65">
+<script id="pp-supabase-cloud-v66">
 (function(){
   const SUPABASE_URL='https://pjotjwkugkyagwafcntb.supabase.co';
   const SUPABASE_KEY='sb_publishable_cNqoA3LlkHpOckIYUlEqQw_PKnw4B0S';
   const TABLE='planner_key_state_v65';
-  const APP_VERSION='v65';
+  const PRESENCE='planner_device_presence_v66';
+  const BACKUP='planner_device_backup_v66';
+  const APP_VERSION='v66';
   const DEVICE_KEY='planejador_cloud_device_v60';
-  const INIT_PREFIX='ppsync_v65_initialized_';
+  const INIT_PREFIX='ppsync_v66_initialized_';
   const PM=window.__ppV41Profile;
 
   if(!window.supabase?.createClient||!PM)return;
@@ -7290,12 +7319,15 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
 
   let currentUser=null;
   let realtimeChannel=null;
+  let monitorTimer=null;
+  let pollTimer=null;
+  let presenceTimer=null;
   let initialized=false;
   let applyingRemote=false;
-  let monitorTimer=null;
-  const revisions=new Map();   // profile|key -> server revision
-  const observed=new Map();    // profile|key -> last local value
-  const dirty=new Set();       // profile|key pending save
+  let syncBusy=false;
+  const revisions=new Map();
+  const observed=new Map();
+  const dirty=new Set();
   const saveTimers=new Map();
 
   function deviceId(){
@@ -7341,28 +7373,30 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     }
     return out;
   }
+  function fullLocalSnapshot(){
+    const profiles={};
+    registryNames().forEach(p=>profiles[p]=profileState(p));
+    return {profiles,global:globalState(),active_profile:activeProfile(),captured_at:new Date().toISOString()};
+  }
   function sanitizeCardsValue(value){
     try{
       const arr=JSON.parse(value||'[]');
       if(!Array.isArray(arr))return value;
       const score=c=>{
-        if(!c||typeof c!=='object')return -1;
         let s=0;
-        if(c.color)s+=4;
-        if(c.last4)s+=4;
-        if(c.cardType)s+=4;
-        if(Number(c.limit)>0)s+=3;
-        if(Number(c.closeDay)&&Number(c.closeDay)!==10)s+=1;
-        if(Number(c.dueDay)&&Number(c.dueDay)!==18)s+=1;
-        if(c.brand&&c.brand!=='Crédito')s+=1;
-        if(c.name&&!/^Itaú$/i.test(c.name)&&!/^Banco Inter$/i.test(c.name))s+=1;
+        if(c?.color)s+=4;if(c?.last4)s+=4;if(c?.cardType)s+=4;
+        if(Number(c?.limit)>0)s+=3;
+        if(Number(c?.closeDay)&&Number(c.closeDay)!==10)s++;
+        if(Number(c?.dueDay)&&Number(c.dueDay)!==18)s++;
+        if(c?.brand&&c.brand!=='Crédito')s++;
+        if(c?.name&&!/^Itaú$/i.test(c.name)&&!/^Banco Inter$/i.test(c.name))s++;
         return s;
       };
       const map=new Map();
       for(const c of arr){
         if(!c||!c.id)continue;
-        const prev=map.get(String(c.id));
-        if(!prev||score(c)>score(prev))map.set(String(c.id),c);
+        const p=map.get(String(c.id));
+        if(!p||score(c)>score(p))map.set(String(c.id),c);
       }
       return JSON.stringify([...map.values()]);
     }catch(e){return value}
@@ -7370,6 +7404,22 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
   function normalizeValue(key,value){
     if(key==='financeiro_marcos_cards_v3')return sanitizeCardsValue(value);
     return value;
+  }
+  function ensureVersionBadge(){
+    const el=document.getElementById('cloudStatusV40');
+    if(!el||document.getElementById('ppV66Version'))return;
+    const b=document.createElement('span');b.id='ppV66Version';b.textContent='v66';
+    el.appendChild(b);
+  }
+  function ensureWarning(){
+    let w=document.getElementById('ppV66CloudWarning');
+    if(w)return w;
+    w=document.createElement('div');
+    w.id='ppV66CloudWarning';
+    w.innerHTML='Este aparelho está sem conexão com a nuvem. Os dados ficam só aqui até conectar.<button type="button">Conectar</button>';
+    document.body.appendChild(w);
+    w.querySelector('button').onclick=()=>openAuth();
+    return w;
   }
   function status(mode,text){
     let el=document.getElementById('cloudStatusV40');
@@ -7382,6 +7432,15 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     el.className=mode||'';
     const span=el.querySelector('span');if(span)span.textContent=text||'Nuvem';
     const btn=el.querySelector('button');if(btn)btn.onclick=()=>openAuth();
+    ensureVersionBadge();
+    const w=ensureWarning();
+    if(!currentUser){
+      el.classList.add('pp-v66-offline');
+      w.style.display='block';
+    }else{
+      el.classList.remove('pp-v66-offline');
+      w.style.display='none';
+    }
   }
   function setProfileKey(profile,key,value){
     value=normalizeValue(key,value);
@@ -7398,11 +7457,38 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     if(value===null||value===undefined)localStorage.removeItem(key);
     else localStorage.setItem(key,String(value));
   }
+  async function touchPresence(){
+    if(!currentUser)return;
+    try{
+      await sb.from(PRESENCE).upsert({
+        user_id:currentUser.id,
+        device_id:deviceId(),
+        user_agent:navigator.userAgent,
+        app_version:APP_VERSION,
+        last_seen:new Date().toISOString()
+      },{onConflict:'user_id,device_id'});
+    }catch(e){}
+  }
+  async function backupThisDevice(reason){
+    if(!currentUser)return;
+    try{
+      await sb.from(BACKUP).insert({
+        user_id:currentUser.id,
+        device_id:deviceId(),
+        app_version:APP_VERSION+'-'+reason,
+        snapshot:fullLocalSnapshot()
+      });
+    }catch(e){console.warn('v66 device backup',e)}
+  }
   async function fetchRows(){
     const {data,error}=await sb.from(TABLE)
       .select('profile,storage_key,value,revision,deleted,updated_at,source_device')
       .eq('user_id',currentUser.id);
-    if(error){console.error('v65 fetchRows',error);return []}
+    if(error){
+      console.error('v66 fetchRows',error);
+      status('error','Erro ao ler a nuvem');
+      return null;
+    }
     return data||[];
   }
   async function rpcSave(profile,key,value,deleted,expected){
@@ -7415,7 +7501,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       p_source_device:deviceId()
     });
     if(error){
-      console.error('v65 save error',profile,key,error);
+      console.error('v66 save error',profile,key,error);
       status('error','Erro ao salvar na nuvem');
       return null;
     }
@@ -7424,78 +7510,79 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
   async function saveOne(profile,key,reason='change'){
     if(!currentUser||!initialized||applyingRemote)return false;
     const token=rk(profile,key);
-    let value;
-    if(profile==='__GLOBAL__')value=globalState()[key]??null;
-    else value=profileState(profile)[key]??null;
+    let value=profile==='__GLOBAL__'?(globalState()[key]??null):(profileState(profile)[key]??null);
     value=value==null?null:normalizeValue(key,String(value));
-
     let expected=Number(revisions.get(token)||0);
     let res=await rpcSave(profile,key,value,value===null,expected);
     if(!res)return false;
 
     if(res.conflict){
-      // Local change wins only for this specific storage key.
       expected=Number(res.revision||0);
       revisions.set(token,expected);
+      // Explicit local edit to this key remains authoritative.
       res=await rpcSave(profile,key,value,value===null,expected);
-      if(!res||!res.ok){
-        status('error','Conflito ao salvar');
-        return false;
-      }
     }
-    if(res.ok){
+    if(res?.ok){
       revisions.set(token,Number(res.revision||expected+1));
       observed.set(token,value);
       dirty.delete(token);
       status('online','Sincronizado agora');
       return true;
     }
+    status('error','Conflito ao salvar');
     return false;
   }
-  function scheduleSave(profile,key,delay=80){
+  function scheduleSave(profile,key,delay=60){
     const token=rk(profile,key);
     dirty.add(token);
     clearTimeout(saveTimers.get(token));
     saveTimers.set(token,setTimeout(()=>saveOne(profile,key),delay));
   }
   function scanProfile(profile){
-    const state=profileState(profile);
-    const prefix=profile+'||';
+    const state=profileState(profile),prefix=profile+'||';
     const currentKeys=new Set(Object.keys(state));
+
     for(const [token,last] of observed){
       if(!token.startsWith(prefix))continue;
       const key=token.slice(prefix.length);
-      if(!currentKeys.has(key)&&last!==null)scheduleSave(profile,key,80);
+      if(!currentKeys.has(key)&&last!==null){
+        observed.set(token,null);
+        scheduleSave(profile,key,40);
+      }
     }
+
     for(const [key,raw] of Object.entries(state)){
-      const value=normalizeValue(key,String(raw));
-      const token=rk(profile,key);
+      const value=normalizeValue(key,String(raw)),token=rk(profile,key);
+      if(key==='financeiro_marcos_cards_v3'&&String(raw)!==value)setProfileKey(profile,key,value);
       if(!observed.has(token)){
         observed.set(token,value);
         continue;
       }
       if(observed.get(token)!==value){
-        // Write sanitized cards back locally so duplicates disappear permanently.
-        if(key==='financeiro_marcos_cards_v3'&&String(raw)!==value)setProfileKey(profile,key,value);
         observed.set(token,value);
-        scheduleSave(profile,key,70);
+        scheduleSave(profile,key,40);
       }
     }
   }
   function scanGlobal(){
     const state=globalState(),profile='__GLOBAL__',prefix=profile+'||';
     const currentKeys=new Set(Object.keys(state));
+
     for(const [token,last] of observed){
       if(!token.startsWith(prefix))continue;
       const key=token.slice(prefix.length);
-      if(!currentKeys.has(key)&&last!==null)scheduleSave(profile,key,80);
+      if(!currentKeys.has(key)&&last!==null){
+        observed.set(token,null);
+        scheduleSave(profile,key,40);
+      }
     }
+
     for(const [key,raw] of Object.entries(state)){
       const token=rk(profile,key),value=String(raw);
       if(!observed.has(token)){observed.set(token,value);continue}
       if(observed.get(token)!==value){
         observed.set(token,value);
-        scheduleSave(profile,key,70);
+        scheduleSave(profile,key,40);
       }
     }
   }
@@ -7505,7 +7592,6 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     scanGlobal();
   }
   async function seedFromThisDevice(){
-    status('saving','Criando base segura…');
     for(const p of registryNames()){
       const state=profileState(p);
       for(const [key,raw] of Object.entries(state)){
@@ -7520,7 +7606,8 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       }
     }
     for(const [key,raw] of Object.entries(globalState())){
-      const value=String(raw),res=await rpcSave('__GLOBAL__',key,value,false,0);
+      const value=String(raw);
+      const res=await rpcSave('__GLOBAL__',key,value,false,0);
       if(res?.ok){
         const token=rk('__GLOBAL__',key);
         revisions.set(token,Number(res.revision||1));
@@ -7533,10 +7620,14 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     applyingRemote=true;
     try{
       for(const row of rows){
-        const token=rk(row.profile,row.storage_key);
-        revisions.set(token,Number(row.revision||0));
+        const token=rk(row.profile,row.storage_key),serverRev=Number(row.revision||0);
+        const localRev=Number(revisions.get(token)||0);
+        if(serverRev<=localRev)continue;
+        if(dirty.has(token))continue;
+        revisions.set(token,serverRev);
         const incoming=row.deleted?null:normalizeValue(row.storage_key,row.value);
         observed.set(token,incoming);
+
         if(row.profile==='__GLOBAL__'){
           setGlobalKey(row.storage_key,incoming);
         }else{
@@ -7548,10 +7639,11 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
         }
       }
     }finally{applyingRemote=false}
+
     if(changedActive&&reload){
       try{window.ppSessionV47?.captureWorkspace?.()}catch(e){}
-      setTimeout(()=>location.reload(),40);
-    }else{
+      setTimeout(()=>location.reload(),30);
+    }else if(changedActive){
       try{
         window.renderAll?.();window.renderDashboard?.();window.renderCards?.();
         window.renderLancamentos?.();window.renderFgts?.();window.renderDebts?.();
@@ -7559,38 +7651,80 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       }catch(e){}
     }
   }
+  async function flushDirty(){
+    scan();
+    for(const token of [...dirty]){
+      const i=token.indexOf('||');
+      await saveOne(token.slice(0,i),token.slice(i+2),'flush');
+    }
+  }
+  async function syncCycle({reload=true}={}){
+    if(!currentUser||!initialized||syncBusy)return;
+    syncBusy=true;
+    try{
+      await flushDirty();
+      const rows=await fetchRows();
+      if(rows)await pullRows(rows,{reload});
+      await touchPresence();
+      status('online','Sincronizado agora');
+    }finally{syncBusy=false}
+  }
   async function initialize(){
     const rows=await fetchRows();
+    if(rows===null)return;
+
     const initKey=INIT_PREFIX+currentUser.id;
+    const firstOnThisDevice=localStorage.getItem(initKey)!=='1';
+
+    // Always create a server-side safety snapshot before the first reconciliation on this device.
+    if(firstOnThisDevice)await backupThisDevice('before-first-sync');
 
     if(!rows.length){
-      // First v65 device becomes the one-time canonical seed.
       await seedFromThisDevice();
-      localStorage.setItem(initKey,'1');
-    }else if(localStorage.getItem(initKey)!=='1'){
-      // First v65 opening on another browser/device: copy canonical key-by-key state.
-      await pullRows(rows,{reload:false});
-      localStorage.setItem(initKey,'1');
     }else{
-      // Returning v65 device: only apply server keys that are newer; dirty local keys are never overwritten.
-      await pullRows(rows,{reload:false});
+      // Existing server becomes canonical on a new device.
+      // Local copy has already been backed up, so nothing is silently lost.
+      for(const row of rows){
+        revisions.set(rk(row.profile,row.storage_key),Number(row.revision||0));
+      }
+      if(firstOnThisDevice){
+        // Baseline observed to server values, then apply server.
+        for(const row of rows){
+          observed.set(rk(row.profile,row.storage_key),row.deleted?null:normalizeValue(row.storage_key,row.value));
+        }
+        applyingRemote=true;
+        try{
+          for(const row of rows){
+            const incoming=row.deleted?null:normalizeValue(row.storage_key,row.value);
+            if(row.profile==='__GLOBAL__')setGlobalKey(row.storage_key,incoming);
+            else setProfileKey(row.profile,row.storage_key,incoming);
+          }
+        }finally{applyingRemote=false}
+      }else{
+        // Returning device: server revision wins unless this exact key is dirty locally.
+        await pullRows(rows,{reload:false});
+      }
     }
 
-    // Ensure every observed active profile key starts from the same baseline.
+    localStorage.setItem(initKey,'1');
     scanProfile(activeProfile());
     scanGlobal();
     initialized=true;
-    startMonitor();
+    startLoops();
     subscribeRealtime();
+    await touchPresence();
     status('online','Tempo real ativo');
   }
-  function startMonitor(){
-    if(monitorTimer)return;
-    monitorTimer=setInterval(scan,180);
+  function startLoops(){
+    if(!monitorTimer)monitorTimer=setInterval(scan,150);
+    if(!pollTimer)pollTimer=setInterval(()=>{
+      if(!document.hidden&&currentUser&&initialized)syncCycle({reload:false});
+    },2500);
+    if(!presenceTimer)presenceTimer=setInterval(touchPresence,30000);
   }
   function subscribeRealtime(){
     if(!currentUser||realtimeChannel)return;
-    realtimeChannel=sb.channel('planner-key-v65-'+currentUser.id)
+    realtimeChannel=sb.channel('planner-v66-'+currentUser.id)
       .on('postgres_changes',{
         event:'*',schema:'public',table:TABLE,filter:'user_id=eq.'+currentUser.id
       },async payload=>{
@@ -7603,48 +7737,16 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
 
         scan();
         if(dirty.has(token)){
-          // Same key changed locally too: keep the explicit local action and rebase just this key.
           revisions.set(token,serverRev);
-          await saveOne(row.profile,row.storage_key,'realtime-conflict');
+          await saveOne(row.profile,row.storage_key,'realtime-local-edit');
           return;
         }
-
         await pullRows([row],{reload:true});
         status('online','Atualizado em tempo real');
       })
-      .subscribe(s=>{if(s==='SUBSCRIBED')status('online','Tempo real ativo')});
-  }
-  async function updateNow(){
-    if(!currentUser)return;
-    scan();
-    for(const token of [...dirty]){
-      const i=token.indexOf('||');
-      await saveOne(token.slice(0,i),token.slice(i+2),'pre-refresh');
-    }
-    const rows=await fetchRows();
-    // Never overwrite a key still dirty locally.
-    const safe=rows.filter(r=>!dirty.has(rk(r.profile,r.storage_key)));
-    await pullRows(safe,{reload:true});
-    status('online','Sincronizado agora');
-  }
-  async function saveNow(){
-    if(!currentUser)return;
-    scan();
-    const p=activeProfile();
-    const state=profileState(p);
-    // Force-save only keys whose local value differs from observed. If none, nothing stale is resent.
-    for(const [key,raw] of Object.entries(state)){
-      const token=rk(p,key),value=normalizeValue(key,String(raw));
-      if(observed.get(token)!==value){
-        observed.set(token,value);
-        dirty.add(token);
-      }
-    }
-    for(const token of [...dirty]){
-      const i=token.indexOf('||');
-      await saveOne(token.slice(0,i),token.slice(i+2),'manual');
-    }
-    status('online','Sincronizado agora');
+      .subscribe(s=>{
+        if(s==='SUBSCRIBED')status('online','Tempo real ativo');
+      });
   }
 
   function closeAuth(){document.getElementById('cloudAuthV40')?.remove()}
@@ -7653,34 +7755,26 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     const ov=document.createElement('div');ov.id='cloudAuthV40';
     ov.innerHTML=`<section class="cloud-card">
       <button type="button" class="cloud-close" aria-label="Fechar">×</button>
-      <h2>${currentUser?'Sincronização por alteração':'Conectar à nuvem'}</h2>
+      <h2>${currentUser?'Sincronização em tempo real':'Conectar este aparelho à nuvem'}</h2>
       <p>${currentUser
-        ? 'Agora cada tipo de dado é sincronizado separadamente. Alterar um lançamento não reenvia cartões antigos, e alterar um cartão não substitui FGTS, dívidas ou outros dados.'
-        : 'Use a mesma conta de nuvem no computador e no celular.'}</p>
+        ? 'Este aparelho está conectado. O sistema salva automaticamente e também confere a nuvem a cada poucos segundos enquanto a página estiver aberta.'
+        : 'Este aparelho ainda não está conectado ao Supabase. Sem essa conexão, o que você altera fica somente neste navegador.'}</p>
       ${currentUser
-        ? `<div class="cloud-note"><b>Conta conectada:</b><br>${String(currentUser.email||'').replace(/</g,'&lt;')}<br><small>Sincronização v65 por chave · tempo real</small></div>
+        ? `<div class="cloud-note"><b>Conta:</b><br>${String(currentUser.email||'').replace(/</g,'&lt;')}<br><small>Versão: v66 · sincronização automática + verificação periódica</small></div>
            <div class="cloud-actions">
-             <button type="button" class="cloud-secondary" id="cloudLoadNow">Atualizar agora</button>
+             <button type="button" class="cloud-secondary" id="cloudLoadNow">Sincronizar agora</button>
              <button type="button" class="cloud-secondary" id="cloudSyncNow">Salvar agora</button>
              <button type="button" class="cloud-primary" id="cloudSignOut">Sair da nuvem</button>
-           </div>
-           <div class="cloud-backup-box">
-             <strong>Backup completo</strong>
-             <p>Guarde uma cópia adicional dos perfis no aparelho.</p>
-             <div class="cloud-backup-actions">
-               <button type="button" class="cloud-backup-download" id="backupDownloadV43">Baixar backup</button>
-               <button type="button" class="cloud-backup-restore" id="backupRestoreV43">Restaurar backup</button>
-             </div>
            </div>`
         : `<div class="cloud-grid">
              <div><label>E-mail da nuvem</label><input id="cloudEmail" type="email" autocomplete="email" placeholder="seu@email.com"></div>
-             <div><label>Senha da nuvem</label><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="Mínimo de 6 caracteres"></div>
+             <div><label>Senha da nuvem</label><input id="cloudPassword" type="password" autocomplete="current-password" placeholder="Senha da conta de nuvem"></div>
            </div>
            <div class="cloud-error" id="cloudError"></div>
            <div class="cloud-actions">
-             <button type="button" class="cloud-primary" id="cloudSignIn">Entrar</button>
-             <button type="button" class="cloud-secondary" id="cloudSignUp">Criar conta</button>
-           </div>`
+             <button type="button" class="cloud-primary" id="cloudSignIn">Conectar este aparelho</button>
+           </div>
+           <div class="cloud-note"><b>Importante:</b> no iPhone, o ícone adicionado à Tela de Início pode ter um armazenamento separado do Safari. Por isso, este aparelho precisa estar conectado à mesma conta de nuvem pelo menos uma vez.</div>`
       }
     </section>`;
     document.body.appendChild(ov);
@@ -7688,85 +7782,80 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     ov.querySelector('.cloud-close').onclick=close;
     ov.onclick=e=>{if(e.target===ov)close()};
 
-    const bd=document.getElementById('backupDownloadV43');
-    const br=document.getElementById('backupRestoreV43');
-    if(bd)bd.onclick=()=>window.ppBackupV43?.download?.();
-    if(br)br.onclick=()=>window.ppBackupV43?.chooseRestore?.();
-
     if(currentUser){
-      document.getElementById('cloudSyncNow').onclick=async()=>{await saveNow();close()};
-      document.getElementById('cloudLoadNow').onclick=async()=>{await updateNow();close()};
+      document.getElementById('cloudSyncNow').onclick=async()=>{await flushDirty();close()};
+      document.getElementById('cloudLoadNow').onclick=async()=>{await syncCycle({reload:true});close()};
       document.getElementById('cloudSignOut').onclick=async()=>{
-        await saveNow();
+        await flushDirty();
         if(realtimeChannel){try{await sb.removeChannel(realtimeChannel)}catch(e){} realtimeChannel=null}
         await sb.auth.signOut();
-        currentUser=null;initialized=false;close();status('','Nuvem desconectada');
+        currentUser=null;initialized=false;close();status('pp-v66-offline','Nuvem desconectada');
       };
       return;
     }
-    function credentials(){
+
+    document.getElementById('cloudSignIn').onclick=async()=>{
       const email=document.getElementById('cloudEmail').value.trim();
       const password=document.getElementById('cloudPassword').value;
-      const errorEl=document.getElementById('cloudError');errorEl.textContent='';
+      const err=document.getElementById('cloudError');err.textContent='';
       if(!email||password.length<6){
-        errorEl.textContent='Informe um e-mail válido e uma senha com pelo menos 6 caracteres.';
-        return null;
-      }
-      return {email,password,errorEl};
-    }
-    document.getElementById('cloudSignIn').onclick=async()=>{
-      const c=credentials();if(!c)return;
-      const {data,error}=await sb.auth.signInWithPassword({email:c.email,password:c.password});
-      if(error){c.errorEl.textContent=error.message;return}
-      currentUser=data.user;close();await initialize();
-    };
-    document.getElementById('cloudSignUp').onclick=async()=>{
-      const c=credentials();if(!c)return;
-      const {data,error}=await sb.auth.signUp({email:c.email,password:c.password});
-      if(error){c.errorEl.textContent=error.message;return}
-      if(!data.session){
-        c.errorEl.style.color='#027a48';
-        c.errorEl.textContent='Conta criada. Confirme o e-mail e depois clique em Entrar.';
+        err.textContent='Informe a conta de nuvem e a senha.';
         return;
       }
-      currentUser=data.user;close();await initialize();
+      const {data,error}=await sb.auth.signInWithPassword({email,password});
+      if(error){err.textContent=error.message;return}
+      currentUser=data.user;
+      close();
+      await initialize();
     };
   }
 
-  document.addEventListener('visibilitychange',()=>{
-    if(!document.hidden&&currentUser&&initialized)setTimeout(updateNow,120);
-  });
-  window.addEventListener('focus',()=>{
-    if(currentUser&&initialized)setTimeout(updateNow,120);
-  });
-  window.addEventListener('online',()=>{
-    if(currentUser&&initialized)setTimeout(updateNow,150);
-  });
-
   async function init(){
-    status('saving','Conectando à nuvem…');
+    status('saving','Verificando nuvem…');
     const {data}=await sb.auth.getSession();
     currentUser=data.session?.user||null;
-    if(currentUser)await initialize();
-    else{status('','Entre na nuvem neste aparelho');setTimeout(openAuth,700)}
+    if(currentUser){
+      await initialize();
+    }else{
+      status('pp-v66-offline','Nuvem desconectada · toque para conectar');
+      // Keep prompting after the site password overlay disappears.
+      let tries=0;
+      const t=setInterval(()=>{
+        tries++;
+        if(currentUser){clearInterval(t);return}
+        if(!document.getElementById('loginOverlay')&&!document.getElementById('sessionLockV45')){
+          clearInterval(t);
+          openAuth();
+        }
+        if(tries>30)clearInterval(t);
+      },300);
+    }
+
     sb.auth.onAuthStateChange((event,session)=>{
       currentUser=session?.user||null;
       if(event==='SIGNED_IN'&&currentUser&&!initialized)setTimeout(initialize,0);
       if(event==='SIGNED_OUT'){
-        initialized=false;status('','Entre na nuvem neste aparelho');
+        initialized=false;status('pp-v66-offline','Nuvem desconectada · toque para conectar');
       }
     });
   }
 
-  window.ppCloud=window.ppCloudV65={
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden&&currentUser&&initialized)setTimeout(()=>syncCycle({reload:true}),100);
+  });
+  window.addEventListener('focus',()=>{
+    if(currentUser&&initialized)setTimeout(()=>syncCycle({reload:true}),100);
+  });
+  window.addEventListener('online',()=>{
+    if(currentUser&&initialized)setTimeout(()=>syncCycle({reload:true}),120);
+  });
+
+  window.ppCloud=window.ppCloudV66={
     open:openAuth,
-    save:saveNow,
-    load:updateNow,
-    updateNow,
-    markDirty:(profile=activeProfile())=>{
-      scanProfile(profile);
-      scanGlobal();
-    },
+    save:flushDirty,
+    load:()=>syncCycle({reload:true}),
+    sync:syncCycle,
+    connected:()=>!!currentUser,
     client:sb,
     version:APP_VERSION
   };
@@ -7901,7 +7990,7 @@ Os dados atuais deste navegador serão substituídos.`);
     if(internal)return;
     internal=true;
     try{PM.saveState(active(),PM.captureShared())}finally{internal=false}
-    try{window.ppCloudV65?.markDirty?.()}catch(e){}
+    try{window.ppCloudV66?.save?.()}catch(e){}
     try{window.ppCloud?.save?.()}catch(e){}
   }
 
