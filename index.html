@@ -1337,7 +1337,7 @@ function renderDashboard(){ let tx=allTx(), maxMonth=(year===currentYear?Math.mi
  let flow=[]; for(let m=1;m<=maxMonth;m++){ let rows=tx.filter(x=>+x.ano===+year && +x.mesNum===m); let i=sum(rows.filter(x=>x.tipo==='entrada'),x=>x.valor), o=sum(rows.filter(x=>x.tipo==='saida'),x=>x.valor); flow.push({m,i,o,b:i-o})} $('#flowList').innerHTML=flow.map(r=>{let total=Math.max(1,...flow.map(x=>Math.max(x.i,x.o))); return `<div class="row3"><span>${monthNames[r.m-1]}</span><div><div class="bar"><i style="width:${(r.i/total)*100}%"></i></div><div class="bar" style="margin-top:4px"><i style="width:${(r.o/total)*100}%;background:linear-gradient(90deg,var(--red),#ff8ea0)"></i></div></div><b>${brl(r.b)}</b></div>`}).join('')||'<div class="empty">Sem dados para este período.</div>';
  let cats={}; ytd.filter(x=>x.tipo==='saida').forEach(x=>cats[x.categoria||'Sem categoria']=(cats[x.categoria||'Sem categoria']||0)+num(x.valor)); let catEntries=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,8); let catMax=Math.max(1,...catEntries.map(x=>x[1])); $('#categoryList').innerHTML=catEntries.map(([n,v])=>`<div class="row3"><span>${esc(n)}</span><div class="bar"><i style="width:${(v/catMax)*100}%"></i></div><b>${brl(v)}</b></div>`).join('')||'<div class="empty">Sem despesas no período.</div>';
  let upcomingCards=cardAggregatedTx().filter(x=>x.ano>currentYear || (x.ano===currentYear && x.mesNum>=currentMonth)).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum).slice(0,4);
- let upcomingDebts=debtProjectionRows(6).slice(0,4); let dueHtml=[...upcomingCards.map(x=>`<div class="row3"><span>${monthLabel(x.ano,x.mesNum)}</span><div>Fatura ${esc(x.origem)} · ${x.itemCount} item(ns)</div><b>${brl(x.valor)}</b></div>`),...upcomingDebts.map(x=>`<div class="row3"><span>${monthLabel(x.year,x.month)}</span><div>${esc(x.description)}</div><b>${brl(x.amount)}</b></div>`)].slice(0,8).join(''); $('#nextDues').innerHTML=dueHtml||'<div class="empty">Nenhuma obrigação futura cadastrada.</div>';
+ let dueHtml=upcomingCards.map(x=>`<div class="row3"><span>${monthLabel(x.ano,x.mesNum)}</span><div>Fatura ${esc(x.origem)} · ${x.itemCount} item(ns)</div><b>${brl(x.valor)}</b></div>`).slice(0,8).join(''); $('#nextDues').innerHTML=dueHtml||'<div class="empty">Nenhuma fatura de cartão prevista.</div>';
  let invTotal=sum(investments.filter(x=>x.status==='Ativo'),x=>x.currentValue), patTotal=sum(assets,x=>x.value); $('#assetSnapshot').innerHTML=`<div class="row3"><span>Patrimônio cadastrado</span><div></div><b>${brl(patTotal)}</b></div><div class="row3"><span>Investimentos</span><div></div><b>${brl(invTotal)}</b></div><div class="row3"><span>FGTS livre</span><div></div><b class="positive">${brl(fgtsSummary.saldoDisponivel)}</b></div><div class="row3"><span>FGTS bloqueado</span><div></div><b class="negative">${brl(fgtsSummary.saldoBloqueado)}</b></div>`;
  }
 function renderLancamentos(){ let y=$('#txYear').value, type=$('#txType').value, q=$('#txSearch').value.toLowerCase(); let rows=allTx().filter(x=>(y==='all'||+x.ano===+y)&&(!q||[x.descricao,x.categoria,x.origem].join(' ').toLowerCase().includes(q))).filter(x=> type==='all' ? true : (type==='cartao' ? x.origemDados==='Cartões' : x.tipo===type)).sort((a,b)=>b.ano-a.ano||b.mesNum-a.mesNum||(b.valor-a.valor)); let inV=sum(rows.filter(x=>x.tipo==='entrada'),x=>x.valor), outV=sum(rows.filter(x=>x.tipo==='saida'),x=>x.valor); $('#txSummary').innerHTML=`<div class="card mini"><span>Entradas</span><b class="positive">${brl(inV)}</b></div><div class="card mini"><span>Saídas</span><b class="negative">${brl(outV)}</b></div><div class="card mini"><span>Saldo</span><b>${brl(inV-outV)}</b></div><div class="card mini"><span>Registros</span><b>${rows.length}</b></div><div class="card mini"><span>Faturas agregadas</span><b>${rows.filter(x=>x.origemDados==='Cartões').length}</b></div>`; $('#txBody').innerHTML=rows.slice(0,1200).map(x=>`<tr><td>${monthLabel(x.ano,x.mesNum)}</td><td><span class="tag ${x.origemDados==='Cartões'?'blue':x.tipo==='entrada'?'green':'red'}">${x.origemDados==='Cartões'?'Fatura':(x.tipo==='entrada'?'Entrada':'Saída')}</span></td><td><b>${esc(x.descricao)}</b>${x.origemDados==='Cartões'?'<br><small style="color:var(--muted)">Detalhamento na aba Cartões</small>':''}</td><td>${esc(x.categoria||'—')}</td><td>${esc(x.origem||'—')}</td><td><span class="tag ${String(x.status).toLowerCase()==='quitado'?'green':'amber'}">${esc(x.status||'—')}</span></td><td class="money ${x.tipo==='entrada'?'positive':'negative'}">${x.tipo==='entrada'?'+':'−'} ${brl(x.valor)}</td><td>${x.origemDados==='Site'?`<button class="ghost" onclick="removeTx('${x.id}')">Excluir</button>`:''}</td></tr>`).join('')||'<tr><td colspan="8" class="empty">Nenhum lançamento encontrado.</td></tr>' }
@@ -1568,8 +1568,8 @@ function setLaunchInitialPeriod(){let y=document.getElementById('txYear'),m=docu
 function bindLaunchFilters(){['txYear','txMonth','txType'].forEach(id=>{let e=document.getElementById(id);if(e)e.onchange=strictLaunchFilter});let q=document.getElementById('txSearch');if(q)q.oninput=strictLaunchFilter}
 function currentTrendRows(){let maxM=(year===currentYear?Math.min(month,currentMonth):month),rows=[];for(let m=1;m<=maxM;m++){let r=allTx().filter(x=>+x.ano===+year&&+x.mesNum===m&&!(x.ano>currentYear||(x.ano===currentYear&&x.mesNum>currentMonth))),inc=sum(r.filter(x=>x.tipo==='entrada'),x=>x.valor),out=sum(r.filter(x=>x.tipo==='saida'),x=>x.valor);rows.push({m,inc,out})}return rows}
 window.renderPremiumTrend=function(){let dash=document.getElementById('dashboard'),annual=document.getElementById('annualPremium');if(!dash||!annual)return;let card=document.getElementById('premiumTrend');if(!card){annual.insertAdjacentHTML('afterend','<section class="premium-trend" id="premiumTrend"></section><div class="plan-grid" id="planningCards"></div>');card=document.getElementById('premiumTrend')}let rows=currentTrendRows(),w=1000,h=240,p=36,maxV=Math.max(1,...rows.flatMap(r=>[r.inc,r.out])),incP=linePath(rows.map(r=>r.inc),w,h,p,maxV),outP=linePath(rows.map(r=>r.out),w,h,p,maxV);let grids=[.25,.5,.75,1].map(q=>`<line class="trend-grid" x1="${p}" y1="${h-p-(h-2*p)*q}" x2="${w-p}" y2="${h-p-(h-2*p)*q}"/>`).join(''),labels=rows.map((r,i)=>{let x=p+(w-2*p)*(i/Math.max(1,rows.length-1));return `<text class="trend-label" x="${x}" y="${h-8}" text-anchor="middle">${shortMonths[r.m-1]}</text>`}).join(''),dotsI=rows.map((r,i)=>{let x=p+(w-2*p)*(i/Math.max(1,rows.length-1)),y=h-p-(h-2*p)*(r.inc/maxV);return `<circle class="trend-dot-income" cx="${x}" cy="${y}" r="4"/>`}).join(''),dotsO=rows.map((r,i)=>{let x=p+(w-2*p)*(i/Math.max(1,rows.length-1)),y=h-p-(h-2*p)*(r.out/maxV);return `<circle class="trend-dot-out" cx="${x}" cy="${y}" r="4"/>`}).join('');card.innerHTML=`<div class="premium-trend-head"><div><h2>Evolução financeira</h2><p>Passe o mouse ou toque no gráfico para ver os valores de cada mês.</p></div><div class="trend-legend"><span><i style="background:#0568ff"></i>Receitas</span><span><i style="background:#ff7200"></i>Despesas</span></div></div><svg class="trend-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${grids}<path class="trend-income" d="${incP}"/><path class="trend-out" d="${outP}"/><line id="trendHoverLine" class="trend-hover-line" x1="0" x2="0" y1="${p}" y2="${h-p}"/>${dotsI}${dotsO}${labels}</svg><div class="trend-tooltip" id="trendTooltip"></div>`;let svg=card.querySelector('.trend-svg'),tip=card.querySelector('#trendTooltip'),line=card.querySelector('#trendHoverLine');function move(ev){if(!rows.length)return;let rect=svg.getBoundingClientRect(),cx=(ev.touches?.[0]?.clientX??ev.clientX),ratio=Math.max(0,Math.min(1,(cx-rect.left)/rect.width)),idx=Math.round(ratio*(rows.length-1)),r=rows[idx],x=p+(w-2*p)*(idx/Math.max(1,rows.length-1));line.setAttribute('x1',x);line.setAttribute('x2',x);line.style.opacity='1';tip.innerHTML=`<b>${monthNames[r.m-1]} de ${year}</b><span>Receitas: ${brl(r.inc)}</span><span>Despesas: ${brl(r.out)}</span><span>Resultado: ${brl(r.inc-r.out)}</span>`;tip.style.left=`${Math.max(85,Math.min(card.clientWidth-85,cx-card.getBoundingClientRect().left))}px`;tip.style.top='185px';tip.classList.add('show')}svg.addEventListener('mousemove',move);svg.addEventListener('touchstart',move,{passive:true});svg.addEventListener('touchmove',move,{passive:true});svg.addEventListener('mouseleave',()=>{tip.classList.remove('show');line.style.opacity='0'});let maxM=(year===currentYear?Math.min(month,currentMonth):month),tx=allTx().filter(x=>+x.ano===+year&&+x.mesNum<=maxM&&!(x.ano>currentYear||(x.ano===currentYear&&x.mesNum>currentMonth))),fixed=sum(tx.filter(x=>x.tipo==='saida'&&String(x.classificacao).toLowerCase().includes('fix')),x=>x.valor),variable=sum(tx.filter(x=>x.tipo==='saida'&&String(x.classificacao).toLowerCase().includes('vari')),x=>x.valor),cardsV=sum(tx.filter(x=>x.origemDados==='Cartões'),x=>x.valor),debts=sum(getDebts(false),x=>x.pendente);let pc=document.getElementById('planningCards');if(pc)pc.innerHTML=`<article class="plan-card"><div class="plan-icon">⌂</div><span>Custos fixos realizados</span><b>${brl(fixed)}</b><small>Até ${monthNames[maxM-1].toLowerCase()}.</small></article><article class="plan-card"><div class="plan-icon">↗</div><span>Custos variáveis realizados</span><b>${brl(variable)}</b><small>Gastos com maior potencial de ajuste.</small></article><article class="plan-card"><div class="plan-icon">▣</div><span>Cartões no período</span><b>${brl(cardsV)}</b><small>Faturas consolidadas.</small></article><article class="plan-card"><div class="plan-icon">◴</div><span>Dívidas pendentes</span><b>${brl(debts)}</b><small>Saldo ainda comprometido.</small></article>`}
-function buildObligationItems(){let cardsF=cardAggregatedTx().filter(x=>x.ano>currentYear||(x.ano===currentYear&&x.mesNum>=currentMonth)).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum).map(x=>({kind:'card',period:monthLabel(x.ano,x.mesNum),title:x.origem||x.descricao,value:x.valor,detail:`${x.itemCount||0} item(ns) na fatura`}));let debtsF=debtProjectionRows(8).map(x=>({kind:'debt',period:monthLabel(x.year,x.month),title:x.description,value:x.amount,detail:'Parcela prevista de dívida'}));return [...cardsF,...debtsF].sort((a,b)=>0).slice(0,12)}
-function renderObligation(index=0){let box=document.getElementById('nextDues');if(!box)return;obligationItems=buildObligationItems();if(!obligationItems.length){box.innerHTML='<div class="obligation-carousel empty-kind"><div class="obligation-main"><h3>Nenhuma obrigação futura cadastrada</h3><p>Os próximos compromissos aparecerão aqui automaticamente.</p></div></div>';return}obligationIndex=(index+obligationItems.length)%obligationItems.length;let x=obligationItems[obligationIndex];box.innerHTML=`<div class="obligation-carousel ${x.kind==='card'?'card-kind':'debt-kind'}"><div class="obligation-top"><span class="obligation-type">${x.kind==='card'?'Cartão de crédito':'Dívida / parcela'}</span><span class="obligation-period">${esc(x.period)}</span></div><div class="obligation-main"><h3>${esc(x.title)}</h3><b>${brl(x.value)}</b><p>${esc(x.detail)}</p></div><div class="obligation-foot"><div class="obligation-dots">${obligationItems.slice(0,8).map((_,i)=>`<i class="${i===obligationIndex?'active':''}"></i>`).join('')}</div><div class="obligation-controls"><button type="button" onclick="window.shiftObligation(-1)">‹</button><button type="button" onclick="window.shiftObligation(1)">›</button></div></div></div>`}
+function buildObligationItems(){let cardsF=cardAggregatedTx().filter(x=>x.ano>currentYear||(x.ano===currentYear&&x.mesNum>=currentMonth)).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum).map(x=>({kind:'card',period:monthLabel(x.ano,x.mesNum),title:x.origem||x.descricao,value:x.valor,detail:`${x.itemCount||0} item(ns) na fatura`}));return cardsF.slice(0,12)}
+function renderObligation(index=0){let box=document.getElementById('nextDues');if(!box)return;obligationItems=buildObligationItems();if(!obligationItems.length){box.innerHTML='<div class="obligation-carousel empty-kind"><div class="obligation-main"><h3>Nenhuma fatura de cartão prevista</h3><p>Quando existir uma fatura de cartão de crédito, ela aparecerá aqui.</p></div></div>';return}obligationIndex=(index+obligationItems.length)%obligationItems.length;let x=obligationItems[obligationIndex];box.innerHTML=`<div class="obligation-carousel ${x.kind==='card'?'card-kind':'debt-kind'}"><div class="obligation-top"><span class="obligation-type">Cartão de crédito</span><span class="obligation-period">${esc(x.period)}</span></div><div class="obligation-main"><h3>${esc(x.title)}</h3><b>${brl(x.value)}</b><p>${esc(x.detail)}</p></div><div class="obligation-foot"><div class="obligation-dots">${obligationItems.slice(0,8).map((_,i)=>`<i class="${i===obligationIndex?'active':''}"></i>`).join('')}</div><div class="obligation-controls"><button type="button" onclick="window.shiftObligation(-1)">‹</button><button type="button" onclick="window.shiftObligation(1)">›</button></div></div></div>`}
 window.shiftObligation=function(step){renderObligation(obligationIndex+step);resetObligationTimer()};function resetObligationTimer(){clearInterval(obligationTimer);obligationTimer=setInterval(()=>renderObligation(obligationIndex+1),4200)}
 function installObligationCarousel(){renderObligation(0);resetObligationTimer()}
 const prevDashboardV6=window.renderDashboard;window.renderDashboard=function(){prevDashboardV6();renderPremiumTrend();installObligationCarousel()}
@@ -1754,7 +1754,7 @@ function renderAnnualScope(rows){let el=document.getElementById('annualPremium')
 function renderAssetBlue(){let panel=document.getElementById('assetSnapshot')?.closest('.panel');if(panel)panel.classList.add('asset-blue-panel');}
 function renderTrendVisibility(){let pt=document.getElementById('premiumTrend');if(pt)pt.classList.toggle('month-scope',dashboardScope==='month');}
 window.renderDashboard=function(){ensureDashboardControls();syncDashControls();let rows=dashboardRows(),inc=sum(rows.filter(x=>x.tipo==='entrada'),x=>x.valor),out=sum(rows.filter(x=>x.tipo==='saida'),x=>x.valor),bal=inc-out;document.getElementById('periodText').textContent=scopeLabel();document.getElementById('dashboardKpis').innerHTML=`<article class="card kpi"><div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></div><span class="label">Receitas</span><strong>${brl(inc)}</strong><span class="delta">${scopeLabel()}</span></article><article class="card kpi"><div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></svg></div><span class="label">Despesas</span><strong>${brl(out)}</strong><span class="delta">${scopeLabel()}</span></article><article class="card kpi"><div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></svg></div><span class="label">Saldo</span><strong>${brl(bal)}</strong><span class="delta">Resultado do período</span></article><article class="card kpi"><div class="kpi-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><span class="label">Dívidas pendentes</span><strong>${brl(sum(getDebts(false),d=>d.pendente))}</strong><span class="delta">Compromissos ativos</span></article><article class="card kpi"><div class="kpi-icon"><svg viewBox="0 0 24 24"><path d="M4 7h16v10H4zM8 11h8"/></svg></div><span class="label">FGTS disponível</span><strong>${brl(fgtsSummary.saldoDisponivel)}</strong><span class="delta">Saldo livre atual</span></article>`;renderFlowScoped(rows);renderCategoriesScoped(rows);renderAnnualScope(rows);renderTrendVisibility();renderAssetBlue();
- let upcomingCards=cardAggregatedTx().filter(x=>x.ano>currentYear||(x.ano===currentYear&&x.mesNum>=currentMonth)).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum).slice(0,4),upcomingDebts=debtProjectionRows(6).slice(0,4),due=[...upcomingCards.map(x=>({period:monthLabel(x.ano,x.mesNum),desc:`Fatura ${x.origem}`,value:x.valor})),...upcomingDebts.map(x=>({period:monthLabel(x.year,x.month),desc:x.description,value:x.amount}))].slice(0,8);document.getElementById('nextDues').innerHTML=due.map(x=>`<div class="row3"><span>${x.period}</span><div>${esc(x.desc)}</div><b>${brl(x.value)}</b></div>`).join('')||'<div class="empty">Nenhuma obrigação futura cadastrada.</div>';
+ let upcomingCards=cardAggregatedTx().filter(x=>x.ano>currentYear||(x.ano===currentYear&&x.mesNum>=currentMonth)).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum).slice(0,8),due=upcomingCards.map(x=>({period:monthLabel(x.ano,x.mesNum),desc:`Fatura ${x.origem}`,value:x.valor}));document.getElementById('nextDues').innerHTML=due.map(x=>`<div class="row3"><span>${x.period}</span><div>${esc(x.desc)}</div><b>${brl(x.value)}</b></div>`).join('')||'<div class="empty">Nenhuma fatura de cartão prevista.</div>';
  let invTotal=sum(investments.filter(x=>x.status==='Ativo'),x=>x.currentValue),patTotal=sum(assets,x=>x.value);document.getElementById('assetSnapshot').innerHTML=`<div class="row3"><span>Patrimônio cadastrado</span><div></div><b>${brl(patTotal)}</b></div><div class="row3"><span>Investimentos</span><div></div><b>${brl(invTotal)}</b></div><div class="row3"><span>FGTS livre</span><div></div><b>${brl(fgtsSummary.saldoDisponivel)}</b></div><div class="row3"><span>FGTS bloqueado</span><div></div><b>${brl(fgtsSummary.saldoBloqueado)}</b></div>`;
  if(typeof renderCapacityDashboard==='function')renderCapacityDashboard();
 }
@@ -7151,29 +7151,70 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
 #cloudAuthV40 .cloud-note{margin-top:10px;padding:9px 10px;border-radius:12px;background:#f7f9fc;color:#667085;font-size:9.5px;line-height:1.4}
 </style>
 
-<script id="pp-supabase-cloud-v42">
+<script id="pp-supabase-cloud-v60">
 (function(){
   const SUPABASE_URL='https://pjotjwkugkyagwafcntb.supabase.co';
   const SUPABASE_KEY='sb_publishable_cNqoA3LlkHpOckIYUlEqQw_PKnw4B0S';
   const TABLE='planner_state';
-  const META_KEY='planejador_cloud_meta_v42';
-  const OLD_META_KEY='planejador_cloud_meta_v40';
-  const HYDRATE_FLAG='pp_cloud_hydrated_v42';
+  const META_KEY='planejador_cloud_meta_v60';
+  const OLD_META_KEYS=['planejador_cloud_meta_v42','planejador_cloud_meta_v40'];
+  const DEVICE_KEY='planejador_cloud_device_v60';
 
-  if(!window.supabase?.createClient) return;
+  if(!window.supabase?.createClient)return;
+
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
     auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
   });
   window.ppSupabase=sb;
 
-  let currentUser=null, saveTimer=null, applyingRemote=false, lastSignature='', watcherStarted=false;
+  let currentUser=null;
+  let saveTimer=null;
+  let applyingRemote=false;
+  let watcherStarted=false;
+  let realtimeChannel=null;
+  let lastSignature='';
+  let lastRemoteTs=0;
+  let initialResolved=false;
 
+  function uuid(){
+    return 'dev-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+  }
+  function deviceId(){
+    let d=localStorage.getItem(DEVICE_KEY);
+    if(!d){d=uuid();localStorage.setItem(DEVICE_KEY,d)}
+    return d;
+  }
   function isCloudKey(k){
     k=String(k||'');
-    if(k===META_KEY||k===OLD_META_KEY)return false;
+    if(k===META_KEY||OLD_META_KEYS.includes(k)||k===DEVICE_KEY)return false;
     return k.startsWith('planejador_')||k.startsWith('financeiro_marcos_')||k.startsWith('rgps_');
   }
-
+  function cloudKeys(){
+    const obj={};
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k&&isCloudKey(k))obj[k]=localStorage.getItem(k);
+    }
+    return obj;
+  }
+  function localMeta(){
+    try{return JSON.parse(localStorage.getItem(META_KEY)||'null')}catch(e){return null}
+  }
+  function snapshot(){
+    const now=new Date().toISOString();
+    return {
+      local_storage:cloudKeys(),
+      exported_at:now,
+      revision_ts:Date.now(),
+      source_device:deviceId(),
+      active_profile:localStorage.getItem('planejador_active_profile')||'Marcos',
+      app_version:'v60'
+    };
+  }
+  function signatureOf(data){
+    const ls=data?.local_storage||{};
+    return Object.keys(ls).sort().map(k=>k+'='+String(ls[k])).join('||');
+  }
   function status(mode,text){
     let el=document.getElementById('cloudStatusV40');
     if(!el){
@@ -7183,34 +7224,10 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       document.body.appendChild(el);
     }
     el.className=mode||'';
-    const span=el.querySelector('span'); if(span)span.textContent=text||'Nuvem';
-    const btn=el.querySelector('button'); if(btn)btn.onclick=()=>openAuth();
+    const span=el.querySelector('span');if(span)span.textContent=text||'Nuvem';
+    const btn=el.querySelector('button');if(btn)btn.onclick=()=>openAuth();
   }
-
-  function cloudKeys(){
-    const obj={};
-    for(let i=0;i<localStorage.length;i++){
-      const k=localStorage.key(i);
-      if(k&&isCloudKey(k))obj[k]=localStorage.getItem(k);
-    }
-    return obj;
-  }
-
-  function snapshot(){
-    return {
-      local_storage:cloudKeys(),
-      exported_at:new Date().toISOString(),
-      app_version:'v42',
-      active_profile:localStorage.getItem('planejador_active_profile')||'Marcos'
-    };
-  }
-
-  function signatureOf(data){
-    const ls=data?.local_storage||{};
-    return Object.keys(ls).sort().map(k=>k+'='+String(ls[k])).join('||');
-  }
-
-  function writeMap(map,clearManaged){
+  function writeMap(map,clearManaged=true){
     if(!map||typeof map!=='object')return;
     applyingRemote=true;
     try{
@@ -7229,43 +7246,132 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       });
     }finally{applyingRemote=false}
   }
-
-  function applySnapshot(data){
-    if(!data?.local_storage)return false;
-    writeMap(data.local_storage,true);
-    lastSignature=signatureOf(snapshot());
+  function preserveSessionAndReload(){
+    try{window.ppSessionV47?.captureWorkspace?.()}catch(e){}
+    try{window.ppSessionV45?.captureWorkspace?.()}catch(e){}
+    sessionStorage.setItem('pp_cloud_remote_reload_v60','1');
+    location.reload();
+  }
+  function applyRemote(remote,updatedAt,{reload=true}={}){
+    if(!remote?.local_storage)return false;
+    writeMap(remote.local_storage,true);
+    if(remote.active_profile)localStorage.setItem('planejador_active_profile',remote.active_profile);
+    lastRemoteTs=Math.max(lastRemoteTs,Date.parse(updatedAt||remote.exported_at||'')||Number(remote.revision_ts)||Date.now());
+    lastSignature=signatureOf({local_storage:remote.local_storage});
+    localStorage.setItem(META_KEY,JSON.stringify({
+      lastRemoteAt:new Date(lastRemoteTs).toISOString(),
+      lastSavedAt:updatedAt||remote.exported_at||new Date().toISOString(),
+      userId:currentUser?.id||null,
+      appVersion:'v60',
+      deviceId:deviceId()
+    }));
+    status('online','Atualizado da nuvem');
+    if(reload)preserveSessionAndReload();
     return true;
   }
 
-  async function upsertNow(){
-    if(!currentUser||applyingRemote)return false;
+  async function saveNow(reason='change'){
+    if(!currentUser||applyingRemote||!initialResolved)return false;
     clearTimeout(saveTimer);
     const snap=snapshot();
     status('saving','Salvando…');
-    const {error}=await sb.from(TABLE).upsert({
+    const {data,error}=await sb.from(TABLE).upsert({
       user_id:currentUser.id,
       data:snap,
       schema_version:1
-    },{onConflict:'user_id'});
+    },{onConflict:'user_id'}).select('updated_at').single();
+
     if(error){
-      console.error('Supabase v42 save error',error);
+      console.error('Supabase v60 save error',error);
       status('error','Erro ao salvar');
       return false;
     }
+    const ts=Date.parse(data?.updated_at||snap.exported_at)||Date.now();
+    lastRemoteTs=Math.max(lastRemoteTs,ts);
     lastSignature=signatureOf(snap);
     localStorage.setItem(META_KEY,JSON.stringify({
-      lastSavedAt:new Date().toISOString(),
+      lastSavedAt:data?.updated_at||snap.exported_at,
+      lastRemoteAt:data?.updated_at||snap.exported_at,
       userId:currentUser.id,
-      appVersion:'v42'
+      appVersion:'v60',
+      deviceId:deviceId(),
+      reason
     }));
-    status('online','Salvo na nuvem');
+    status('online','Sincronizado agora');
     return true;
   }
 
-  function scheduleSave(delay=500){
-    if(!currentUser||applyingRemote)return;
+  function scheduleSave(delay=350,reason='change'){
+    if(!currentUser||applyingRemote||!initialResolved)return;
     clearTimeout(saveTimer);
-    saveTimer=setTimeout(upsertNow,delay);
+    saveTimer=setTimeout(()=>saveNow(reason),delay);
+  }
+
+  async function fetchRemote(){
+    if(!currentUser)return {row:null,error:null};
+    const {data,error}=await sb.from(TABLE)
+      .select('data,updated_at')
+      .eq('user_id',currentUser.id)
+      .maybeSingle();
+    return {row:data,error};
+  }
+
+  async function resolveInitial(){
+    if(!currentUser)return;
+    status('saving','Sincronizando…');
+
+    const {row,error}=await fetchRemote();
+    if(error){
+      console.error('Supabase v60 initial load error',error);
+      initialResolved=true;
+      startWatcher();
+      status('error','Erro na nuvem');
+      return;
+    }
+
+    if(!row){
+      initialResolved=true;
+      startWatcher();
+      await saveNow('first-cloud-state');
+      subscribeRealtime();
+      return;
+    }
+
+    const remote=row.data||{};
+    const remoteTs=Date.parse(row.updated_at||remote.exported_at||'')||Number(remote.revision_ts)||0;
+    const meta=localMeta();
+    const localSavedTs=Date.parse(meta?.lastSavedAt||'')||0;
+
+    // Conflict rule:
+    // - a known locally-saved state newer than server is uploaded;
+    // - otherwise server wins, which fixes stale phones/tablets.
+    if(localSavedTs>remoteTs+1500){
+      initialResolved=true;
+      startWatcher();
+      await saveNow('local-newer-on-start');
+    }else{
+      applyRemote(remote,row.updated_at,{reload:false});
+      initialResolved=true;
+      startWatcher();
+    }
+
+    subscribeRealtime();
+    status('online','Sincronizado agora');
+  }
+
+  async function pull({reason='manual',force=false,reload=true}={}){
+    if(!currentUser)return false;
+    const {row,error}=await fetchRemote();
+    if(error){status('error','Erro ao atualizar');return false}
+    if(!row)return false;
+
+    const remote=row.data||{};
+    const remoteTs=Date.parse(row.updated_at||remote.exported_at||'')||Number(remote.revision_ts)||0;
+    if(force||remoteTs>lastRemoteTs+500){
+      return applyRemote(remote,row.updated_at,{reload});
+    }
+    status('online','Já está atualizado');
+    return false;
   }
 
   function startWatcher(){
@@ -7273,59 +7379,59 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     watcherStarted=true;
     lastSignature=signatureOf(snapshot());
     setInterval(()=>{
-      if(!currentUser||applyingRemote)return;
+      if(!currentUser||applyingRemote||!initialResolved)return;
       const sig=signatureOf(snapshot());
       if(sig!==lastSignature){
         lastSignature=sig;
-        scheduleSave(250);
+        scheduleSave(300,'local-change');
       }
-    },1000);
+    },800);
   }
 
-  window.addEventListener('storage',e=>{
-    if(e.storageArea===localStorage&&isCloudKey(e.key))scheduleSave(200);
+  function subscribeRealtime(){
+    if(!currentUser||realtimeChannel)return;
+    realtimeChannel=sb.channel('planner-state-v60-'+currentUser.id)
+      .on('postgres_changes',{
+        event:'*',
+        schema:'public',
+        table:TABLE,
+        filter:'user_id=eq.'+currentUser.id
+      },payload=>{
+        const row=payload.new||null;
+        const remote=row?.data||null;
+        if(!remote)return;
+        if(remote.source_device===deviceId())return;
+
+        const remoteTs=Date.parse(row.updated_at||remote.exported_at||'')||Number(remote.revision_ts)||Date.now();
+        if(remoteTs<=lastRemoteTs+250)return;
+
+        // Another device changed the planner. Apply it immediately.
+        applyRemote(remote,row.updated_at,{reload:true});
+      })
+      .subscribe(statusValue=>{
+        if(statusValue==='SUBSCRIBED')status('online','Tempo real ativo');
+      });
+  }
+
+  async function unsubscribeRealtime(){
+    if(realtimeChannel){
+      try{await sb.removeChannel(realtimeChannel)}catch(e){}
+      realtimeChannel=null;
+    }
+  }
+
+  // Pull latest state whenever this device becomes active again.
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden&&currentUser&&initialResolved){
+      setTimeout(()=>pull({reason:'visibility',reload:true}),120);
+    }
   });
-
-  async function loadCloud(){
-    if(!currentUser)return;
-    status('saving','Sincronizando…');
-    const {data,error}=await sb.from(TABLE).select('data,updated_at').eq('user_id',currentUser.id).maybeSingle();
-    if(error){
-      console.error('Supabase v42 load error',error);
-      status('error','Erro na nuvem');
-      return;
-    }
-
-    if(!data){
-      await upsertNow();
-      sessionStorage.setItem(HYDRATE_FLAG,'1');
-      status('online','Nuvem criada');
-      return;
-    }
-
-    if(sessionStorage.getItem(HYDRATE_FLAG)!=='1'){
-      const remote=data.data||{};
-      if(String(remote.app_version||'')==='v42'){
-        if(applySnapshot(remote)){
-          sessionStorage.setItem(HYDRATE_FLAG,'1');
-          status('online','Dados carregados');
-          setTimeout(()=>location.reload(),80);
-          return;
-        }
-      }else{
-        const merged=Object.assign({},cloudKeys(),remote.local_storage||{});
-        writeMap(merged,true);
-        sessionStorage.setItem(HYDRATE_FLAG,'1');
-        await upsertNow();
-        status('online','Nuvem atualizada');
-        setTimeout(()=>location.reload(),80);
-        return;
-      }
-    }
-
-    lastSignature=signatureOf(snapshot());
-    status('online','Salvo na nuvem');
-  }
+  window.addEventListener('focus',()=>{
+    if(currentUser&&initialResolved)setTimeout(()=>pull({reason:'focus',reload:true}),120);
+  });
+  window.addEventListener('online',()=>{
+    if(currentUser&&initialResolved)setTimeout(()=>pull({reason:'online',reload:true}),150);
+  });
 
   function closeAuth(){document.getElementById('cloudAuthV40')?.remove()}
 
@@ -7333,22 +7439,24 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     document.getElementById('cloudAuthV40')?.remove();
     const ov=document.createElement('div');
     ov.id='cloudAuthV40';
+    const meta=localMeta();
+    const last=meta?.lastSavedAt?new Date(meta.lastSavedAt).toLocaleString('pt-BR'):'ainda não';
     ov.innerHTML=`<section class="cloud-card">
       <button type="button" class="cloud-close" aria-label="Fechar">×</button>
-      <h2>${currentUser?'Sincronização ativa':'Conectar à nuvem'}</h2>
+      <h2>${currentUser?'Sincronização em tempo real':'Conectar à nuvem'}</h2>
       <p>${currentUser
-        ? 'Este aparelho está conectado. As informações dos perfis Marcos e Christian serão sincronizadas.'
-        : 'Entre com a mesma conta de nuvem em cada aparelho para usar as mesmas senhas e os mesmos dados.'}</p>
+        ? 'Este aparelho recebe automaticamente alterações feitas em outros aparelhos conectados à mesma conta.'
+        : 'Entre com a mesma conta de nuvem em todos os aparelhos para manter os dados iguais.'}</p>
       ${currentUser
-        ? `<div class="cloud-note"><b>Conta conectada:</b><br>${String(currentUser.email||'').replace(/</g,'&lt;')}</div>
+        ? `<div class="cloud-note"><b>Conta conectada:</b><br>${String(currentUser.email||'').replace(/</g,'&lt;')}<br><small>Última sincronização: ${last}</small></div>
            <div class="cloud-actions">
-             <button type="button" class="cloud-secondary" id="cloudLoadNow">Baixar da nuvem</button>
+             <button type="button" class="cloud-secondary" id="cloudLoadNow">Atualizar agora</button>
              <button type="button" class="cloud-secondary" id="cloudSyncNow">Salvar agora</button>
              <button type="button" class="cloud-primary" id="cloudSignOut">Sair da nuvem</button>
            </div>
            <div class="cloud-backup-box">
              <strong>Backup completo</strong>
-             <p>Guarde uma cópia de Marcos e Christian no seu aparelho.</p>
+             <p>Guarde uma cópia dos perfis no seu aparelho.</p>
              <div class="cloud-backup-actions">
                <button type="button" class="cloud-backup-download" id="backupDownloadV43">Baixar backup</button>
                <button type="button" class="cloud-backup-restore" id="backupRestoreV43">Restaurar backup</button>
@@ -7363,15 +7471,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
              <button type="button" class="cloud-primary" id="cloudSignIn">Entrar</button>
              <button type="button" class="cloud-secondary" id="cloudSignUp">Criar conta</button>
            </div>
-           <div class="cloud-note"><b>Importante:</b> cada celular/computador precisa entrar uma vez nesta mesma conta. Depois a sessão fica salva neste aparelho.</div>
-           <div class="cloud-backup-box">
-             <strong>Backup local</strong>
-             <p>Você também pode baixar ou restaurar uma cópia completa sem entrar na nuvem.</p>
-             <div class="cloud-backup-actions">
-               <button type="button" class="cloud-backup-download" id="backupDownloadV43">Baixar backup</button>
-               <button type="button" class="cloud-backup-restore" id="backupRestoreV43">Restaurar backup</button>
-             </div>
-           </div>`
+           <div class="cloud-note"><b>Importante:</b> use esta mesma conta de nuvem no computador e no celular.</div>`
       }
     </section>`;
     document.body.appendChild(ov);
@@ -7384,18 +7484,15 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     if(br)br.onclick=()=>window.ppBackupV43?.chooseRestore?.();
 
     if(currentUser){
-      document.getElementById('cloudSyncNow').onclick=async()=>{await upsertNow();closeAuth()};
-      document.getElementById('cloudLoadNow').onclick=async()=>{
-        sessionStorage.removeItem(HYDRATE_FLAG);
-        await loadCloud();
-        closeAuth();
-      };
+      document.getElementById('cloudSyncNow').onclick=async()=>{await saveNow('manual');closeAuth()};
+      document.getElementById('cloudLoadNow').onclick=async()=>{await pull({reason:'manual',force:true,reload:true});closeAuth()};
       document.getElementById('cloudSignOut').onclick=async()=>{
+        await unsubscribeRealtime();
         await sb.auth.signOut();
         currentUser=null;
-        sessionStorage.removeItem(HYDRATE_FLAG);
+        initialResolved=false;
         closeAuth();
-        status('','Entre na nuvem neste aparelho');
+        status('','Nuvem desconectada');
       };
       return;
     }
@@ -7411,19 +7508,16 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       }
       return {email,password,errorEl};
     }
-
     document.getElementById('cloudSignIn').onclick=async()=>{
-      const c=credentials(); if(!c)return;
+      const c=credentials();if(!c)return;
       const {data,error}=await sb.auth.signInWithPassword({email:c.email,password:c.password});
       if(error){c.errorEl.textContent=error.message;return}
       currentUser=data.user;
-      sessionStorage.removeItem(HYDRATE_FLAG);
       closeAuth();
-      await loadCloud();
+      await resolveInitial();
     };
-
     document.getElementById('cloudSignUp').onclick=async()=>{
-      const c=credentials(); if(!c)return;
+      const c=credentials();if(!c)return;
       const {data,error}=await sb.auth.signUp({email:c.email,password:c.password});
       if(error){c.errorEl.textContent=error.message;return}
       if(!data.session){
@@ -7432,9 +7526,8 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
         return;
       }
       currentUser=data.user;
-      sessionStorage.removeItem(HYDRATE_FLAG);
       closeAuth();
-      await loadCloud();
+      await resolveInitial();
     };
   }
 
@@ -7442,34 +7535,34 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     status('saving','Conectando à nuvem…');
     const {data}=await sb.auth.getSession();
     currentUser=data.session?.user||null;
-    startWatcher();
-
-    if(currentUser)await loadCloud();
-    else{
+    if(currentUser){
+      await resolveInitial();
+    }else{
       status('','Entre na nuvem neste aparelho');
       setTimeout(openAuth,700);
     }
 
     sb.auth.onAuthStateChange((event,session)=>{
       currentUser=session?.user||null;
-      if(event==='SIGNED_IN'&&currentUser){
-        sessionStorage.removeItem(HYDRATE_FLAG);
-        setTimeout(loadCloud,0);
-      }else if(event==='SIGNED_OUT'){
+      if(event==='SIGNED_IN'&&currentUser&&!initialResolved)setTimeout(resolveInitial,0);
+      if(event==='SIGNED_OUT'){
+        unsubscribeRealtime();
+        initialResolved=false;
         status('','Entre na nuvem neste aparelho');
       }
     });
   }
 
-  window.ppCloud={
+  window.ppCloud=window.ppCloudV60={
     open:openAuth,
-    save:upsertNow,
-    load:async()=>{sessionStorage.removeItem(HYDRATE_FLAG);return loadCloud()},
+    save:()=>saveNow('api'),
+    load:()=>pull({reason:'api',force:true,reload:true}),
+    pull,
     client:sb,
-    version:'v42'
+    version:'v60'
   };
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0));
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0),{once:true});
   else setTimeout(init,0);
 })();
 </script>
@@ -7986,6 +8079,12 @@ Os dados atuais deste navegador serão substituídos.`);
 
   function checkExpiry(){
     if(locked)return;
+    // While the initial login screen is visible there is no expired session to lock.
+    // The first correct site password starts the one-hour session.
+    if(document.getElementById('loginOverlay')){
+      paintTimer();
+      return;
+    }
     if(!validSession()){lockNow();return}
     paintTimer();
   }
@@ -7999,11 +8098,13 @@ Os dados atuais deste navegador serão substituídos.`);
     const chosen=overlay.querySelector('.profile-choice.active')?.dataset.profile||activeProfile();
     const pass=overlay.querySelector('#loginPassword')?.value||'';
     if(pass===profilePass(chosen)){
+      // Start immediately so the 1s expiry timer cannot show a second password prompt.
+      sessionStorage.removeItem(WORKSPACE_KEY);
+      startFreshSession(chosen);
       setTimeout(()=>{
-        sessionStorage.removeItem(WORKSPACE_KEY);
-        startFreshSession(chosen);
         removeLegacyLoginWithoutReveal();
         revealAfterRestore();
+        try{window.ppCloudV60?.pull?.({reason:'site-login'})}catch(e){}
       },20);
     }
   }
@@ -12354,6 +12455,28 @@ setTimeout(initEssence,0);
   setTimeout(renderCardInvoices58,200);
 
   window.ppV58RenderCardInvoices=renderCardInvoices58;
+})();
+</script>
+
+<script id="pp-v60-invoices-hard-guard">
+(function(){
+  function repaint(){
+    if(window.ppV58RenderCardInvoices)window.ppV58RenderCardInvoices();
+  }
+  // Older lexical renderers can still execute after filters; overwrite them immediately.
+  ['click','change'].forEach(evt=>document.addEventListener(evt,e=>{
+    if(e.target.closest?.('#dashboard,#nav,#yearFilter,#monthFilter,#dashboardScope,#saveTx,[data-addtx]')){
+      setTimeout(repaint,0);
+      setTimeout(repaint,100);
+    }
+  },true));
+  setInterval(()=>{
+    const box=document.getElementById('nextDues');
+    if(!box||!document.getElementById('dashboard')?.classList.contains('active'))return;
+    const txt=box.textContent||'';
+    if(/dívida|parcela prevista|obrigação futura/i.test(txt))repaint();
+  },1000);
+  setTimeout(repaint,100);
 })();
 </script>
 
