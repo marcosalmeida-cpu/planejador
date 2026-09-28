@@ -13,30 +13,34 @@ html.pp-prelogin #loginOverlay{
 }
 html.pp-authenticated body>*{visibility:visible!important}
 </style>
-<script id="pp-login-first-paint-v44-script">
+<script id="pp-login-first-paint-v45-script">
 (function(){
-  const SESSION_KEY='pp_secure_session_v44';
-  const LIMIT_MS=5*60*1000;
+  const SESSION_KEY='pp_secure_session_v45';
+  const OLD_SESSION_KEY='pp_secure_session_v44';
+  const WORKSPACE_KEY='pp_secure_workspace_v45';
+  const LIMIT_MS=60*60*1000;
 
   function readSession(){
     try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null')}catch(e){return null}
   }
-  function sessionIsValid(){
+  function valid(){
     const s=readSession();
-    if(!s || !s.authenticated || !s.profile)return false;
-    if(s.hiddenAt && (Date.now()-Number(s.hiddenAt)>=LIMIT_MS))return false;
-    return true;
+    return !!(s && s.authenticated && s.profile && Number(s.expiresAt||0)>Date.now());
   }
 
-  if(sessionIsValid()){
-    document.documentElement.classList.add('pp-authenticated');
+  // v44 used another session model; do not carry it forward.
+  try{sessionStorage.removeItem(OLD_SESSION_KEY)}catch(e){}
+
+  if(valid()){
+    // Keep the app hidden until the previous section/draft has been restored.
+    document.documentElement.classList.add('pp-authenticated','pp-session-resume-v45');
   }else{
     document.documentElement.classList.add('pp-prelogin');
   }
 
   function showLoginImmediately(){
-    if(sessionIsValid())return;
-    var overlay=document.getElementById('loginOverlay');
+    if(valid())return;
+    const overlay=document.getElementById('loginOverlay');
     if(overlay){
       overlay.style.display='flex';
       overlay.style.opacity='1';
@@ -52,16 +56,16 @@ html.pp-authenticated body>*{visibility:visible!important}
   }
 
   window.ppRevealAppAfterLogin=function(){
-    document.documentElement.classList.remove('pp-prelogin');
+    document.documentElement.classList.remove('pp-prelogin','pp-session-resume-v45');
     document.documentElement.classList.add('pp-authenticated');
-    var overlay=document.getElementById('loginOverlay');
+    const overlay=document.getElementById('loginOverlay');
     if(overlay){
       overlay.style.visibility='hidden';
       overlay.style.pointerEvents='none';
     }
   };
 
-  window.ppSessionV44Early={readSession,sessionIsValid,SESSION_KEY,LIMIT_MS};
+  window.ppSessionV45Early={readSession,valid,SESSION_KEY,WORKSPACE_KEY,LIMIT_MS};
 })();
 </script>
 
@@ -219,67 +223,521 @@ img,svg,canvas{max-width:100%}.filterbar{max-width:100%}.filterbar>*{max-width:1
 </style>
 
 
-<style id="pp-session-v44-style">
-#sessionTimerV44{
-  display:flex;align-items:center;gap:7px;min-width:118px;padding:7px 10px;
+<style id="pp-session-v45-style">
+html.pp-session-resume-v45 body{opacity:0!important;visibility:hidden!important}
+html.pp-session-resume-v45 #loginOverlay{display:none!important}
+
+#sessionTimerV45{
+  display:flex;align-items:center;gap:7px;min-width:122px;padding:7px 10px;
   border:1px solid #e7eaf0;border-radius:12px;background:#fff;color:#344054;
   box-shadow:0 4px 12px rgba(16,24,40,.04);user-select:none
 }
-#sessionTimerV44 .session-clock-icon{font-size:15px;line-height:1}
-#sessionTimerV44 .session-time{
+#sessionTimerV45 .session-clock-icon{font-size:15px;line-height:1}
+#sessionTimerV45 .session-time{
   font-variant-numeric:tabular-nums;font-size:13px;font-weight:900;color:#172b4d;
-  min-width:38px;text-align:center
+  min-width:42px;text-align:center
 }
-#sessionTimerV44 .session-state{font-size:8.5px;font-weight:800;color:#667085;line-height:1.1}
-#sessionTimerV44.is-away{border-color:#ffd39e;background:#fff8ef}
-#sessionTimerV44.is-away .session-time{color:#e56f00}
-#sessionTimerV44.is-locked{border-color:#f1b5b5;background:#fff5f5}
-#sessionTimerV44.is-locked .session-time{color:#b42318}
+#sessionTimerV45 .session-state{font-size:8.5px;font-weight:800;color:#667085;line-height:1.1}
+#sessionTimerV45.is-warning{border-color:#ffd39e;background:#fff8ef}
+#sessionTimerV45.is-warning .session-time{color:#e56f00}
+#sessionTimerV45.is-locked{border-color:#f1b5b5;background:#fff5f5}
+#sessionTimerV45.is-locked .session-time{color:#b42318}
 
-#sessionLockV44{
-  position:fixed;inset:0;z-index:120000;background:rgba(7,16,31,.78);
+#sessionLockV45{
+  position:fixed;inset:0;z-index:120000;background:rgba(7,16,31,.82);
   backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:18px
 }
-#sessionLockV44 .session-lock-card{
+#sessionLockV45 .session-lock-card{
   width:min(430px,96vw);background:#fff;border-radius:28px;padding:26px;
   box-shadow:0 38px 110px rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.75)
 }
-#sessionLockV44 .session-lock-icon{
+#sessionLockV45 .session-lock-icon{
   width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#ff8a00,#ffb44d);
   display:grid;place-items:center;color:#fff;font-size:25px;margin-bottom:17px
 }
-#sessionLockV44 h2{margin:0;font-size:25px;letter-spacing:-.035em;color:#172033}
-#sessionLockV44 p{margin:7px 0 18px;color:#7b8798;font-size:12px;line-height:1.5}
-#sessionLockV44 label{display:block;font-size:10px;font-weight:900;color:#667085;margin-bottom:6px}
-#sessionLockV44 input{
+#sessionLockV45 h2{margin:0;font-size:25px;letter-spacing:-.035em;color:#172033}
+#sessionLockV45 p{margin:7px 0 18px;color:#7b8798;font-size:12px;line-height:1.5}
+#sessionLockV45 label{display:block;font-size:10px;font-weight:900;color:#667085;margin-bottom:6px}
+#sessionLockV45 input{
   width:100%;font-size:18px;letter-spacing:.15em;padding:12px 13px;border:1px solid #dfe4ea;
   border-radius:13px;outline:none
 }
-#sessionLockV44 input:focus{border-color:#ff8a00;box-shadow:0 0 0 3px rgba(255,138,0,.12)}
-#sessionLockV44 .session-lock-error{min-height:18px;margin-top:6px;color:#b42318;font-size:10.5px;font-weight:800}
-#sessionLockV44 .session-unlock{
+#sessionLockV45 input:focus{border-color:#ff8a00;box-shadow:0 0 0 3px rgba(255,138,0,.12)}
+#sessionLockV45 .session-lock-error{min-height:18px;margin-top:6px;color:#b42318;font-size:10.5px;font-weight:800}
+#sessionLockV45 .session-unlock{
   width:100%;margin-top:5px;padding:12px;border:0;border-radius:14px;background:#13a26b;color:#fff;font-weight:900
 }
-#sessionLockV44 .session-security-note{
+#sessionLockV45 .session-security-note{
   margin-top:13px;padding:10px 12px;background:#f7f9fc;border-radius:12px;color:#667085;font-size:9.5px;line-height:1.45
 }
 @media(max-width:760px){
-  #sessionTimerV44{min-width:84px;padding:6px 8px;gap:5px}
-  #sessionTimerV44 .session-state{display:none}
-  #sessionTimerV44 .session-clock-icon{font-size:13px}
-  #sessionTimerV44 .session-time{font-size:12px}
+  #sessionTimerV45{min-width:88px;padding:6px 8px;gap:5px}
+  #sessionTimerV45 .session-state{display:none}
+  #sessionTimerV45 .session-clock-icon{font-size:13px}
+  #sessionTimerV45 .session-time{font-size:12px}
+}
+</style>
+
+
+<style id="pp-v46-cards-profiles-style">
+/* Próximas faturas: somente cartões de crédito */
+#dashboard #nextDues.pp-card-invoices-v46{
+  display:block!important;overflow:hidden!important
+}
+#dashboard .invoice-showcase-v46{position:relative}
+#dashboard .invoice-track-v46{
+  display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;
+  scrollbar-width:none;padding:3px 2px 8px;scroll-behavior:smooth
+}
+#dashboard .invoice-track-v46::-webkit-scrollbar{display:none}
+#dashboard .invoice-card-v46{
+  flex:0 0 min(270px,82vw);min-height:148px;scroll-snap-align:start;
+  border-radius:22px;padding:16px;color:#fff;position:relative;overflow:hidden;
+  box-shadow:0 14px 30px rgba(15,23,42,.15);cursor:pointer;
+  display:flex;flex-direction:column;justify-content:space-between
+}
+#dashboard .invoice-card-v46:before{
+  content:"";position:absolute;width:150px;height:150px;border-radius:50%;
+  right:-48px;top:-62px;background:rgba(255,255,255,.16)
+}
+#dashboard .invoice-card-v46:after{
+  content:"";position:absolute;width:100px;height:100px;border-radius:50%;
+  right:34px;bottom:-62px;background:rgba(255,255,255,.10)
+}
+#dashboard .invoice-card-v46>*{position:relative;z-index:1}
+#dashboard .invoice-card-v46 .invoice-top-v46{
+  display:flex;justify-content:space-between;gap:10px;align-items:flex-start
+}
+#dashboard .invoice-card-v46 .invoice-bank-v46 small{
+  display:block;font-size:9px;text-transform:uppercase;letter-spacing:.08em;
+  opacity:.78;font-weight:900
+}
+#dashboard .invoice-card-v46 .invoice-bank-v46 strong{display:block;margin-top:3px;font-size:16px}
+#dashboard .invoice-card-v46 .invoice-month-v46{
+  padding:5px 8px;border:1px solid rgba(255,255,255,.24);border-radius:999px;
+  background:rgba(255,255,255,.12);font-size:9.5px;font-weight:900;white-space:nowrap
+}
+#dashboard .invoice-card-v46 .invoice-value-v46{
+  font-size:26px;font-weight:950;letter-spacing:-.05em;margin-top:16px
+}
+#dashboard .invoice-card-v46 .invoice-bottom-v46{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:9px
+}
+#dashboard .invoice-card-v46 .invoice-bottom-v46 span{font-size:9.5px;opacity:.82;line-height:1.35}
+#dashboard .invoice-card-v46 .invoice-due-v46{text-align:right}
+#dashboard .invoice-nav-v46{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px
+}
+#dashboard .invoice-dots-v46{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+#dashboard .invoice-dots-v46 i{
+  width:6px;height:6px;border-radius:999px;background:#d7dde7;display:block
+}
+#dashboard .invoice-dots-v46 i.active{width:18px;background:#000cff}
+#dashboard .invoice-arrows-v46{display:flex;gap:7px}
+#dashboard .invoice-arrows-v46 button{
+  width:34px;height:34px;border-radius:50%;border:1px solid #e2e7ef;background:#fff;
+  color:#344054;font-size:18px;cursor:pointer;display:grid;place-items:center
+}
+#dashboard .invoice-empty-v46{
+  padding:22px;border:1px dashed #d7dfeb;border-radius:18px;background:#fbfcfe;
+  color:#667085;text-align:center
+}
+#dashboard .invoice-empty-v46 b{display:block;color:#172b4d;font-size:14px;margin-bottom:4px}
+
+/* Perfis adicionais */
+#profileCreateV46,#profileSwitchV46{
+  position:fixed;inset:0;z-index:110000;background:rgba(8,20,40,.68);
+  backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:18px
+}
+.pp-profile-v46-card{
+  width:min(520px,96vw);max-height:88vh;overflow:auto;background:#fff;border-radius:26px;
+  padding:22px;box-shadow:0 34px 100px rgba(0,0,0,.30)
+}
+.pp-profile-v46-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.pp-profile-v46-head h2{margin:0;font-size:23px;color:#172b4d;letter-spacing:-.035em}
+.pp-profile-v46-head p{margin:5px 0 0;color:#7b8798;font-size:11px}
+.pp-profile-v46-close{
+  width:34px;height:34px;border:0;border-radius:50%;background:#f1f4f8;
+  font-size:20px;cursor:pointer
+}
+.pp-profile-v46-list{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+.pp-profile-v46-option{
+  border:1px solid #e3e8ef;border-radius:16px;background:#fff;padding:12px;
+  display:flex;align-items:center;gap:9px;text-align:left;cursor:pointer
+}
+.pp-profile-v46-option.active{border:2px solid #000cff;background:#f4f5ff}
+.pp-profile-v46-avatar{
+  width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+  background:#eef2f7;color:#344054;font-weight:950;flex:none
+}
+.pp-profile-v46-option.active .pp-profile-v46-avatar{background:#000cff;color:#fff}
+.pp-profile-v46-option b{display:block;font-size:12px;color:#172b4d}
+.pp-profile-v46-option small{display:block;font-size:9.5px;color:#7b8798;margin-top:2px}
+.pp-profile-v46-field{margin-top:13px}
+.pp-profile-v46-field label{display:block;font-size:10px;font-weight:900;color:#667085;margin-bottom:5px}
+.pp-profile-v46-field input,.pp-profile-v46-field select{
+  width:100%;box-sizing:border-box;min-height:43px;border:1px solid #dfe6ef;
+  border-radius:12px;padding:9px 11px;font-size:13px
+}
+.pp-profile-v46-error{min-height:17px;color:#b42318;font-size:10.5px;font-weight:800;margin-top:6px}
+.pp-profile-v46-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;flex-wrap:wrap}
+.pp-profile-v46-actions button{
+  border:0;border-radius:12px;padding:10px 14px;font-weight:900;cursor:pointer
+}
+.pp-profile-v46-secondary{background:#eef2f6;color:#344054}
+.pp-profile-v46-primary{background:#000cff;color:#fff}
+#createProfileBtnV46,#switchProfileBtnV46{
+  min-height:40px;border-radius:12px;font-weight:850;cursor:pointer
+}
+#createProfileBtnV46{border:1px solid #dfe6ef;background:#fff;color:#344054}
+#switchProfileBtnV46{border:0;background:#000cff;color:#fff}
+@media(max-width:600px){
+  .pp-profile-v46-list{grid-template-columns:1fr}
+}
+</style>
+
+
+<style id="pp-v49-fgts-money-style">
+#fgtsBlockedModal .fgts-year-table th:nth-child(1),
+#fgtsBlockedModal .fgts-year-table td:nth-child(1){width:28%!important}
+#fgtsBlockedModal .fgts-year-table th:nth-child(2),
+#fgtsBlockedModal .fgts-year-table td:nth-child(2){width:72%!important;text-align:right!important}
+#fgtsBlockedModal .fgts-year-table th:nth-child(n+3),
+#fgtsBlockedModal .fgts-year-table td:nth-child(n+3){display:none!important}
+#fgtsBlockedModal .fgts-year-table .next-year{background:#f3f6ff}
+#fgtsBlockedModal .fgts-year-table .discount{font-weight:900;color:#b42318}
+.pp-money-v49{text-align:right!important;font-variant-numeric:tabular-nums}
+</style>
+
+
+<style id="pp-v50-fgts-table-responsive">
+#fgtsBlockedModal .modal{
+  width:min(560px,calc(100vw - 24px))!important;
+  max-width:560px!important;
+  box-sizing:border-box!important;
+}
+#fgtsBlockedModal #fgtsBlockedBody{
+  width:100%!important;
+  min-width:0!important;
+}
+#fgtsBlockedModal #fgtsBlockedBody > div[style*="overflow:auto"]{
+  overflow-x:hidden!important;
+  width:100%!important;
+  max-width:100%!important;
+}
+#fgtsBlockedModal .fgts-year-table{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  table-layout:fixed!important;
+  border-collapse:collapse!important;
+  font-size:11px!important;
+}
+#fgtsBlockedModal .fgts-year-table th,
+#fgtsBlockedModal .fgts-year-table td{
+  box-sizing:border-box!important;
+  padding:10px 8px!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+  vertical-align:middle!important;
+}
+#fgtsBlockedModal .fgts-year-table th:nth-child(1),
+#fgtsBlockedModal .fgts-year-table td:nth-child(1){
+  width:28%!important;
+  text-align:left!important;
+}
+#fgtsBlockedModal .fgts-year-table th:nth-child(2),
+#fgtsBlockedModal .fgts-year-table td:nth-child(2){
+  width:72%!important;
+  text-align:right!important;
+}
+#fgtsBlockedModal .fgts-year-table th:nth-child(n+3),
+#fgtsBlockedModal .fgts-year-table td:nth-child(n+3){
+  display:none!important;
+}
+#fgtsBlockedModal .fgts-blocked-summary{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:8px!important;
+  width:100%!important;
+}
+#fgtsBlockedModal .fgts-blocked-summary>div{
+  min-width:0!important;
+  padding:10px!important;
+}
+#fgtsBlockedModal .fgts-blocked-summary span,
+#fgtsBlockedModal .fgts-blocked-summary b{
+  overflow-wrap:anywhere!important;
+}
+#fgtsBlockedModal .fgts-net-box{
+  width:100%!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  gap:12px!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+}
+#fgtsBlockedModal .fgts-net-box span{
+  min-width:0!important;
+  flex:1 1 auto!important;
+}
+#fgtsBlockedModal .fgts-net-box b{
+  flex:0 0 auto!important;
+  white-space:nowrap!important;
+}
+@media(max-width:520px){
+  #fgtsBlockedModal .modal{
+    width:calc(100vw - 18px)!important;
+    padding:16px!important;
+    border-radius:18px!important;
+  }
+  #fgtsBlockedModal .fgts-blocked-summary{
+    grid-template-columns:1fr!important;
+  }
+  #fgtsBlockedModal .fgts-year-table{
+    font-size:10.5px!important;
+  }
+  #fgtsBlockedModal .fgts-year-table th,
+  #fgtsBlockedModal .fgts-year-table td{
+    padding:9px 6px!important;
+  }
+  #fgtsBlockedModal .fgts-year-table th:nth-child(1),
+  #fgtsBlockedModal .fgts-year-table td:nth-child(1){
+    width:24%!important;
+  }
+  #fgtsBlockedModal .fgts-year-table th:nth-child(2),
+  #fgtsBlockedModal .fgts-year-table td:nth-child(2){
+    width:76%!important;
+  }
+  #fgtsBlockedModal .fgts-net-box{
+    align-items:flex-start!important;
+    flex-direction:column!important;
+  }
+}
+</style>
+
+
+<style id="pp-previdencia-v51-style">
+#previdencia{--rgps-blue:#071f46;--rgps-cyan:#0ba8d8;--rgps-green:#16a56e;--rgps-ink:#172033;--rgps-soft:#f5f8fc}
+.rgps-loading-v51{min-height:420px;display:flex;align-items:center;justify-content:center;gap:14px;color:#667085}
+.rgps-loading-v51 .rgps-loading-mark-v51{width:54px;height:54px;border-radius:18px;background:#071f46;color:#fff;display:grid;place-items:center;font-weight:950}
+.rgps-loading-v51 b,.rgps-loading-v51 span{display:block}.rgps-loading-v51 span{font-size:11px;margin-top:4px}
+.rgps-hero-v51{
+  border-radius:30px;padding:26px;background:
+  radial-gradient(circle at 88% 18%,rgba(32,209,153,.28),transparent 24%),
+  radial-gradient(circle at 72% 80%,rgba(11,168,216,.22),transparent 30%),
+  linear-gradient(135deg,#061b3b 0%,#0a2e5f 65%,#0c466c 100%);
+  color:#fff;position:relative;overflow:hidden;box-shadow:0 22px 52px rgba(6,27,59,.20)
+}
+.rgps-hero-v51:after{content:"";position:absolute;width:240px;height:240px;border:1px solid rgba(255,255,255,.12);border-radius:50%;right:-80px;top:-100px}
+.rgps-hero-top-v51{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;position:relative;z-index:1}
+.rgps-badge-v51{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.14);font-size:9.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.rgps-hero-v51 h1{margin:12px 0 6px;font-size:34px;letter-spacing:-.055em}
+.rgps-hero-v51 p{margin:0;max-width:760px;color:rgba(255,255,255,.72);font-size:11.5px;line-height:1.55}
+.rgps-source-v51{text-align:right;min-width:165px}.rgps-source-v51 b{display:block;font-size:12px}.rgps-source-v51 span{font-size:9.5px;color:rgba(255,255,255,.62)}
+.rgps-kpis-v51{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px;position:relative;z-index:1}
+.rgps-kpi-v51{padding:14px;border-radius:18px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.10);backdrop-filter:blur(10px)}
+.rgps-kpi-v51 span{display:block;font-size:9px;font-weight:800;color:rgba(255,255,255,.60);text-transform:uppercase;letter-spacing:.06em}
+.rgps-kpi-v51 strong{display:block;font-size:21px;margin-top:5px;letter-spacing:-.035em}
+.rgps-kpi-v51 small{display:block;margin-top:3px;font-size:9px;color:rgba(255,255,255,.64)}
+.rgps-progress-v51{margin-top:15px;position:relative;z-index:1}
+.rgps-progress-meta-v51{display:flex;justify-content:space-between;gap:12px;font-size:9px;color:rgba(255,255,255,.65);margin-bottom:6px}
+.rgps-progress-bar-v51{height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
+.rgps-progress-bar-v51 i{display:block;height:100%;background:linear-gradient(90deg,#21d59e,#33c7ed);border-radius:999px}
+.rgps-grid-v51{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);gap:14px;margin-top:14px}
+.rgps-card-v51{background:#fff;border:1px solid #e7ecf3;border-radius:24px;padding:18px;box-shadow:0 10px 30px rgba(15,23,42,.045)}
+.rgps-card-head-v51{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:13px}
+.rgps-card-head-v51 h3{margin:0;font-size:16px;color:#172033;letter-spacing:-.03em}.rgps-card-head-v51 p{margin:4px 0 0;font-size:10px;color:#7b8798;line-height:1.4}
+.rgps-pill-v51{padding:6px 8px;border-radius:999px;background:#eef7ff;color:#075985;font-size:9px;font-weight:900;white-space:nowrap}
+.rgps-rules-v51{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.rgps-rule-v51{border:1px solid #e9edf3;border-radius:17px;padding:12px;position:relative;overflow:hidden}
+.rgps-rule-v51.best{border-color:#bdebd9;background:#f4fcf8}
+.rgps-rule-v51 .rgps-rule-name-v51{font-size:9px;color:#667085;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
+.rgps-rule-v51 b{display:block;margin-top:5px;font-size:15px;color:#172033}
+.rgps-rule-v51 small{display:block;margin-top:4px;font-size:9.5px;line-height:1.4;color:#7b8798}
+.rgps-rule-v51 .tag{position:absolute;right:9px;top:9px;padding:4px 6px;border-radius:999px;background:#16a56e;color:#fff;font-size:7.5px;font-weight:900;text-transform:uppercase}
+.rgps-benefits-v51{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.rgps-benefit-v51{border-radius:18px;padding:13px;background:#f7f9fc;border:1px solid #e8edf4}
+.rgps-benefit-v51 span{display:block;font-size:9px;color:#667085;font-weight:800}.rgps-benefit-v51 b{display:block;font-size:19px;margin-top:4px;color:#172033}.rgps-benefit-v51 small{display:block;font-size:8.8px;color:#7b8798;margin-top:4px;line-height:1.35}
+.rgps-sim-v51{margin-top:11px;padding:12px;border-radius:16px;background:linear-gradient(135deg,#071f46,#0b3c67);color:#fff}
+.rgps-sim-v51 label{display:block;font-size:9px;font-weight:900;color:rgba(255,255,255,.66);margin-bottom:5px}.rgps-sim-row-v51{display:grid;grid-template-columns:1fr auto;gap:8px}.rgps-sim-v51 input{min-width:0;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.10);color:#fff;border-radius:11px;padding:9px 10px;font-weight:800}
+.rgps-sim-out-v51{text-align:right}.rgps-sim-out-v51 span{display:block;font-size:8.5px;color:rgba(255,255,255,.62)}.rgps-sim-out-v51 b{font-size:18px}
+.rgps-toolbar-v51{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
+.rgps-toolbar-left-v51,.rgps-toolbar-right-v51{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rgps-toolbar-v51 select,.rgps-toolbar-v51 input{border:1px solid #e0e6ee;border-radius:11px;padding:9px 10px;background:#fff;font-size:10.5px}
+.rgps-btn-v51{border:0;border-radius:12px;padding:10px 13px;font-weight:900;font-size:10px;cursor:pointer}.rgps-btn-v51.primary{background:#071f46;color:#fff}.rgps-btn-v51.secondary{background:#eef3f8;color:#344054}.rgps-btn-v51.green{background:#16a56e;color:#fff}
+.rgps-tablewrap-v51{overflow:auto;border:1px solid #e6ebf2;border-radius:18px;margin-top:10px;max-height:600px}
+.rgps-table-v51{width:100%;border-collapse:collapse;min-width:970px;font-size:10px}
+.rgps-table-v51 th{position:sticky;top:0;z-index:2;background:#f7f9fc;color:#667085;font-size:8.5px;text-transform:uppercase;letter-spacing:.05em;text-align:left;padding:10px;border-bottom:1px solid #e6ebf2}
+.rgps-table-v51 td{padding:10px;border-bottom:1px solid #eef1f5;color:#344054;vertical-align:top}.rgps-table-v51 tr:hover td{background:#fbfdff}
+.rgps-table-v51 .money{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.rgps-table-v51 .coef{text-align:right;white-space:nowrap;color:#667085}
+.rgps-status-v51{display:inline-flex;padding:5px 7px;border-radius:999px;font-size:8px;font-weight:900}.rgps-status-v51.ok{background:#e9f8f1;color:#087a4d}.rgps-status-v51.att{background:#fff2e2;color:#a04e00}
+.rgps-action-v51{border:0;background:#eef3f8;border-radius:8px;padding:6px 8px;cursor:pointer;font-size:9px;margin-right:4px}
+.rgps-year-strip-v51{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}.rgps-year-strip-v51::-webkit-scrollbar{display:none}
+.rgps-year-chip-v51{flex:0 0 auto;border:1px solid #e4e9f0;background:#fff;border-radius:12px;padding:8px 10px;cursor:pointer}.rgps-year-chip-v51.active{background:#071f46;color:#fff;border-color:#071f46}.rgps-year-chip-v51 b{display:block;font-size:11px}.rgps-year-chip-v51 span{display:block;font-size:8px;opacity:.68;margin-top:2px}
+.rgps-profile-v51{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.rgps-field-v51 label{display:block;font-size:9px;color:#667085;font-weight:900;margin-bottom:5px}.rgps-field-v51 input,.rgps-field-v51 select{width:100%;box-sizing:border-box;border:1px solid #e0e6ee;border-radius:11px;padding:9px 10px;background:#fff;font-size:11px}
+.rgps-note-v51{margin-top:12px;padding:11px 13px;border-radius:14px;background:#fff9eb;border:1px solid #fde6aa;color:#77520a;font-size:9.5px;line-height:1.5}
+.rgps-sources-v51{margin-top:12px;padding-top:12px;border-top:1px solid #edf0f4;font-size:9px;color:#7b8798;line-height:1.55}.rgps-sources-v51 a{color:#075985;text-decoration:none;font-weight:800}
+#rgpsModalV51{position:fixed;inset:0;z-index:110000;background:rgba(7,18,36,.68);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:16px}
+#rgpsModalV51 .rgps-modal-card-v51{width:min(620px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:25px;padding:20px;box-shadow:0 32px 90px rgba(0,0,0,.3)}
+.rgps-modal-grid-v51{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.rgps-modal-grid-v51 .full{grid-column:1/-1}.rgps-modal-actions-v51{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.rgps-modal-error-v51{min-height:17px;color:#b42318;font-size:10px;font-weight:800;margin-top:5px}
+@media(max-width:900px){.rgps-kpis-v51{grid-template-columns:repeat(2,1fr)}.rgps-grid-v51{grid-template-columns:1fr}.rgps-profile-v51{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.rgps-hero-v51{padding:18px;border-radius:22px}.rgps-hero-top-v51{display:block}.rgps-source-v51{text-align:left;margin-top:14px}.rgps-hero-v51 h1{font-size:27px}.rgps-kpis-v51{grid-template-columns:1fr 1fr}.rgps-rules-v51,.rgps-benefits-v51{grid-template-columns:1fr}.rgps-profile-v51{grid-template-columns:1fr}.rgps-modal-grid-v51{grid-template-columns:1fr}.rgps-modal-grid-v51 .full{grid-column:auto}}
+</style>
+
+
+<style id="pp-v52-mobile-responsive">
+@media (max-width:900px){
+  html,body{max-width:100%;overflow-x:hidden!important}
+  body{min-width:0!important}
+  .topbar,.topinner,.shell,.container,.content,.view,
+  .panel,.card,.modal,.modalback,.hero,.grid2,.grid3,.grid4,
+  #dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,
+  #investimentos,#patrimonio,#projecao,#calculadora,#previdencia{
+    max-width:100%!important;min-width:0!important;box-sizing:border-box!important
+  }
+  .topinner{padding-left:10px!important;padding-right:10px!important}
+  .brand{min-width:0!important}
+  .brand span{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .actions{gap:6px!important;flex-wrap:nowrap!important}
+  #sessionTimerV45{min-width:82px!important;max-width:92px!important}
+  .content,.container{padding-left:10px!important;padding-right:10px!important}
+  .grid2,.grid3,.grid4{grid-template-columns:1fr!important}
+  .modal{width:min(96vw,680px)!important;max-width:96vw!important}
+  .modalback{padding:10px!important}
+  table{max-width:100%!important}
+  img,svg,canvas{max-width:100%!important;height:auto!important}
+}
+@media (max-width:700px){
+  .topbar{position:sticky!important;top:0!important}
+  .topinner{min-height:56px!important;height:auto!important;gap:7px!important}
+  .brand img,.brand .logo{max-height:28px!important;width:auto!important}
+  .brand span{font-size:12px!important}
+  .brand small{font-size:8px!important}
+  .actions button,.actions .btn{min-width:36px!important;padding:7px 8px!important}
+  #sessionTimerV45{padding:5px 7px!important;min-width:78px!important}
+  #sessionTimerV45 .session-time{font-size:11px!important}
+  #nav{width:min(88vw,330px)!important;max-width:88vw!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+  .hero,.rgps-hero-v51{padding:16px!important;border-radius:20px!important}
+  .hero h1,.rgps-hero-v51 h1{font-size:24px!important;line-height:1.05!important}
+  .hero p,.rgps-hero-v51 p{font-size:10px!important;line-height:1.45!important}
+  .filterbar{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important}
+  .filterbar>*{min-width:0!important;width:100%!important}
+  .kpis,#dashboardKpis,.rgps-kpis-v51{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important
+  }
+  .mini,.kpi,.rgps-kpi-v51{min-width:0!important;padding:11px!important;border-radius:15px!important}
+  .mini span,.kpi span,.rgps-kpi-v51 span{font-size:8px!important;line-height:1.25!important}
+  .mini b,.kpi b,.rgps-kpi-v51 strong{font-size:16px!important;line-height:1.1!important;overflow-wrap:anywhere!important}
+  .panel,.card,.rgps-card-v51{padding:13px!important;border-radius:18px!important}
+  .panelhead,.rgps-card-head-v51{gap:6px!important}
+  .panelhead h2,.rgps-card-head-v51 h3{font-size:14px!important}
+  .panelhead span,.rgps-card-head-v51 p{font-size:9px!important}
+  .card .big,.panel .big{font-size:22px!important}
+  .invoice-track-v46{gap:8px!important}
+  .invoice-card-v46{flex-basis:min(228px,78vw)!important;min-height:126px!important;padding:13px!important;border-radius:18px!important}
+  .invoice-card-v46 .invoice-value-v46{font-size:21px!important}
+  .invoice-arrows-v46 button{width:30px!important;height:30px!important}
+  .cards-strip,.card-strip,.card-miniatures,.credit-card-row{
+    display:flex!important;overflow-x:auto!important;gap:8px!important;
+    scroll-snap-type:x mandatory!important;max-width:100%!important;scrollbar-width:none!important
+  }
+  .cards-strip::-webkit-scrollbar,.card-strip::-webkit-scrollbar,.card-miniatures::-webkit-scrollbar,.credit-card-row::-webkit-scrollbar{display:none!important}
+  .physical-card,.card-detail,.credit-card-detail{width:min(100%,330px)!important;max-width:100%!important}
+  .rgps-grid-v51{grid-template-columns:1fr!important;gap:10px!important}
+  .rgps-rules-v51,.rgps-benefits-v51{grid-template-columns:1fr!important}
+  .rgps-rule-v51,.rgps-benefit-v51{padding:10px!important;border-radius:14px!important}
+  .rgps-rule-v51 b,.rgps-benefit-v51 b{font-size:16px!important}
+  .rgps-profile-v51{grid-template-columns:1fr!important}
+  .rgps-toolbar-v51{align-items:stretch!important}
+  .rgps-toolbar-left-v51,.rgps-toolbar-right-v51{width:100%!important;display:grid!important;grid-template-columns:1fr!important}
+  .rgps-toolbar-v51 select,.rgps-toolbar-v51 input,.rgps-btn-v51{width:100%!important}
+  .rgps-year-chip-v51{padding:7px 9px!important}
+  .rgps-tablewrap-v51{width:100%!important;max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
+  .rgps-table-v51{min-width:760px!important;font-size:9.5px!important}
+  .rgps-table-v51 th,.rgps-table-v51 td{padding:8px!important}
+  #fgtsBlockedModal .modal,#saqueMemoryModal .modal{width:calc(100vw - 16px)!important;max-width:none!important}
+  #fgtsBlockedModal .fgts-blocked-summary{grid-template-columns:1fr!important}
+  #fgtsBlockedModal .fgts-year-table{font-size:10px!important}
+  #fgtsBlockedModal .fgts-year-table th,#fgtsBlockedModal .fgts-year-table td{padding:8px 5px!important}
+  #fgtsBlockedModal .fgts-net-box{flex-direction:column!important;align-items:flex-start!important}
+  #fgtsBlockedModal .fgts-net-box b{white-space:normal!important}
+  .pp-profile-v46-card{width:calc(100vw - 16px)!important;padding:15px!important;border-radius:18px!important}
+  .pp-profile-v46-list{grid-template-columns:1fr!important}
+  .formgrid,.form-grid,.modalgrid,.modal-grid{grid-template-columns:1fr!important}
+  input,select,textarea,button{max-width:100%!important;box-sizing:border-box!important}
+  input,select,textarea{font-size:16px!important}
+  button{touch-action:manipulation}
+  .tablewrap,.table-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important}
+  .tablewrap table,.table-wrap table{min-width:680px}
+  .chart-wrap,.chart-container,.canvas-wrap{width:100%!important;overflow:hidden!important}
+  canvas{width:100%!important}
+  .section-actions,.toolbar,.filters{gap:7px!important;flex-wrap:wrap!important}
+  .section-actions>*,.toolbar>*,.filters>*{min-width:0!important}
+}
+@media (max-width:430px){
+  .content,.container{padding-left:8px!important;padding-right:8px!important}
+  .hero,.rgps-hero-v51{padding:14px!important}
+  .kpis,#dashboardKpis,.rgps-kpis-v51{grid-template-columns:1fr 1fr!important;gap:7px!important}
+  .mini,.kpi,.rgps-kpi-v51{padding:9px!important}
+  .mini b,.kpi b,.rgps-kpi-v51 strong{font-size:15px!important}
+  .panel,.card,.rgps-card-v51{padding:11px!important}
+  .invoice-card-v46{flex-basis:74vw!important}
+  .rgps-hero-top-v51{display:block!important}
+  .rgps-source-v51{text-align:left!important;margin-top:10px!important}
+  .rgps-sim-row-v51{grid-template-columns:1fr!important}
+  .rgps-sim-out-v51{text-align:left!important;margin-top:6px!important}
+  .rgps-modal-grid-v51{grid-template-columns:1fr!important}
+  #sessionTimerV45 .session-state{display:none!important}
+}
+@media (max-width:360px){
+  .kpis,#dashboardKpis,.rgps-kpis-v51{grid-template-columns:1fr!important}
+  .filterbar{grid-template-columns:1fr!important}
+  .invoice-card-v46{flex-basis:82vw!important}
+}
+</style>
+
+
+<style id="pp-v55-previdencia-menu-fix">
+.nav button[data-view="previdencia"]:before{
+  content:"⚕"!important;
+  display:inline-block!important;
+  width:23px!important;
+  margin-right:8px!important;
+  text-align:center!important;
+  opacity:.95!important;
+}
+</style>
+
+
+<style id="pp-v57-logout-style">
+#logoutBtnV57{
+  width:36px;height:36px;border:0;border-radius:12px;
+  background:#d92d20;color:#fff;display:grid;place-items:center;
+  cursor:pointer;box-shadow:0 6px 16px rgba(217,45,32,.22);
+  transition:transform .16s ease,box-shadow .16s ease,background .16s ease;
+  flex:0 0 auto
+}
+#logoutBtnV57:hover{background:#b42318;transform:translateY(-1px);box-shadow:0 8px 18px rgba(217,45,32,.28)}
+#logoutBtnV57:active{transform:translateY(0)}
+#logoutBtnV57 svg{width:18px;height:18px;display:block}
+@media(max-width:700px){
+  #logoutBtnV57{width:32px;height:32px;border-radius:10px}
+  #logoutBtnV57 svg{width:16px;height:16px}
 }
 </style>
 
 </head>
 <body><div class="app">
-<header class="topbar"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button data-view="dashboard" class="active">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="projecao">Projeção</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx>+ Lançamento</button></div></div></header>
+<header class="topbar"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button data-view="dashboard" class="active">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="projecao">Projeção</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx>+ Lançamento</button></div></div></header>
 <main class="main">
 <section class="view active" id="dashboard">
 <div class="hero"><div><div class="eyebrow">seu planejamento financeiro</div><h1>Olá, Marcos.</h1><p id="periodText">Receitas e despesas realizadas, sem misturar projeções futuras.</p></div><div class="filterbar"><select id="yearFilter"></select><select id="monthFilter"></select></div></div>
 <div class="kpis" id="dashboardKpis"></div>
 <div class="grid2"><article class="card panel"><div class="panelhead"><div><h2>Fluxo acumulado do ano</h2><span id="dashboardLegend">entradas, saídas e saldo até o mês selecionado</span></div></div><div id="flowList" class="list"></div></article><article class="card panel"><div class="panelhead"><div><h2>Onde você mais gastou</h2><span id="catPeriod">categorias do período</span></div></div><div id="categoryList" class="list"></div></article></div>
-<div class="grid2"><article class="card panel"><div class="panelhead"><div><h2>Próximas obrigações</h2><span>cartões e dívidas com saldo pendente</span></div></div><div id="nextDues" class="list"></div></article><article class="card panel"><div class="panelhead"><div><h2>Resumo patrimonial</h2><span>FGTS, patrimônio e investimentos</span></div></div><div id="assetSnapshot" class="list"></div></article></div>
+<div class="grid2"><article class="card panel"><div class="panelhead"><div><h2>Próximas faturas de cartões</h2><span>exclusivamente faturas dos cartões de crédito cadastrados</span></div></div><div id="nextDues" class="list"></div></article><article class="card panel"><div class="panelhead"><div><h2>Resumo patrimonial</h2><span>FGTS, patrimônio e investimentos</span></div></div><div id="assetSnapshot" class="list"></div></article></div>
 </section>
 
 <section class="view" id="lancamentos">
@@ -305,6 +763,14 @@ img,svg,canvas{max-width:100%}.filterbar{max-width:100%}.filterbar>*{max-width:1
 <div class="section-tools"><div><div class="eyebrow">garantia e antecipações</div><h2>FGTS</h2></div><div class="filterbar"><select id="fgtsYear"></select><select id="fgtsStatus"><option value="all">Todos</option><option value="Quitado">Quitados</option><option value="Pendente">Pendentes</option></select><input id="fgtsSearch" class="search" placeholder="Buscar banco"><button class="btn" id="editFgtsSummary">Editar saldos</button></div></div>
 <div class="summary-strip" id="fgtsSummary"></div>
 <div class="tablewrap"><table><thead><tr><th>Contrato</th><th>Banco</th><th>Ano contratação</th><th>Valor no ano</th><th>Total</th><th>Quitado</th><th>Pendente</th><th>Status</th></tr></thead><tbody id="fgtsBody"></tbody></table></div>
+</section>
+
+
+<section class="view" id="previdencia">
+  <div class="rgps-loading-v51">
+    <div class="rgps-loading-mark-v51">RGPS</div>
+    <div><b>Previdência Social</b><span>Carregando seu histórico contributivo…</span></div>
+  </div>
 </section>
 
 <section class="view" id="investimentos">
@@ -6322,7 +6788,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
   function isCloudKey(k){
     k=String(k||'');
     if(k===META_KEY||k===OLD_META_KEY)return false;
-    return k.startsWith('planejador_')||k.startsWith('financeiro_marcos_');
+    return k.startsWith('planejador_')||k.startsWith('financeiro_marcos_')||k.startsWith('rgps_');
   }
 
   function status(mode,text){
@@ -6936,12 +7402,11 @@ Os dados atuais deste navegador serão substituídos.`);
 </script>
 
 
-<script id="pp-session-v44">
+<script id="pp-session-v47">
 (function(){
-  const SESSION_KEY='pp_secure_session_v44';
-  const WORKSPACE_KEY='pp_secure_workspace_v44';
-  const LIMIT_MS=5*60*1000;
-  let hiddenAt=null;
+  const SESSION_KEY='pp_secure_session_v45';
+  const WORKSPACE_KEY='pp_secure_workspace_v45';
+  const LIMIT_MS=60*60*1000;
   let ticker=null;
   let locked=false;
 
@@ -6954,28 +7419,25 @@ Os dados atuais deste navegador serão substituídos.`);
   function readSession(){
     try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null')}catch(e){return null}
   }
-  function writeSession(extra){
-    const prev=readSession()||{};
-    const next=Object.assign({},prev,{
-      authenticated:true,
-      profile:activeProfile(),
-      hiddenAt:hiddenAt,
-      updatedAt:Date.now()
-    },extra||{});
-    sessionStorage.setItem(SESSION_KEY,JSON.stringify(next));
-    return next;
+  function writeSession(obj){sessionStorage.setItem(SESSION_KEY,JSON.stringify(obj))}
+  function validSession(){
+    const s=readSession();
+    return !!(s&&s.authenticated&&s.profile&&Number(s.expiresAt||0)>Date.now());
   }
-  function clearSession(){
-    sessionStorage.removeItem(SESSION_KEY);
+  function startFreshSession(profile){
+    const now=Date.now();
+    writeSession({authenticated:true,profile:profile||activeProfile(),startedAt:now,expiresAt:now+LIMIT_MS});
+    locked=false;
+    paintTimer();
   }
 
   function ensureTimer(){
-    let el=document.getElementById('sessionTimerV44');
+    let el=document.getElementById('sessionTimerV45');
     if(el)return el;
     el=document.createElement('div');
-    el.id='sessionTimerV44';
-    el.title='A sessão só expira após 5 minutos com o Planejador fora de visualização.';
-    el.innerHTML='<span class="session-clock-icon">⏱</span><span class="session-time">05:00</span><span class="session-state">sessão ativa</span>';
+    el.id='sessionTimerV45';
+    el.title='A sessão permanece aberta por 1 hora. Ao final, a senha do perfil será solicitada.';
+    el.innerHTML='<span class="session-clock-icon">⏱</span><span class="session-time">60:00</span><span class="session-state">sessão</span>';
     const actions=document.querySelector('.topinner .actions');
     if(actions)actions.insertBefore(el,actions.firstChild);
     else document.body.appendChild(el);
@@ -6984,31 +7446,20 @@ Os dados atuais deste navegador serão substituídos.`);
 
   function fmt(ms){
     const sec=Math.max(0,Math.ceil(ms/1000));
-    const m=Math.floor(sec/60),s=sec%60;
-    return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    const min=Math.floor(sec/60),s=sec%60;
+    return String(min).padStart(2,'0')+':'+String(s).padStart(2,'0');
   }
-
+  function remaining(){
+    const s=readSession();
+    return s?Math.max(0,Number(s.expiresAt||0)-Date.now()):0;
+  }
   function paintTimer(){
-    const el=ensureTimer();
-    const time=el.querySelector('.session-time');
-    const state=el.querySelector('.session-state');
-
-    el.classList.toggle('is-away',!!hiddenAt&&!locked);
+    const el=ensureTimer(),left=remaining();
+    const time=el.querySelector('.session-time'),state=el.querySelector('.session-state');
+    el.classList.toggle('is-warning',!locked&&left>0&&left<=5*60*1000);
     el.classList.toggle('is-locked',locked);
-
-    if(locked){
-      time.textContent='00:00';
-      state.textContent='bloqueado';
-      return;
-    }
-    if(hiddenAt){
-      const left=LIMIT_MS-(Date.now()-hiddenAt);
-      time.textContent=fmt(left);
-      state.textContent='fora da tela';
-    }else{
-      time.textContent='05:00';
-      state.textContent='sessão ativa';
-    }
+    if(locked||left<=0){time.textContent='00:00';state.textContent='bloqueado'}
+    else{time.textContent=fmt(left);state.textContent='sessão'}
   }
 
   function currentView(){
@@ -7019,12 +7470,12 @@ Os dados atuais deste navegador serão substituídos.`);
   function captureWorkspace(){
     try{
       const draft={view:currentView(),scrollY:window.scrollY||0,openModals:[],fields:{},savedAt:Date.now()};
-      document.querySelectorAll('.modalback.open,#profilePanelModal.open').forEach(m=>{
-        if(m.id)draft.openModals.push(m.id);
+      document.querySelectorAll('.modalback.open,#profilePanelModal.open').forEach(x=>{
+        if(x.id)draft.openModals.push(x.id);
       });
       document.querySelectorAll('input,select,textarea').forEach(el=>{
-        if(!el.id || el.type==='password' || el.type==='file')return;
-        if(el.closest('#loginOverlay,#sessionLockV44,#cloudAuthV40'))return;
+        if(!el.id||el.type==='password'||el.type==='file')return;
+        if(el.closest('#loginOverlay,#sessionLockV45,#cloudAuthV40,#profileCreateV46,#profileSwitchV46'))return;
         draft.fields[el.id]=el.type==='checkbox'||el.type==='radio'
           ? {checked:el.checked,type:el.type}
           : {value:el.value,type:el.type};
@@ -7033,69 +7484,75 @@ Os dados atuais deste navegador serão substituídos.`);
     }catch(e){}
   }
 
-  function restoreWorkspace(){
-    let d=null;
-    try{d=JSON.parse(sessionStorage.getItem(WORKSPACE_KEY)||'null')}catch(e){}
-    if(!d)return;
-
-    const restore=()=>{
-      try{
-        if(d.view && document.getElementById(d.view) && typeof window.showView==='function'){
-          window.showView(d.view);
-        }
-        Object.entries(d.fields||{}).forEach(([id,v])=>{
-          const el=document.getElementById(id);
-          if(!el || el.type==='password'||el.type==='file')return;
-          if(v && (v.type==='checkbox'||v.type==='radio'))el.checked=!!v.checked;
-          else if(v && Object.prototype.hasOwnProperty.call(v,'value'))el.value=v.value;
-        });
-        (d.openModals||[]).forEach(id=>{
-          document.getElementById(id)?.classList.add('open');
-        });
-        if(Number.isFinite(Number(d.scrollY))){
-          setTimeout(()=>window.scrollTo(0,Number(d.scrollY)),30);
-        }
-      }catch(e){}
-    };
-    setTimeout(restore,220);
-    setTimeout(restore,800);
+  function readWorkspace(){
+    try{return JSON.parse(sessionStorage.getItem(WORKSPACE_KEY)||'null')}catch(e){return null}
   }
 
-  function markAuthenticated(){
-    locked=false;
-    hiddenAt=null;
-    writeSession({authenticated:true,hiddenAt:null,profile:activeProfile()});
-    document.documentElement.classList.remove('pp-prelogin');
-    document.documentElement.classList.add('pp-authenticated');
-    paintTimer();
-  }
+  // Critical v47 change: restore everything while the page is still invisible.
+  function restoreWorkspaceHidden(){
+    const d=readWorkspace();
+    if(!d)return false;
+    try{
+      if(d.view&&document.getElementById(d.view)){
+        // Avoid the old dashboard ever becoming the visible intermediary.
+        document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===d.view));
+        document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===d.view));
 
-  function validStoredSession(){
-    const s=readSession();
-    if(!s || !s.authenticated || !s.profile)return false;
-    if(s.hiddenAt && Date.now()-Number(s.hiddenAt)>=LIMIT_MS)return false;
-    return true;
-  }
+        // Render the chosen section directly while hidden.
+        if(d.view==='lancamentos')window.renderLancamentos?.();
+        else if(d.view==='cartoes')window.renderCards?.();
+        else if(d.view==='credores')window.renderCreditors?.();
+        else if(d.view==='dividas')window.renderDebts?.();
+        else if(d.view==='fgts')window.renderFgts?.();
+        else if(d.view==='previdencia')window.renderPrevidencia?.();
+        else if(d.view==='investimentos')window.renderInvestments?.();
+        else if(d.view==='patrimonio')window.renderAssets?.();
+        else if(d.view==='projecao')window.renderProjection?.();
+        else if(d.view==='calculadora')window.renderCalculator?.();
+        else if(d.view==='dashboard')window.renderDashboard?.();
+      }
 
-  function removeStartupLoginIfSessionValid(){
-    if(!validStoredSession())return false;
-    const s=readSession();
-    if(s.profile && s.profile!==activeProfile()){
-      localStorage.setItem('planejador_active_profile',s.profile);
+      Object.entries(d.fields||{}).forEach(([id,v])=>{
+        const el=document.getElementById(id);
+        if(!el||el.type==='password'||el.type==='file')return;
+        if(v&&(v.type==='checkbox'||v.type==='radio'))el.checked=!!v.checked;
+        else if(v&&Object.prototype.hasOwnProperty.call(v,'value'))el.value=v.value;
+      });
+
+      (d.openModals||[]).forEach(id=>document.getElementById(id)?.classList.add('open'));
+      if(Number.isFinite(Number(d.scrollY)))window.scrollTo(0,Number(d.scrollY));
+      return true;
+    }catch(e){
+      return false;
     }
-    hiddenAt=null;
-    locked=false;
-    writeSession({hiddenAt:null});
+  }
+
+  function removeLegacyLoginWithoutReveal(){
+    const ov=document.getElementById('loginOverlay');
+    if(ov)ov.remove();
     document.documentElement.classList.remove('pp-prelogin');
     document.documentElement.classList.add('pp-authenticated');
+  }
 
-    const kill=()=>{
-      const ov=document.getElementById('loginOverlay');
-      if(ov)ov.remove();
+  function revealAfterRestore(){
+    // Wait two paint frames after the correct view has been restored.
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      document.documentElement.classList.remove('pp-session-resume-v45');
+      document.body.style.visibility='';
+      document.body.style.opacity='';
       try{window.ppRevealAppAfterLogin?.()}catch(e){}
-    };
-    kill();setTimeout(kill,60);setTimeout(kill,260);setTimeout(kill,900);
-    restoreWorkspace();
+    }));
+  }
+
+  function resumeWithoutFlash(){
+    if(!validSession())return false;
+    const s=readSession();
+    if(s.profile&&s.profile!==activeProfile())localStorage.setItem('planejador_active_profile',s.profile);
+
+    document.documentElement.classList.add('pp-session-resume-v45');
+    removeLegacyLoginWithoutReveal();
+    restoreWorkspaceHidden();
+    revealAfterRestore();
     return true;
   }
 
@@ -7103,93 +7560,67 @@ Os dados atuais deste navegador serão substituídos.`);
     if(locked)return;
     locked=true;
     captureWorkspace();
-    writeSession({authenticated:false,hiddenAt:hiddenAt||Date.now(),lockedAt:Date.now()});
     paintTimer();
 
-    document.getElementById('sessionLockV44')?.remove();
+    document.getElementById('sessionLockV45')?.remove();
     const profile=activeProfile();
     const ov=document.createElement('div');
-    ov.id='sessionLockV44';
+    ov.id='sessionLockV45';
     ov.innerHTML=`<div class="session-lock-card">
       <div class="session-lock-icon">🔒</div>
-      <h2>Sessão protegida</h2>
-      <p>O Planejador ficou fora de visualização por 5 minutos. Informe a senha de <b>${profile}</b> para continuar exatamente de onde parou.</p>
+      <h2>Sessão encerrada</h2>
+      <p>A sessão de 1 hora terminou. Informe a senha de <b>${profile}</b> para continuar exatamente de onde parou.</p>
       <label>Senha de ${profile}</label>
-      <input id="sessionUnlockPassV44" type="password" autocomplete="current-password" placeholder="••••••">
-      <div class="session-lock-error" id="sessionUnlockErrorV44"></div>
-      <button type="button" class="session-unlock" id="sessionUnlockBtnV44">Desbloquear</button>
-      <div class="session-security-note">Se você apenas trocar de aba e voltar antes de 5 minutos, nenhuma senha será solicitada. O cronômetro é reiniciado para 05:00 quando o Planejador volta à tela.</div>
+      <input id="sessionUnlockPassV45" type="password" autocomplete="current-password" placeholder="••••••">
+      <div class="session-lock-error" id="sessionUnlockErrorV45"></div>
+      <button type="button" class="session-unlock" id="sessionUnlockBtnV45">Iniciar nova sessão de 1 hora</button>
+      <div class="session-security-note">Enquanto esta tela estiver bloqueada, os dados financeiros permanecem ocultos.</div>
     </div>`;
     document.body.appendChild(ov);
 
     const unlock=()=>{
-      const input=document.getElementById('sessionUnlockPassV44');
-      const err=document.getElementById('sessionUnlockErrorV44');
+      const input=document.getElementById('sessionUnlockPassV45');
+      const err=document.getElementById('sessionUnlockErrorV45');
       if((input?.value||'')!==profilePass(activeProfile())){
         if(err)err.textContent='Senha incorreta.';
         if(input){input.value='';input.focus()}
         return;
       }
       ov.remove();
-      markAuthenticated();
-      restoreWorkspace();
+      startFreshSession(activeProfile());
+
+      // Keep content shielded while restoring the exact workspace.
+      document.documentElement.classList.add('pp-session-resume-v45');
+      removeLegacyLoginWithoutReveal();
+      restoreWorkspaceHidden();
+      revealAfterRestore();
     };
-    document.getElementById('sessionUnlockBtnV44').onclick=unlock;
-    document.getElementById('sessionUnlockPassV44').onkeydown=e=>{if(e.key==='Enter')unlock()};
-    setTimeout(()=>document.getElementById('sessionUnlockPassV44')?.focus(),30);
+
+    document.getElementById('sessionUnlockBtnV45').onclick=unlock;
+    document.getElementById('sessionUnlockPassV45').onkeydown=e=>{if(e.key==='Enter')unlock()};
+    setTimeout(()=>document.getElementById('sessionUnlockPassV45')?.focus(),30);
   }
 
-  function startHiddenCountdown(){
+  function checkExpiry(){
     if(locked)return;
-    hiddenAt=Date.now();
-    captureWorkspace();
-    writeSession({hiddenAt});
-    paintTimer();
-    clearInterval(ticker);
-    ticker=setInterval(()=>{
-      paintTimer();
-      if(hiddenAt && Date.now()-hiddenAt>=LIMIT_MS){
-        clearInterval(ticker);
-        ticker=null;
-        lockNow();
-      }
-    },1000);
-  }
-
-  function returnVisible(){
-    clearInterval(ticker);ticker=null;
-    if(locked)return;
-    const stored=readSession();
-    const started=hiddenAt || Number(stored?.hiddenAt||0) || null;
-    if(started && Date.now()-started>=LIMIT_MS){
-      hiddenAt=started;
-      lockNow();
-      return;
-    }
-    hiddenAt=null;
-    writeSession({hiddenAt:null,authenticated:true});
+    if(!validSession()){lockNow();return}
     paintTimer();
   }
 
-  function onVisibility(){
-    if(document.hidden)startHiddenCountdown();
-    else returnVisible();
-  }
-
-  // Detect a successful normal login without changing the existing password logic.
   function watchLoginAttempt(e){
     const btn=e.target?.closest?.('#loginSubmit');
-    const enter=e.type==='keydown' && e.target?.id==='loginPassword' && e.key==='Enter';
-    if(!btn && !enter)return;
-
+    const enter=e.type==='keydown'&&e.target?.id==='loginPassword'&&e.key==='Enter';
+    if(!btn&&!enter)return;
     const overlay=document.getElementById('loginOverlay');
     if(!overlay)return;
     const chosen=overlay.querySelector('.profile-choice.active')?.dataset.profile||activeProfile();
     const pass=overlay.querySelector('#loginPassword')?.value||'';
     if(pass===profilePass(chosen)){
       setTimeout(()=>{
-        markAuthenticated();
         sessionStorage.removeItem(WORKSPACE_KEY);
+        startFreshSession(chosen);
+        removeLegacyLoginWithoutReveal();
+        revealAfterRestore();
       },20);
     }
   }
@@ -7197,24 +7628,23 @@ Os dados atuais deste navegador serão substituídos.`);
   document.addEventListener('click',watchLoginAttempt,true);
   document.addEventListener('keydown',watchLoginAttempt,true);
 
-  // Preserve current page and in-progress fields before leaving the page/app.
-  window.addEventListener('pagehide',()=>{
-    if(!locked){
-      if(!hiddenAt)hiddenAt=Date.now();
-      captureWorkspace();
-      writeSession({hiddenAt});
-    }
+  // Changing tabs does not alter the workspace and does not trigger any redraw.
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden)checkExpiry();
   });
-  window.addEventListener('beforeunload',captureWorkspace);
-  document.addEventListener('visibilitychange',onVisibility);
+  window.addEventListener('focus',checkExpiry);
 
-  // Keep the selected section so a reload/mobile suspension doesn't return to Visão geral.
+  // Save the workspace only when the browser actually unloads/suspends the document.
+  window.addEventListener('pagehide',captureWorkspace);
+  window.addEventListener('beforeunload',captureWorkspace);
+
+  // Save selected view without causing any restoration cycle on normal tab switches.
   const oldShow=window.showView;
   if(typeof oldShow==='function'){
     window.showView=function(id){
       const r=oldShow.apply(this,arguments);
       try{
-        const d=JSON.parse(sessionStorage.getItem(WORKSPACE_KEY)||'{}');
+        const d=readWorkspace()||{};
         d.view=id;d.savedAt=Date.now();
         sessionStorage.setItem(WORKSPACE_KEY,JSON.stringify(d));
       }catch(e){}
@@ -7222,36 +7652,1308 @@ Os dados atuais deste navegador serão substituídos.`);
     };
   }
 
-  // If the session was already valid before scripts initialized, bypass login safely.
-  const auto=removeStartupLoginIfSessionValid();
-
-  if(!auto){
-    paintTimer();
-  }else{
-    markAuthenticated();
-  }
-
-  // Re-check once the legacy login constructor has run.
-  setTimeout(()=>{
-    if(validStoredSession()&&!locked){
-      document.getElementById('loginOverlay')?.remove();
-      try{window.ppRevealAppAfterLogin?.()}catch(e){}
-      restoreWorkspace();
-    }
+  const resumed=resumeWithoutFlash();
+  if(!resumed){
+    document.documentElement.classList.remove('pp-session-resume-v45');
     ensureTimer();
     paintTimer();
+  }
+
+  // Legacy scripts may recreate a login overlay after our first pass.
+  setTimeout(()=>{
+    if(validSession()&&!locked){
+      document.documentElement.classList.add('pp-session-resume-v45');
+      removeLegacyLoginWithoutReveal();
+      restoreWorkspaceHidden();
+      revealAfterRestore();
+    }
+    ensureTimer();paintTimer();
   },180);
 
-  setInterval(()=>{
-    if(!document.hidden&&!locked)paintTimer();
-  },1000);
+  setTimeout(()=>{
+    if(validSession()&&!locked){
+      document.getElementById('loginOverlay')?.remove();
+    }
+  },700);
 
-  window.ppSessionV44={
+  clearInterval(ticker);
+  ticker=setInterval(checkExpiry,1000);
+
+  window.ppSessionV47={
     lock:lockNow,
     captureWorkspace,
-    restoreWorkspace,
-    remaining:()=>hiddenAt?Math.max(0,LIMIT_MS-(Date.now()-hiddenAt)):LIMIT_MS
+    restore:restoreWorkspaceHidden,
+    remaining
   };
+})();
+</script>
+
+
+<script id="pp-v46-cards-profiles">
+(function(){
+  const REGISTRY_KEY='planejador_profiles_v46';
+  const PM=window.__ppV41Profile;
+
+  function active(){return localStorage.getItem('planejador_active_profile')||'Marcos'}
+  function esc46(s){
+    return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function registry(){
+    let arr=[];
+    try{arr=JSON.parse(localStorage.getItem(REGISTRY_KEY)||'[]')}catch(e){}
+    if(!Array.isArray(arr))arr=[];
+    const by=new Map(arr.filter(x=>x&&x.name).map(x=>[String(x.name).toLowerCase(),x]));
+    if(!by.has('marcos'))by.set('marcos',{name:'Marcos',builtin:true});
+    if(!by.has('christian'))by.set('christian',{name:'Christian',builtin:true});
+    arr=[...by.values()];
+    localStorage.setItem(REGISTRY_KEY,JSON.stringify(arr));
+    return arr;
+  }
+  function saveRegistry(arr){localStorage.setItem(REGISTRY_KEY,JSON.stringify(arr))}
+  function passFor(p){return localStorage.getItem('planejador_password_'+p)||'123456'}
+
+  function blankState(){
+    if(PM?.blankChristian)return PM.blankChristian();
+    return {
+      'financeiro_marcos_custom_tx_v3':'[]',
+      'financeiro_marcos_debt_edits_v3':'{}',
+      'financeiro_marcos_debt_archived_v3':'[]',
+      'financeiro_marcos_debt_deleted_v3':'[]',
+      'financeiro_marcos_assets_v3':'[]',
+      'financeiro_marcos_fgts_summary_v3':'{"saldoAtual":0,"saldoBloqueado":0,"saldoRescisao":0,"saldoDisponivel":0}',
+      'financeiro_marcos_cards_v3':'[]',
+      'financeiro_marcos_card_purchases_v3':'[]',
+      'financeiro_marcos_investments_v3':'[]',
+      'planejador_creditores_v1':'[]',
+      'planejador_tx_edits_v1':'{}',
+      'planejador_tx_deleted_v1':'[]',
+      'planejador_fgts_item_edits_v1':'{}',
+      'planejador_invoice_item_overrides_v2':'{}',
+      'planejador_purchase_overrides_v2':'{}',
+      'planejador_asset_financings_v27':'{}'
+    };
+  }
+
+  // Generic profile switching: works for Marcos, Christian and future profiles.
+  window.ppV41SwitchProfile=window.ppV42SwitchProfile=window.ppV46SwitchProfile=function(profile){
+    if(!profile||profile===active())return;
+    try{window.ppV42SaveProfileState?.()}catch(e){}
+    if(PM){
+      let target=PM.readState(profile);
+      if(!target){
+        target=profile==='Marcos'?PM.captureShared():blankState();
+        PM.saveState(profile,target);
+      }
+      PM.applyState(target);
+    }
+    localStorage.setItem('planejador_active_profile',profile);
+
+    // Keep the 30-minute authenticated session attached to the selected profile.
+    try{
+      const now=Date.now();
+      sessionStorage.setItem('pp_secure_session_v45',JSON.stringify({
+        authenticated:true,profile,startedAt:now,expiresAt:now+60*60*1000
+      }));
+      sessionStorage.removeItem('pp_secure_workspace_v45');
+    }catch(e){}
+    try{window.ppCloud?.save?.()}catch(e){}
+    location.reload();
+  };
+
+  function createProfileModal(){
+    document.getElementById('profileCreateV46')?.remove();
+    const ov=document.createElement('div');
+    ov.id='profileCreateV46';
+    ov.innerHTML=`<div class="pp-profile-v46-card">
+      <div class="pp-profile-v46-head">
+        <div><h2>Criar novo perfil</h2><p>O novo perfil começa completamente vazio e separado dos demais.</p></div>
+        <button class="pp-profile-v46-close" type="button">×</button>
+      </div>
+      <div class="pp-profile-v46-field"><label>Nome do perfil</label><input id="profileNameV46" maxlength="24" placeholder="Ex.: Ana"></div>
+      <div class="pp-profile-v46-field"><label>Senha</label><input id="profilePassV46" type="password" minlength="6" autocomplete="new-password" placeholder="Mínimo de 6 caracteres"></div>
+      <div class="pp-profile-v46-field"><label>Confirmar senha</label><input id="profilePass2V46" type="password" minlength="6" autocomplete="new-password"></div>
+      <div class="pp-profile-v46-error" id="profileCreateErrorV46"></div>
+      <div class="pp-profile-v46-actions">
+        <button type="button" class="pp-profile-v46-secondary" id="profileCreateCancelV46">Cancelar</button>
+        <button type="button" class="pp-profile-v46-primary" id="profileCreateConfirmV46">Criar perfil</button>
+      </div>
+    </div>`;
+    document.body.appendChild(ov);
+    const close=()=>ov.remove();
+    ov.querySelector('.pp-profile-v46-close').onclick=close;
+    document.getElementById('profileCreateCancelV46').onclick=close;
+    ov.onclick=e=>{if(e.target===ov)close()};
+    document.getElementById('profileCreateConfirmV46').onclick=()=>{
+      const name=(document.getElementById('profileNameV46').value||'').trim().replace(/\s+/g,' ');
+      const p1=document.getElementById('profilePassV46').value||'';
+      const p2=document.getElementById('profilePass2V46').value||'';
+      const err=document.getElementById('profileCreateErrorV46');
+      if(name.length<2){err.textContent='Informe um nome com pelo menos 2 caracteres.';return}
+      if(registry().some(x=>String(x.name).toLowerCase()===name.toLowerCase())){err.textContent='Já existe um perfil com esse nome.';return}
+      if(p1.length<6){err.textContent='A senha precisa ter pelo menos 6 caracteres.';return}
+      if(p1!==p2){err.textContent='As senhas não coincidem.';return}
+      const arr=registry();arr.push({name,createdAt:new Date().toISOString(),builtin:false});saveRegistry(arr);
+      localStorage.setItem('planejador_password_'+name,p1);
+      if(PM)PM.saveState(name,blankState());
+      try{window.ppCloud?.save?.()}catch(e){}
+      close();
+      window.ppV46SwitchProfile(name);
+    };
+    setTimeout(()=>document.getElementById('profileNameV46')?.focus(),30);
+  }
+
+  function switchProfileModal(){
+    document.getElementById('profileSwitchV46')?.remove();
+    let selected=active();
+    const ov=document.createElement('div');ov.id='profileSwitchV46';
+    const options=registry().map(p=>`<button type="button" class="pp-profile-v46-option ${p.name===selected?'active':''}" data-p="${esc46(p.name)}">
+      <span class="pp-profile-v46-avatar">${esc46(p.name.charAt(0).toUpperCase())}</span>
+      <span><b>${esc46(p.name)}</b><small>${p.builtin?'Perfil principal/pessoal':'Perfil adicional'}</small></span>
+    </button>`).join('');
+    ov.innerHTML=`<div class="pp-profile-v46-card">
+      <div class="pp-profile-v46-head">
+        <div><h2>Trocar perfil</h2><p>Todos os perfis possuem dados e senha independentes.</p></div>
+        <button class="pp-profile-v46-close" type="button">×</button>
+      </div>
+      <div class="pp-profile-v46-list">${options}</div>
+      <div class="pp-profile-v46-field"><label>Senha do perfil selecionado</label><input id="profileSwitchPassV46" type="password" autocomplete="current-password"></div>
+      <div class="pp-profile-v46-error" id="profileSwitchErrorV46"></div>
+      <div class="pp-profile-v46-actions">
+        <button type="button" class="pp-profile-v46-secondary" id="profileNewInsideV46">+ Novo perfil</button>
+        <button type="button" class="pp-profile-v46-primary" id="profileSwitchConfirmV46">Entrar neste perfil</button>
+      </div>
+    </div>`;
+    document.body.appendChild(ov);
+    const close=()=>ov.remove();
+    ov.querySelector('.pp-profile-v46-close').onclick=close;
+    ov.onclick=e=>{if(e.target===ov)close()};
+    ov.querySelectorAll('.pp-profile-v46-option').forEach(b=>b.onclick=()=>{
+      selected=b.dataset.p;
+      ov.querySelectorAll('.pp-profile-v46-option').forEach(x=>x.classList.toggle('active',x===b));
+      document.getElementById('profileSwitchPassV46').value='';
+      document.getElementById('profileSwitchErrorV46').textContent='';
+      document.getElementById('profileSwitchPassV46').focus();
+    });
+    document.getElementById('profileNewInsideV46').onclick=()=>{close();createProfileModal()};
+    const go=()=>{
+      const val=document.getElementById('profileSwitchPassV46').value||'';
+      if(val!==passFor(selected)){
+        document.getElementById('profileSwitchErrorV46').textContent='Senha incorreta.';
+        document.getElementById('profileSwitchPassV46').value='';
+        return;
+      }
+      if(selected===active()){close();return}
+      window.ppV46SwitchProfile(selected);
+    };
+    document.getElementById('profileSwitchConfirmV46').onclick=go;
+    document.getElementById('profileSwitchPassV46').onkeydown=e=>{if(e.key==='Enter')go()};
+    setTimeout(()=>document.getElementById('profileSwitchPassV46')?.focus(),30);
+  }
+
+  function enhanceProfilePanel(){
+    const modal=document.getElementById('profilePanelModal');
+    if(!modal)return;
+    const actions=modal.querySelector('.profile-actions');if(!actions)return;
+
+    const legacy=document.getElementById('switchProfileBtn');
+    if(legacy){
+      legacy.id='switchProfileLegacyV46';
+      legacy.style.display='none';
+    }
+    if(!document.getElementById('switchProfileBtnV46')){
+      const sw=document.createElement('button');sw.type='button';sw.id='switchProfileBtnV46';sw.textContent='Trocar perfil';
+      sw.onclick=e=>{e.preventDefault();modal.classList.remove('open');switchProfileModal()};
+      actions.prepend(sw);
+    }
+    if(!document.getElementById('createProfileBtnV46')){
+      const cr=document.createElement('button');cr.type='button';cr.id='createProfileBtnV46';cr.textContent='+ Novo perfil';
+      cr.onclick=e=>{e.preventDefault();modal.classList.remove('open');createProfileModal()};
+      actions.appendChild(cr);
+    }
+  }
+
+  // Add additional profiles to the normal start login selector.
+  function decorateLogin(){
+    const ov=document.getElementById('loginOverlay');if(!ov)return;
+    const holder=ov.querySelector('.profile-choices');if(!holder)return;
+    const list=registry();
+    const existing=[...holder.querySelectorAll('.profile-choice')].map(x=>x.dataset.profile);
+    list.forEach(p=>{
+      if(existing.includes(p.name))return;
+      const b=document.createElement('button');b.type='button';b.className='profile-choice';b.dataset.profile=p.name;
+      b.innerHTML=`<span class="profile-avatar">${esc46(p.name.charAt(0).toUpperCase())}</span><span><b>${esc46(p.name)}</b><span>Perfil pessoal</span></span>`;
+      b.onclick=()=>{
+        holder.querySelectorAll('.profile-choice').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        ov.querySelector('#loginPassword').value='';
+        ov.querySelector('#loginPassword').focus();
+      };
+      holder.appendChild(b);
+    });
+  }
+
+  /* -------- Próximas faturas: cartão APENAS, sem qualquer acesso a dívidas -------- */
+  let invoiceIndex=0;
+  function invoiceItems(){
+    let sch=[];
+    try{sch=typeof getCardSchedules==='function'?(getCardSchedules(false)||[]):[]}catch(e){sch=[]}
+    const nowY=Number(typeof currentYear!=='undefined'?currentYear:new Date().getFullYear());
+    const nowM=Number(typeof currentMonth!=='undefined'?currentMonth:new Date().getMonth()+1);
+    const activeCards=(typeof cards!=='undefined'&&Array.isArray(cards)?cards:[]).filter(c=>c.status!=='Cancelado');
+    const cardIds=new Set(activeCards.map(c=>String(c.id)));
+
+    const grouped={};
+    sch.forEach(r=>{
+      if(r.paid)return;
+      if(!cardIds.has(String(r.cardId)))return;
+      const y=Number(r.year),m=Number(r.month);
+      if(y<nowY||(y===nowY&&m<nowM))return;
+      const k=`${r.cardId}|${y}|${m}`;
+      if(!grouped[k])grouped[k]={cardId:r.cardId,year:y,month:m,total:0,count:0};
+      grouped[k].total+=Number(r.amount)||0;
+      grouped[k].count++;
+    });
+
+    // One next unpaid invoice for each active credit card.
+    const nextByCard={};
+    Object.values(grouped).sort((a,b)=>a.year-b.year||a.month-b.month).forEach(x=>{
+      if(!nextByCard[x.cardId])nextByCard[x.cardId]=x;
+    });
+
+    return Object.values(nextByCard).map(x=>{
+      const c=activeCards.find(c=>String(c.id)===String(x.cardId))||{};
+      return {...x,card:c};
+    }).sort((a,b)=>a.year-b.year||a.month-b.month);
+  }
+
+  function renderCardInvoicesOnly(){
+    const box=document.getElementById('nextDues');if(!box)return;
+    box.classList.add('pp-card-invoices-v46');
+    const head=box.closest('.panel')?.querySelector('.panelhead');
+    if(head){
+      const h=head.querySelector('h2');if(h)h.textContent='Próximas faturas de cartões';
+      const s=head.querySelector('span');if(s)s.textContent='somente cartões de crédito · nenhuma dívida aparece aqui';
+    }
+
+    const items=invoiceItems();
+    if(!items.length){
+      box.innerHTML='<div class="invoice-empty-v46"><b>Nenhuma fatura de cartão prevista</b>Cadastre uma compra no cartão para que a próxima fatura apareça aqui.</div>';
+      return;
+    }
+    if(invoiceIndex>=items.length)invoiceIndex=0;
+
+    const cardsHtml=items.map((x,i)=>{
+      const c=x.card||{};
+      const color=c.color||'#12335f';
+      const month=(typeof monthNames!=='undefined'&&monthNames[x.month-1])?monthNames[x.month-1]:String(x.month).padStart(2,'0');
+      const due=c.dueDay?`Vence dia ${c.dueDay}`:'Vencimento não informado';
+      return `<article class="invoice-card-v46" data-card-id-v46="${esc46(x.cardId)}" style="background:linear-gradient(135deg,${color},${color} 58%,rgba(0,0,0,.22) 145%)">
+        <div class="invoice-top-v46">
+          <div class="invoice-bank-v46"><small>cartão de crédito</small><strong>${esc46(c.name||'Cartão')}</strong></div>
+          <span class="invoice-month-v46">${esc46(month)} / ${x.year}</span>
+        </div>
+        <div class="invoice-value-v46">${typeof brl==='function'?brl(x.total):x.total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</div>
+        <div class="invoice-bottom-v46"><span>${x.count} lançamento(s)<br>próxima fatura em aberto</span><span class="invoice-due-v46">${esc46(due)}</span></div>
+      </article>`;
+    }).join('');
+
+    box.innerHTML=`<div class="invoice-showcase-v46">
+      <div class="invoice-track-v46" id="invoiceTrackV46">${cardsHtml}</div>
+      <div class="invoice-nav-v46">
+        <div class="invoice-dots-v46">${items.map((_,i)=>`<i class="${i===invoiceIndex?'active':''}"></i>`).join('')}</div>
+        <div class="invoice-arrows-v46"><button type="button" id="invoicePrevV46">‹</button><button type="button" id="invoiceNextV46">›</button></div>
+      </div>
+    </div>`;
+
+    const track=document.getElementById('invoiceTrackV46');
+    const all=[...track.querySelectorAll('.invoice-card-v46')];
+    const scrollToIndex=idx=>{
+      invoiceIndex=(idx+all.length)%all.length;
+      all[invoiceIndex]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'start'});
+      box.querySelectorAll('.invoice-dots-v46 i').forEach((d,i)=>d.classList.toggle('active',i===invoiceIndex));
+    };
+    document.getElementById('invoicePrevV46').onclick=()=>scrollToIndex(invoiceIndex-1);
+    document.getElementById('invoiceNextV46').onclick=()=>scrollToIndex(invoiceIndex+1);
+    all.forEach((el,i)=>{
+      el.onclick=()=>{
+        invoiceIndex=i;
+        try{window.openCardDetail?.(el.dataset.cardIdV46)}catch(e){}
+      };
+    });
+  }
+
+  // Final dashboard wrapper. This runs after every prior dashboard implementation.
+  const priorDash=window.renderDashboard;
+  const finalDash=function(){
+    const r=typeof priorDash==='function'?priorDash.apply(this,arguments):undefined;
+    renderCardInvoicesOnly();
+    return r;
+  };
+  window.renderDashboard=finalDash;
+  try{renderDashboard=finalDash}catch(e){}
+
+  // Ensure a blank non-Marcos profile cannot inherit base debts/FGTS from Marcos.
+  const prevDebts=window.getDebts;
+  window.getDebts=function(){
+    if(active()!=='Marcos')return [];
+    return typeof prevDebts==='function'?prevDebts.apply(this,arguments):[];
+  };
+  try{getDebts=window.getDebts}catch(e){}
+
+  const prevFgts=window.getFgtsContracts;
+  window.getFgtsContracts=function(){
+    if(active()!=='Marcos')return [];
+    return typeof prevFgts==='function'?prevFgts.apply(this,arguments):[];
+  };
+  try{getFgtsContracts=window.getFgtsContracts}catch(e){}
+
+  document.addEventListener('click',e=>{
+    if(e.target.closest('.profile-man')){
+      setTimeout(()=>{enhanceProfilePanel();decorateLogin()},20);
+    }
+  },true);
+
+  // Initialize and keep login selector/profile panel aware of the registry without observers.
+  registry();
+  setTimeout(()=>{enhanceProfilePanel();decorateLogin();renderCardInvoicesOnly()},80);
+  setTimeout(()=>{enhanceProfilePanel();decorateLogin();renderCardInvoicesOnly()},500);
+  setTimeout(()=>{decorateLogin()},1400);
+
+  window.ppProfilesV46={registry,create:createProfileModal,switcher:switchProfileModal};
+  window.ppRenderCardInvoicesOnlyV46=renderCardInvoicesOnly;
+})();
+</script>
+
+
+<script id="pp-v48-year-filter">
+(function(){
+  function validLaunchRows(){
+    const rows=[];
+    try{
+      if(Array.isArray(custom)) rows.push(...custom);
+    }catch(e){}
+    try{
+      if(typeof cardAggregatedTx==='function'){
+        const c=cardAggregatedTx();
+        if(Array.isArray(c)) rows.push(...c);
+      }
+    }catch(e){}
+    return rows.filter(x=>{
+      const y=Number(x?.ano);
+      return Number.isFinite(y) && y>=2000 && y<=2100;
+    });
+  }
+
+  function availableYears(){
+    const ys=new Set([Number(currentYear)]);
+    validLaunchRows().forEach(x=>ys.add(Number(x.ano)));
+    return [...ys].filter(Boolean).sort((a,b)=>b-a);
+  }
+
+  function applyYearFilters(){
+    const years=availableYears();
+
+    // If the selected dashboard year no longer exists, return to the current year.
+    if(!years.includes(Number(year))){
+      year=Number(currentYear);
+    }
+
+    const yf=document.getElementById('yearFilter');
+    if(yf){
+      const selected=years.includes(Number(year))?Number(year):Number(currentYear);
+      yf.innerHTML=years.map(y=>`<option value="${y}" ${y===selected?'selected':''}>${y}</option>`).join('');
+      yf.value=String(selected);
+    }
+
+    // Lançamentos filter: "Todos os anos" + only years that actually contain launches,
+    // with the current year always available.
+    const tx=document.getElementById('txYear');
+    if(tx){
+      const old=tx.value;
+      tx.innerHTML='<option value="all">Todos os anos</option>'+
+        years.map(y=>`<option value="${y}">${y}</option>`).join('');
+      tx.value=(old==='all'||years.includes(Number(old)))?old:'all';
+    }
+
+    return years;
+  }
+
+  // Preserve every other selector built by the app, then clean only the year filters.
+  try{
+    const originalSave=saveSelectOptions;
+    saveSelectOptions=function(){
+      const r=originalSave.apply(this,arguments);
+      applyYearFilters();
+      return r;
+    };
+    window.saveSelectOptions=saveSelectOptions;
+  }catch(e){}
+
+  // Keep the filter synchronized after dashboard refreshes without changing months.
+  const previousDashboard=window.renderDashboard;
+  if(typeof previousDashboard==='function'){
+    const wrapped=function(){
+      applyYearFilters();
+      return previousDashboard.apply(this,arguments);
+    };
+    window.renderDashboard=wrapped;
+    try{renderDashboard=wrapped}catch(e){}
+  }
+
+  // Refresh after actions that can create/remove years.
+  document.addEventListener('click',e=>{
+    if(e.target.closest('#saveTx,#saveCardPurchase,#saveCard,#deleteTx,#deleteCard,#saveAsset,#saveInvestment')){
+      setTimeout(()=>{
+        applyYearFilters();
+        try{window.renderDashboard?.()}catch(err){}
+      },220);
+    }
+  },true);
+
+  applyYearFilters();
+  setTimeout(applyYearFilters,120);
+  setTimeout(applyYearFilters,600);
+
+  window.ppV48AvailableYears=availableYears;
+  window.ppV48ApplyYearFilters=applyYearFilters;
+})();
+</script>
+
+
+<script id="pp-v49-fgts-money">
+(function(){
+  function num49(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(!s)return 0;
+    if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');
+    return Number(s.replace(/[^0-9.-]/g,''))||0;
+  }
+  function money49(v){
+    return Number(v||0).toLocaleString('pt-BR',{
+      style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:2
+    });
+  }
+  function numberMoney49(v){
+    return Number(v||0).toLocaleString('pt-BR',{
+      minimumFractionDigits:2,maximumFractionDigits:2
+    });
+  }
+
+  /* ============================================================
+     FGTS: restaurar memória anual do saldo bloqueado e desconto
+     exato do próximo saque-aniversário.
+     ============================================================ */
+  function profile49(){return localStorage.getItem('planejador_active_profile')||'Marcos'}
+  function birthdayMonth49(){
+    const p=profile49();
+    if(p==='Christian')return 1;
+    return 7; // Marcos e perfis sem aniversário específico cadastrado
+  }
+  function birthdayName49(){
+    return ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][birthdayMonth49()-1];
+  }
+  function nextSaqueYear49(){
+    const cy=Number(typeof currentYear!=='undefined'?currentYear:new Date().getFullYear());
+    const cm=Number(typeof currentMonth!=='undefined'?currentMonth:new Date().getMonth()+1);
+    return cm>birthdayMonth49()?cy+1:cy;
+  }
+  function faixa49(balance){
+    const s=Math.max(0,num49(balance));
+    if(s<=500)return{faixa:'Até R$ 500,00',aliq:.50,parcela:0};
+    if(s<=1000)return{faixa:'De R$ 500,01 a R$ 1.000,00',aliq:.40,parcela:50};
+    if(s<=5000)return{faixa:'De R$ 1.000,01 a R$ 5.000,00',aliq:.30,parcela:150};
+    if(s<=10000)return{faixa:'De R$ 5.000,01 a R$ 10.000,00',aliq:.20,parcela:650};
+    if(s<=15000)return{faixa:'De R$ 10.000,01 a R$ 15.000,00',aliq:.15,parcela:1150};
+    if(s<=20000)return{faixa:'De R$ 15.000,01 a R$ 20.000,00',aliq:.10,parcela:1900};
+    return{faixa:'Acima de R$ 20.000,00',aliq:.05,parcela:2900};
+  }
+
+  function contracts49(){
+    const p=profile49();
+    let edits={};
+    try{edits=(typeof fgtsItemEdits!=='undefined'&&fgtsItemEdits)||{}}catch(e){}
+    const base=(p==='Marcos'?(BASE_DATA.fgtsDetalhe?.contratos||[]):[]);
+    const baseIds=new Set(base.map(c=>String(c.id)));
+    const rows=base.map(c=>Object.assign({},c,edits[c.id]||{}));
+
+    // Perfis que não são Marcos usam apenas seus próprios itens manuais.
+    // Para Marcos, também inclui eventual item novo que não exista no BASE_DATA.
+    Object.entries(edits||{}).forEach(([id,c])=>{
+      if(baseIds.has(String(id)))return;
+      rows.push(Object.assign({id,anos:{}},c||{}));
+    });
+
+    return rows.filter(c=>c&&!c._deleted);
+  }
+
+  // Final override: não deixa o wrapper antigo de perfis bloquear os itens próprios.
+  window.getFgtsContracts=contracts49;
+  try{getFgtsContracts=contracts49}catch(e){}
+
+  function activeForDiscount49(c){
+    return c&&!c._deleted&&c.status!=='Quitado'&&!c.quitadoManual&&num49(c.pendente)!==0;
+  }
+  function annualDiscounts49(){
+    const map={};
+    contracts49().filter(activeForDiscount49).forEach(c=>{
+      Object.entries(c.anos||{}).forEach(([yr,val])=>{
+        const y=Number(yr),amount=num49(val);
+        if(!Number.isFinite(y)||amount<=0)return;
+        map[y]=(map[y]||0)+amount;
+      });
+    });
+    return map;
+  }
+  function saqueInfo49(){
+    let saldo=0;
+    try{saldo=Math.max(0,num49(fgtsSummary?.saldoAtual||0))}catch(e){}
+    const f=faixa49(saldo);
+    const gross=saldo*f.aliq+f.parcela;
+    const year=nextSaqueYear49();
+    const discounts=annualDiscounts49();
+    const discount=num49(discounts[year]||0);
+    return {saldo,f,gross,year,discounts,discount,net:Math.max(0,gross-discount)};
+  }
+
+  function ensureBlocked49(){
+    let m=document.getElementById('fgtsBlockedModal');
+    if(!m){
+      m=document.createElement('div');
+      m.className='modalback';m.id='fgtsBlockedModal';
+      m.innerHTML=`<div class="modal">
+        <button type="button" class="pp-modal-close" id="fgtsBlockedClose" aria-label="Fechar">×</button>
+        <h2 style="margin:0">Saldo bloqueado · antecipações</h2>
+        <p style="color:#7b8797;margin:6px 0 0;font-size:11px">Memória anual das antecipações que reduzem os próximos saques-aniversário.</p>
+        <div id="fgtsBlockedBody"></div>
+      </div>`;
+      document.body.appendChild(m);
+      document.getElementById('fgtsBlockedClose').onclick=()=>m.classList.remove('open');
+      m.onclick=e=>{if(e.target===m)m.classList.remove('open')};
+    }
+    return m;
+  }
+
+  window.openFgtsBlockedMemory=function(){
+    const m=ensureBlocked49();
+    const info=saqueInfo49();
+    const years=Object.keys(info.discounts).map(Number).filter(y=>y>=Number(currentYear)).sort((a,b)=>a-b);
+    const body=document.getElementById('fgtsBlockedBody');
+    body.innerHTML=`
+      <div class="fgts-blocked-summary">
+        <div><span>Saldo bloqueado atual</span><b>${money49(fgtsSummary?.saldoBloqueado||0)}</b></div>
+        <div><span>Próximo saque-aniversário</span><b>${birthdayName49()} de ${info.year}</b></div>
+        <div><span>Desconto no saque de ${info.year}</span><b style="color:#b42318">${money49(info.discount)}</b></div>
+      </div>
+      <div style="overflow:auto;border:1px solid #e7ecf2;border-radius:15px">
+        <table class="fgts-year-table">
+          <thead><tr><th>Ano</th><th>Saldo bloqueado previsto no ano</th></tr></thead>
+          <tbody>${years.length?years.map(y=>`<tr class="${y===info.year?'next-year':''}">
+            <td><b>${y}</b></td>
+            <td class="discount">− ${money49(info.discounts[y])}</td>
+          </tr>`).join(''):`<tr><td colspan="2">Nenhum saldo bloqueado anual previsto nas antecipações pendentes.</td></tr>`}</tbody>
+        </table>
+      </div>
+      <div class="fgts-net-box">
+        <span>Próximo saque-aniversário líquido estimado<br>
+          <small>${money49(info.gross)} bruto − ${money49(info.discount)} bloqueado em ${info.year}</small>
+        </span>
+        <b>${money49(info.net)}</b>
+      </div>`;
+    document.querySelectorAll('.modalback.open').forEach(x=>{if(x!==m)x.classList.remove('open')});
+    m.classList.add('open');
+  };
+
+  window.openSaqueMemory=function(){
+    const info=saqueInfo49();
+    let m=document.getElementById('saqueMemoryModal');
+    if(!m){
+      m=document.createElement('div');m.className='modalback';m.id='saqueMemoryModal';
+      m.innerHTML='<div class="modal"><div class="saque-mem-head"><div><h2>Memória de cálculo</h2><p>Saque-aniversário do FGTS</p></div><button type="button" class="saque-close" id="saqueMemoryClose">Fechar</button></div><div class="saque-mem-body" id="saqueMemoryBody"></div></div>';
+      document.body.appendChild(m);
+      document.getElementById('saqueMemoryClose').onclick=()=>m.classList.remove('open');
+      m.onclick=e=>{if(e.target===m)m.classList.remove('open')};
+    }
+    const base=info.saldo*info.f.aliq;
+    document.getElementById('saqueMemoryBody').innerHTML=`
+      <div class="saque-highlight">
+        <div><span>Saldo considerado</span><b>${money49(info.saldo)}</b></div>
+        <div><span>Perfil / aniversário</span><b>${profile49()} · ${birthdayName49()}</b></div>
+      </div>
+      <div class="saque-formula">
+        <h3>Como o valor foi calculado</h3>
+        <div class="saque-formula-line"><span>Faixa de saldo</span><b>${info.f.faixa}</b></div>
+        <div class="saque-formula-line"><span>Alíquota</span><b>${(info.f.aliq*100).toFixed(0)}%</b></div>
+        <div class="saque-formula-line"><span>${money49(info.saldo)} × ${(info.f.aliq*100).toFixed(0)}%</span><b>${money49(base)}</b></div>
+        <div class="saque-formula-line"><span>Parcela adicional</span><b>${money49(info.f.parcela)}</b></div>
+        <div class="saque-formula-line"><span>Saque-aniversário bruto</span><b>${money49(info.gross)}</b></div>
+        <div class="saque-formula-line"><span>Saldo bloqueado previsto para ${info.year}</span><b style="color:#b42318">− ${money49(info.discount)}</b></div>
+      </div>
+      <div class="saque-result">
+        <span>Saque-aniversário líquido estimado de ${info.year}</span>
+        <b>${money49(info.net)}</b>
+      </div>`;
+    document.querySelectorAll('.modalback.open').forEach(x=>{if(x!==m)x.classList.remove('open')});
+    m.classList.add('open');
+  };
+
+  function decorateFgts49(){
+    const summary=document.getElementById('fgtsSummary');if(!summary)return;
+    const cards=[...summary.querySelectorAll('.mini')];
+    const blocked=cards.find(c=>/saldo bloqueado/i.test(c.textContent));
+    if(blocked){
+      blocked.classList.add('fgts-blocked-memory');
+      blocked.style.cursor='pointer';
+      blocked.onclick=e=>{e.preventDefault();window.openFgtsBlockedMemory()};
+      blocked.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();window.openFgtsBlockedMemory()}};
+      blocked.tabIndex=0;blocked.setAttribute('role','button');
+      const b=blocked.querySelector('b');
+      if(b)b.textContent=money49(fgtsSummary?.saldoBloqueado||0);
+    }
+
+    const saque=cards.find(c=>/saque-aniversário/i.test(c.textContent));
+    if(saque){
+      const info=saqueInfo49();
+      saque.style.cursor='pointer';
+      const b=saque.querySelector('b');if(b)b.textContent=money49(info.net);
+      let small=saque.querySelector('small');
+      if(!small){small=document.createElement('small');saque.appendChild(small)}
+      small.className='saque-card-note';
+      small.textContent=`Bruto ${money49(info.gross)} − bloqueado ${money49(info.discount)} em ${info.year}`;
+      saque.onclick=e=>{e.preventDefault();window.openSaqueMemory()};
+      saque.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();window.openSaqueMemory()}};
+      saque.tabIndex=0;saque.setAttribute('role','button');
+    }
+  }
+
+  const oldRenderFgts49=window.renderFgts;
+  window.renderFgts=function(){
+    const r=typeof oldRenderFgts49==='function'?oldRenderFgts49.apply(this,arguments):undefined;
+    setTimeout(decorateFgts49,0);
+    return r;
+  };
+  try{renderFgts=window.renderFgts}catch(e){}
+
+  /* ============================================================
+     Formatação monetária global
+     Display: R$ 1.234,56
+     Inputs financeiros: 1.234,56
+     ============================================================ */
+  window.formatMoneyBR=function(value,withCurrency=true){
+    const n=num49(value);
+    return n.toLocaleString('pt-BR',{
+      style:withCurrency?'currency':'decimal',
+      currency:withCurrency?'BRL':undefined,
+      minimumFractionDigits:2,maximumFractionDigits:2
+    });
+  };
+  window.parseMoneyBR=num49;
+
+  function monetaryField49(el){
+    if(!(el instanceof HTMLInputElement))return false;
+    if(['password','file','date','month','time','checkbox','radio'].includes(el.type))return false;
+    if(/year|ano|month|mes|day|dia|qty|quant|parcelas|depend|hora|percent|aliq|taxa/i.test(el.id||''))return false;
+
+    const id=(el.id||'').toLowerCase();
+    const label=(el.closest('.field')?.querySelector('label')?.textContent||el.parentElement?.querySelector?.('label')?.textContent||'').toLowerCase();
+    const hint=id+' '+label;
+    return /valor|saldo|total|quitado|pendente|limite|sal[aá]rio|renda|receita|despesa|parcela|desconto|benef[ií]cio|pens[aã]o|inss|irrf|fgts|custo|pre[cç]o|aporte|patrim[oô]nio|fatura|empr[eé]stimo|financiamento|taxa mensal|juros monet/i.test(hint)
+      || el.getAttribute('inputmode')==='decimal';
+  }
+
+  function formatInput49(el){
+    if(!monetaryField49(el)||!String(el.value||'').trim())return;
+    el.value=numberMoney49(num49(el.value));
+    el.classList.add('pp-money-v49');
+    el.setAttribute('inputmode','decimal');
+  }
+  function editInput49(el){
+    if(!monetaryField49(el)||!String(el.value||'').trim())return;
+    el.value=numberMoney49(num49(el.value));
+    el.classList.add('pp-money-v49');
+    el.setAttribute('inputmode','decimal');
+  }
+
+  document.addEventListener('focusin',e=>{if(monetaryField49(e.target))editInput49(e.target)},true);
+  document.addEventListener('focusout',e=>{if(monetaryField49(e.target))formatInput49(e.target)},true);
+
+  function formatVisibleMoneyInputs49(root=document){
+    root.querySelectorAll('input').forEach(el=>{
+      if(monetaryField49(el)&&String(el.value||'').trim())formatInput49(el);
+    });
+  }
+
+  // No MutationObserver: run only after explicit UI-opening interactions.
+  document.addEventListener('click',e=>{
+    if(e.target.closest('button,.card,.mini,.dots')){
+      setTimeout(()=>formatVisibleMoneyInputs49(),80);
+    }
+  },true);
+
+  setTimeout(()=>{
+    try{window.renderFgts?.()}catch(e){}
+    decorateFgts49();
+    formatVisibleMoneyInputs49();
+  },120);
+
+  window.ppV49Fgts={
+    contracts:contracts49,
+    annualDiscounts:annualDiscounts49,
+    saqueInfo:saqueInfo49
+  };
+})();
+</script>
+
+
+
+<script id="pp-previdencia-v54">
+(function(){
+  const SEED=[{"id":"cnis-2011-03","year":2011,"month":3,"value":165.29,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2011-04","year":2011,"month":4,"value":291.68,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2011-05","year":2011,"month":5,"value":291.68,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2011-06","year":2011,"month":6,"value":291.68,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2011-07","year":2011,"month":7,"value":254.16,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2011-08","year":2011,"month":8,"value":294.39,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2011-09","year":2011,"month":9,"value":294.39,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2011-10","year":2011,"month":10,"value":294.39,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2011-11","year":2011,"month":11,"value":294.39,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2011-12","year":2011,"month":12,"value":294.39,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2012-01","year":2012,"month":1,"value":365.19,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2012-02","year":2012,"month":2,"value":365.19,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2012-03","year":2012,"month":3,"value":158.25,"employer":"Lojas Rede - Comercial Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2012-06","year":2012,"month":6,"value":622.0,"employer":"AEC Centro de Contatos S/A","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2012-07","year":2012,"month":7,"value":733.03,"employer":"AEC Centro de Contatos S/A","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2012-08","year":2012,"month":8,"value":1039.9,"employer":"AEC Centro de Contatos S/A","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2012-09","year":2012,"month":9,"value":1312.13,"employer":"AEC Centro de Contatos + São Dimas Transportes","indicator":"Vínculos concomitantes","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2012-10","year":2012,"month":10,"value":871.72,"employer":"AEC Centro de Contatos + São Dimas Transportes","indicator":"Vínculos concomitantes","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2012-11","year":2012,"month":11,"value":580.54,"employer":"São Dimas Transportes Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2012-12","year":2012,"month":12,"value":352.47,"employer":"São Dimas Transportes Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2013-04","year":2013,"month":4,"value":497.2,"employer":"Contax S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2013-05","year":2013,"month":5,"value":335.87,"employer":"Contax S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2013-07","year":2013,"month":7,"value":519.8,"employer":"Atento Brasil S/A","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2013-08","year":2013,"month":8,"value":901.9,"employer":"Atento Brasil S/A","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2013-09","year":2013,"month":9,"value":1139.09,"employer":"Atento Brasil S/A","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2013-10","year":2013,"month":10,"value":708.8,"employer":"Atento Brasil + Equipecheque","indicator":"Vínculos concomitantes","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2013-11","year":2013,"month":11,"value":71.3,"employer":"Equipecheque Serviços de Informações Cadastrais Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2013-12","year":2013,"month":12,"value":792.64,"employer":"Nominal Credit Correspondente de Instituições Financeiras Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2014-01","year":2014,"month":1,"value":820,"employer":"Nominal Credit Correspondente de Instituições Financeiras Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2014-02","year":2014,"month":2,"value":820,"employer":"Nominal Credit Correspondente de Instituições Financeiras Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2014-03","year":2014,"month":3,"value":765.34,"employer":"Nominal Credit Correspondente de Instituições Financeiras Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2014-04","year":2014,"month":4,"value":437.33,"employer":"Nominal Credit Correspondente de Instituições Financeiras Ltda","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2014-11","year":2014,"month":11,"value":278.67,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2014-12","year":2014,"month":12,"value":748.66,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2015-01","year":2015,"month":1,"value":1145.41,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2015-02","year":2015,"month":2,"value":854.82,"employer":"Master Brasil S.A.","indicator":"PREC-PMIG-DOM","valid":true,"note":"Há recolhimento doméstico de R$ 1.059,20 com pendência de comprovação; não somado à base estimada.","source":"CNIS 28/09/2026"},{"id":"cnis-2015-03","year":2015,"month":3,"value":826.69,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2015-04","year":2015,"month":4,"value":811.67,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2015-05","year":2015,"month":5,"value":894.44,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2015-06","year":2015,"month":6,"value":962.18,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2015-07","year":2015,"month":7,"value":877.81,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2015-08","year":2015,"month":8,"value":980.51,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2015-09","year":2015,"month":9,"value":813.03,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2015-10","year":2015,"month":10,"value":752.78,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2015-11","year":2015,"month":11,"value":803.09,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2015-12","year":2015,"month":12,"value":838.33,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2016-01","year":2016,"month":1,"value":941.89,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2016-02","year":2016,"month":2,"value":861.5,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2016-03","year":2016,"month":3,"value":745.39,"employer":"Master Brasil S.A.","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2018-11","year":2018,"month":11,"value":954.0,"employer":"Recolhimento MEI","indicator":"IREC-MEI, IREC-LC123","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2020-05","year":2020,"month":5,"value":1768.87,"employer":"Cruz Vermelha Brasileira - Afiliada Minas Gerais","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2020-06","year":2020,"month":6,"value":2948.11,"employer":"Cruz Vermelha Brasileira - Afiliada Minas Gerais","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2020-07","year":2020,"month":7,"value":2948.11,"employer":"Cruz Vermelha Brasileira - Afiliada Minas Gerais","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2020-08","year":2020,"month":8,"value":2514.29,"employer":"Cruz Vermelha Brasileira - Afiliada Minas Gerais","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2020-10","year":2020,"month":10,"value":879.83,"employer":"AEC Centro de Contatos S/A","indicator":"PSC-MEN-SM-EC103","valid":false,"note":"Competência abaixo do salário mínimo após a EC 103/2019; exige complementação, utilização ou agrupamento para contar.","source":"CNIS 28/09/2026"},{"id":"cnis-2020-11","year":2020,"month":11,"value":1059.53,"employer":"AEC Centro de Contatos S/A","indicator":"IREM-INDPEND","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2020-12","year":2020,"month":12,"value":3494.23,"employer":"AEC Centro de Contatos + Hospital Notre Dame Intermédica BH","indicator":"Vínculos concomitantes","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2021-01","year":2021,"month":1,"value":1807.66,"employer":"AEC + Hospital Notre Dame Intermédica BH","indicator":"IREM-INDPEND","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2021-02","year":2021,"month":2,"value":1144.68,"employer":"AEC Centro de Contatos S/A","indicator":"IREM-INDPEND","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2021-03","year":2021,"month":3,"value":1168.92,"employer":"AEC Centro de Contatos S/A","indicator":"IREM-INDPEND","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2021-04","year":2021,"month":4,"value":1168.17,"employer":"AEC Centro de Contatos S/A","indicator":"IREM-INDPEND","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2021-05","year":2021,"month":5,"value":1123.18,"employer":"AEC Centro de Contatos S/A","indicator":"IREM-INDPEND","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2021-06","year":2021,"month":6,"value":1226.3,"employer":"AEC Centro de Contatos S/A","indicator":"IREM-INDPEND","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2021-07","year":2021,"month":7,"value":1250.04,"employer":"AEC Centro de Contatos S/A","indicator":"IREM-INDPEND","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2021-08","year":2021,"month":8,"value":1134.01,"employer":"AEC Centro de Contatos S/A","indicator":"IREM-INDPEND","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2021-09","year":2021,"month":9,"value":1196.62,"employer":"AEC Centro de Contatos S/A","indicator":"IREM-INDPEND","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2021-10","year":2021,"month":10,"value":2273.68,"employer":"AEC + Rede Cidadã","indicator":"IREM-INDPEND","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2021-11","year":2021,"month":11,"value":4071.82,"employer":"AEC + Rede Cidadã","indicator":"IREM-INDPEND","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2021-12","year":2021,"month":12,"value":2632.71,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2022-01","year":2022,"month":1,"value":2494.15,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2022-02","year":2022,"month":2,"value":2494.15,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2022-03","year":2022,"month":3,"value":2494.15,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2022-04","year":2022,"month":4,"value":2494.15,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2022-05","year":2022,"month":5,"value":2494.15,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2022-06","year":2022,"month":6,"value":2494.15,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2022-07","year":2022,"month":7,"value":3242.4,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2022-08","year":2022,"month":8,"value":2743.57,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2022-09","year":2022,"month":9,"value":3992.38,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2022-10","year":2022,"month":10,"value":3992.38,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2022-11","year":2022,"month":11,"value":3992.38,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2022-12","year":2022,"month":12,"value":4258.54,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2023-01","year":2023,"month":1,"value":4613.42,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2023-02","year":2023,"month":2,"value":3992.38,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2023-03","year":2023,"month":3,"value":3992.38,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2023-04","year":2023,"month":4,"value":3992.38,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2023-05","year":2023,"month":5,"value":4231.92,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2023-06","year":2023,"month":6,"value":4231.92,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2023-07","year":2023,"month":7,"value":4231.92,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2023-08","year":2023,"month":8,"value":4231.92,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2023-09","year":2023,"month":9,"value":4702.13,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2023-10","year":2023,"month":10,"value":4231.92,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2023-11","year":2023,"month":11,"value":4231.92,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2023-12","year":2023,"month":12,"value":4702.13,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2024-01","year":2024,"month":1,"value":4231.92,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2024-02","year":2024,"month":2,"value":4231.92,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2024-03","year":2024,"month":3,"value":4231.92,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2024-04","year":2024,"month":4,"value":4231.92,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2024-05","year":2024,"month":5,"value":5364.27,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2024-06","year":2024,"month":6,"value":5364.27,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2024-07","year":2024,"month":7,"value":5364.27,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2024-08","year":2024,"month":8,"value":5364.27,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2024-09","year":2024,"month":9,"value":5364.27,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2024-10","year":2024,"month":10,"value":6437.12,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2024-11","year":2024,"month":11,"value":5483.48,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2024-12","year":2024,"month":12,"value":6198.71,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2025-01","year":2025,"month":1,"value":5423.87,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2025-02","year":2025,"month":2,"value":5364.27,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2025-03","year":2025,"month":3,"value":5364.27,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2025-04","year":2025,"month":4,"value":5364.27,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2025-05","year":2025,"month":5,"value":5632.48,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2025-06","year":2025,"month":6,"value":5632.48,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2025-07","year":2025,"month":7,"value":5632.48,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2025-08","year":2025,"month":8,"value":5632.48,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2025-09","year":2025,"month":9,"value":5632.48,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2025-10","year":2025,"month":10,"value":5632.48,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2025-11","year":2025,"month":11,"value":6571.23,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2025-12","year":2025,"month":12,"value":6070.56,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2026-01","year":2026,"month":1,"value":5820.23,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2026-02","year":2026,"month":2,"value":5632.48,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2026-03","year":2026,"month":3,"value":5632.48,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2026-04","year":2026,"month":4,"value":5632.48,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2026-05","year":2026,"month":5,"value":6000.81,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2026-06","year":2026,"month":6,"value":5932.13,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2026-07","year":2026,"month":7,"value":5932.13,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"},{"id":"cnis-2026-08","year":2026,"month":8,"value":5932.13,"employer":"Rede Cidadã","indicator":"","valid":true,"note":"","source":"CNIS 28/09/2026"}];
+  const INPC={"2011-01":2.368296271233,"2011-02":2.346241600192,"2011-03":2.333639944491,"2011-04":2.318338907701,"2011-05":2.301766191125,"2011-06":2.288720484364,"2011-07":2.283696352388,"2011-08":2.283696352388,"2011-09":2.274144943625,"2011-10":2.263957136511,"2011-11":2.256735582646,"2011-12":2.243945095601,"2012-01":2.232559044475,"2012-02":2.22123076756,"2012-03":2.212601621237,"2012-04":2.208626094268,"2012-05":2.194580777293,"2012-06":2.18257660596,"2012-07":2.176916622741,"2012-08":2.167595960113,"2012-09":2.157885475473,"2012-10":2.144375907257,"2012-11":2.12925817422,"2012-12":2.117821935767,"2013-01":2.102265173483,"2013-02":2.083100647526,"2013-03":2.072324559815,"2013-04":2.059964771188,"2013-05":2.04788226582,"2013-06":2.04073967695,"2013-07":2.035041560581,"2013-08":2.037690558306,"2013-09":2.034435461568,"2013-10":2.02895727692,"2013-11":2.016655677289,"2013-12":2.005824226466,"2014-01":1.991485530645,"2014-02":1.979017719015,"2014-03":1.966432550691,"2014-04":1.95043895129,"2014-05":1.935343273755,"2014-06":1.92380047093,"2014-07":1.918811560871,"2014-08":1.916320344423,"2014-09":1.912877165526,"2014-10":1.903549771644,"2014-11":1.896343665715,"2014-12":1.886346031747,"2015-01":1.874722750692,"2015-02":1.847381504427,"2015-03":1.826197612126,"2015-04":1.799032225521,"2015-05":1.78634914658,"2015-06":1.768837653807,"2015-07":1.755321676895,"2015-08":1.745199519681,"2015-09":1.740847401178,"2015-10":1.73201412912,"2015-11":1.718779526763,"2015-12":1.699910519992,"2016-01":1.684747789883,"2016-02":1.65968652338,"2016-03":1.644067878534,"2016-04":1.636865669587,"2016-05":1.626456348954,"2016-06":1.610671765651,"2016-07":1.603137021649,"2016-08":1.592942191623,"2016-09":1.588019331694,"2016-10":1.586749931749,"2016-11":1.58405703479,"2016-12":1.58294897051,"2018-01":1.548724866378,"2018-02":1.54517097314,"2018-03":1.542394662747,"2018-04":1.541315741728,"2018-05":1.538085761629,"2018-06":1.531500310294,"2018-07":1.50990861707,"2018-08":1.506143258923,"2018-09":1.506143258923,"2018-10":1.501638343891,"2018-11":1.495655721007,"2018-12":1.499404231586,"2020-01":1.433083110183,"2020-02":1.430365415893,"2020-03":1.427937921427,"2020-04":1.425372251374,"2020-05":1.428658165154,"2020-06":1.432238762059,"2020-07":1.427954897367,"2020-08":1.421699419919,"2020-09":1.416599661139,"2020-10":1.404381541726,"2020-11":1.391992805755,"2020-12":1.378893319222,"2021-01":1.35905117211,"2021-02":1.35539161475,"2021-03":1.3443677988,"2021-04":1.33290481737,"2021-05":1.327858953348,"2021-06":1.315232719243,"2021-07":1.307388388909,"2021-08":1.294187674628,"2021-09":1.282898170726,"2021-10":1.267685939452,"2021-11":1.253149406339,"2021-12":1.242710636988,"2022-01":1.233704593456,"2022-02":1.225493785096,"2022-03":1.213360183263,"2022-04":1.192960557726,"2022-05":1.180681470434,"2022-06":1.175392205509,"2022-07":1.168149677508,"2022-08":1.175200882805,"2022-09":1.178855334341,"2022-10":1.182639781643,"2022-11":1.177107376971,"2022-12":1.172651302023,"2023-01":1.164615455381,"2023-02":1.159282754709,"2023-03":1.150424486166,"2023-04":1.143108591182,"2023-05":1.137082056284,"2023-06":1.133003244604,"2023-07":1.134137381986,"2023-08":1.135159025108,"2023-09":1.132893238631,"2023-10":1.131648425363,"2023-11":1.130292074873,"2023-12":1.129162911961,"2024-01":1.122986486287,"2024-02":1.116621742355,"2024-03":1.107649779144,"2024-04":1.105549235596,"2024-05":1.101473782601,"2024-06":1.096430203664,"2024-07":1.093695963755,"2024-08":1.090859728461,"2024-09":1.092389073163,"2024-10":1.087170654024,"2024-11":1.080579121383,"2024-12":1.077024939084,"2025-01":1.07187991549,"2025-02":1.07187991549,"2025-03":1.056247453183,"2025-04":1.050887924767,"2025-05":1.045867759521,"2025-06":1.042219989557,"2025-07":1.039828384274,"2025-08":1.0376493207,"2025-09":1.039832969937,"2025-10":1.034453810124,"2025-11":1.034143567054,"2025-12":1.033833417029,"2026-01":1.031666916504,"2026-02":1.027659046224,"2026-03":1.021936203485,"2026-04":1.012720447413,"2026-05":1.004583322501,"2026-06":0.998095700448,"2026-07":0.99670032,"2026-08":0.9968,"2026-09":1,"2026-10":1,"2026-11":1,"2026-12":1};
+  const MIN_2026=1621.00;
+  const CEILING_2026=8475.55;
+  const MONTHS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  let filterYear='all';
+
+  function profile(){return localStorage.getItem('planejador_active_profile')||'Marcos'}
+  function safeProfile(){return profile().replace(/[^a-z0-9_-]/gi,'_')}
+  function storageKey(){return 'rgps_previdencia_v55_'+safeProfile()}
+  function legacyStorageKey(){return 'planejador_previdencia_rgps_v51_'+safeProfile()}
+  function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+  function num(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');
+    return Number(s.replace(/[^0-9.-]/g,''))||0;
+  }
+  function money(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:2})}
+  function defaultState(){
+    return {
+      profileData: profile()==='Marcos'
+        ? {dob:'1994-07-17',sex:'M',affiliatedBeforeReform:true}
+        : {dob:'',sex:'M',affiliatedBeforeReform:true},
+      contributions: profile()==='Marcos'?JSON.parse(JSON.stringify(SEED)):[],
+      futureSalary: profile()==='Marcos'?5932.13:MIN_2026,
+      updatedAt:new Date().toISOString()
+    };
+  }
+  function sameRow(a,b){
+    if(!a||!b)return false;
+    const keys=['year','month','value','employer','indicator','valid','note','source','factor'];
+    return keys.every(k=>JSON.stringify(a[k]??null)===JSON.stringify(b[k]??null));
+  }
+  function encodeCompact(s){
+    const compact={
+      version:55,
+      profileData:s.profileData||{},
+      futureSalary:Number(s.futureSalary||0),
+      updatedAt:new Date().toISOString(),
+      overrides:{},
+      deleted:[],
+      manual:[]
+    };
+    if(profile()==='Marcos'){
+      const base=new Map(SEED.map(r=>[String(r.id),r]));
+      const current=new Map((s.contributions||[]).map(r=>[String(r.id),r]));
+      for(const [id,row] of current){
+        if(base.has(id)){
+          if(!sameRow(row,base.get(id)))compact.overrides[id]=row;
+        }else{
+          compact.manual.push(row);
+        }
+      }
+      for(const id of base.keys()){
+        if(!current.has(id))compact.deleted.push(id);
+      }
+    }else{
+      compact.manual=(s.contributions||[]).slice();
+    }
+    return compact;
+  }
+  function decodeCompact(c){
+    const base=defaultState();
+    if(!c||typeof c!=='object')return base;
+    base.profileData=Object.assign({},base.profileData,c.profileData||{});
+    if(Number.isFinite(Number(c.futureSalary)))base.futureSalary=Number(c.futureSalary);
+    if(profile()==='Marcos'){
+      const deleted=new Set((c.deleted||[]).map(String));
+      base.contributions=SEED
+        .filter(r=>!deleted.has(String(r.id)))
+        .map(r=>c.overrides&&c.overrides[String(r.id)] ? c.overrides[String(r.id)] : JSON.parse(JSON.stringify(r)));
+      (c.manual||[]).forEach(r=>base.contributions.push(r));
+    }else{
+      base.contributions=Array.isArray(c.manual)?c.manual.slice():[];
+    }
+    base.updatedAt=c.updatedAt||new Date().toISOString();
+    return base;
+  }
+  function safeSetItem(k,v){
+    try{
+      localStorage.setItem(k,v);
+      return true;
+    }catch(err){
+      if(err && (err.name==='QuotaExceededError'||String(err.message||'').toLowerCase().includes('quota'))){
+        // Remove only obsolete Previdência keys; never touch the financial data.
+        const rm=[];
+        for(let i=0;i<localStorage.length;i++){
+          const x=localStorage.key(i);
+          if(x && x.startsWith('planejador_previdencia_rgps_v51_'))rm.push(x);
+        }
+        rm.forEach(x=>{try{localStorage.removeItem(x)}catch(e){}});
+        try{localStorage.setItem(k,v);return true}catch(e){}
+      }
+      return false;
+    }
+  }
+  function migrateLegacy(){
+    const oldKey=legacyStorageKey();
+    let old=null;
+    try{old=JSON.parse(localStorage.getItem(oldKey)||'null')}catch(e){}
+    if(old&&Array.isArray(old.contributions)){
+      const compact=encodeCompact(old);
+      try{localStorage.removeItem(oldKey)}catch(e){}
+      safeSetItem(storageKey(),JSON.stringify(compact));
+      return decodeCompact(compact);
+    }
+    // Clean stale old Previdência keys from all profiles to recover quota.
+    const rm=[];
+    for(let i=0;i<localStorage.length;i++){
+      const x=localStorage.key(i);
+      if(x && x.startsWith('planejador_previdencia_rgps_v51_'))rm.push(x);
+    }
+    rm.forEach(x=>{try{localStorage.removeItem(x)}catch(e){}});
+    return null;
+  }
+  function load(){
+    try{
+      const c=JSON.parse(localStorage.getItem(storageKey())||'null');
+      if(c&&c.version===55)return decodeCompact(c);
+    }catch(e){}
+    const migrated=migrateLegacy();
+    if(migrated)return migrated;
+    // Important: the embedded CNIS is the default source and is NOT copied into localStorage.
+    return defaultState();
+  }
+  function save(s){
+    s.updatedAt=new Date().toISOString();
+    const compact=encodeCompact(s);
+    if(!safeSetItem(storageKey(),JSON.stringify(compact))){
+      throw new Error('Não há espaço local suficiente para salvar esta alteração. O histórico-base do CNIS continua preservado no site.');
+    }
+    try{window.ppCloud?.save?.()}catch(e){}
+  }
+  let inpcRatesV56=null;
+  let inpcLatestRefV56=null;
+  let inpcFetchStatusV56='fallback';
+
+  function ymKeyV56(y,m){return `${Number(y)}-${String(Number(m)).padStart(2,'0')}`}
+  function addMonthKeyV56(key,offset){
+    const [y,m]=key.split('-').map(Number);
+    const d=new Date(y,m-1+offset,1);
+    return ymKeyV56(d.getFullYear(),d.getMonth()+1);
+  }
+  function factorFromRatesV56(year,month){
+    if(!inpcRatesV56||!inpcLatestRefV56)return null;
+    const contributionKey=ymKeyV56(year,month);
+    if(contributionKey>=inpcLatestRefV56)return 1;
+    let key=addMonthKeyV56(contributionKey,1);
+    let f=1,guard=0;
+    while(key<=inpcLatestRefV56&&guard<1200){
+      const rate=inpcRatesV56[key];
+      if(typeof rate==='number'&&Number.isFinite(rate))f*=1+(rate/100);
+      key=addMonthKeyV56(key,1);
+      guard++;
+    }
+    return f;
+  }
+  function factor(r){
+    // For planning, always calculate automatically when the official monthly
+    // INPC series is available. Manual factor is kept only as an emergency override.
+    const online=factorFromRatesV56(r.year,r.month);
+    if(online!==null)return online;
+    return Number(r.factor||INPC[`${r.year}-${String(r.month).padStart(2,'0')}`]||1);
+  }
+  async function refreshInpcV56(){
+    try{
+      inpcFetchStatusV56='loading';
+      const url='https://api.bcb.gov.br/dados/serie/bcdata.sgs.188/dados?formato=json';
+      const resp=await fetch(url,{cache:'no-store'});
+      if(!resp.ok)throw new Error('INPC HTTP '+resp.status);
+      const data=await resp.json();
+      const map={};
+      let latest=null;
+      (Array.isArray(data)?data:[]).forEach(item=>{
+        const parts=String(item.data||'').split('/');
+        if(parts.length!==3)return;
+        const key=ymKeyV56(Number(parts[2]),Number(parts[1]));
+        const val=Number(String(item.valor||'').replace(',','.'));
+        if(!Number.isFinite(val))return;
+        map[key]=val;
+        if(!latest||key>latest)latest=key;
+      });
+      if(!latest||!Object.keys(map).length)throw new Error('Série INPC vazia');
+      inpcRatesV56=map;
+      inpcLatestRefV56=latest;
+      inpcFetchStatusV56='online';
+      if(document.getElementById('previdencia')?.classList.contains('active'))render();
+    }catch(err){
+      inpcFetchStatusV56='fallback';
+      console.warn('INPC automático indisponível; usando fatores embutidos.',err);
+      if(document.getElementById('previdencia')?.classList.contains('active'))render();
+    }
+  }
+  function validRows(s){return s.contributions.filter(r=>r.valid!==false)}
+  function uniqueMonths(s){
+    return new Set(validRows(s).map(r=>`${r.year}-${String(r.month).padStart(2,'0')}`)).size;
+  }
+  function preReformMonths(s){
+    return new Set(validRows(s).filter(r=>r.year<2019||(r.year===2019&&r.month<=11))
+      .map(r=>`${r.year}-${String(r.month).padStart(2,'0')}`)).size;
+  }
+  function averageUpdated(s){
+    const a=validRows(s); if(!a.length)return 0;
+    return a.reduce((z,r)=>z+num(r.value)*factor(r),0)/a.length;
+  }
+  function last12Avg(s){
+    const a=validRows(s).slice().sort((a,b)=>a.year-b.year||a.month-b.month).slice(-12);
+    return a.length?a.reduce((z,r)=>z+num(r.value),0)/a.length:0;
+  }
+  function ageYears(dob,at=new Date()){
+    if(!dob)return 0;
+    const d=new Date(dob+'T12:00:00');
+    return (at-d)/(365.2425*864e5);
+  }
+  function ageLabel(dob){
+    if(!dob)return 'Informe a data';
+    const d=new Date(dob+'T12:00:00'),now=new Date();
+    let y=now.getFullYear()-d.getFullYear(),m=now.getMonth()-d.getMonth();
+    if(now.getDate()<d.getDate())m--;
+    if(m<0){y--;m+=12}
+    return `${y}a ${m}m`;
+  }
+  function contribLabel(m){return `${Math.floor(m/12)}a ${m%12}m`}
+  function dateAtAge(dob,age){if(!dob)return null;const d=new Date(dob+'T12:00:00');d.setFullYear(d.getFullYear()+age);return d}
+  function addMonths(d,n){const x=new Date(d);x.setDate(1);x.setMonth(x.getMonth()+n);return x}
+  function fmtDate(d){return d?d.toLocaleDateString('pt-BR',{month:'short',year:'numeric'}).replace('.',''):'—'}
+  function diffDate(d){
+    if(!d)return '—';
+    const now=new Date();
+    const n=(d.getFullYear()-now.getFullYear())*12+(d.getMonth()-now.getMonth());
+    if(n<=0)return 'requisito temporal cumprido';
+    return `${Math.floor(n/12)}a ${n%12}m`;
+  }
+  function pointReq(y){return Math.min(105,96+(y-2019))}
+  function progAgeReq(y,sex){return Math.min(sex==='F'?62:65,(sex==='F'?56:61)+.5*(y-2019))}
+
+  function rules(s){
+    const dob=s.profileData.dob,sex=s.profileData.sex||'M',cm=uniqueMonths(s);
+    if(!dob)return {best:null};
+    const now=new Date();
+    const minYears=sex==='F'?30:35,minMonths=minYears*12;
+    const ageMin=sex==='F'?62:65;
+    const ageDate=dateAtAge(dob,ageMin);
+    const missingCar=Math.max(0,180-cm);
+    const ageRule=new Date(Math.max(ageDate.getTime(),addMonths(now,missingCar).getTime()));
+    let points=null,progressive=null;
+    for(let i=0;i<1200;i++){
+      const d=addMonths(now,i),fm=cm+i,a=ageYears(dob,d),cy=fm/12;
+      if(!points&&fm>=minMonths&&a+cy>=pointReq(d.getFullYear()))points=d;
+      if(!progressive&&fm>=minMonths&&a>=progAgeReq(d.getFullYear(),sex))progressive=d;
+      if(points&&progressive)break;
+    }
+    const pre=preReformMonths(s),missing2019=Math.max(0,minMonths-pre),pedTarget=minMonths+missing2019;
+    let ped100=null;
+    for(let i=0;i<1500;i++){
+      const d=addMonths(now,i);
+      if(cm+i>=pedTarget&&ageYears(dob,d)>=(sex==='F'?57:60)){ped100=d;break}
+    }
+    const all=[['Pontos',points],['Idade · transição',ageRule],['Idade progressiva',progressive],['Pedágio 100%',ped100]].filter(x=>x[1]);
+    all.sort((a,b)=>a[1]-b[1]);
+    return {age:ageRule,points,progressive,ped100,best:all[0]||null};
+  }
+
+  function benefits(s,r){
+    const avg=averageUpdated(s),last=last12Avg(s),months=uniqueMonths(s);
+    const temp=Math.max(MIN_2026,Math.min(CEILING_2026,avg*.91,last||Infinity));
+    const coef=Math.min(1,.60+Math.max(0,months/12-20)*.02);
+    const perm=Math.max(MIN_2026,Math.min(CEILING_2026,avg*coef));
+    let projected=0;
+    if(r.best){
+      const now=new Date(),d=r.best[1];
+      const future=Math.max(0,(d.getFullYear()-now.getFullYear())*12+d.getMonth()-now.getMonth());
+      const pm=months+future;
+      const pa=(avg*months+num(s.futureSalary)*future)/Math.max(1,pm);
+      const pc=Math.min(1,.60+Math.max(0,pm/12-20)*.02);
+      projected=Math.max(MIN_2026,Math.min(CEILING_2026,pa*pc));
+    }
+    return {avg,temp,perm,projected,coef};
+  }
+
+  function years(s){
+    const map={};
+    s.contributions.forEach(r=>{map[r.year]=(map[r.year]||0)+1});
+    return map;
+  }
+
+  function renderRows(s){
+    const body=document.getElementById('rgpsBodyV54'); if(!body)return;
+    const y=document.getElementById('rgpsYearFilterV54')?.value||filterYear;
+    const q=(document.getElementById('rgpsSearchV54')?.value||'').toLowerCase();
+    let a=s.contributions.slice().sort((a,b)=>b.year-a.year||b.month-a.month);
+    if(y!=='all')a=a.filter(r=>String(r.year)===String(y));
+    if(q)a=a.filter(r=>(`${r.employer||''} ${r.indicator||''} ${r.note||''}`).toLowerCase().includes(q));
+    body.innerHTML=a.length?a.map(r=>`
+      <tr>
+        <td><b>${String(r.month).padStart(2,'0')}/${r.year}</b></td>
+        <td>${esc(r.employer||'—')}</td>
+        <td class="money">${money(r.value)}</td>
+        <td class="coef">${factor(r).toFixed(6).replace('.',',')}</td>
+        <td class="money"><b>${money(num(r.value)*factor(r))}</b></td>
+        <td>${esc(r.indicator||'—')}</td>
+        <td><span class="rgps-status-v51 ${r.valid===false?'att':'ok'}">${r.valid===false?'Pendente':'Válida'}</span></td>
+        <td><button class="rgps-action-v51" data-rgps54-edit="${esc(r.id)}">Editar</button><button class="rgps-action-v51" data-rgps54-del="${esc(r.id)}">Excluir</button></td>
+      </tr>`).join(''):'<tr><td colspan="8" style="padding:24px;text-align:center;color:#7b8798">Nenhuma contribuição encontrada.</td></tr>';
+    body.querySelectorAll('[data-rgps54-edit]').forEach(b=>b.onclick=()=>openModal(b.dataset.rgps54Edit,s));
+    body.querySelectorAll('[data-rgps54-del]').forEach(b=>b.onclick=()=>{
+      if(!confirm('Excluir esta competência?'))return;
+      s.contributions=s.contributions.filter(x=>x.id!==b.dataset.rgps54Del);save(s);render();
+    });
+  }
+
+  function render(){
+    try{
+      const sec=document.getElementById('previdencia'); if(!sec)return;
+      const s=load(),cm=uniqueMonths(s),r=rules(s),b=benefits(s,r),ym=years(s),ys=Object.keys(ym).map(Number).sort((a,b)=>b-a);
+      const carPct=Math.min(100,cm/180*100),best=r.best;
+      sec.innerHTML=`
+        <div class="rgps-hero-v51">
+          <div class="rgps-hero-top-v51">
+            <div><span class="rgps-badge-v51">⚕ RGPS · Previdência Social</span><h1>Minha jornada previdenciária</h1><p>Acompanhe suas contribuições, carência, salários corrigidos e cenários estimados de aposentadoria.</p></div>
+            <div class="rgps-source-v51"><b>${esc(profile())}</b><span>${s.contributions.length} competências cadastradas</span></div>
+          </div>
+          <div class="rgps-kpis-v51">
+            <div class="rgps-kpi-v51"><span>Tempo contributivo</span><strong>${contribLabel(cm)}</strong><small>${cm} competências válidas</small></div>
+            <div class="rgps-kpi-v51"><span>Carência</span><strong>${cm} / 180</strong><small>${Math.max(0,180-cm)} competências restantes</small></div>
+            <div class="rgps-kpi-v51"><span>Idade atual</span><strong>${ageLabel(s.profileData.dob)}</strong><small>perfil previdenciário</small></div>
+            <div class="rgps-kpi-v51"><span>Melhor data simulada</span><strong>${best?fmtDate(best[1]):'Configure o perfil'}</strong><small>${best?`${best[0]} · faltam ${diffDate(best[1])}`:'informe nascimento'}</small></div>
+          </div>
+          <div class="rgps-progress-v51"><div class="rgps-progress-meta-v51"><span>Carência para aposentadoria por idade</span><span>${carPct.toFixed(0)}%</span></div><div class="rgps-progress-bar-v51"><i style="width:${carPct}%"></i></div></div>
+        </div>
+
+        <div class="rgps-grid-v51">
+          <article class="rgps-card-v51">
+            <div class="rgps-card-head-v51"><div><h3>Regras de aposentadoria</h3><p>Comparação automática das principais regras de transição.</p></div></div>
+            <div class="rgps-rules-v51">
+              <div class="rgps-rule-v51"><span class="rgps-rule-name-v51">Pontos</span><b>${r.points?fmtDate(r.points):'—'}</b><small>35 anos para homem / 30 para mulher + pontuação progressiva.</small></div>
+              <div class="rgps-rule-v51"><span class="rgps-rule-name-v51">Idade · transição</span><b>${r.age?fmtDate(r.age):'—'}</b><small>65 anos homem / 62 mulher + 180 meses de carência.</small></div>
+              <div class="rgps-rule-v51"><span class="rgps-rule-name-v51">Idade progressiva</span><b>${r.progressive?fmtDate(r.progressive):'—'}</b><small>Idade mínima progressiva + tempo mínimo de contribuição.</small></div>
+              <div class="rgps-rule-v51"><span class="rgps-rule-name-v51">Pedágio 100%</span><b>${r.ped100?fmtDate(r.ped100):'—'}</b><small>Tempo que faltava na reforma + pedágio equivalente.</small></div>
+            </div>
+          </article>
+          <article class="rgps-card-v51">
+            <div class="rgps-card-head-v51"><div><h3>Estimativa de benefícios</h3><p>Valores atualizados automaticamente pelo INPC mensal; na falta de conexão, usa a base embutida.</p></div></div>
+            <div class="rgps-benefits-v51">
+              <div class="rgps-benefit-v51"><span>Salário de benefício</span><b>${money(b.avg)}</b><small>Média das competências válidas corrigidas.</small></div>
+              <div class="rgps-benefit-v51"><span>Incapacidade temporária</span><b>${money(b.temp)}</b><small>Estimativa de 91%, respeitado o limite da média recente.</small></div>
+              <div class="rgps-benefit-v51"><span>Incapacidade permanente comum</span><b>${money(b.perm)}</b><small>Coeficiente estimado atual: ${(b.coef*100).toFixed(0)}%.</small></div>
+              <div class="rgps-benefit-v51"><span>Aposentadoria projetada</span><b>${money(b.projected)}</b><small>Simulação na melhor regra encontrada.</small></div>
+            </div>
+            <div class="rgps-sim-v51"><label>Salário de contribuição futuro</label><div class="rgps-sim-row-v51"><input id="rgpsFutureV54" inputmode="decimal" value="${Number(s.futureSalary||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}"><div class="rgps-sim-out-v51"><span>Base futura em valores de hoje</span><b>${money(s.futureSalary)}</b></div></div></div>
+          </article>
+        </div>
+
+        <article class="rgps-card-v51" style="margin-top:14px">
+          <div class="rgps-card-head-v51"><div><h3>Perfil previdenciário</h3><p>Dados usados nas regras automáticas deste perfil.</p></div></div>
+          <div class="rgps-profile-v51">
+            <div class="rgps-field-v51"><label>Data de nascimento</label><input id="rgpsDobV54" type="date" value="${esc(s.profileData.dob||'')}"></div>
+            <div class="rgps-field-v51"><label>Sexo previdenciário</label><select id="rgpsSexV54"><option value="M" ${s.profileData.sex==='M'?'selected':''}>Homem</option><option value="F" ${s.profileData.sex==='F'?'selected':''}>Mulher</option></select></div>
+            <div class="rgps-field-v51"><label>Filiação anterior a 13/11/2019</label><select id="rgpsBeforeV54"><option value="1" ${s.profileData.affiliatedBeforeReform!==false?'selected':''}>Sim</option><option value="0" ${s.profileData.affiliatedBeforeReform===false?'selected':''}>Não</option></select></div>
+          </div>
+        </article>
+
+        <article class="rgps-card-v51" style="margin-top:14px">
+          <div class="rgps-card-head-v51"><div><h3>Contribuições ao INSS</h3><p>Edite, adicione ou exclua competências e acompanhe a atualização automática pelo INPC.</p></div><span class="rgps-pill-v51" id="rgpsInpcStatusV56">INPC automático</span></div>
+          <div class="rgps-toolbar-v51">
+            <div class="rgps-toolbar-left-v51">
+              <select id="rgpsYearFilterV54"><option value="all">Todos os anos</option>${ys.map(y=>`<option value="${y}" ${String(filterYear)===String(y)?'selected':''}>${y}</option>`).join('')}</select>
+              <input id="rgpsSearchV54" placeholder="Buscar empresa ou indicador">
+            </div>
+            <div class="rgps-toolbar-right-v51"><button class="rgps-btn-v51 secondary" id="rgpsResetV54">Restaurar CNIS</button><button class="rgps-btn-v51 green" id="rgpsAddV54">+ Nova contribuição</button></div>
+          </div>
+          <div class="rgps-tablewrap-v51"><table class="rgps-table-v51"><thead><tr><th>Competência</th><th>Empresa / origem</th><th class="money">Salário contribuição</th><th class="coef">Fator INPC</th><th class="money">Valor atualizado</th><th>Indicadores</th><th>Status</th><th>Ações</th></tr></thead><tbody id="rgpsBodyV54"></tbody></table></div><div class="rgps-sources-v51" id="rgpsInpcInfoV56"></div>
+        </article>
+      `;
+
+      document.getElementById('rgpsDobV54').onchange=e=>{s.profileData.dob=e.target.value;save(s);render()};
+      document.getElementById('rgpsSexV54').onchange=e=>{s.profileData.sex=e.target.value;save(s);render()};
+      document.getElementById('rgpsBeforeV54').onchange=e=>{s.profileData.affiliatedBeforeReform=e.target.value==='1';save(s);render()};
+      document.getElementById('rgpsFutureV54').onchange=e=>{s.futureSalary=num(e.target.value);save(s);render()};
+      document.getElementById('rgpsYearFilterV54').onchange=e=>{filterYear=e.target.value;renderRows(s)};
+      document.getElementById('rgpsSearchV54').oninput=()=>renderRows(s);
+      document.getElementById('rgpsAddV54').onclick=()=>openModal(null,s);
+      document.getElementById('rgpsResetV54').onclick=()=>{
+        if(profile()!=='Marcos'){alert('A restauração automática do CNIS está disponível apenas para Marcos nesta versão.');return}
+        if(!confirm('Restaurar o histórico a partir do CNIS cadastrado nesta versão?'))return;
+        s.contributions=JSON.parse(JSON.stringify(SEED));save(s);filterYear='all';render();
+      };
+      renderRows(s);
+      const inpcStatus=document.getElementById('rgpsInpcStatusV56');
+      const inpcInfo=document.getElementById('rgpsInpcInfoV56');
+      if(inpcStatus){
+        inpcStatus.textContent=inpcFetchStatusV56==='online'
+          ? `INPC automático · ref. ${inpcLatestRefV56.split('-').reverse().join('/')}`
+          : (inpcFetchStatusV56==='loading'?'Atualizando INPC…':'INPC · base local');
+      }
+      if(inpcInfo){
+        inpcInfo.innerHTML=inpcFetchStatusV56==='online'
+          ? `<b>Atualização automática ativa.</b> Série mensal INPC/BCB-SGS 188 até <b>${inpcLatestRefV56.split('-').reverse().join('/')}</b>. Novas contribuições passam a usar o fator calculado automaticamente; competências posteriores ao último INPC divulgado ficam provisoriamente com fator 1,000000 até a divulgação do índice seguinte.`
+          : `<b>Modo contingência.</b> Sem acesso à série oficial neste momento, o site usa os fatores INPC já embutidos. Ao recuperar conexão, os fatores são recalculados automaticamente.`;
+      }
+    }catch(err){
+      const sec=document.getElementById('previdencia');
+      if(sec)sec.innerHTML=`<article class="rgps-card-v51"><h3>Não foi possível carregar a Previdência</h3><p style="color:#667085;font-size:11px">Detalhe: ${esc(err&&err.message?err.message:String(err))}</p><button class="rgps-btn-v51 primary" type="button" onclick="location.reload()">Recarregar</button></article>`;
+      console.error('Previdência v54',err);
+    }
+  }
+
+  function openModal(id,s){
+    const r=id?s.contributions.find(x=>x.id===id):{id:'rgps-'+Date.now(),year:new Date().getFullYear(),month:new Date().getMonth()+1,value:0,employer:'',indicator:'',valid:true,note:'',source:'Manual'};
+    if(!r)return;
+    document.getElementById('rgpsModalV51')?.remove();
+    const ov=document.createElement('div');ov.id='rgpsModalV51';
+    ov.innerHTML=`<div class="rgps-modal-card-v51">
+      <div class="rgps-card-head-v51"><div><h3>${id?'Editar contribuição':'Nova contribuição'}</h3><p>Cadastre uma competência do RGPS.</p></div><button class="rgps-action-v51" id="rgpsCloseV54">Fechar</button></div>
+      <div class="rgps-modal-grid-v51">
+        <div class="rgps-field-v51"><label>Ano</label><input id="rgpsYV54" type="number" value="${r.year}"></div>
+        <div class="rgps-field-v51"><label>Mês</label><select id="rgpsMV54">${MONTHS.map((m,i)=>`<option value="${i+1}" ${r.month===i+1?'selected':''}>${m}</option>`).join('')}</select></div>
+        <div class="rgps-field-v51 full"><label>Empresa / origem</label><input id="rgpsEV54" value="${esc(r.employer||'')}"></div>
+        <div class="rgps-field-v51"><label>Salário de contribuição</label><input id="rgpsVV54" inputmode="decimal" value="${Number(r.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}"></div>
+        <div class="rgps-field-v51"><label>Fator INPC</label><input id="rgpsFV54" value="Automático" disabled></div>
+        <div class="rgps-field-v51 full"><label>Indicadores</label><input id="rgpsIV54" value="${esc(r.indicator||'')}"></div>
+        <div class="rgps-field-v51"><label>Conta para tempo/carência?</label><select id="rgpsValidV54"><option value="1" ${r.valid!==false?'selected':''}>Sim</option><option value="0" ${r.valid===false?'selected':''}>Não / pendente</option></select></div>
+        <div class="rgps-field-v51 full"><label>Observação</label><input id="rgpsNV54" value="${esc(r.note||'')}"></div>
+      </div>
+      <div class="rgps-modal-actions-v51"><button class="rgps-btn-v51 secondary" id="rgpsCancelV54">Cancelar</button><button class="rgps-btn-v51 primary" id="rgpsSaveV54">Salvar</button></div>
+    </div>`;
+    document.body.appendChild(ov);
+    const close=()=>ov.remove();document.getElementById('rgpsCloseV54').onclick=close;document.getElementById('rgpsCancelV54').onclick=close;
+    document.getElementById('rgpsSaveV54').onclick=()=>{
+      const obj={id:r.id,year:+document.getElementById('rgpsYV54').value,month:+document.getElementById('rgpsMV54').value,
+        employer:document.getElementById('rgpsEV54').value.trim(),value:num(document.getElementById('rgpsVV54').value),
+        factor:undefined,indicator:document.getElementById('rgpsIV54').value.trim(),
+        valid:document.getElementById('rgpsValidV54').value==='1',note:document.getElementById('rgpsNV54').value.trim(),source:r.source||'Manual'};
+      if(!obj.year||!obj.month||!obj.employer||!obj.value){alert('Preencha ano, mês, empresa/origem e salário de contribuição.');return}
+      if(id)s.contributions=s.contributions.map(x=>x.id===id?obj:x);else s.contributions.push(obj);
+      save(s);close();render();
+    };
+  }
+
+  function openPage(){
+    document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='previdencia'));
+    document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view==='previdencia'));
+    document.getElementById('nav')?.classList.remove('open');
+    render();
+    window.scrollTo({top:0,behavior:'auto'});
+  }
+
+  function ensureNav(){
+    const nav=document.getElementById('nav');if(!nav)return;
+    let b=nav.querySelector('[data-view="previdencia"]');
+    if(!b){
+      b=document.createElement('button');b.type='button';b.dataset.view='previdencia';
+      const inv=nav.querySelector('[data-view="investimentos"]');nav.insertBefore(b,inv||null);
+    }
+    b.textContent='Previdência';
+  }
+
+  // Capture-phase handler beats all legacy nav handlers.
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?.('#nav [data-view="previdencia"]');
+    if(!b)return;
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    openPage();
+  },true);
+
+  window.renderPrevidencia=render;
+  window.openPrevidenciaPageV54=openPage;
+  ensureNav();
+  refreshInpcV56();
+
+  setTimeout(ensureNav,100);
+  setTimeout(ensureNav,600);
+  setTimeout(()=>{if(document.getElementById('previdencia')?.classList.contains('active'))render()},300);
+})();
+</script>
+
+
+
+<script id="pp-v57-session-logout">
+(function(){
+  const SESSION_KEY='pp_secure_session_v45';
+  const WORKSPACE_KEY='pp_secure_workspace_v45';
+
+  function ensureLogout(){
+    if(document.getElementById('logoutBtnV57'))return;
+    const timer=document.getElementById('sessionTimerV45');
+    if(!timer)return;
+
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.id='logoutBtnV57';
+    btn.title='Sair do Planejador';
+    btn.setAttribute('aria-label','Sair do Planejador');
+    btn.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M10 3a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V5H5v14h4v-1a1 1 0 1 1 2 0v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h6Zm6.293 4.293a1 1 0 0 1 1.414 0l4 4a1 1 0 0 1 0 1.414l-4 4a1 1 0 1 1-1.414-1.414L18.586 13H9a1 1 0 1 1 0-2h9.586l-2.293-2.293a1 1 0 0 1 0-1.414Z"/>
+    </svg>`;
+    timer.insertAdjacentElement('afterend',btn);
+
+    btn.onclick=()=>{
+      // Preserve unsaved workspace state if possible, but end authentication immediately.
+      try{window.ppSessionV47?.captureWorkspace?.()}catch(e){}
+      try{window.ppSessionV45?.captureWorkspace?.()}catch(e){}
+
+      sessionStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(WORKSPACE_KEY);
+      sessionStorage.removeItem('pp_v42_authed_profile');
+      sessionStorage.removeItem('pp_v41_authed_profile');
+      sessionStorage.removeItem('pp_session_v44_authed_profile');
+
+      // Remove any lock overlay and force the normal login screen.
+      document.getElementById('sessionLockV45')?.remove();
+      document.getElementById('sessionLockV44')?.remove();
+
+      document.documentElement.classList.remove('pp-authenticated','pp-session-resume-v45');
+      document.documentElement.classList.add('pp-prelogin');
+
+      // Reload so no financial data remains visible behind the login overlay.
+      location.reload();
+    };
+  }
+
+  // Ensure timer reflects 1-hour session after login/unlock if an older script persisted 30 min.
+  function normalizeSessionToOneHour(){
+    try{
+      const s=JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null');
+      if(!s||!s.authenticated)return;
+      const started=Number(s.startedAt||Date.now());
+      const maxExpiry=started+60*60*1000;
+      if(!s.expiresAt || Number(s.expiresAt)-started<59*60*1000){
+        s.expiresAt=maxExpiry;
+        sessionStorage.setItem(SESSION_KEY,JSON.stringify(s));
+      }
+    }catch(e){}
+  }
+
+  normalizeSessionToOneHour();
+  ensureLogout();
+  setTimeout(()=>{normalizeSessionToOneHour();ensureLogout()},150);
+  setTimeout(()=>ensureLogout(),700);
+
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.('#loginSubmit,#sessionUnlockBtnV45')){
+      setTimeout(()=>{normalizeSessionToOneHour();ensureLogout()},60);
+    }
+  },true);
 })();
 </script>
 
@@ -10121,3 +11823,26 @@ setTimeout(initEssence,0);
   else setTimeout(build,0);
 })();
 </script>
+
+<script id="pp-v54-faturas-final-guard">
+(function(){
+  function enforce(){
+    try{window.ppV53?.renderInvoices?.()}catch(e){}
+    const box=document.getElementById('nextDues');
+    const head=box?.closest('.panel')?.querySelector('.panelhead');
+    if(head){
+      const h=head.querySelector('h2'),s=head.querySelector('span');
+      if(h)h.textContent='Próximas faturas de cartões';
+      if(s)s.textContent='somente faturas dos cartões de crédito cadastrados';
+    }
+  }
+  const old=window.renderDashboard;
+  window.renderDashboard=function(){
+    const r=typeof old==='function'?old.apply(this,arguments):undefined;
+    setTimeout(enforce,0);return r;
+  };
+  try{renderDashboard=window.renderDashboard}catch(e){}
+  setTimeout(enforce,100);
+})();
+</script>
+
