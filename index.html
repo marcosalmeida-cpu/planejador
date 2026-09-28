@@ -1213,9 +1213,10 @@ html.pp-session-resume-v45 #loginOverlay{display:none!important}
 
   function isGlobalKey(k){
     return k==='planejador_active_profile'
-      || k==='planejador_cloud_meta_v40'
       || k===INIT_KEY
       || k===CHRISTIAN_RESET
+      || k==='planejador_profiles_v46'
+      || k.startsWith('planejador_cloud_')
       || k.startsWith('planejador_password_')
       || k.startsWith(STATE_PREFIX);
   }
@@ -7156,16 +7157,87 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
 #cloudAuthV40 .cloud-note{margin-top:10px;padding:9px 10px;border-radius:12px;background:#f7f9fc;color:#667085;font-size:9.5px;line-height:1.4}
 </style>
 
-<script id="pp-supabase-cloud-v60">
+
+<script id="pp-v63-christian-cleanup">
+(function(){
+  const DONE='planejador_christian_limpeza_v63';
+  if(localStorage.getItem(DONE)==='1')return;
+
+  const PM=window.__ppV41Profile;
+  const PROFILE='Christian';
+
+  function cleanChristianState(state){
+    const s=Object.assign({},state||{});
+
+    // FGTS: zera saldos e remove histórico/lista de antecipações.
+    s['financeiro_marcos_fgts_summary_v3']=JSON.stringify({
+      saldoAtual:0,
+      saldoBloqueado:0,
+      saldoRescisao:0,
+      saldoDisponivel:0
+    });
+    s['planejador_fgts_item_edits_v1']='{}';
+    s['planejador_fgts_quitados_visiveis']='0';
+
+    // Dívidas / histórico de dívidas / credores.
+    s['financeiro_marcos_debt_edits_v3']='{}';
+    s['financeiro_marcos_debt_archived_v3']='[]';
+    s['financeiro_marcos_debt_deleted_v3']='[]';
+    s['planejador_creditores_v1']='[]';
+
+    return s;
+  }
+
+  try{
+    if(PM){
+      const prior=PM.readState(PROFILE)||{};
+      const cleaned=cleanChristianState(prior);
+      PM.saveState(PROFILE,cleaned);
+
+      // Se Christian estiver aberto agora, limpa também a área de trabalho ativa.
+      if((localStorage.getItem('planejador_active_profile')||'Marcos')===PROFILE){
+        PM.applyState(cleaned);
+      }
+    }else{
+      const key='planejador_profile_state_Christian_v41';
+      let prior={};
+      try{prior=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){}
+      localStorage.setItem(key,JSON.stringify(cleanChristianState(prior)));
+    }
+
+    // Previdência Social do Christian: começa totalmente vazia para cadastro manual.
+    localStorage.removeItem('rgps_previdencia_v55_Christian');
+    localStorage.removeItem('planejador_previdencia_rgps_v51_Christian');
+
+    // Marca especificamente o perfil Christian como alterado para a sincronização v62.
+    try{
+      const revKey='ppsync_profile_revisions_v62';
+      const rev=JSON.parse(localStorage.getItem(revKey)||'{}')||{};
+      rev[PROFILE]=Date.now();
+      localStorage.setItem(revKey,JSON.stringify(rev));
+    }catch(e){}
+
+    localStorage.setItem(DONE,'1');
+  }catch(err){
+    console.error('Falha na limpeza isolada do perfil Christian',err);
+  }
+})();
+</script>
+
+<script id="pp-supabase-cloud-v62">
 (function(){
   const SUPABASE_URL='https://pjotjwkugkyagwafcntb.supabase.co';
   const SUPABASE_KEY='sb_publishable_cNqoA3LlkHpOckIYUlEqQw_PKnw4B0S';
   const TABLE='planner_state';
-  const META_KEY='planejador_cloud_meta_v60';
-  const OLD_META_KEYS=['planejador_cloud_meta_v42','planejador_cloud_meta_v40'];
+  const HISTORY_TABLE='planner_state_history';
+  const APP_VERSION='v62';
   const DEVICE_KEY='planejador_cloud_device_v60';
+  const LOCAL_PROFILE_REVS='ppsync_profile_revisions_v62';
+  const LOCAL_GLOBAL_REV='ppsync_global_revision_v62';
+  const LOCAL_LAST_REMOTE='ppsync_last_remote_v62';
+  const PM=window.__ppV41Profile;
 
-  if(!window.supabase?.createClient)return;
+  if(!window.supabase?.createClient||!PM)return;
 
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
     auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
@@ -7173,54 +7245,131 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
   window.ppSupabase=sb;
 
   let currentUser=null;
-  let saveTimer=null;
-  let applyingRemote=false;
-  let watcherStarted=false;
   let realtimeChannel=null;
-  let lastSignature='';
-  let lastRemoteTs=0;
   let initialResolved=false;
+  let applyingRemote=false;
+  let saveTimer=null;
+  let pollTimer=null;
+  let lastWorkingSig='';
+  let lastGlobalSig='';
+  let lastCloudSignature='';
+  let statusText='';
 
-  function uuid(){
-    return 'dev-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
-  }
+  function now(){return Date.now()}
   function deviceId(){
     let d=localStorage.getItem(DEVICE_KEY);
-    if(!d){d=uuid();localStorage.setItem(DEVICE_KEY,d)}
+    if(!d){
+      d='dev-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10);
+      localStorage.setItem(DEVICE_KEY,d);
+    }
     return d;
   }
-  function isCloudKey(k){
-    k=String(k||'');
-    if(k===META_KEY||OLD_META_KEYS.includes(k)||k===DEVICE_KEY)return false;
-    return k.startsWith('planejador_')||k.startsWith('financeiro_marcos_')||k.startsWith('rgps_');
+  function activeProfile(){return localStorage.getItem('planejador_active_profile')||'Marcos'}
+  function stateKey(p){return PM.stateKey?PM.stateKey(p):'planejador_profile_state_'+p+'_v41'}
+  function parse(k,fallback){
+    try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(fallback))}catch(e){return fallback}
   }
-  function cloudKeys(){
-    const obj={};
+  function stable(v){
+    if(v===null||typeof v!=='object')return JSON.stringify(v);
+    if(Array.isArray(v))return '['+v.map(stable).join(',')+']';
+    return '{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+stable(v[k])).join(',')+'}';
+  }
+  function profileRevs(){return parse(LOCAL_PROFILE_REVS,{})||{}}
+  function setProfileRevs(v){localStorage.setItem(LOCAL_PROFILE_REVS,JSON.stringify(v||{}))}
+  function globalRev(){return Number(localStorage.getItem(LOCAL_GLOBAL_REV)||0)}
+  function setGlobalRev(v){localStorage.setItem(LOCAL_GLOBAL_REV,String(Number(v)||0))}
+  function touchProfile(p,ts=now()){
+    const r=profileRevs();r[p]=Math.max(Number(r[p]||0),Number(ts)||now());setProfileRevs(r);return r[p];
+  }
+  function touchGlobal(ts=now()){const v=Math.max(globalRev(),Number(ts)||now());setGlobalRev(v);return v}
+
+  function cleanProfileState(state){
+    const out={};
+    Object.entries(state||{}).forEach(([k,v])=>{
+      if(PM.isProfileKey(k))out[k]=String(v);
+    });
+    return out;
+  }
+  function syncActiveSnapshot({touch=false}={}){
+    if(applyingRemote)return;
+    const p=activeProfile();
+    const state=cleanProfileState(PM.captureShared());
+    PM.saveState(p,state);
+    if(touch)touchProfile(p);
+  }
+  function registry(){
+    let arr=[];
+    try{arr=JSON.parse(localStorage.getItem('planejador_profiles_v46')||'[]')}catch(e){}
+    if(!Array.isArray(arr))arr=[];
+    const names=new Map(arr.filter(x=>x&&x.name).map(x=>[String(x.name).toLowerCase(),x]));
+    if(!names.has('marcos'))names.set('marcos',{name:'Marcos',builtin:true});
+    if(!names.has('christian'))names.set('christian',{name:'Christian',builtin:true});
+    return [...names.values()];
+  }
+  function profileNames(){
+    const names=new Set(registry().map(x=>x.name));
     for(let i=0;i<localStorage.length;i++){
-      const k=localStorage.key(i);
-      if(k&&isCloudKey(k))obj[k]=localStorage.getItem(k);
+      const k=localStorage.key(i)||'';
+      const mm=k.match(/^planejador_profile_state_(.+)_v41$/);
+      if(mm)names.add(mm[1]);
     }
-    return obj;
+    names.add(activeProfile());
+    return [...names];
   }
-  function localMeta(){
-    try{return JSON.parse(localStorage.getItem(META_KEY)||'null')}catch(e){return null}
+  function localProfiles(){
+    const out={};
+    profileNames().forEach(p=>{
+      let s=PM.readState(p);
+      if(p===activeProfile())s=cleanProfileState(PM.captureShared());
+      if(s)out[p]=cleanProfileState(s);
+    });
+    return out;
   }
-  function snapshot(){
-    const now=new Date().toISOString();
+  function localPasswords(){
+    const out={};
+    profileNames().forEach(p=>{
+      const v=localStorage.getItem('planejador_password_'+p);
+      if(v!=null)out[p]=v;
+    });
+    return out;
+  }
+  function localRgps(){
+    const out={};
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i)||'';
+      if(k.startsWith('rgps_'))out[k]=localStorage.getItem(k);
+    }
+    return out;
+  }
+  function globalPayload(){
     return {
-      local_storage:cloudKeys(),
-      exported_at:now,
-      revision_ts:Date.now(),
-      source_device:deviceId(),
-      active_profile:localStorage.getItem('planejador_active_profile')||'Marcos',
-      app_version:'v60'
+      registry:registry(),
+      passwords:localPasswords(),
+      rgps:localRgps()
     };
   }
-  function signatureOf(data){
-    const ls=data?.local_storage||{};
-    return Object.keys(ls).sort().map(k=>k+'='+String(ls[k])).join('||');
+  function buildCanonical(){
+    syncActiveSnapshot({touch:false});
+    return {
+      app_version:APP_VERSION,
+      source_device:deviceId(),
+      exported_at:new Date().toISOString(),
+      profiles:localProfiles(),
+      profile_revisions:profileRevs(),
+      global:globalPayload(),
+      global_revision:globalRev()
+    };
+  }
+  function canonicalSignature(c){
+    return stable({
+      profiles:c?.profiles||{},
+      profile_revisions:c?.profile_revisions||{},
+      global:c?.global||{},
+      global_revision:Number(c?.global_revision||0)
+    });
   }
   function status(mode,text){
+    statusText=text||'Nuvem';
     let el=document.getElementById('cloudStatusV40');
     if(!el){
       el=document.createElement('div');
@@ -7229,193 +7378,328 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       document.body.appendChild(el);
     }
     el.className=mode||'';
-    const span=el.querySelector('span');if(span)span.textContent=text||'Nuvem';
+    const span=el.querySelector('span');if(span)span.textContent=statusText;
     const btn=el.querySelector('button');if(btn)btn.onclick=()=>openAuth();
   }
-  function writeMap(map,clearManaged=true){
-    if(!map||typeof map!=='object')return;
+
+  function workingSignature(){return stable(cleanProfileState(PM.captureShared()))}
+  function globalSignature(){return stable(globalPayload())}
+
+  function detectLocalChanges(){
+    if(applyingRemote||!initialResolved)return;
+    const w=workingSignature();
+    if(lastWorkingSig&&w!==lastWorkingSig){
+      syncActiveSnapshot({touch:true});
+      lastWorkingSig=workingSignature();
+      scheduleSave(120,'profile-change');
+    }else if(!lastWorkingSig)lastWorkingSig=w;
+
+    const g=globalSignature();
+    if(lastGlobalSig&&g!==lastGlobalSig){
+      touchGlobal();
+      lastGlobalSig=globalSignature();
+      scheduleSave(120,'global-change');
+    }else if(!lastGlobalSig)lastGlobalSig=g;
+  }
+
+  function mergeCanonical(local,remote){
+    const L=local||{},R=remote||{};
+    const out={
+      app_version:APP_VERSION,
+      source_device:deviceId(),
+      exported_at:new Date().toISOString(),
+      profiles:{},
+      profile_revisions:{},
+      global:{},
+      global_revision:0
+    };
+    const names=new Set([
+      ...Object.keys(L.profiles||{}),
+      ...Object.keys(R.profiles||{}),
+      ...Object.keys(L.profile_revisions||{}),
+      ...Object.keys(R.profile_revisions||{})
+    ]);
+    names.forEach(p=>{
+      const lr=Number(L.profile_revisions?.[p]||0);
+      const rr=Number(R.profile_revisions?.[p]||0);
+      if(rr>lr){
+        if(R.profiles?.[p])out.profiles[p]=R.profiles[p];
+        out.profile_revisions[p]=rr;
+      }else{
+        if(L.profiles?.[p])out.profiles[p]=L.profiles[p];
+        out.profile_revisions[p]=lr;
+      }
+    });
+    const lg=Number(L.global_revision||0),rg=Number(R.global_revision||0);
+    if(rg>lg){
+      out.global=R.global||{};
+      out.global_revision=rg;
+    }else{
+      out.global=L.global||{};
+      out.global_revision=lg;
+    }
+    return out;
+  }
+
+  function applyCanonical(c,{reload=true}={}){
+    if(!c||c.app_version!==APP_VERSION)return false;
+    const localR=profileRevs();
+    const remoteR=c.profile_revisions||{};
+    const active=activeProfile();
+    let activeChanged=false;
+
     applyingRemote=true;
     try{
-      if(clearManaged){
-        const rm=[];
-        for(let i=0;i<localStorage.length;i++){
-          const k=localStorage.key(i);
-          if(k&&isCloudKey(k))rm.push(k);
+      Object.entries(c.profiles||{}).forEach(([p,state])=>{
+        const rr=Number(remoteR[p]||0),lr=Number(localR[p]||0);
+        if(rr>lr){
+          PM.saveState(p,cleanProfileState(state));
+          localR[p]=rr;
+          if(p===active){
+            PM.applyState(cleanProfileState(state));
+            activeChanged=true;
+          }
         }
-        rm.forEach(k=>localStorage.removeItem(k));
-      }
-      Object.entries(map).forEach(([k,v])=>{
-        if(!isCloudKey(k))return;
-        if(v===null||v===undefined)localStorage.removeItem(k);
-        else localStorage.setItem(k,String(v));
       });
+      setProfileRevs(localR);
+
+      const rg=Number(c.global_revision||0),lg=globalRev();
+      if(rg>lg){
+        const g=c.global||{};
+        if(Array.isArray(g.registry))localStorage.setItem('planejador_profiles_v46',JSON.stringify(g.registry));
+        Object.entries(g.passwords||{}).forEach(([p,v])=>localStorage.setItem('planejador_password_'+p,String(v)));
+        // Replace only RGPS cloud-managed keys; never touch financial profile data here.
+        const remoteRgps=g.rgps||{};
+        const localRgpsKeys=[];
+        for(let i=0;i<localStorage.length;i++){
+          const k=localStorage.key(i)||'';
+          if(k.startsWith('rgps_'))localRgpsKeys.push(k);
+        }
+        localRgpsKeys.forEach(k=>{if(!(k in remoteRgps))localStorage.removeItem(k)});
+        Object.entries(remoteRgps).forEach(([k,v])=>localStorage.setItem(k,String(v)));
+        setGlobalRev(rg);
+      }
     }finally{applyingRemote=false}
-  }
-  function preserveSessionAndReload(){
-    try{window.ppSessionV47?.captureWorkspace?.()}catch(e){}
-    try{window.ppSessionV45?.captureWorkspace?.()}catch(e){}
-    sessionStorage.setItem('pp_cloud_remote_reload_v60','1');
-    location.reload();
-  }
-  function applyRemote(remote,updatedAt,{reload=true}={}){
-    if(!remote?.local_storage)return false;
-    writeMap(remote.local_storage,true);
-    if(remote.active_profile)localStorage.setItem('planejador_active_profile',remote.active_profile);
-    lastRemoteTs=Math.max(lastRemoteTs,Date.parse(updatedAt||remote.exported_at||'')||Number(remote.revision_ts)||Date.now());
-    lastSignature=signatureOf({local_storage:remote.local_storage});
-    localStorage.setItem(META_KEY,JSON.stringify({
-      lastRemoteAt:new Date(lastRemoteTs).toISOString(),
-      lastSavedAt:updatedAt||remote.exported_at||new Date().toISOString(),
-      userId:currentUser?.id||null,
-      appVersion:'v60',
-      deviceId:deviceId()
+
+    lastWorkingSig=workingSignature();
+    lastGlobalSig=globalSignature();
+    lastCloudSignature=canonicalSignature(c);
+    localStorage.setItem(LOCAL_LAST_REMOTE,JSON.stringify({
+      at:new Date().toISOString(),
+      source:c.source_device||null
     }));
-    status('online','Atualizado da nuvem');
-    if(reload)preserveSessionAndReload();
+    status('online','Sincronizado agora');
+    if(activeChanged&&reload){
+      try{window.ppSessionV47?.captureWorkspace?.()}catch(e){}
+      setTimeout(()=>location.reload(),30);
+    }else{
+      try{
+        window.renderAll?.();
+        window.renderDashboard?.();
+        window.renderCards?.();
+        window.renderLancamentos?.();
+        window.renderFgts?.();
+        window.renderDebts?.();
+        window.renderAssets?.();
+        window.renderInvestments?.();
+        window.renderPrevidencia?.();
+      }catch(e){}
+    }
+    return activeChanged;
+  }
+
+  async function fetchRemote(){
+    if(!currentUser)return {row:null,error:null};
+    const {data,error}=await sb.from(TABLE).select('data,updated_at,schema_version').eq('user_id',currentUser.id).maybeSingle();
+    return {row:data,error};
+  }
+
+  async function archiveRemote(row){
+    if(!row||!currentUser)return;
+    try{
+      await sb.from(HISTORY_TABLE).insert({
+        user_id:currentUser.id,
+        data:row.data||{},
+        schema_version:Number(row.schema_version||1),
+        source_updated_at:row.updated_at||null
+      });
+    }catch(e){console.warn('Cloud history archive failed',e)}
+  }
+
+  async function upsertCanonical(c,reason){
+    if(!currentUser)return false;
+    status('saving','Salvando…');
+    const {data,error}=await sb.from(TABLE).upsert({
+      user_id:currentUser.id,
+      data:{...c,save_reason:reason||'change'},
+      schema_version:2
+    },{onConflict:'user_id'}).select('updated_at').single();
+    if(error){
+      console.error('Supabase v62 save error',error);
+      status('error','Erro ao salvar');
+      return false;
+    }
+    lastCloudSignature=canonicalSignature(c);
+    status('online','Sincronizado agora');
     return true;
   }
 
   async function saveNow(reason='change'){
     if(!currentUser||applyingRemote||!initialResolved)return false;
     clearTimeout(saveTimer);
-    const snap=snapshot();
-    status('saving','Salvando…');
-    const {data,error}=await sb.from(TABLE).upsert({
-      user_id:currentUser.id,
-      data:snap,
-      schema_version:1
-    },{onConflict:'user_id'}).select('updated_at').single();
 
-    if(error){
-      console.error('Supabase v60 save error',error);
-      status('error','Erro ao salvar');
-      return false;
+    // Capture the active profile synchronously BEFORE touching the cloud.
+    syncActiveSnapshot({touch:false});
+    let local=buildCanonical();
+
+    const {row,error}=await fetchRemote();
+    if(error){status('error','Erro ao comparar nuvem');return false}
+
+    let merged=local;
+    if(row?.data?.app_version===APP_VERSION){
+      merged=mergeCanonical(local,row.data);
+      // If the server contains a newer profile/global change, apply it locally before saving the merged copy.
+      applyCanonical(merged,{reload:false});
     }
-    const ts=Date.parse(data?.updated_at||snap.exported_at)||Date.now();
-    lastRemoteTs=Math.max(lastRemoteTs,ts);
-    lastSignature=signatureOf(snap);
-    localStorage.setItem(META_KEY,JSON.stringify({
-      lastSavedAt:data?.updated_at||snap.exported_at,
-      lastRemoteAt:data?.updated_at||snap.exported_at,
-      userId:currentUser.id,
-      appVersion:'v60',
-      deviceId:deviceId(),
-      reason
-    }));
-    status('online','Sincronizado agora');
-    return true;
+
+    const newSig=canonicalSignature(merged);
+    const oldSig=row?.data?.app_version===APP_VERSION?canonicalSignature(row.data):'';
+    if(newSig===oldSig){
+      status('online','Já está sincronizado');
+      return true;
+    }
+
+    if(row)await archiveRemote(row);
+    return await upsertCanonical(merged,reason);
   }
 
-  function scheduleSave(delay=350,reason='change'){
-    if(!currentUser||applyingRemote||!initialResolved)return;
+  function scheduleSave(delay=180,reason='change'){
+    if(!currentUser||!initialResolved||applyingRemote)return;
     clearTimeout(saveTimer);
     saveTimer=setTimeout(()=>saveNow(reason),delay);
   }
 
-  async function fetchRemote(){
-    if(!currentUser)return {row:null,error:null};
-    const {data,error}=await sb.from(TABLE)
-      .select('data,updated_at')
-      .eq('user_id',currentUser.id)
-      .maybeSingle();
-    return {row:data,error};
-  }
-
-  async function resolveInitial(){
-    if(!currentUser)return;
-    status('saving','Sincronizando…');
-
-    const {row,error}=await fetchRemote();
-    if(error){
-      console.error('Supabase v60 initial load error',error);
-      initialResolved=true;
-      startWatcher();
-      status('error','Erro na nuvem');
-      return;
-    }
-
-    if(!row){
-      initialResolved=true;
-      startWatcher();
-      await saveNow('first-cloud-state');
-      subscribeRealtime();
-      return;
-    }
-
-    const remote=row.data||{};
-    const remoteTs=Date.parse(row.updated_at||remote.exported_at||'')||Number(remote.revision_ts)||0;
-    const meta=localMeta();
-    const localSavedTs=Date.parse(meta?.lastSavedAt||'')||0;
-
-    // Conflict rule:
-    // - a known locally-saved state newer than server is uploaded;
-    // - otherwise server wins, which fixes stale phones/tablets.
-    if(localSavedTs>remoteTs+1500){
-      initialResolved=true;
-      startWatcher();
-      await saveNow('local-newer-on-start');
-    }else{
-      applyRemote(remote,row.updated_at,{reload:false});
-      initialResolved=true;
-      startWatcher();
-    }
-
-    subscribeRealtime();
-    status('online','Sincronizado agora');
-  }
-
-  async function pull({reason='manual',force=false,reload=true}={}){
+  async function pull({force=false,reload=true,reason='manual'}={}){
     if(!currentUser)return false;
+    detectLocalChanges();
+    // If this device changed locally, push/merge it first so "Atualizar" can never discard it.
+    if(saveTimer){clearTimeout(saveTimer);saveTimer=null;await saveNow('pre-pull-'+reason)}
+
     const {row,error}=await fetchRemote();
     if(error){status('error','Erro ao atualizar');return false}
     if(!row)return false;
 
-    const remote=row.data||{};
-    const remoteTs=Date.parse(row.updated_at||remote.exported_at||'')||Number(remote.revision_ts)||0;
-    if(force||remoteTs>lastRemoteTs+500){
-      return applyRemote(remote,row.updated_at,{reload});
+    if(row.data?.app_version!==APP_VERSION){
+      // Old cloud formats are never allowed to overwrite v62 local data.
+      await saveNow('upgrade-old-cloud');
+      return false;
+    }
+
+    const local=buildCanonical();
+    const merged=mergeCanonical(local,row.data);
+    const changed=canonicalSignature(merged)!==canonicalSignature(local);
+
+    if(changed||force){
+      applyCanonical(merged,{reload});
+      // If local had something newer too, persist the merge back to server.
+      if(canonicalSignature(merged)!==canonicalSignature(row.data)){
+        await archiveRemote(row);
+        await upsertCanonical(merged,'merge-'+reason);
+      }
+      return changed;
     }
     status('online','Já está atualizado');
     return false;
   }
 
-  function startWatcher(){
-    if(watcherStarted)return;
-    watcherStarted=true;
-    lastSignature=signatureOf(snapshot());
-    setInterval(()=>{
-      if(!currentUser||applyingRemote||!initialResolved)return;
-      const sig=signatureOf(snapshot());
-      if(sig!==lastSignature){
-        lastSignature=sig;
-        scheduleSave(300,'local-change');
+  async function initializeCloud(){
+    status('saving','Sincronizando…');
+    syncActiveSnapshot({touch:false});
+    const {row,error}=await fetchRemote();
+    if(error){
+      console.error(error);
+      initialResolved=true;
+      status('error','Erro na nuvem');
+      startMonitor();
+      subscribeRealtime();
+      return;
+    }
+
+    if(!row||row.data?.app_version!==APP_VERSION){
+      // Safe migration rule: an old/empty cloud copy can NEVER erase current browser data.
+      const t=now();
+      const revs=profileRevs();
+      profileNames().forEach(p=>{if(!Number(revs[p]||0))revs[p]=t});
+      setProfileRevs(revs);
+      if(!globalRev())setGlobalRev(t);
+      const local=buildCanonical();
+      initialResolved=true;
+      startMonitor();
+      if(row)await archiveRemote(row);
+      await upsertCanonical(local,'v62-safe-migration');
+      subscribeRealtime();
+      return;
+    }
+
+    const localRevs=profileRevs();
+    const remoteRevs=row.data.profile_revisions||{};
+    const hasLocalRevs=Object.values(localRevs).some(v=>Number(v)>0)||globalRev()>0;
+
+    if(!hasLocalRevs){
+      // New device/browser: server is authoritative because this device has no v62 edits yet.
+      const zeroLocal={
+        app_version:APP_VERSION,source_device:deviceId(),profiles:{},profile_revisions:{},
+        global:{},global_revision:0
+      };
+      const merged=mergeCanonical(zeroLocal,row.data);
+      applyCanonical(merged,{reload:false});
+    }else{
+      const merged=mergeCanonical(buildCanonical(),row.data);
+      applyCanonical(merged,{reload:false});
+      if(canonicalSignature(merged)!==canonicalSignature(row.data)){
+        await archiveRemote(row);
+        await upsertCanonical(merged,'startup-merge');
       }
-    },800);
+    }
+
+    initialResolved=true;
+    lastWorkingSig=workingSignature();
+    lastGlobalSig=globalSignature();
+    startMonitor();
+    subscribeRealtime();
+    status('online','Tempo real ativo');
+  }
+
+  function startMonitor(){
+    if(pollTimer)return;
+    lastWorkingSig=workingSignature();
+    lastGlobalSig=globalSignature();
+    pollTimer=setInterval(detectLocalChanges,250);
   }
 
   function subscribeRealtime(){
     if(!currentUser||realtimeChannel)return;
-    realtimeChannel=sb.channel('planner-state-v60-'+currentUser.id)
+    realtimeChannel=sb.channel('planner-state-v62-'+currentUser.id)
       .on('postgres_changes',{
-        event:'*',
-        schema:'public',
-        table:TABLE,
-        filter:'user_id=eq.'+currentUser.id
-      },payload=>{
-        const row=payload.new||null;
-        const remote=row?.data||null;
-        if(!remote)return;
+        event:'UPDATE',schema:'public',table:TABLE,filter:'user_id=eq.'+currentUser.id
+      },async payload=>{
+        const remote=payload.new?.data;
+        if(!remote||remote.app_version!==APP_VERSION)return;
         if(remote.source_device===deviceId())return;
 
-        const remoteTs=Date.parse(row.updated_at||remote.exported_at||'')||Number(remote.revision_ts)||Date.now();
-        if(remoteTs<=lastRemoteTs+250)return;
-
-        // Another device changed the planner. Apply it immediately.
-        applyRemote(remote,row.updated_at,{reload:true});
+        detectLocalChanges();
+        if(saveTimer){
+          clearTimeout(saveTimer);saveTimer=null;
+          await saveNow('local-before-realtime');
+          return; // our save creates a fresh realtime event containing the merged state
+        }
+        const merged=mergeCanonical(buildCanonical(),remote);
+        const localSig=canonicalSignature(buildCanonical());
+        if(canonicalSignature(merged)!==localSig){
+          applyCanonical(merged,{reload:true});
+        }
       })
-      .subscribe(statusValue=>{
-        if(statusValue==='SUBSCRIBED')status('online','Tempo real ativo');
-      });
+      .subscribe(s=>{if(s==='SUBSCRIBED')status('online','Tempo real ativo')});
   }
 
   async function unsubscribeRealtime(){
@@ -7425,35 +7709,21 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     }
   }
 
-  // Pull latest state whenever this device becomes active again.
-  document.addEventListener('visibilitychange',()=>{
-    if(!document.hidden&&currentUser&&initialResolved){
-      setTimeout(()=>pull({reason:'visibility',reload:true}),120);
-    }
-  });
-  window.addEventListener('focus',()=>{
-    if(currentUser&&initialResolved)setTimeout(()=>pull({reason:'focus',reload:true}),120);
-  });
-  window.addEventListener('online',()=>{
-    if(currentUser&&initialResolved)setTimeout(()=>pull({reason:'online',reload:true}),150);
-  });
-
   function closeAuth(){document.getElementById('cloudAuthV40')?.remove()}
 
   function openAuth(){
     document.getElementById('cloudAuthV40')?.remove();
-    const ov=document.createElement('div');
-    ov.id='cloudAuthV40';
-    const meta=localMeta();
-    const last=meta?.lastSavedAt?new Date(meta.lastSavedAt).toLocaleString('pt-BR'):'ainda não';
+    const ov=document.createElement('div');ov.id='cloudAuthV40';
+    const last=parse(LOCAL_LAST_REMOTE,null);
+    const lastTxt=last?.at?new Date(last.at).toLocaleString('pt-BR'):'—';
     ov.innerHTML=`<section class="cloud-card">
       <button type="button" class="cloud-close" aria-label="Fechar">×</button>
-      <h2>${currentUser?'Sincronização em tempo real':'Conectar à nuvem'}</h2>
+      <h2>${currentUser?'Sincronização segura em tempo real':'Conectar à nuvem'}</h2>
       <p>${currentUser
-        ? 'Este aparelho recebe automaticamente alterações feitas em outros aparelhos conectados à mesma conta.'
-        : 'Entre com a mesma conta de nuvem em todos os aparelhos para manter os dados iguais.'}</p>
+        ? 'As alterações são salvas por perfil e mescladas entre os aparelhos. Exclusões feitas por você também são sincronizadas.'
+        : 'Entre com a mesma conta de nuvem em todos os aparelhos.'}</p>
       ${currentUser
-        ? `<div class="cloud-note"><b>Conta conectada:</b><br>${String(currentUser.email||'').replace(/</g,'&lt;')}<br><small>Última sincronização: ${last}</small></div>
+        ? `<div class="cloud-note"><b>Conta conectada:</b><br>${String(currentUser.email||'').replace(/</g,'&lt;')}<br><small>Última atualização recebida: ${lastTxt}</small><br><small>Proteção: cópia anterior arquivada antes de cada alteração da nuvem.</small></div>
            <div class="cloud-actions">
              <button type="button" class="cloud-secondary" id="cloudLoadNow">Atualizar agora</button>
              <button type="button" class="cloud-secondary" id="cloudSyncNow">Salvar agora</button>
@@ -7461,7 +7731,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
            </div>
            <div class="cloud-backup-box">
              <strong>Backup completo</strong>
-             <p>Guarde uma cópia dos perfis no seu aparelho.</p>
+             <p>Guarde uma cópia adicional dos perfis no seu aparelho.</p>
              <div class="cloud-backup-actions">
                <button type="button" class="cloud-backup-download" id="backupDownloadV43">Baixar backup</button>
                <button type="button" class="cloud-backup-restore" id="backupRestoreV43">Restaurar backup</button>
@@ -7475,13 +7745,13 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
            <div class="cloud-actions">
              <button type="button" class="cloud-primary" id="cloudSignIn">Entrar</button>
              <button type="button" class="cloud-secondary" id="cloudSignUp">Criar conta</button>
-           </div>
-           <div class="cloud-note"><b>Importante:</b> use esta mesma conta de nuvem no computador e no celular.</div>`
+           </div>`
       }
     </section>`;
     document.body.appendChild(ov);
-    ov.querySelector('.cloud-close').onclick=closeAuth;
-    ov.onclick=e=>{if(e.target===ov)closeAuth()};
+    const close=()=>ov.remove();
+    ov.querySelector('.cloud-close').onclick=close;
+    ov.onclick=e=>{if(e.target===ov)close()};
 
     const bd=document.getElementById('backupDownloadV43');
     const br=document.getElementById('backupRestoreV43');
@@ -7489,15 +7759,21 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     if(br)br.onclick=()=>window.ppBackupV43?.chooseRestore?.();
 
     if(currentUser){
-      document.getElementById('cloudSyncNow').onclick=async()=>{await saveNow('manual');closeAuth()};
-      document.getElementById('cloudLoadNow').onclick=async()=>{await pull({reason:'manual',force:true,reload:true});closeAuth()};
+      document.getElementById('cloudSyncNow').onclick=async()=>{
+        detectLocalChanges();
+        await saveNow('manual-save');
+        close();
+      };
+      document.getElementById('cloudLoadNow').onclick=async()=>{
+        await pull({force:true,reload:true,reason:'manual-refresh'});
+        close();
+      };
       document.getElementById('cloudSignOut').onclick=async()=>{
+        detectLocalChanges();
+        await saveNow('before-cloud-signout');
         await unsubscribeRealtime();
         await sb.auth.signOut();
-        currentUser=null;
-        initialResolved=false;
-        closeAuth();
-        status('','Nuvem desconectada');
+        currentUser=null;initialResolved=false;close();status('','Nuvem desconectada');
       };
       return;
     }
@@ -7505,8 +7781,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     function credentials(){
       const email=document.getElementById('cloudEmail').value.trim();
       const password=document.getElementById('cloudPassword').value;
-      const errorEl=document.getElementById('cloudError');
-      errorEl.textContent='';
+      const errorEl=document.getElementById('cloudError');errorEl.textContent='';
       if(!email||password.length<6){
         errorEl.textContent='Informe um e-mail válido e uma senha com pelo menos 6 caracteres.';
         return null;
@@ -7517,9 +7792,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       const c=credentials();if(!c)return;
       const {data,error}=await sb.auth.signInWithPassword({email:c.email,password:c.password});
       if(error){c.errorEl.textContent=error.message;return}
-      currentUser=data.user;
-      closeAuth();
-      await resolveInitial();
+      currentUser=data.user;close();await initializeCloud();
     };
     document.getElementById('cloudSignUp').onclick=async()=>{
       const c=credentials();if(!c)return;
@@ -7530,41 +7803,64 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
         c.errorEl.textContent='Conta criada. Confirme o e-mail e depois clique em Entrar.';
         return;
       }
-      currentUser=data.user;
-      closeAuth();
-      await resolveInitial();
+      currentUser=data.user;close();await initializeCloud();
     };
   }
+
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden&&currentUser&&initialResolved)setTimeout(()=>pull({reload:true,reason:'visibility'}),100);
+  });
+  window.addEventListener('focus',()=>{
+    if(currentUser&&initialResolved)setTimeout(()=>pull({reload:true,reason:'focus'}),100);
+  });
+  window.addEventListener('online',()=>{
+    if(currentUser&&initialResolved)setTimeout(()=>pull({reload:true,reason:'online'}),120);
+  });
+  window.addEventListener('beforeunload',()=>{try{syncActiveSnapshot({touch:false})}catch(e){}});
+
+  // Explicit mutations: save profile snapshot immediately instead of waiting for the 250ms monitor.
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.(
+      '#saveTx,#saveCardPurchase,#saveCard,#saveAsset,#saveInvestment,#saveFgts,#saveDebt,'+
+      '#cardDeleteConfirm,#v19DeleteCard,#v19Active,#v19Cancelled,'+
+      '[data-action="delete"],[data-action="archive"],[data-action="pay"],[data-action="advance"]'
+    )){
+      setTimeout(()=>{
+        if(applyingRemote)return;
+        const w=workingSignature();
+        if(w!==lastWorkingSig){
+          syncActiveSnapshot({touch:true});
+          lastWorkingSig=workingSignature();
+          scheduleSave(80,'explicit-action');
+        }
+      },40);
+    }
+  },true);
 
   async function init(){
     status('saving','Conectando à nuvem…');
     const {data}=await sb.auth.getSession();
     currentUser=data.session?.user||null;
-    if(currentUser){
-      await resolveInitial();
-    }else{
-      status('','Entre na nuvem neste aparelho');
-      setTimeout(openAuth,700);
-    }
+    if(currentUser)await initializeCloud();
+    else{status('','Entre na nuvem neste aparelho');setTimeout(openAuth,700)}
 
     sb.auth.onAuthStateChange((event,session)=>{
       currentUser=session?.user||null;
-      if(event==='SIGNED_IN'&&currentUser&&!initialResolved)setTimeout(resolveInitial,0);
+      if(event==='SIGNED_IN'&&currentUser&&!initialResolved)setTimeout(initializeCloud,0);
       if(event==='SIGNED_OUT'){
-        unsubscribeRealtime();
-        initialResolved=false;
-        status('','Entre na nuvem neste aparelho');
+        unsubscribeRealtime();initialResolved=false;status('','Entre na nuvem neste aparelho');
       }
     });
   }
 
-  window.ppCloud=window.ppCloudV60={
+  window.ppCloud=window.ppCloudV60=window.ppCloudV62={
     open:openAuth,
     save:()=>saveNow('api'),
-    load:()=>pull({reason:'api',force:true,reload:true}),
+    load:()=>pull({force:true,reload:true,reason:'api'}),
     pull,
+    syncActiveSnapshot,
     client:sb,
-    version:'v60'
+    version:APP_VERSION
   };
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,0),{once:true});
@@ -7591,7 +7887,7 @@ html.pp-christian-empty #dashboardScope{display:none!important}
 
 <script id="pp-backup-v43">
 (function(){
-  const PREFIXES=['planejador_','financeiro_marcos_'];
+  const PREFIXES=['planejador_','financeiro_marcos_','rgps_'];
   const isManaged=k=>PREFIXES.some(p=>String(k||'').startsWith(p));
 
   function collect(){
@@ -7604,7 +7900,7 @@ html.pp-christian-empty #dashboardScope{display:none!important}
     return {
       type:'PlanejadorPessoalBackup',
       format_version:1,
-      app_version:'v43',
+      app_version:'v62',
       created_at:new Date().toISOString(),
       active_profile:localStorage.getItem('planejador_active_profile')||'Marcos',
       data
@@ -7697,6 +7993,7 @@ Os dados atuais deste navegador serão substituídos.`);
     if(internal)return;
     internal=true;
     try{PM.saveState(active(),PM.captureShared())}finally{internal=false}
+    try{window.ppCloudV62?.syncActiveSnapshot?.({touch:true})}catch(e){}
     try{window.ppCloud?.save?.()}catch(e){}
   }
 
@@ -12482,6 +12779,72 @@ setTimeout(initEssence,0);
     if(/dívida|parcela prevista|obrigação futura/i.test(txt))repaint();
   },1000);
   setTimeout(repaint,100);
+})();
+</script>
+
+<script id="pp-v63-christian-source-guards">
+(function(){
+  function active(){return localStorage.getItem('planejador_active_profile')||'Marcos'}
+
+  const previousDebts=window.getDebts;
+  window.getDebts=function(){
+    if(active()==='Christian')return [];
+    return typeof previousDebts==='function'?previousDebts.apply(this,arguments):[];
+  };
+  try{getDebts=window.getDebts}catch(e){}
+
+  const previousFgts=window.getFgtsContracts;
+  window.getFgtsContracts=function(){
+    if(active()==='Christian')return [];
+    return typeof previousFgts==='function'?previousFgts.apply(this,arguments):[];
+  };
+  try{getFgtsContracts=window.getFgtsContracts}catch(e){}
+
+  // Projeções de dívida também ficam vazias no perfil Christian.
+  try{
+    const previousDebtProjection=window.debtProjectionRows || (typeof debtProjectionRows==='function'?debtProjectionRows:null);
+    if(previousDebtProjection){
+      window.debtProjectionRows=function(){
+        if(active()==='Christian')return [];
+        return previousDebtProjection.apply(this,arguments);
+      };
+      try{debtProjectionRows=window.debtProjectionRows}catch(e){}
+    }
+  }catch(e){}
+
+  function repaintChristianEmpty(){
+    if(active()!=='Christian')return;
+
+    const db=document.getElementById('debtBody');
+    if(db)db.innerHTML='<tr><td colspan="10" class="empty">Nenhuma dívida cadastrada para Christian.</td></tr>';
+    const ds=document.getElementById('debtSummary');
+    if(ds)ds.innerHTML='';
+
+    const fb=document.getElementById('fgtsBody');
+    if(fb)fb.innerHTML='<tr><td colspan="8" class="empty">Nenhuma antecipação do FGTS cadastrada para Christian.</td></tr>';
+  }
+
+  const priorRenderDebts=window.renderDebts;
+  if(typeof priorRenderDebts==='function'){
+    window.renderDebts=function(){
+      const r=priorRenderDebts.apply(this,arguments);
+      repaintChristianEmpty();
+      return r;
+    };
+    try{renderDebts=window.renderDebts}catch(e){}
+  }
+
+  const priorRenderFgts=window.renderFgts;
+  if(typeof priorRenderFgts==='function'){
+    window.renderFgts=function(){
+      const r=priorRenderFgts.apply(this,arguments);
+      repaintChristianEmpty();
+      return r;
+    };
+    try{renderFgts=window.renderFgts}catch(e){}
+  }
+
+  setTimeout(repaintChristianEmpty,120);
 })();
 </script>
 
