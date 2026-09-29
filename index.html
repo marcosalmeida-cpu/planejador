@@ -14898,3 +14898,219 @@ setTimeout(initEssence,0);
   setTimeout(()=>{ensureControls76();removeBank76();render76()},800);
 })();
 </script>
+
+
+<style id="pp-v77-debt-dates-style">
+#dividas #debtLastMonthFilterV77{min-width:155px}
+#dividas .tablewrap table{min-width:1220px!important;table-layout:auto!important}
+#dividas th:nth-child(1),#dividas td:nth-child(1){min-width:185px}
+#dividas th:nth-child(2),#dividas td:nth-child(2){min-width:165px}
+#dividas th:nth-child(3),#dividas td:nth-child(3),#dividas th:nth-child(4),#dividas td:nth-child(4){min-width:72px;width:72px}
+#dividas th:nth-child(5),#dividas td:nth-child(5){min-width:90px}
+#dividas th:nth-child(6),#dividas td:nth-child(6){min-width:105px;white-space:nowrap}
+#dividas th:nth-child(7),#dividas td:nth-child(7){min-width:150px}
+#dividas th:nth-child(8),#dividas td:nth-child(8),#dividas th:nth-child(9),#dividas td:nth-child(9){min-width:88px}
+#dividas th:nth-child(10),#dividas td:nth-child(10){min-width:100px}
+#dividas th:last-child,#dividas td:last-child{min-width:64px;white-space:nowrap}
+#debtModal .debt-month-note{display:block;margin-top:4px;color:#7a8493;font-size:10px;line-height:1.35}
+#debtModal input[type="month"]{min-height:39px}
+</style>
+<script id="pp-v77-debt-dates">
+(function(){
+  const EDIT_KEY='financeiro_marcos_debt_edits_v3';
+
+  function n77(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(','))s=s.replace(',','.');
+    s=s.replace(/[^0-9.-]/g,'');
+    const n=Number(s);return Number.isFinite(n)?n:0;
+  }
+  function validMonth(v){return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(v||''))}
+  function addMonths77(ym,steps){
+    if(!validMonth(ym))return '';
+    const [y,m]=ym.split('-').map(Number);
+    const d=new Date(y,m-1+Math.max(0,Number(steps)||0),1);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  function fmtMonth77(ym){
+    if(!validMonth(ym))return '—';
+    const [y,m]=ym.split('-');return `${m}/${y}`;
+  }
+  function readEdits77(){
+    try{const x=JSON.parse(localStorage.getItem(EDIT_KEY)||'{}');return x&&typeof x==='object'?x:{}}catch(e){return {}}
+  }
+  function currentDebt77(){
+    const id=String(document.getElementById('dId')?.value||'');
+    if(!id)return null;
+    try{return (typeof getDebts==='function'?getDebts(true):[]).find(x=>String(x.id)===id)||null}catch(e){return null}
+  }
+  function state77(d){
+    const totalInst=Math.max(1,parseInt(d?.parcelasTotal,10)||1);
+    let paidInst=Math.max(0,parseInt(d?.parcelasQuitadas,10)||0);
+    let installment=n77(d?.parcela),total=n77(d?.total),paid=n77(d?.quitado);
+    if(!total&&installment>0)total=installment*totalInst;
+    if(!installment&&total>0)installment=Number((total/totalInst).toFixed(2));
+    let pending=(d&&d.pendente!==undefined&&d.pendente!==null&&String(d.pendente).trim()!=='')?n77(d.pendente):Math.max(0,total-paid);
+    if(total>0&&paid>total)paid=total;
+    if(pending<0)pending=0;
+    if((pending===0&&total>0)||String(d?.status||'').toLowerCase()==='quitado'||paidInst>=totalInst){pending=0;paid=total||paid;paidInst=totalInst}
+    const pendingInst=Math.max(0,totalInst-paidInst);
+    const status=(pending===0&&pendingInst===0)?'Quitado':'Pendente';
+    const pct=total>0?Math.min(100,Math.max(0,paid/total*100)):(status==='Quitado'?100:0);
+    const first=validMonth(d?.primeiraParcelaMes)?d.primeiraParcelaMes:'';
+    const last=validMonth(d?.ultimaParcelaMes)?d.ultimaParcelaMes:(first?addMonths77(first,totalInst-1):'');
+    return {totalInst,paidInst,pendingInst,installment,total,paid,pending,status,pct,first,last};
+  }
+
+  function ensureDateFields77(){
+    const modal=document.getElementById('debtModal');if(!modal)return;
+    // Banco deixa de existir na interface, não apenas oculto.
+    const bank=document.getElementById('dBank');
+    if(bank){const field=bank.closest('.field');if(field)field.remove();else bank.remove()}
+    const qty=document.getElementById('dInstallments');
+    if(!qty)return;
+    let first=document.getElementById('dFirstMonthV77');
+    if(!first){
+      const field=document.createElement('div');field.className='field';field.id='dFirstMonthFieldV77';
+      field.innerHTML='<label>Primeira parcela</label><input id="dFirstMonthV77" type="month"><small class="debt-month-note">Informe apenas mês e ano.</small>';
+      const qtyField=qty.closest('.field');
+      qtyField?.parentNode?.insertBefore(field,qtyField.nextSibling);
+      first=document.getElementById('dFirstMonthV77');
+    }
+    let last=document.getElementById('dLastMonthV77');
+    if(!last){
+      const field=document.createElement('div');field.className='field';field.id='dLastMonthFieldV77';
+      field.innerHTML='<label>Última parcela</label><input id="dLastMonthV77" type="month" readonly><small class="debt-month-note">Calculada automaticamente pela primeira parcela e pelo total de parcelas.</small>';
+      const firstField=document.getElementById('dFirstMonthFieldV77');
+      firstField?.parentNode?.insertBefore(field,firstField.nextSibling);
+      last=document.getElementById('dLastMonthV77');
+    }
+    function recalc(){
+      const count=Math.max(1,parseInt(document.getElementById('dInstallments')?.value,10)||1);
+      const start=document.getElementById('dFirstMonthV77')?.value||'';
+      const end=start?addMonths77(start,count-1):'';
+      const out=document.getElementById('dLastMonthV77');if(out)out.value=end;
+    }
+    if(first&&!first.dataset.v77){first.dataset.v77='1';first.addEventListener('change',recalc);first.addEventListener('input',recalc)}
+    if(qty&&!qty.dataset.date77){qty.dataset.date77='1';qty.addEventListener('input',recalc,true);qty.addEventListener('change',recalc,true)}
+  }
+
+  function populateDates77(){
+    ensureDateFields77();
+    const id=String(document.getElementById('dId')?.value||'');
+    const d=id?currentDebt77():null;
+    const first=document.getElementById('dFirstMonthV77'),last=document.getElementById('dLastMonthV77');
+    if(!first||!last)return;
+    const s=d?state77(d):null;
+    first.value=s?.first||'';
+    const count=Math.max(1,parseInt(document.getElementById('dInstallments')?.value,10)||s?.totalInst||1);
+    last.value=first.value?addMonths77(first.value,count-1):'';
+  }
+
+  // Observa abertura do modal porque os abridores antigos continuam sendo usados pela V9.
+  const debtModal=document.getElementById('debtModal');
+  if(debtModal){
+    const mo=new MutationObserver(()=>{
+      ensureDateFields77();
+      if(debtModal.classList.contains('open'))setTimeout(populateDates77,0);
+    });
+    mo.observe(debtModal,{attributes:true,attributeFilter:['class']});
+  }
+  ensureDateFields77();
+
+  // Antes da rotina de salvar já existente, injeta as datas no objeto atual para que o spread preserve os campos.
+  function stageDates77(){
+    const id=String(document.getElementById('dId')?.value||'');
+    const first=document.getElementById('dFirstMonthV77')?.value||'';
+    const count=Math.max(1,parseInt(document.getElementById('dInstallments')?.value,10)||1);
+    const last=first?addMonths77(first,count-1):'';
+    if(!id)return; // nova dívida será consolidada logo após o save pela rotina abaixo.
+    try{
+      const all=readEdits77();
+      all[id]={...(all[id]||{}),primeiraParcelaMes:first,ultimaParcelaMes:last,banco:''};
+      localStorage.setItem(EDIT_KEY,JSON.stringify(all));
+      if(typeof debtEdits!=='undefined')debtEdits=all;
+    }catch(e){}
+  }
+  document.addEventListener('pointerdown',e=>{if(e.target.closest?.('#saveDebt'))stageDates77()},true);
+
+  // Para novas dívidas, identifica o registro recém-criado e acrescenta as datas sem alterar os demais dados.
+  document.addEventListener('click',e=>{
+    if(!e.target.closest?.('#saveDebt'))return;
+    const wasNew=!String(document.getElementById('dId')?.value||'');
+    const first=document.getElementById('dFirstMonthV77')?.value||'';
+    const count=Math.max(1,parseInt(document.getElementById('dInstallments')?.value,10)||1);
+    const last=first?addMonths77(first,count-1):'';
+    if(!wasNew)return;
+    const before=new Set(Object.keys(readEdits77()));
+    setTimeout(()=>{
+      try{
+        const all=readEdits77();
+        const ids=Object.keys(all).filter(id=>!before.has(id)&&String(id).startsWith('DEBT_MANUAL_')).sort();
+        const id=ids[ids.length-1];if(!id)return;
+        all[id]={...(all[id]||{}),primeiraParcelaMes:first,ultimaParcelaMes:last,banco:''};
+        localStorage.setItem(EDIT_KEY,JSON.stringify(all));
+        if(typeof debtEdits!=='undefined')debtEdits=all;
+        try{window.renderDebts?.()}catch(x){}
+        try{window.ppCloudV66?.save?.()}catch(x){}
+      }catch(err){}
+    },80);
+  },false);
+
+  function ensureFilter77(){
+    const bar=document.querySelector('#dividas .section-tools .filterbar');if(!bar)return;
+    let f=document.getElementById('debtLastMonthFilterV77');
+    if(!f){
+      f=document.createElement('input');f.type='month';f.id='debtLastMonthFilterV77';f.title='Filtrar pelo mês/ano da última parcela';f.setAttribute('aria-label','Última parcela');
+      const search=document.getElementById('debtSearch');if(search)bar.insertBefore(f,search);else bar.appendChild(f);
+      f.addEventListener('change',()=>window.renderDebts?.());
+      f.addEventListener('input',()=>window.renderDebts?.());
+    }
+  }
+
+  function render77(){
+    ensureFilter77();ensureDateFields77();
+    const section=document.getElementById('dividas'),body=document.getElementById('debtBody'),summary=document.getElementById('debtSummary');
+    const statusEl=document.getElementById('debtStatusFilterV76'),negoEl=document.getElementById('debtNegotiationFilterV76'),dateEl=document.getElementById('debtLastMonthFilterV77'),search=document.getElementById('debtSearch');
+    if(!section||!body||!summary||!statusEl||!negoEl||!dateEl||!search)return;
+    const head=section.querySelector('table thead tr');
+    if(head)head.innerHTML='<th>Descrição</th><th>Credor</th><th>Pendentes</th><th>Quitadas</th><th>Parcela</th><th>Última parcela</th><th>Andamento</th><th>Negociado</th><th>Status</th><th>Pendente</th><th>Ação</th>';
+    const active=(()=>{try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}})();
+    if(active==='Christian'){summary.innerHTML='';body.innerHTML='<tr><td colspan="11" class="empty">Nenhuma dívida cadastrada para Christian.</td></tr>';return}
+    const all=(typeof getDebts==='function'?getDebts(true):[]).map(d=>{const s=state77(d);return Object.assign({},d,{banco:'',parcela:s.installment,total:s.total,quitado:s.paid,pendente:s.pending,parcelasTotal:s.totalInst,parcelasQuitadas:s.paidInst,primeiraParcelaMes:s.first,ultimaParcelaMes:s.last,_pinst:s.pendingInst,_pct:s.pct,_status:s.status})});
+    const q=(search.value||'').toLowerCase().trim(),status=statusEl.value,nego=negoEl.value,lastMonth=dateEl.value||'';
+    const visible=all.filter(x=>{
+      if(x.arquivado)return false;
+      if(q&&![x.descricao,x.credor].join(' ').toLowerCase().includes(q))return false;
+      if(status==='pending'&&x.pendente<=0)return false;
+      if(status==='paid'&&x.pendente>0)return false;
+      const isNeg=String(x.negociado||'').toLowerCase()==='sim';
+      if(nego==='negotiated'&&!isNeg)return false;
+      if(nego==='notnegotiated'&&isNeg)return false;
+      if(lastMonth&&x.ultimaParcelaMes!==lastMonth)return false;
+      return true;
+    });
+    const live=all.filter(x=>!x.arquivado);
+    const total=live.reduce((a,x)=>a+n77(x.total),0),pend=live.reduce((a,x)=>a+n77(x.pendente),0),paid=live.reduce((a,x)=>a+n77(x.quitado),0);
+    const neg=live.filter(x=>x.pendente>0&&String(x.negociado).toLowerCase()==='sim').reduce((a,x)=>a+n77(x.pendente),0);
+    const notneg=live.filter(x=>x.pendente>0&&String(x.negociado).toLowerCase()!=='sim').reduce((a,x)=>a+n77(x.pendente),0);
+    summary.innerHTML=`<div class="card mini"><span>Total contratado</span><b>${brl(total)}</b></div><div class="card mini"><span>Pendente</span><b class="negative">${brl(pend)}</b></div><div class="card mini"><span>Já quitado</span><b class="positive">${brl(paid)}</b></div><div class="card mini"><span>Pendente negociado</span><b class="blue">${brl(neg)}</b></div><div class="card mini"><span>Pendente não negociado</span><b class="warning">${brl(notneg)}</b></div>`;
+    body.innerHTML=visible.sort((a,b)=>{
+      if(a.ultimaParcelaMes&&b.ultimaParcelaMes&&a.ultimaParcelaMes!==b.ultimaParcelaMes)return a.ultimaParcelaMes.localeCompare(b.ultimaParcelaMes);
+      return n77(b.pendente)-n77(a.pendente);
+    }).map(x=>{
+      const pendingN=Math.max(0,parseInt(x._pinst,10)||0),paidN=Math.max(0,parseInt(x.parcelasQuitadas,10)||0),pct=Number(x._pct||0),st=x._status;
+      return `<tr><td><b>${esc(x.descricao||'Dívida')}</b></td><td>${esc(x.credor||'—')}</td><td><b>${pendingN}</b></td><td><b class="positive">${paidN}</b></td><td>${brl(x.parcela||0)}</td><td><b>${fmtMonth77(x.ultimaParcelaMes)}</b></td><td><div class="debt-progress-wrap"><div class="progress"><i style="width:${pct}%"></i></div><small>${pct.toFixed(0)}% quitado</small>${x.pendente>0?`<br><button class="debt-action-pay" onclick="openDebtPayment('${x.id}')">✓ pagar / adiantar</button>`:''}</div></td><td><span class="tag ${String(x.negociado).toLowerCase()==='sim'?'green':'amber'}">${esc(x.negociado||'Não')}</span></td><td><span class="tag ${st==='Quitado'?'green':'red'}">${st}</span></td><td class="money ${x.pendente>0?'negative':'positive'}">${brl(x.pendente||0)}</td><td class="actioncell"><button class="dots" onclick="openDebtMenu(event,'${x.id}')">⋯</button></td></tr>`;
+    }).join('')||'<tr><td colspan="11" class="empty">Nenhuma dívida neste filtro.</td></tr>';
+    if(typeof installSorters==='function')installSorters(section);
+  }
+
+  ensureFilter77();
+  window.renderDebts=render77;try{renderDebts=render77}catch(e){}
+  render77();
+  setTimeout(()=>{ensureFilter77();ensureDateFields77();render77()},180);
+  setTimeout(()=>{ensureFilter77();ensureDateFields77();render77()},850);
+})();
+</script>
