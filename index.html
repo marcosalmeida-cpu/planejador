@@ -16176,3 +16176,121 @@ const add=$id('addCardPurchaseBtn');if(add)add.onclick=e=>{e.preventDefault();op
 document.addEventListener('click',e=>{const ed=e.target.closest?.('[data-v39-edit]');if(!ed)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();open52(ed.dataset.v39Edit)},true);
 })();
 </script>
+
+<script id="pp-v54-installment-input-final">
+(()=>{
+'use strict';
+const draft={qty:null,mode:null};
+
+function qEl(){ return document.getElementById('cpInstallments'); }
+function modeEl(){ return document.getElementById('cpMode'); }
+
+function normalizedQty(v){
+  const n=parseInt(String(v??'').replace(/\D/g,''),10);
+  return Number.isFinite(n)&&n>0?n:null;
+}
+
+function rememberQty(){
+  const q=qEl();
+  if(!q) return;
+  const n=normalizedQty(q.value);
+  if(n) {
+    draft.qty=n;
+    q.dataset.v54Qty=String(n);
+  }
+}
+
+function rememberMode(v){
+  const m=v||modeEl()?.value||'avista';
+  draft.mode=m;
+  const el=modeEl();
+  if(el) el.dataset.v54Mode=m;
+}
+
+function install(){
+  const q=qEl();
+  if(q && q.dataset.v54Bound!=='1'){
+    q.dataset.v54Bound='1';
+    q.type='text';
+    q.inputMode='numeric';
+    q.pattern='[0-9]*';
+    q.autocomplete='off';
+  }
+}
+
+/* Captura a digitação antes de listeners antigos.
+   Não impede a digitação; apenas impede que outros listeners de input/change
+   voltem o campo para 1/2. */
+document.addEventListener('input',e=>{
+  if(e.target?.id!=='cpInstallments') return;
+  rememberQty();
+  e.stopImmediatePropagation();
+},true);
+
+document.addEventListener('change',e=>{
+  if(e.target?.id!=='cpInstallments') return;
+  rememberQty();
+  e.stopImmediatePropagation();
+},true);
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('#v52ModeBar [data-mode]');
+  if(!b) return;
+  rememberMode(b.dataset.mode);
+  if(b.dataset.mode==='parcelado'){
+    setTimeout(()=>{
+      install();
+      const q=qEl();
+      if(!q) return;
+      const stored=normalizedQty(q.dataset.v54Qty)||draft.qty;
+      if(stored) q.value=stored;
+      else if(!normalizedQty(q.value)) q.value='2';
+    },0);
+  }
+},true);
+
+/* Intercepta o salvar antes de qualquer rotina antiga e grava a quantidade
+   que o usuário efetivamente digitou. */
+document.addEventListener('click',e=>{
+  const btn=e.target.closest?.('#saveCardPurchaseV52,#saveCardPurchase');
+  if(!btn) return;
+  const q=qEl();
+  if(q){
+    const typed=normalizedQty(q.value)||normalizedQty(q.dataset.v54Qty)||draft.qty;
+    if(typed){
+      q.value=String(typed);
+      q.dataset.v54Qty=String(typed);
+      draft.qty=typed;
+      const m=modeEl();
+      if(typed>1 && m){
+        m.value='parcelado';
+        m.dataset.v54Mode='parcelado';
+        draft.mode='parcelado';
+      }
+    }
+  }
+},true);
+
+/* Quando o modal abrir, apenas restaura eventual valor salvo no próprio input.
+   Sem MutationObserver e sem intervalos. */
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('#addCardPurchaseBtn,[data-v39-edit],[data-add-card-purchase]')){
+    draft.qty=null;
+    draft.mode=null;
+    setTimeout(()=>{
+      install();
+      const q=qEl();
+      const m=modeEl();
+      if(q){
+        const n=normalizedQty(q.value);
+        if(n){ draft.qty=n; q.dataset.v54Qty=String(n); }
+      }
+      if(m) rememberMode(m.value);
+    },40);
+  }
+},true);
+
+install();
+})();
+</script>
+
