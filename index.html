@@ -16537,3 +16537,225 @@ window.saveCardPurchase=save;try{saveCardPurchase=save}catch(e){}
 setTimeout(arm,0);setTimeout(arm,300);setTimeout(arm,1200);
 })();
 </script>
+
+
+<!-- V46: definitive card save controller, shared by all profiles -->
+<script id="pp-v46-card-save-final">
+(()=>{
+  'use strict';
+  function byId(id){return document.getElementById(id)}
+  function money(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim();if(!s)return 0;
+    s=s.replace(/R\$\s?/gi,'').replace(/\s/g,'');
+    if(s.includes(',')&&s.includes('.')) s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(',')) s=s.replace(',','.');
+    else if(/^[-+]?\d{1,3}(\.\d{3})+$/.test(s)) s=s.replace(/\./g,'');
+    const n=Number(s.replace(/[^0-9.+-]/g,''));return Number.isFinite(n)?n:0;
+  }
+  function actualBrand(){
+    const raw=(byId('cBrand')?.value||'Mastercard').trim();
+    if(raw==='Outro') return (byId('cOtherBrand')?.value||'').trim()||'Outro';
+    return raw||'Mastercard';
+  }
+  function saveCardFinal(e){
+    if(e){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation?.()}
+    const id=(byId('cId')?.value||'').trim()||('CARD_'+Date.now());
+    const name=(byId('cName')?.value||'').trim();
+    if(!name){try{toast('Informe o nome do cartão.')}catch(_){alert('Informe o nome do cartão.')}return false}
+    const last4=(byId('cLast4')?.value||'').trim();
+    if(last4&&!/^\d{4}$/.test(last4)){try{toast('Informe exatamente os 4 últimos dígitos ou deixe em branco.')}catch(_){alert('Informe exatamente os 4 últimos dígitos ou deixe em branco.')}return false}
+    const existing=(window.cards||cards||[]).find?.(x=>x.id===id);
+    const obj={
+      ...(existing||{}),
+      id,
+      name,
+      brand:actualBrand(),
+      color:byId('cColor')?.value||existing?.color||'#1434cb',
+      last4,
+      cardType:byId('cCardType')?.value||existing?.cardType||'Físico',
+      limit:Number(money(byId('cLimit')?.value).toFixed(2)),
+      closeDay:Math.min(31,Math.max(1,+byId('cCloseDay')?.value||10)),
+      dueDay:Math.min(31,Math.max(1,+byId('cDueDay')?.value||18)),
+      status:existing?.status||'Ativo'
+    };
+    const arr=window.cards||cards;
+    const i=arr.findIndex(x=>x.id===id);
+    if(i>=0)arr[i]=obj;else arr.push(obj);
+    try{persist()}catch(err){console.error('V46 persist card',err)}
+    try{byId('cardModal')?.classList.remove('open')}catch(_){ }
+    try{saveSelectOptions()}catch(_){ }
+    try{window.renderCards?.()}catch(_){ }
+    try{window.renderDashboard?.()}catch(_){ }
+    try{window.renderLancamentos?.()}catch(_){try{renderLancamentos()}catch(__){ }}
+    try{window.renderProjection?.()}catch(_){ }
+    try{window.renderNuvem?.()}catch(_){ }
+    try{window.ppCloudV66?.save?.()}catch(_){ }
+    try{toast(i>=0?'Cartão atualizado.':'Cartão adicionado.')}catch(_){ }
+    return false;
+  }
+  window.saveCard=saveCardFinal;
+  try{saveCard=saveCardFinal}catch(_){ }
+  function bind(){
+    const old=byId('saveCard');if(!old)return;
+    if(old.dataset.v46==='1')return;
+    const b=old.cloneNode(true);
+    b.id='saveCard';b.dataset.v46='1';b.dataset.v21='1';
+    b.removeAttribute('onclick');
+    old.replaceWith(b);
+    b.addEventListener('click',saveCardFinal,true);
+  }
+  bind();
+  const mo=new MutationObserver(()=>bind());
+  mo.observe(document.documentElement,{childList:true,subtree:true});
+  document.addEventListener('click',e=>{
+    const t=e.target.closest?.('#saveCard');if(!t)return;
+    if(t.dataset.v46==='1')return;
+    saveCardFinal(e);
+  },true);
+  setTimeout(bind,50);setTimeout(bind,250);setTimeout(bind,1000);setTimeout(bind,1800);
+})();
+</script>
+
+<style id="pp-v47-invoice-payment-style">
+.pp-v47-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.pp-v47-actions .pp-v47-pay{background:#0b63f6;color:#fff;border:1px solid #0b63f6}
+.pp-v47-actions .pp-v47-reopen{background:#fff;color:#667085;border:1px solid #d9e0ea}
+#v39InvoiceBoard .pp-v47-invoice-action{margin-top:8px;display:flex;justify-content:flex-end}
+#v39InvoiceBoard .pp-v47-invoice-action button{border:1px solid #d9e0ea;background:#fff;border-radius:9px;padding:7px 10px;font-size:10px;font-weight:850;cursor:pointer}
+#v39InvoiceBoard .pp-v47-invoice-action button.pay{background:#0b63f6;border-color:#0b63f6;color:#fff}
+</style>
+<script id="pp-v47-installments-and-invoice-status-final">
+(()=>{
+'use strict';
+const STATUS_KEY='financeiro_marcos_card_invoice_status_v47';
+const round=v=>Math.round((Number(v)||0)*100)/100;
+const esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+const fmtMonth=(y,m)=>{try{return monthLabel(+y,+m)}catch(e){return `${String(m).padStart(2,'0')}/${y}`}};
+const statusMap=()=>{try{const x=JSON.parse(localStorage.getItem(STATUS_KEY)||'{}');return x&&typeof x==='object'?x:{}}catch(e){return {}}};
+const invKey=(cardId,y,m)=>`${cardId}|${+y}|${+m}`;
+function setInvoiceStatus(cardId,y,m,status){
+  const map=statusMap(),k=invKey(cardId,y,m);
+  if(status) map[k]=status; else delete map[k];
+  localStorage.setItem(STATUS_KEY,JSON.stringify(map));
+  try{window.renderLancamentos?.()}catch(e){}
+  try{window.renderCards?.()}catch(e){}
+  try{window.renderDashboard?.()}catch(e){}
+  try{window.renderProjection?.()}catch(e){}
+  setTimeout(patchInvoiceBoard,30);
+  try{window.ppCloudV66?.save?.()}catch(e){}
+}
+window.setInvoiceStatusV47=setInvoiceStatus;
+
+/* Remove os listeners antigos do campo de quantidade, mantendo o mesmo id/visual. */
+function hardenInstallmentInput(){
+  const old=document.getElementById('cpInstallments');
+  if(!old||old.dataset.v47Safe==='1')return old;
+  const value=old.value||'1';
+  const q=old.cloneNode(true);
+  q.value=value;
+  [...q.attributes].forEach(()=>{});
+  delete q.dataset.v21; delete q.dataset.v44Bound; delete q.dataset.v44Qty;
+  q.dataset.v47Safe='1';
+  old.replaceWith(q);
+  const remember=()=>{
+    const v=Math.max(1,parseInt(q.value,10)||1);
+    q.dataset.v47Qty=String(v);
+    q.dataset.v44Qty=String(v);
+    if(v>1){
+      const mode=document.getElementById('cpMode');
+      if(mode)mode.value='parcelado';
+      document.querySelectorAll('#v39ModeBar [data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode==='parcelado'));
+      const help=document.getElementById('v39ModeHelp');if(help)help.textContent='Parcelado: o valor total será dividido e lançado mês a mês nas faturas.';
+    }
+    const totalEl=document.getElementById('cpTotal'),preview=document.getElementById('v39InstallmentPreview');
+    if(totalEl&&preview&&v>1){
+      let s=String(totalEl.value||'').replace(/R\$|\s/g,'');
+      if(s.includes(',')&&s.includes('.'))s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,''); else if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');
+      const total=Number(s)||0,first=document.getElementById('cpFirstInvoiceV39')?.value||document.getElementById('cpFirstInvoiceV44')?.value||'';
+      if(total>0&&first){const [yy,mm]=first.split('-').map(Number),d=new Date(yy,mm-1+v-1,1);preview.textContent=`${v} parcelas de aproximadamente ${brl(total/v)} · de ${fmtMonth(yy,mm)} até ${fmtMonth(d.getFullYear(),d.getMonth()+1)}.`}
+    }
+  };
+  q.addEventListener('input',e=>{e.stopImmediatePropagation();remember()},true);
+  q.addEventListener('change',e=>{e.stopImmediatePropagation();remember()},true);
+  q.addEventListener('keydown',e=>{e.stopPropagation()},true);
+  remember();
+  return q;
+}
+function protectModal(){
+  const modal=document.getElementById('cardPurchaseModal');if(!modal)return;
+  hardenInstallmentInput();
+}
+const modal=document.getElementById('cardPurchaseModal');
+if(modal){new MutationObserver(()=>protectModal()).observe(modal,{attributes:true,attributeFilter:['class'],childList:true,subtree:true});}
+document.addEventListener('click',e=>{if(e.target.closest?.('#addCardPurchaseBtn,[data-v39-edit],[data-purchase-edit],[data-add-card-purchase]'))setTimeout(protectModal,0)},true);
+setTimeout(protectModal,0);setTimeout(protectModal,400);setTimeout(protectModal,1400);
+
+/* Usa o motor atual de parcelas, mas permite status explícito por fatura. */
+const baseSchedules=typeof window.getCardSchedules==='function'?window.getCardSchedules.bind(window):()=>[];
+function schedulesV47(){
+  const map=statusMap();
+  return (baseSchedules()||[]).map(r=>{
+    const manual=map[invKey(r.cardId,r.year,r.month)];
+    if(manual==='Quitado')return {...r,paid:true,status:'Quitado'};
+    if(manual==='Pendente')return {...r,paid:false,status:'Pendente'};
+    return r;
+  });
+}
+function aggregatedV47(){
+  const groups={};
+  schedulesV47().forEach(r=>{
+    const k=invKey(r.cardId,r.year,r.month),c=(cards||[]).find(x=>String(x.id)===String(r.cardId))||{};
+    if(!groups[k])groups[k]={id:`CTV47_${r.cardId}_${r.year}_${r.month}`,cardId:r.cardId,tipo:'saida',ano:+r.year,mesNum:+r.month,descricao:`Fatura ${c.name||'Cartão'}`,valor:0,categoria:'Cartão de crédito',classificacao:'Cartão',origem:c.name||'Cartão',status:'Quitado',origemDados:'Cartões',itemCount:0};
+    groups[k].valor=round(groups[k].valor+(Number(r.amount)||0));groups[k].itemCount++;
+    if(!r.paid)groups[k].status='Pendente';
+  });
+  return Object.values(groups).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum);
+}
+window.getCardSchedules=schedulesV47;
+window.cardAggregatedTx=aggregatedV47;
+window.allTx=()=>[...(Array.isArray(custom)?custom:[]),...aggregatedV47()];
+window.getCardStats=function(card){const s=schedulesV47().filter(r=>String(r.cardId)===String(card.id));const current=round(s.filter(r=>+r.year===+currentYear&&+r.month===+currentMonth).reduce((a,r)=>a+(Number(r.amount)||0),0));const pending=round(s.filter(r=>!r.paid&&!r.recurring).reduce((a,r)=>a+(Number(r.amount)||0),0));const paid=round(s.filter(r=>r.paid&&!r.recurring).reduce((a,r)=>a+(Number(r.amount)||0),0));return{currentInv:current,pending,paid,available:round((Number(card.limit)||0)-pending),totalUsed:round(paid+pending),items:new Set(s.map(r=>r.purchaseId)).size}};
+try{getCardSchedules=window.getCardSchedules;cardAggregatedTx=window.cardAggregatedTx;allTx=window.allTx;getCardStats=window.getCardStats}catch(e){}
+
+function renderLaunchesV47(){
+  const body=document.getElementById('txBody');if(!body)return;
+  const y=document.getElementById('txYear')?.value||'all',type=document.getElementById('txType')?.value||'all',q=(document.getElementById('txSearch')?.value||'').toLowerCase();
+  const rows=window.allTx().filter(x=>(y==='all'||+x.ano===+y)&&(!q||[x.descricao,x.categoria,x.origem].join(' ').toLowerCase().includes(q))).filter(x=>type==='all'?true:(type==='cartao'?x.origemDados==='Cartões':x.tipo===type)).sort((a,b)=>b.ano-a.ano||b.mesNum-a.mesNum||(b.valor-a.valor));
+  const sumRows=a=>round(a.reduce((s,x)=>s+(Number(x.valor)||0),0)),inc=sumRows(rows.filter(x=>x.tipo==='entrada')),out=sumRows(rows.filter(x=>x.tipo==='saida'));
+  const sm=document.getElementById('txSummary');if(sm)sm.innerHTML=`<div class="card mini"><span>Entradas</span><b class="positive">${brl(inc)}</b></div><div class="card mini"><span>Saídas</span><b class="negative">${brl(out)}</b></div><div class="card mini"><span>Saldo</span><b>${brl(inc-out)}</b></div><div class="card mini"><span>Registros</span><b>${rows.length}</b></div><div class="card mini"><span>Faturas agregadas</span><b>${rows.filter(x=>x.origemDados==='Cartões').length}</b></div>`;
+  body.innerHTML=rows.slice(0,1200).map(x=>{
+    let action='';
+    if(x.origemDados==='Cartões'){
+      const paid=String(x.status).toLowerCase()==='quitado';
+      action=`<div class="pp-v47-actions"><button type="button" class="ghost" data-v47-detail="${esc(x.cardId)}|${x.ano}|${x.mesNum}">Detalhar</button><button type="button" class="${paid?'pp-v47-reopen':'pp-v47-pay'}" data-v47-status="${esc(x.cardId)}|${x.ano}|${x.mesNum}|${paid?'Pendente':'Quitado'}">${paid?'Reabrir':'Quitar'}</button></div>`;
+    }else if(x.origemDados==='Site') action=`<button class="ghost" onclick="removeTx('${esc(x.id)}')">Excluir</button>`;
+    return `<tr><td>${fmtMonth(x.ano,x.mesNum)}</td><td><span class="tag ${x.origemDados==='Cartões'?'blue':x.tipo==='entrada'?'green':'red'}">${x.origemDados==='Cartões'?'Fatura':x.tipo==='entrada'?'Entrada':'Saída'}</span></td><td><b>${esc(x.descricao)}</b>${x.origemDados==='Cartões'?'<br><small style="color:var(--muted)">Fatura agrupada do cartão</small>':''}</td><td>${esc(x.categoria||'—')}</td><td>${esc(x.origem||'—')}</td><td><span class="tag ${String(x.status).toLowerCase()==='quitado'?'green':'amber'}">${esc(x.status||'—')}</span></td><td class="money ${x.tipo==='entrada'?'positive':'negative'}">${x.tipo==='entrada'?'+':'−'} ${brl(x.valor)}</td><td>${action}</td></tr>`;
+  }).join('')||'<tr><td colspan="8" class="empty">Nenhum lançamento encontrado.</td></tr>';
+}
+window.renderLancamentos=renderLaunchesV47;try{renderLancamentos=renderLaunchesV47}catch(e){}
+
+document.addEventListener('click',e=>{
+  const st=e.target.closest?.('[data-v47-status]');if(st){e.preventDefault();e.stopPropagation();const p=st.dataset.v47Status.split('|');if(p.length===4){setInvoiceStatus(p[0],+p[1],+p[2],p[3]);try{toast(p[3]==='Quitado'?'Fatura quitada.':'Fatura reaberta como pendente.')}catch(_){} }return}
+  const det=e.target.closest?.('[data-v47-detail]');if(det){e.preventDefault();e.stopPropagation();const p=det.dataset.v47Detail.split('|');if(p.length===3){if(typeof window.openInvoiceEssence==='function')window.openInvoiceEssence(p[0],+p[1],+p[2],false);else{try{showView('cartoes')}catch(_){}}}return}
+},true);
+
+function selectedCardId(){return document.querySelector('#cardsCleanRoot [data-clean-card].selected')?.dataset.cleanCard||document.querySelector('#cardsCleanRoot [data-clean-card]')?.dataset.cleanCard||''}
+function patchInvoiceBoard(){
+  const board=document.getElementById('v39InvoiceBoard');if(!board)return;
+  const cardId=selectedCardId();if(!cardId)return;
+  const map=statusMap();
+  board.querySelectorAll('[data-v39-invoice]').forEach(card=>{
+    const raw=card.dataset.v39Invoice||'',p=raw.split('-');if(p.length!==2)return;const y=+p[0],m=+p[1],manual=map[invKey(cardId,y,m)];
+    const currentStatus=manual||card.querySelector('.v39-status')?.textContent?.trim()||'Pendente';const paid=currentStatus==='Quitado'||currentStatus==='Quitada';
+    const badge=card.querySelector('.v39-status');if(badge){badge.textContent=paid?'Quitada':'Pendente';badge.classList.toggle('paid',paid)}
+    let a=card.querySelector('.pp-v47-invoice-action');if(!a){a=document.createElement('div');a.className='pp-v47-invoice-action';card.querySelector('.v39-details')?.appendChild(a)}
+    if(a)a.innerHTML=`<button type="button" class="${paid?'':'pay'}" data-v47-board-status="${esc(cardId)}|${y}|${m}|${paid?'Pendente':'Quitado'}">${paid?'Reabrir fatura':'Quitar fatura'}</button>`;
+  });
+}
+document.addEventListener('click',e=>{const b=e.target.closest?.('[data-v47-board-status]');if(!b)return;e.preventDefault();e.stopPropagation();const p=b.dataset.v47BoardStatus.split('|');if(p.length===4)setInvoiceStatus(p[0],+p[1],+p[2],p[3])},true);
+const boardObserver=new MutationObserver(()=>patchInvoiceBoard());
+const sec=document.getElementById('cartoes');if(sec)boardObserver.observe(sec,{childList:true,subtree:true});
+setTimeout(()=>{renderLaunchesV47();patchInvoiceBoard()},100);setTimeout(()=>{renderLaunchesV47();patchInvoiceBoard()},900);
+})();
+</script>
