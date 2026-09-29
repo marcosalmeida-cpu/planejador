@@ -16264,3 +16264,226 @@ setTimeout(initEssence,0);
   try{renderCards?.();renderDashboard?.();renderLancamentos?.();renderProjection?.();}catch(e){}
 })();
 </script>
+
+
+<script id="pp-v24-card-save-final-fix">
+(function(){
+  function money24(v){
+    if(typeof v==='number' && Number.isFinite(v)) return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(!s)return 0;
+    if(s.includes(',')&&s.includes('.')) s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(',')) s=s.replace(',','.');
+    else {
+      // dot-only value: decimal when one/two digits follow final dot; otherwise thousands separator
+      const m=s.match(/^[-+]?\d+\.(\d{1,2})$/);
+      if(!m && /^[-+]?\d{1,3}(\.\d{3})+$/.test(s)) s=s.replace(/\./g,'');
+    }
+    s=s.replace(/[^0-9.+-]/g,'');
+    const n=Number(s);
+    return Number.isFinite(n)?n:0;
+  }
+
+  function currentBrand24(){
+    const raw=document.getElementById('cBrand')?.value || 'Mastercard';
+    if(raw==='Outro') return document.getElementById('cOtherBrand')?.value.trim() || 'Outro';
+    return raw;
+  }
+
+  function saveCard24(){
+    const id=document.getElementById('cId')?.value || ('CARD_'+Date.now());
+    const name=document.getElementById('cName')?.value.trim() || '';
+    if(!name) return toast('Informe o nome do cartão.');
+
+    const last4=(document.getElementById('cLast4')?.value||'').trim();
+    if(last4 && !/^\d{4}$/.test(last4)) return toast('Informe exatamente os 4 últimos dígitos ou deixe em branco.');
+
+    const existing=(cards||[]).find(x=>x.id===id) || {};
+    const obj={
+      ...existing,
+      id,
+      name,
+      brand:currentBrand24(),
+      color:document.getElementById('cColor')?.value || existing.color || '#1434cb',
+      last4,
+      cardType:document.getElementById('cCardType')?.value || existing.cardType || 'Físico',
+      limit:Number(money24(document.getElementById('cLimit')?.value).toFixed(2)),
+      closeDay:Math.min(31,Math.max(1,+document.getElementById('cCloseDay')?.value||10)),
+      dueDay:Math.min(31,Math.max(1,+document.getElementById('cDueDay')?.value||18)),
+      status:existing.status || 'Ativo'
+    };
+
+    const i=cards.findIndex(x=>x.id===id);
+    if(i>=0) cards[i]=obj; else cards.push(obj);
+
+    try{persist()}catch(e){
+      try{localStorage.setItem(cardsKey,JSON.stringify(cards))}catch(x){}
+    }
+
+    document.getElementById('cardModal')?.classList.remove('open');
+    try{saveSelectOptions()}catch(e){}
+    try{window.renderCards?.()}catch(e){}
+    try{window.renderDashboard?.()}catch(e){}
+    try{window.renderLancamentos?.()}catch(e){}
+    try{window.renderProjection?.()}catch(e){}
+    try{window.renderNuvem?.()}catch(e){}
+    try{window.ppCloudV66?.save?.()}catch(e){}
+    toast(i>=0?'Cartão atualizado.':'Cartão adicionado.');
+  }
+
+  window.saveCard=saveCard24;
+  try{saveCard=saveCard24}catch(e){}
+
+  function bindFinal24(){
+    const old=document.getElementById('saveCard');
+    if(!old)return;
+    if(old.dataset.v24==='1')return;
+    const btn=old.cloneNode(true);
+    btn.dataset.v24='1';
+    old.replaceWith(btn);
+    btn.addEventListener('click',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      saveCard24();
+    },true);
+  }
+
+  // The old V21 routine rebinds around 150/900 ms. Re-assert the final handler after it.
+  bindFinal24();
+  [250,1100,1800].forEach(ms=>setTimeout(bindFinal24,ms));
+  document.addEventListener('click',function(e){
+    if(e.target.closest?.('#addCardBtn,[data-clean-menu],#cleanEdit')) setTimeout(bindFinal24,80);
+  },true);
+})();
+</script>
+
+
+<style id="pp-v25-invoice-engine-style">
+#cardInvoicesV25 .modal,#invoiceItemsV25 .modal{width:min(860px,100%)}
+.v25-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}.v25-head h2{margin:0 0 4px}.v25-head p{margin:0;color:#667085;font-size:12px}
+.v25-section{margin-top:15px}.v25-section h3{margin:0 0 8px;font-size:13px}.v25-list{display:grid;gap:8px}.v25-invoice,.v25-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;background:#f8fafc;border:1px solid #e8edf3;border-radius:15px;padding:13px 14px}.v25-invoice.current{background:#eef5ff;border-color:#cfe0ff}.v25-invoice .amt,.v25-item .amt{font-size:17px;font-weight:900;text-align:right}.v25-meta{font-size:10.5px;color:#778197;margin-top:4px}.v25-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:7px}.v25-actions button{border:1px solid #dde4ec;background:#fff;border-radius:9px;padding:6px 9px;font-size:10.5px;font-weight:800}.v25-actions button.danger{color:#b42318}.v25-status{display:inline-flex;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:900;margin-left:6px}.v25-status.paid{background:#eaf8f2;color:#12805c}.v25-status.pending{background:#fff1f4;color:#a30d2d}.v25-empty{padding:18px;border:1px dashed #d8dee8;border-radius:14px;color:#7a8493;text-align:center;font-size:11px}
+@media(max-width:650px){.v25-invoice,.v25-item{grid-template-columns:1fr}.v25-invoice .amt,.v25-item .amt{text-align:left}.v25-actions{justify-content:flex-start}}
+</style>
+<script id="pp-v25-installment-invoice-engine">
+(function(){
+  function money25(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'').replace(/[^0-9,.-]/g,'');
+    if(!s)return 0;
+    if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');
+    else if(/^[-+]?\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');
+    const n=Number(s);return Number.isFinite(n)?n:0;
+  }
+  function beforeCurrent25(y,m){return +y<+currentYear || (+y===+currentYear && +m<+currentMonth)}
+  function monthAfter25(dateStr){
+    let d=dateStr?new Date(dateStr+'T12:00:00'):new Date();
+    if(Number.isNaN(d.getTime()))d=new Date();
+    d.setMonth(d.getMonth()+1);
+    return {year:d.getFullYear(),month:d.getMonth()+1};
+  }
+  function autoPaidCount25(startY,startM,inst){
+    let n=0;
+    for(let i=0;i<inst;i++){const ym=nextMonth(+startY,+startM,i);if(beforeCurrent25(ym.year,ym.month))n++;}
+    return n;
+  }
+  function scheduleRows25(includeArchived=false){
+    const rows=[];
+    (cardPurchases||[]).forEach(p=>{
+      if(p.status==='Arquivado'&&!includeArchived)return;
+      let startY=+p.startYear,startM=+p.startMonth;
+      if((!startY||!startM)&&p.date){const f=monthAfter25(p.date);startY=f.year;startM=f.month}
+      if(!startY||!startM){startY=currentYear;startM=currentMonth}
+      const total=money25(p.total);
+      if(p.mode==='recorrente'){
+        for(let i=0;i<60;i++){
+          const ym=nextMonth(startY,startM,i),paid=beforeCurrent25(ym.year,ym.month);
+          rows.push({purchaseId:p.id,cardId:p.cardId,description:p.description,category:p.category||'Cartão de crédito',year:ym.year,month:ym.month,installmentNo:1,installments:1,amount:total,paid,status:paid?'Quitado':'Pendente',mode:'recorrente',recurring:true});
+        }
+        return;
+      }
+      const inst=p.mode==='parcelado'?Math.max(1,+p.installments||1):1;
+      const autoPaid=autoPaidCount25(startY,startM,inst);
+      const manualPaid=Math.max(0,Math.min(inst,+p.paidInstallments||0));
+      const effectivePaid=Math.max(autoPaid,manualPaid);
+      const per=inst?Number((total/inst).toFixed(2)):total;
+      for(let i=0;i<inst;i++){
+        const ym=nextMonth(startY,startM,i),amount=i===inst-1?Number((total-per*(inst-1)).toFixed(2)):per,paid=i<effectivePaid;
+        rows.push({purchaseId:p.id,cardId:p.cardId,description:p.description,category:p.category||'Cartão de crédito',year:ym.year,month:ym.month,installmentNo:i+1,installments:inst,amount,paid,status:paid?'Quitado':'Pendente',mode:p.mode||'avista',recurring:false});
+      }
+    });
+    return rows;
+  }
+  window.getCardSchedules=scheduleRows25;try{getCardSchedules=window.getCardSchedules}catch(e){}
+
+  window.cardAggregatedTx=function(){
+    const groups={};
+    scheduleRows25(false).forEach(r=>{
+      const k=`${r.cardId}_${r.year}_${r.month}`;
+      if(!groups[k]){const c=(cards||[]).find(x=>String(x.id)===String(r.cardId))||{};groups[k]={id:`CT_${k}`,cardId:r.cardId,tipo:'saida',ano:+r.year,mesNum:+r.month,descricao:`Fatura ${c.name||'Cartão'}`,valor:0,categoria:'Cartão de crédito',classificacao:'Cartão',origem:c.name||'Cartão',status:'Quitado',origemDados:'Cartões',itemCount:0,_allPaid:true};}
+      const g=groups[k];g.valor=Number((g.valor+money25(r.amount)).toFixed(2));g.itemCount++;if(!r.paid)g._allPaid=false;
+    });
+    return Object.values(groups).map(g=>{g.status=g._allPaid?'Quitado':'Pendente';delete g._allPaid;return g}).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum);
+  };
+  try{cardAggregatedTx=window.cardAggregatedTx}catch(e){}
+  window.allTx=function(){return [...(custom||[]),...window.cardAggregatedTx()]};try{allTx=window.allTx}catch(e){}
+
+  window.getCardStats=function(card){
+    const s=scheduleRows25(false).filter(r=>String(r.cardId)===String(card.id));
+    const currentInv=s.filter(r=>+r.year===+currentYear&&+r.month===+currentMonth).reduce((t,r)=>t+money25(r.amount),0);
+    const pending=s.filter(r=>!r.paid&&!r.recurring).reduce((t,r)=>t+money25(r.amount),0);
+    const paid=s.filter(r=>r.paid).reduce((t,r)=>t+money25(r.amount),0);
+    return {currentInv:Number(currentInv.toFixed(2)),pending:Number(pending.toFixed(2)),paid:Number(paid.toFixed(2)),available:Number((money25(card.limit)-pending).toFixed(2)),totalUsed:Number((paid+pending).toFixed(2)),items:new Set(s.map(r=>r.purchaseId)).size};
+  };
+  try{getCardStats=window.getCardStats}catch(e){}
+
+  function savePurchase25(){
+    const id=document.getElementById('cpId')?.value||('CP'+Date.now());
+    const date=document.getElementById('cpDate')?.value||new Date().toISOString().slice(0,10);
+    const mode=document.getElementById('cpMode')?.value||'avista';
+    const installments=mode==='parcelado'?Math.max(1,parseInt(document.getElementById('cpInstallments')?.value,10)||1):1;
+    const total=Number(money25(document.getElementById('cpTotal')?.value).toFixed(2));
+    const first=monthAfter25(date);
+    const autoPaid=mode==='recorrente'?0:autoPaidCount25(first.year,first.month,installments);
+    const enteredPaid=Math.max(0,Math.min(installments,parseInt(document.getElementById('cpPaid')?.value,10)||0));
+    const obj={id,cardId:document.getElementById('cpCard')?.value,date,description:document.getElementById('cpDesc')?.value.trim()||'',category:document.getElementById('cpCategory')?.value||'Cartão de crédito',mode,total,installments,paidInstallments:Math.max(autoPaid,enteredPaid),startYear:first.year,startMonth:first.month,status:document.getElementById('cpStatus')?.value||'Ativo'};
+    if(!obj.cardId||!obj.description||!obj.total)return toast('Preencha cartão, descrição e valor.');
+    const i=(cardPurchases||[]).findIndex(x=>String(x.id)===String(id));
+    if(i>=0)cardPurchases[i]=Object.assign({},cardPurchases[i],obj);else cardPurchases.push(obj);
+    try{persist()}catch(e){try{localStorage.setItem(cardPurchasesKey,JSON.stringify(cardPurchases))}catch(x){}}
+    document.getElementById('cardPurchaseModal')?.classList.remove('open');
+    try{window.renderCards?.()}catch(e){}try{window.renderLancamentos?.()}catch(e){}try{window.renderDashboard?.()}catch(e){}try{window.renderProjection?.()}catch(e){}try{window.ppCloudV66?.save?.()}catch(e){}
+    toast(i>=0?'Compra atualizada.':'Compra no cartão salva.');
+  }
+  window.saveCardPurchase=savePurchase25;try{saveCardPurchase=savePurchase25}catch(e){}
+  function bindSave25(){const old=document.getElementById('saveCardPurchase');if(!old)return;const b=old.cloneNode(true);old.replaceWith(b);b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();savePurchase25()},true)}
+  bindSave25();[300,1200,2200].forEach(ms=>setTimeout(bindSave25,ms));
+
+  function ensureModal25(id){let b=document.getElementById(id);if(!b){b=document.createElement('div');b.className='modalback';b.id=id;b.innerHTML='<div class="modal"></div>';document.body.appendChild(b)}return b}
+  function esc25(v){return typeof esc==='function'?esc(v):String(v??'')}
+  function monthLabel25(y,m){return `${monthNames?.[m-1]||String(m).padStart(2,'0')}/${y}`}
+  function groups25(cardId){
+    const map={};scheduleRows25(false).filter(r=>String(r.cardId)===String(cardId)).forEach(r=>{const k=`${r.year}-${String(r.month).padStart(2,'0')}`;if(!map[k])map[k]={cardId,year:+r.year,month:+r.month,total:0,count:0,paid:true};map[k].total+=money25(r.amount);map[k].count++;if(!r.paid)map[k].paid=false});return Object.values(map).sort((a,b)=>a.year-b.year||a.month-b.month)
+  }
+  window.openInvoiceItemsV25=function(cardId,y,m){
+    const c=(cards||[]).find(x=>String(x.id)===String(cardId));if(!c)return;
+    const rows=scheduleRows25(false).filter(r=>String(r.cardId)===String(cardId)&&+r.year===+y&&+r.month===+m),mb=ensureModal25('invoiceItemsV25'),modal=mb.querySelector('.modal'),total=rows.reduce((t,r)=>t+money25(r.amount),0);
+    modal.innerHTML=`<div class="v25-head"><div><h2>${esc25(c.name)} · ${monthLabel25(y,m)}</h2><p>${rows.length} item(ns) · ${brl(total)}</p></div><button class="ghost" id="v25ItemsClose">Fechar</button></div><div class="v25-list">${rows.map(r=>{const p=(cardPurchases||[]).find(x=>String(x.id)===String(r.purchaseId)),inst=r.recurring?'Recorrente':(+r.installments>1?`Parcela ${r.installmentNo}/${r.installments}`:'À vista');return `<div class="v25-item"><div><b>${esc25(r.description||p?.description||'Compra')}</b><div class="v25-meta">${esc25(r.category||'Cartão de crédito')} · ${inst}<span class="v25-status ${r.paid?'paid':'pending'}">${r.paid?'Quitada':'Pendente'}</span>${p&&+r.installments>1?` · compra total ${brl(money25(p.total))}`:''}</div></div><div><div class="amt">${brl(r.amount)}</div><div class="v25-actions"><button type="button" data-v25-edit="${esc25(r.purchaseId)}">Editar</button><button type="button" class="danger" data-v25-delete="${esc25(r.purchaseId)}">Excluir</button></div></div></div>`}).join('')||'<div class="v25-empty">Nenhum item nesta fatura.</div>'}</div><div class="modalfoot"><button class="ghost" id="v25BackInvoices">← Faturas</button><button class="primary" id="v25ItemsDone">Fechar</button></div>`;
+    const close=()=>mb.classList.remove('open');document.getElementById('v25ItemsClose').onclick=close;document.getElementById('v25ItemsDone').onclick=close;document.getElementById('v25BackInvoices').onclick=()=>{close();setTimeout(()=>window.openCardInvoicesV25(cardId),20)};
+    modal.querySelectorAll('[data-v25-edit]').forEach(b=>b.onclick=()=>{close();setTimeout(()=>window.openCardPurchase?.(b.dataset.v25Edit),20)});
+    modal.querySelectorAll('[data-v25-delete]').forEach(b=>b.onclick=()=>{const id=b.dataset.v25Delete,p=(cardPurchases||[]).find(x=>String(x.id)===String(id));if(!p||!confirm(`Excluir a compra “${p.description||'Compra'}” inteira?`))return;const i=cardPurchases.findIndex(x=>String(x.id)===String(id));if(i>=0)cardPurchases.splice(i,1);try{persist()}catch(e){}try{window.renderCards?.();window.renderLancamentos?.();window.renderDashboard?.();window.renderProjection?.();window.ppCloudV66?.save?.()}catch(e){}toast('Compra excluída.');setTimeout(()=>window.openInvoiceItemsV25(cardId,+y,+m),20)});
+    mb.onclick=e=>{if(e.target===mb)close()};mb.classList.add('open');
+  };
+  window.openCardInvoicesV25=function(cardId){
+    const c=(cards||[]).find(x=>String(x.id)===String(cardId));if(!c)return;const gs=groups25(cardId),cur=gs.filter(g=>g.year===currentYear&&g.month===currentMonth),future=gs.filter(g=>g.year>currentYear||(g.year===currentYear&&g.month>currentMonth)),past=gs.filter(g=>g.year<currentYear||(g.year===currentYear&&g.month<currentMonth)).reverse(),mb=ensureModal25('cardInvoicesV25'),modal=mb.querySelector('.modal');
+    const rows=(arr,cls='')=>arr.map(g=>`<div class="v25-invoice ${cls}"><div><b>${monthLabel25(g.year,g.month)}</b><div class="v25-meta">${g.count} item(ns)<span class="v25-status ${g.paid?'paid':'pending'}">${g.paid?'Quitada':'Pendente'}</span></div></div><div><div class="amt">${brl(g.total)}</div><div class="v25-actions"><button type="button" data-v25-open="${g.year}-${g.month}">Ver itens</button></div></div></div>`).join('');
+    modal.innerHTML=`<div class="v25-head"><div><h2>Faturas · ${esc25(c.name)}</h2><p>Os valores abaixo são a soma das parcelas que pertencem a cada mês.</p></div><button class="ghost" id="v25InvClose">Fechar</button></div><div class="v25-section"><h3>Fatura atual</h3><div class="v25-list">${rows(cur,'current')||'<div class="v25-empty">Nenhum item na fatura atual.</div>'}</div></div><div class="v25-section"><h3>Próximas faturas</h3><div class="v25-list">${rows(future)||'<div class="v25-empty">Nenhuma fatura futura.</div>'}</div></div><div class="v25-section"><h3>Faturas anteriores</h3><div class="v25-list">${rows(past)||'<div class="v25-empty">Nenhuma fatura anterior.</div>'}</div></div><div class="modalfoot"><button class="ghost" id="v25EditCard">Editar cartão</button><button class="primary" id="v25InvDone">Fechar</button></div>`;
+    const close=()=>mb.classList.remove('open');document.getElementById('v25InvClose').onclick=close;document.getElementById('v25InvDone').onclick=close;document.getElementById('v25EditCard').onclick=()=>{close();setTimeout(()=>window.openCard?.(cardId),20)};modal.querySelectorAll('[data-v25-open]').forEach(b=>b.onclick=()=>{const [y,m]=b.dataset.v25Open.split('-').map(Number);close();setTimeout(()=>window.openInvoiceItemsV25(cardId,y,m),20)});mb.onclick=e=>{if(e.target===mb)close()};mb.classList.add('open');
+  };
+  window.openCardDetail=function(id){window.openCardInvoicesV25(id)};try{openCardDetail=window.openCardDetail}catch(e){}
+  window.openInvoiceItemsV22=window.openInvoiceItemsV25;window.openCardInvoicesV22=window.openCardInvoicesV25;
+
+  // Refresh every dependent view with the same installment engine.
+  setTimeout(()=>{try{window.renderCards?.();window.renderLancamentos?.();window.renderDashboard?.();window.renderProjection?.()}catch(e){}},100);
+})();
+</script>
