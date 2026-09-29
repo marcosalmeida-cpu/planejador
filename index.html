@@ -16069,3 +16069,94 @@ setTimeout(initEssence,0);
   },true);
 })();
 </script>
+
+
+<style id="pp-v22-card-items-style">
+#cardInvoicesV22,#invoiceItemsV22{z-index:2200!important}
+#cardInvoicesV22 .modal,#invoiceItemsV22 .modal{width:min(920px,calc(100vw - 28px));max-height:92vh;overflow:auto;border-radius:24px}
+.v22-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}.v22-head h2{margin:0 0 4px}.v22-head p{margin:0;color:var(--muted)}
+.v22-invoices,.v22-items{display:grid;gap:9px}.v22-invoice,.v22-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;background:#f7f8fa;border:1px solid #e8ecf1;border-radius:16px;padding:13px}
+.v22-invoice b,.v22-item b{display:block}.v22-meta{font-size:10.5px;color:#758094;margin-top:4px}.v22-amount{font-weight:900;font-size:16px;text-align:right}.v22-actions{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;margin-top:7px}.v22-actions button{border:1px solid #dfe5ec;background:#fff;border-radius:9px;padding:7px 9px;font-weight:800;font-size:10.5px}.v22-actions .danger{color:#b42318;border-color:#f2c7c3;background:#fff8f7}.v22-empty{padding:28px;text-align:center;color:var(--muted)}
+@media(max-width:650px){.v22-invoice,.v22-item{grid-template-columns:1fr}.v22-amount{text-align:left}.v22-actions{justify-content:flex-start}}
+</style>
+<script id="pp-v22-card-items-controller">
+(function(){
+  function schedules22(includeArchived=false){
+    try{return (window.getCardSchedules?.(includeArchived)||[]).filter(Boolean)}catch(e){return []}
+  }
+  function card22(id){return (cards||[]).find(c=>String(c.id)===String(id))}
+  function esc22(v){return typeof esc==='function'?esc(v):String(v??'').replace(/[&<>\"]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[s]))}
+  function money22(v){return typeof brl==='function'?brl(v):Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+  function month22(y,m){return `${monthNames?.[m-1]||String(m).padStart(2,'0')}/${y}`}
+  function ensure22(id){let b=document.getElementById(id);if(!b){b=document.createElement('div');b.className='modalback';b.id=id;b.innerHTML='<div class="modal"></div>';document.body.appendChild(b)}return b}
+  function closeAll22(){['cardInvoicesV22','invoiceItemsV22'].forEach(id=>document.getElementById(id)?.classList.remove('open'))}
+
+  function groups22(cardId){
+    const map={};
+    schedules22(false).filter(r=>String(r.cardId)===String(cardId)).forEach(r=>{
+      const k=`${r.year}-${String(r.month).padStart(2,'0')}`;
+      if(!map[k])map[k]={cardId,year:+r.year,month:+r.month,total:0,count:0,paid:true};
+      map[k].total+=Number(r.amount||0);map[k].count++;if(!r.paid)map[k].paid=false;
+    });
+    return Object.values(map).sort((a,b)=>b.year-a.year||b.month-a.month);
+  }
+
+  window.openInvoiceItemsV22=function(cardId,y,m){
+    closeAll22();
+    const c=card22(cardId);if(!c)return;
+    const rows=schedules22(false).filter(r=>String(r.cardId)===String(cardId)&&+r.year===+y&&+r.month===+m);
+    const mb=ensure22('invoiceItemsV22'),modal=mb.querySelector('.modal');
+    const total=rows.reduce((t,r)=>t+Number(r.amount||0),0);
+    modal.innerHTML=`<div class="v22-head"><div><h2>${esc22(c.name||'Cartão')} · ${month22(y,m)}</h2><p>${rows.length} item(ns) · ${money22(total)}</p></div><button class="ghost" id="v22ItemsClose">Fechar</button></div><div class="v22-items">${rows.map(r=>{
+      const p=(cardPurchases||[]).find(x=>String(x.id)===String(r.purchaseId));
+      const inst=(+r.installments||1)>1?`Parcela ${r.installmentNo}/${r.installments}`:(r.recurring?'Recorrente':'À vista');
+      return `<div class="v22-item"><div><b>${esc22(r.description||p?.description||'Compra')}</b><div class="v22-meta">${esc22(r.category||p?.category||'Cartão de crédito')} · ${inst} · ${r.paid?'Quitado':'Pendente'}</div></div><div><div class="v22-amount">${money22(r.amount)}</div><div class="v22-actions"><button type="button" data-v22-edit="${esc22(r.purchaseId)}">Editar compra</button><button type="button" class="danger" data-v22-delete="${esc22(r.purchaseId)}">Excluir compra</button></div></div></div>`
+    }).join('')||'<div class="v22-empty">Nenhum item encontrado nesta fatura.</div>'}</div><div class="modalfoot"><button class="ghost" id="v22BackInvoices">← Faturas do cartão</button><button class="primary" id="v22ItemsDone">Fechar</button></div>`;
+    const close=()=>mb.classList.remove('open');
+    document.getElementById('v22ItemsClose').onclick=close;document.getElementById('v22ItemsDone').onclick=close;
+    document.getElementById('v22BackInvoices').onclick=()=>{close();setTimeout(()=>window.openCardInvoicesV22(cardId),20)};
+    modal.querySelectorAll('[data-v22-edit]').forEach(b=>b.onclick=()=>{const id=b.dataset.v22Edit;close();setTimeout(()=>window.openCardPurchase?.(id),20)});
+    modal.querySelectorAll('[data-v22-delete]').forEach(b=>b.onclick=()=>{
+      const id=b.dataset.v22Delete,p=(cardPurchases||[]).find(x=>String(x.id)===String(id));if(!p)return;
+      if(!confirm(`Excluir a compra “${p.description||'Compra'}” inteira?\n\nTodas as parcelas futuras dessa compra serão removidas das faturas.`))return;
+      const i=cardPurchases.findIndex(x=>String(x.id)===String(id));if(i>=0)cardPurchases.splice(i,1);
+      try{persist()}catch(e){try{localStorage.setItem(cardPurchasesKey,JSON.stringify(cardPurchases))}catch(x){}}
+      try{window.renderCards?.()}catch(e){}try{window.renderLancamentos?.()}catch(e){}try{window.renderDashboard?.()}catch(e){}try{window.renderProjection?.()}catch(e){}try{window.ppCloudV66?.save?.()}catch(e){}
+      try{toast('Compra excluída do cartão e das faturas.')}catch(e){}
+      setTimeout(()=>window.openInvoiceItemsV22(cardId,+y,+m),20);
+    });
+    mb.onclick=e=>{if(e.target===mb)close()};mb.classList.add('open');
+  };
+
+  window.openCardInvoicesV22=function(cardId){
+    closeAll22();const c=card22(cardId);if(!c)return;
+    const gs=groups22(cardId),mb=ensure22('cardInvoicesV22'),modal=mb.querySelector('.modal');
+    modal.innerHTML=`<div class="v22-head"><div><h2>Faturas · ${esc22(c.name||'Cartão')}</h2><p>Abra uma fatura para editar ou excluir cada compra.</p></div><button class="ghost" id="v22InvClose">Fechar</button></div><div class="v22-invoices">${gs.map(g=>`<div class="v22-invoice"><div><b>${month22(g.year,g.month)}</b><div class="v22-meta">${g.count} item(ns) · ${g.paid?'Quitada':'Pendente'}</div></div><div><div class="v22-amount">${money22(g.total)}</div><div class="v22-actions"><button type="button" data-v22-open="${g.year}-${g.month}">Ver itens</button></div></div></div>`).join('')||'<div class="v22-empty">Nenhuma fatura encontrada para este cartão.</div>'}</div><div class="modalfoot"><button class="ghost" id="v22EditCard">Editar cartão</button><button class="primary" id="v22InvDone">Fechar</button></div>`;
+    const close=()=>mb.classList.remove('open');document.getElementById('v22InvClose').onclick=close;document.getElementById('v22InvDone').onclick=close;
+    document.getElementById('v22EditCard').onclick=()=>{close();setTimeout(()=>window.openCard?.(cardId),20)};
+    modal.querySelectorAll('[data-v22-open]').forEach(b=>b.onclick=()=>{const [y,m]=b.dataset.v22Open.split('-').map(Number);close();setTimeout(()=>window.openInvoiceItemsV22(cardId,y,m),20)});
+    mb.onclick=e=>{if(e.target===mb)close()};mb.classList.add('open');
+  };
+
+  // Mantém a aparência estável da V21, mas torna o clique do cartão útil para gestão das faturas.
+  window.openCardDetail=function(id){window.openCardInvoicesV22(id)};
+  try{openCardDetail=window.openCardDetail}catch(e){}
+
+  // Lançamentos agregados: Detalhar abre a fatura exata, em vez de apenas mudar de aba.
+  const oldRender=window.renderLancamentos;
+  function renderLaunches22(){
+    const body=document.getElementById('txBody'),summary=document.getElementById('txSummary');if(!body||!summary)return;
+    const y=document.getElementById('txYear')?.value||'all',m=document.getElementById('txMonth')?.value||'all',type=document.getElementById('txType')?.value||'all',q=(document.getElementById('txSearch')?.value||'').toLowerCase();
+    let rows=(window.allTx?.()||[]).filter(x=>(y==='all'||+x.ano===+y)&&(m==='all'||+x.mesNum===+m));if(type!=='all')rows=rows.filter(x=>type==='cartao'?x.origemDados==='Cartões':x.tipo===type);if(q)rows=rows.filter(x=>[x.descricao,x.categoria,x.origem].join(' ').toLowerCase().includes(q));rows.sort((a,b)=>(+b.ano)-(+a.ano)||(+b.mesNum)-(+a.mesNum)||Number(b.valor||0)-Number(a.valor||0));
+    const inv=rows.filter(x=>x.tipo==='entrada').reduce((t,x)=>t+Number(x.valor||0),0),out=rows.filter(x=>x.tipo==='saida').reduce((t,x)=>t+Number(x.valor||0),0);
+    summary.innerHTML=`<div class="card mini"><span>Entradas</span><b class="positive">${money22(inv)}</b></div><div class="card mini"><span>Saídas</span><b class="negative">${money22(out)}</b></div><div class="card mini"><span>Saldo</span><b>${money22(inv-out)}</b></div><div class="card mini"><span>Registros</span><b>${rows.length}</b></div><div class="card mini"><span>Faturas agregadas</span><b>${rows.filter(x=>x.origemDados==='Cartões').length}</b></div>`;
+    body.innerHTML=rows.map(x=>{let action='';if(x.origemDados==='Cartões'){action=`<button class="ghost" type="button" data-v22-launch-invoice="${esc22(x.cardId||'')}|${+x.ano}|${+x.mesNum}">Detalhar</button>`}else{action=`<button class="dots" onclick="openRowMenu(event,[['Editar',()=>openTxEdit('${esc22(x.id)}')],['Excluir',()=>deleteTxEnhanced('${esc22(x.id)}','custom'),'danger']])">⋯</button>`}return `<tr><td>${monthLabel(x.ano,x.mesNum)}</td><td><span class="tag ${x.origemDados==='Cartões'?'blue':x.tipo==='entrada'?'green':'red'}">${x.origemDados==='Cartões'?'Fatura':x.tipo==='entrada'?'Entrada':'Saída'}</span></td><td><b>${esc22(x.descricao||'')}</b>${x.origemDados==='Cartões'?'<br><small style="color:var(--muted)">Clique em Detalhar para ver e editar os itens.</small>':''}</td><td>${esc22(x.categoria||'—')}</td><td>${esc22(x.origem||'—')}</td><td><span class="tag ${String(x.status).toLowerCase()==='quitado'?'green':'amber'}">${esc22(x.status||'—')}</span></td><td class="money ${x.tipo==='entrada'?'positive':'negative'}">${x.tipo==='entrada'?'+':'−'} ${money22(x.valor)}</td><td>${action}</td></tr>`}).join('')||'<tr><td colspan="8" class="empty">Nenhum lançamento cadastrado.</td></tr>';
+    body.querySelectorAll('[data-v22-launch-invoice]').forEach(b=>b.onclick=()=>{const [cardId,y,m]=b.dataset.v22LaunchInvoice.split('|');window.openInvoiceItemsV22(cardId,+y,+m)});
+  }
+  window.renderLancamentos=renderLaunches22;try{renderLancamentos=renderLaunches22}catch(e){}
+  ['txYear','txMonth','txType'].forEach(id=>{const e=document.getElementById(id);if(e)e.onchange=renderLaunches22});const search=document.getElementById('txSearch');if(search)search.oninput=renderLaunches22;
+
+  // Após salvar/editar compra, reabre os dados atuais sem tocar na nuvem/autenticação.
+  setTimeout(()=>{try{renderLaunches22()}catch(e){}},80);
+})();
+</script>
