@@ -16463,3 +16463,84 @@ setTimeout(initEssence,0);
 
 
 <!-- V38 FINAL ABSOLUTE CONTROLLER: parcel count captured before legacy handlers -->
+
+
+<!-- V44 FINAL TRUE-EOF CARD ENGINE: same behavior for every card -->
+<script id="pp-v44-true-eof-card-engine">
+(()=>{
+'use strict';
+const KEY=(typeof cardPurchasesKey!=='undefined'&&cardPurchasesKey)||'financeiro_marcos_card_purchases_v3';
+const n=v=>{if(typeof v==='number')return Number.isFinite(v)?v:0;let s=String(v??'').trim().replace(/R\$|\s/g,'');if(!s)return 0;if(s.includes(',')&&s.includes('.'))s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');else if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');let x=Number(s);return Number.isFinite(x)?x:0};
+const r2=v=>Math.round((Number(v)||0)*100)/100;
+const addm=(y,m,i)=>{const d=new Date(+y,+m-1+i,1,12);return{year:d.getFullYear(),month:d.getMonth()+1}};
+const past=(y,m)=>+y<+currentYear||(+y===+currentYear&&+m<+currentMonth);
+const firstFromDate=v=>{const d=new Date(String(v||new Date().toISOString().slice(0,10)).slice(0,10)+'T12:00:00');d.setMonth(d.getMonth()+1);return{year:d.getFullYear(),month:d.getMonth()+1}};
+const parseYM=v=>{const m=String(v||'').match(/^(\d{4})-(\d{2})$/);return m&&+m[2]>=1&&+m[2]<=12?{year:+m[1],month:+m[2]}:null};
+function canon(p){
+ const total=r2(n(p?.purchaseTotalV44??p?.purchaseTotalV39??p?.purchaseTotalV38??p?.purchaseTotalV37??p?.total));
+ let qty=Math.max(1,parseInt(p?.installmentCountV44??p?.installmentCountV39??p?.installmentCountV38??p?.installmentCountV37??p?.installments,10)||1);
+ let mode=p?.modeV44||p?.modeV39||p?.modeV38||p?.modeV37||p?.mode||'avista';
+ const refund=p?.entryTypeV44==='refund'||p?.entryTypeV39==='refund'||mode==='estorno';
+ let y=+(p?.firstInvoiceYearV44??p?.firstInvoiceYearV39??p?.firstInvoiceYearV38??p?.startYear),m=+(p?.firstInvoiceMonthV44??p?.firstInvoiceMonthV39??p?.firstInvoiceMonthV38??p?.startMonth);
+ if(!(y&&m>=1&&m<=12)){const f=firstFromDate(p?.date);y=f.year;m=f.month}
+ if(refund){mode='estorno';qty=1}else if(mode==='recorrente'){qty=1}else mode=qty>1?'parcelado':'avista';
+ return{total,qty,mode,refund,first:{year:y,month:m}};
+}
+function schedules(){
+ const out=[];
+ (cardPurchases||[]).forEach(p=>{
+  if(!p||p.status==='Arquivado'||!p.cardId)return;
+  const c=canon(p);if(c.total<=0)return;
+  if(c.refund){out.push({purchaseId:p.id,cardId:p.cardId,description:p.description||'Estorno',category:p.category||'Estorno',year:c.first.year,month:c.first.month,installmentNo:1,installments:1,amount:-c.total,totalPurchase:c.total,paid:past(c.first.year,c.first.month),isRefund:true,recurring:false});return}
+  if(c.mode==='recorrente'){for(let i=0;i<60;i++){const z=addm(c.first.year,c.first.month,i);out.push({purchaseId:p.id,cardId:p.cardId,description:p.description||'Compra',category:p.category||'Cartão de crédito',year:z.year,month:z.month,installmentNo:1,installments:1,amount:c.total,totalPurchase:c.total,paid:past(z.year,z.month),isRefund:false,recurring:true})}return}
+  const cents=Math.round(c.total*100),base=Math.floor(cents/c.qty);let used=0;
+  for(let i=0;i<c.qty;i++){const z=addm(c.first.year,c.first.month,i),pc=i===c.qty-1?cents-used:base;used+=pc;out.push({purchaseId:p.id,cardId:p.cardId,description:p.description||'Compra',category:p.category||'Cartão de crédito',year:z.year,month:z.month,installmentNo:i+1,installments:c.qty,amount:pc/100,totalPurchase:c.total,paid:past(z.year,z.month),isRefund:false,recurring:false})}
+ });
+ return out;
+}
+function aggregated(){
+ const g={};
+ schedules().forEach(x=>{const k=`${x.cardId}|${x.year}|${x.month}`;if(!g[k]){const c=(cards||[]).find(c=>String(c.id)===String(x.cardId))||{};g[k]={id:`CTV44_${x.cardId}_${x.year}_${x.month}`,cardId:x.cardId,tipo:'saida',ano:x.year,mesNum:x.month,descricao:`Fatura ${c.name||'Cartão'}`,valor:0,categoria:'Cartão de crédito',classificacao:'Cartão',origem:c.name||'Cartão',status:'Quitado',origemDados:'Cartões',itemCount:0}};g[k].valor=r2(g[k].valor+x.amount);g[k].itemCount++;if(!x.paid)g[k].status='Pendente'});
+ return Object.values(g).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum);
+}
+window.getCardSchedules=schedules;window.cardAggregatedTx=aggregated;window.allTx=()=>[...(Array.isArray(custom)?custom:[]),...aggregated()];
+window.getCardStats=function(card){const s=schedules().filter(x=>String(x.cardId)===String(card.id));const current=r2(s.filter(x=>+x.year===+currentYear&&+x.month===+currentMonth).reduce((a,x)=>a+x.amount,0));const pending=r2(s.filter(x=>!x.paid&&!x.recurring).reduce((a,x)=>a+x.amount,0));const paid=r2(s.filter(x=>x.paid&&!x.recurring).reduce((a,x)=>a+x.amount,0));return{currentInv:current,pending,paid,available:r2(n(card.limit)-pending),totalUsed:r2(paid+pending),items:new Set(s.map(x=>x.purchaseId)).size}};
+try{getCardSchedules=window.getCardSchedules;cardAggregatedTx=window.cardAggregatedTx;allTx=window.allTx;getCardStats=window.getCardStats}catch(e){}
+
+function qtyEl(){return document.getElementById('cpInstallments')}
+function captureQty(){const q=qtyEl();if(!q)return;const v=Math.max(1,parseInt(q.value,10)||1);q.dataset.v44Qty=String(v)}
+function ensureFirstField(){let f=document.getElementById('cpFirstInvoiceV39');if(f)return f;f=document.getElementById('cpFirstInvoiceV32');if(f)return f;const box=document.createElement('div');box.className='field';box.id='cpFirstInvoiceFieldV44';box.innerHTML='<label>1ª parcela / fatura</label><input id="cpFirstInvoiceV44" type="month"><small>Escolha o mês em que a primeira parcela entra.</small>';document.getElementById('cpDate')?.closest('.field')?.insertAdjacentElement('afterend',box);return box.querySelector('input')}
+function currentFirst(){const f=ensureFirstField();return parseYM(f?.value)}
+function mode(){return document.getElementById('cpMode')?.value||'avista'}
+function selectedCategory(){const c=document.getElementById('cpCategory');return c?.dataset.v39Selected||c?.value||'Cartão de crédito'}
+function save(){
+ captureQty();
+ const id=document.getElementById('cpId')?.value||('CP'+Date.now()),old=(cardPurchases||[]).find(x=>String(x.id)===String(id))||{};
+ const cardId=document.getElementById('cpCard')?.value||'',date=document.getElementById('cpDate')?.value||new Date().toISOString().slice(0,10),description=(document.getElementById('cpDesc')?.value||'').trim();
+ const total=r2(n(document.getElementById('cpTotal')?.value));let q=Math.max(1,parseInt(qtyEl()?.dataset.v44Qty||qtyEl()?.value,10)||1);let md=mode();const first=currentFirst()||firstFromDate(date);
+ if(!cardId||!description||total<=0){try{toast('Preencha cartão, descrição e valor.')}catch(e){}return}
+ if(md==='estorno'||md==='recorrente')q=1;else if(q>1)md='parcelado';else md='avista';
+ let paid=0;if(md!=='recorrente'){for(let i=0;i<q;i++){const z=addm(first.year,first.month,i);if(past(z.year,z.month))paid++}}
+ const obj={...old,id,cardId,date,description,category:selectedCategory(),mode:md,total,installments:q,paidInstallments:paid,startYear:first.year,startMonth:first.month,status:document.getElementById('cpStatus')?.value||old.status||'Ativo',purchaseTotalV44:total,installmentCountV44:q,firstInvoiceYearV44:first.year,firstInvoiceMonthV44:first.month,modeV44:md,entryTypeV44:md==='estorno'?'refund':'purchase'};
+ const i=(cardPurchases||[]).findIndex(x=>String(x.id)===String(id));if(i>=0)cardPurchases[i]=obj;else cardPurchases.push(obj);
+ try{persist()}catch(e){}try{localStorage.setItem(KEY,JSON.stringify(cardPurchases))}catch(e){}
+ document.getElementById('cardPurchaseModal')?.classList.remove('open');
+ try{window.renderCards?.()}catch(e){}try{window.renderLancamentos?.()}catch(e){}try{window.renderDashboard?.()}catch(e){}try{window.renderProjection?.()}catch(e){}try{window.ppCloudV66?.save?.()}catch(e){}
+ try{toast(md==='estorno'?'Estorno salvo.':q>1?`${q} parcelas distribuídas entre ${q} faturas/mês.`:'Compra salva.')}catch(e){}
+}
+function armSave(){
+ const modal=document.getElementById('cardPurchaseModal');if(!modal)return;
+ let old=modal.querySelector('#saveCardPurchaseV39,#saveCardPurchase,.modalfoot .primary');if(!old)return;
+ if(old.id==='saveCardPurchaseV44')return;
+ const b=old.cloneNode(true);b.id='saveCardPurchaseV44';b.textContent='Salvar compra';old.replaceWith(b);
+ b.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();save()},true);
+}
+function armQty(){const q=qtyEl();if(!q||q.dataset.v44Bound==='1')return;q.dataset.v44Bound='1';q.addEventListener('input',captureQty,true);q.addEventListener('change',captureQty,true);captureQty()}
+function arm(){armQty();armSave()}
+const modal=document.getElementById('cardPurchaseModal');if(modal){new MutationObserver(()=>arm()).observe(modal,{childList:true,subtree:true});}
+document.addEventListener('click',e=>{if(e.target.closest?.('#addCardPurchaseBtn,[data-v39-edit],[data-purchase-edit],#cardPurchaseModal'))setTimeout(arm,0)},true);
+document.addEventListener('input',e=>{if(e.target?.id==='cpInstallments')captureQty()},true);
+window.saveCardPurchase=save;try{saveCardPurchase=save}catch(e){}
+setTimeout(arm,0);setTimeout(arm,300);setTimeout(arm,1200);
+})();
+</script>
