@@ -16186,8 +16186,16 @@ function qEl(){ return document.getElementById('cpInstallments'); }
 function modeEl(){ return document.getElementById('cpMode'); }
 
 function normalizedQty(v){
-  const n=parseInt(String(v??'').replace(/\D/g,''),10);
-  return Number.isFinite(n)&&n>0?n:null;
+  let raw=String(v??'').trim();
+  if(!raw)return null;
+  // Quantidade de parcelas é inteira. Se vier "7,0" ou "7.0", considera 7.
+  raw=raw.split(/[,.]/)[0].replace(/\D/g,'');
+  if(!raw)return null;
+  let n=parseInt(raw,10);
+  if(!Number.isFinite(n)||n<1)return null;
+  // Proteção contra quantidades absurdas geradas por erro de digitação/formatação.
+  n=Math.min(120,n);
+  return n;
 }
 
 function rememberQty(){
@@ -16197,6 +16205,8 @@ function rememberQty(){
   if(n) {
     draft.qty=n;
     q.dataset.v54Qty=String(n);
+    // Remove vírgulas/decimais visualmente para deixar claro que é uma contagem inteira.
+    if(String(q.value).trim()!==String(n)) q.value=String(n);
   }
 }
 
@@ -16215,6 +16225,11 @@ function install(){
     q.inputMode='numeric';
     q.pattern='[0-9]*';
     q.autocomplete='off';
+    q.setAttribute('aria-label','Quantidade de parcelas - somente número inteiro');
+    q.placeholder='Ex.: 7';
+    q.addEventListener('keydown',ev=>{
+      if([',','.','e','E','+','-'].includes(ev.key))ev.preventDefault();
+    });
   }
 }
 
@@ -16291,6 +16306,150 @@ document.addEventListener('click',e=>{
 },true);
 
 install();
+})();
+</script>
+
+<style id="pp-v55-invoice-paid-style">
+.v55-invoice-pay{border:1px solid #cfd9e7;background:#fff;border-radius:9px;padding:6px 10px;font-size:9.5px;font-weight:850;cursor:pointer;margin-left:6px}
+.v55-invoice-pay.pay{color:#0b63f6}.v55-invoice-pay.reopen{color:#8a5a00}
+.v55-invoice-paid-note{font-size:9px;font-weight:850;color:#16845b;margin-top:5px}
+</style>
+<script id="pp-v55-installment-integer-invoice-paid-final">
+(()=>{
+'use strict';
+
+function profile55(){
+  try{
+    if(typeof activeProfile==='function') return String(activeProfile()).toLowerCase();
+  }catch(e){}
+  return String(localStorage.getItem('financeiro_active_profile')||localStorage.getItem('activeProfile')||'marcos').toLowerCase();
+}
+function statusKey55(){ return 'planejador_invoice_status_v50_'+profile55(); }
+function read55(){ try{return JSON.parse(localStorage.getItem(statusKey55())||'{}')||{}}catch(e){return {}} }
+function write55(o){
+  try{localStorage.setItem(statusKey55(),JSON.stringify(o))}catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+}
+function k55(card,y,m){return `${card}|${+y}|${+m}`}
+function manual55(card,y,m){return read55()[k55(card,y,m)]||''}
+function set55(card,y,m,status){
+  const o=read55();o[k55(card,y,m)]=status;write55(o);
+  try{window.renderLancamentos?.()}catch(e){}
+  try{window.renderCards?.()}catch(e){}
+  try{window.renderDashboard?.()}catch(e){}
+  setTimeout(patch55,40);
+}
+function effectivePaid55(row){
+  const man=manual55(row.cardId,row.year,row.month);
+  if(man==='Quitado')return true;
+  if(man==='Pendente')return false;
+  return !!row.paid;
+}
+
+/* Faz o status manual prevalecer no lançamento agregado. */
+const baseAgg55=window.cardAggregatedTx;
+if(typeof baseAgg55==='function' && !baseAgg55.__v55){
+  const wrapped=function(){
+    return baseAgg55().map(x=>{
+      const man=manual55(x.cardId,x.ano,x.mesNum);
+      return man?{...x,status:man}:x;
+    });
+  };
+  wrapped.__v55=true;
+  window.cardAggregatedTx=wrapped;
+  window.allTx=()=>[...(Array.isArray(custom)?custom:[]),...window.cardAggregatedTx()];
+  try{cardAggregatedTx=window.cardAggregatedTx;allTx=window.allTx}catch(e){}
+}
+
+/* Quitação manual também libera o comprometido do cartão. */
+window.getCardStats=function(card){
+  const rows=(typeof window.getCardSchedules==='function'?window.getCardSchedules():[]).filter(x=>String(x.cardId)===String(card.id));
+  const current=Number(rows.filter(x=>+x.year===+currentYear&&+x.month===+currentMonth).reduce((a,x)=>a+(Number(x.amount)||0),0).toFixed(2));
+  const pending=Number(rows.filter(x=>!x.recurring&&!effectivePaid55(x)).reduce((a,x)=>a+(Number(x.amount)||0),0).toFixed(2));
+  const paid=Number(rows.filter(x=>!x.recurring&&effectivePaid55(x)).reduce((a,x)=>a+(Number(x.amount)||0),0).toFixed(2));
+  const lim=Number(card.limit)||0;
+  return {currentInv:current,pending,paid,available:Number((lim-pending).toFixed(2)),totalUsed:Number((paid+pending).toFixed(2)),items:new Set(rows.map(x=>x.purchaseId)).size};
+};
+try{getCardStats=window.getCardStats}catch(e){}
+
+function activeCard55(){
+  const id=document.querySelector('#cardsCleanRoot [data-clean-card].selected')?.dataset.cleanCard
+        ||document.querySelector('[data-clean-card].selected')?.dataset.cleanCard||'';
+  if(id)return id;
+  try{
+    const c=(cards||[]).find(x=>x.status!=='Cancelado'&&x.status!=='Arquivado')||(cards||[])[0];
+    return c?.id||'';
+  }catch(e){return ''}
+}
+
+function patchLaunch55(){
+  const body=document.getElementById('txBody');if(!body)return;
+  body.querySelectorAll('[data-v39-detail]').forEach(detail=>{
+    const p=String(detail.dataset.v39Detail||'').split('|');
+    if(p.length!==3)return;
+    const card=p[0],y=+p[1],m=+p[2],row=detail.closest('tr');
+    if(!row)return;
+    const man=manual55(card,y,m);
+    const tag=row.querySelector('td:nth-child(6) .tag');
+    const auto=tag?.textContent?.trim()||'Pendente';
+    const st=man||auto;
+    if(tag){tag.textContent=st;tag.className='tag '+(st==='Quitado'?'green':'amber')}
+    let b=detail.parentElement?.querySelector('.v55-invoice-pay');
+    if(!b){
+      b=document.createElement('button');
+      b.type='button';b.className='v55-invoice-pay';detail.insertAdjacentElement('afterend',b);
+    }
+    b.dataset.v55Invoice=`${card}|${y}|${m}`;
+    b.className='v55-invoice-pay '+(st==='Quitado'?'reopen':'pay');
+    b.textContent=st==='Quitado'?'Reabrir':'Quitar';
+  });
+}
+
+function patchBoard55(){
+  const board=document.getElementById('v39InvoiceBoard');if(!board)return;
+  const cardId=activeCard55();if(!cardId)return;
+  board.querySelectorAll('[data-v39-invoice]').forEach(card=>{
+    const ym=String(card.dataset.v39Invoice||'').split('-');if(ym.length!==2)return;
+    const y=+ym[0],m=+ym[1],man=manual55(cardId,y,m);
+    const tag=card.querySelector('.v39-status');
+    const auto=tag?.textContent?.trim()==='Quitada'?'Quitado':'Pendente';
+    const st=man||auto;
+    if(tag){tag.textContent=st==='Quitado'?'Quitada':'Pendente';tag.classList.toggle('paid',st==='Quitado')}
+    const details=card.querySelector('.v39-details')||card;
+    let b=details.querySelector('.v55-invoice-pay');
+    if(!b){
+      b=document.createElement('button');b.type='button';b.className='v55-invoice-pay';details.prepend(b);
+    }
+    b.dataset.v55Invoice=`${cardId}|${y}|${m}`;
+    b.className='v55-invoice-pay '+(st==='Quitado'?'reopen':'pay');
+    b.textContent=st==='Quitado'?'Reabrir fatura':'Quitar fatura';
+  });
+}
+function patch55(){patchLaunch55();patchBoard55()}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('[data-v55-invoice]');
+  if(!b)return;
+  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+  const p=String(b.dataset.v55Invoice||'').split('|');if(p.length!==3)return;
+  const cur=manual55(p[0],+p[1],+p[2]);
+  // Se ainda não há status manual, usa o texto atual do botão para inferir.
+  const currentlyPaid=cur==='Quitado'||/reabrir/i.test(b.textContent||'');
+  set55(p[0],+p[1],+p[2],currentlyPaid?'Pendente':'Quitado');
+},true);
+
+const rl55=window.renderLancamentos;
+if(typeof rl55==='function'&&!rl55.__v55){
+  const w=function(){const r=rl55.apply(this,arguments);patchLaunch55();return r};w.__v55=true;
+  window.renderLancamentos=w;try{renderLancamentos=w}catch(e){}
+}
+const rc55=window.renderCards;
+if(typeof rc55==='function'&&!rc55.__v55){
+  const w=function(){const r=rc55.apply(this,arguments);setTimeout(patchBoard55,30);return r};w.__v55=true;
+  window.renderCards=w;try{renderCards=w}catch(e){}
+}
+patch55();
+setTimeout(patch55,300);
 })();
 </script>
 
