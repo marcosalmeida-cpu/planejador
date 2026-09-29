@@ -9178,6 +9178,7 @@ Os dados atuais deste navegador serão substituídos.`);
   window.deleteCard=deleteCardClean;
   window.openCardMenu=(e,id)=>openRowMenu(e,[['Editar',()=>openCardClean(id)],['Excluir',()=>deleteCardClean(id),'danger']]);
 
+  const renderCardsBeforeV17=window.renderCards;
   function renderCards17(){
     sanitizeState(false);const filter=document.getElementById('cardFilter')?.value||'all',status=document.getElementById('cardPurchaseStatus')?.value||'all',q=(document.getElementById('cardSearch')?.value||'').toLowerCase();
     if(document.getElementById('cardFilter'))document.getElementById('cardFilter').innerHTML='<option value="all">Todos os cartões</option>'+cards.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
@@ -9189,7 +9190,13 @@ Os dados atuais deste navegador serão substituídos.`);
     const rows=cardPurchases.filter(p=>(filter==='all'||p.cardId===filter)&&(!q||[p.description,p.category,cards.find(c=>c.id===p.cardId)?.name].join(' ').toLowerCase().includes(q))).filter(p=>status==='all'||(status==='active'&&p.status==='Ativo')||(status==='paid'&&p.status==='Quitado')||(status==='archived'&&p.status==='Arquivado'));
     const body=document.getElementById('cardPurchaseBody');if(body)body.innerHTML=rows.sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(p=>{const c=cards.find(x=>x.id===p.cardId)||{},inst=p.installments||1,per=round2(money(p.total)/inst),paid=Math.min(inst,p.paidInstallments||0),pend=round2(money(p.total)-per*paid);return `<tr><td>${esc(c.name||'—')}</td><td><b>${esc(p.description)}</b><br><small>${esc(p.category||'')}</small></td><td>${p.date?new Date(p.date+'T12:00:00').toLocaleDateString('pt-BR'):'—'}</td><td><span class="tag ${inst>1?'blue':'green'}">${inst>1?'Parcelado':'À vista'}</span></td><td>${paid}/${inst}<br><small>${brl(per)} cada</small></td><td><div class="progress"><i style="width:${inst?paid/inst*100:0}%"></i></div><small>${inst?Math.round(paid/inst*100):0}% pago</small></td><td class="money">${brl(p.total)}</td><td class="money ${pend>0?'negative':'positive'}">${brl(Math.max(0,pend))}</td><td class="actioncell"><button class="dots" onclick="openCardPurchaseMenu(event,'${esc(p.id)}')">⋯</button></td></tr>`}).join('')||'<tr><td colspan="9" class="empty">Nenhuma compra neste filtro.</td></tr>';
   }
-  window.renderCards=renderCards17;try{renderCards=window.renderCards}catch(e){}
+  // Preserve the visual renderer that was already stable before v17.
+  // v17 remains responsible only for card data, invoices and save logic.
+  function renderCardsV18(){
+    if(typeof renderCardsBeforeV17==='function') return renderCardsBeforeV17.apply(this,arguments);
+    return renderCards17.apply(this,arguments);
+  }
+  window.renderCards=renderCardsV18;try{renderCards=window.renderCards}catch(e){}
 
   function ensureModal(id){let m=document.getElementById(id);if(!m){m=document.createElement('div');m.id=id;m.className='modalback';m.innerHTML='<div class="modal"></div>';document.body.appendChild(m);m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')})}return m}
   function invoiceLines(cardId,y,m){return scheduleRows(false).filter(r=>r.cardId===cardId&&r.year===+y&&r.month===+m)}
@@ -9206,7 +9213,7 @@ Os dados atuais deste navegador serão substituídos.`);
 
   const oldDashboard=window.renderDashboard;window.renderDashboard=function(){const r=typeof oldDashboard==='function'?oldDashboard.apply(this,arguments):undefined;renderUpcoming();return r};try{renderDashboard=window.renderDashboard}catch(e){}
 
-  function refreshAll(){sanitizeState(false);try{saveSelectOptions()}catch(e){};try{renderCards17()}catch(e){};try{renderLanc17()}catch(e){};try{window.renderProjection?.()}catch(e){};try{window.renderDashboard?.()}catch(e){};renderUpcoming()}
+  function refreshAll(){sanitizeState(false);try{saveSelectOptions()}catch(e){};try{window.renderCards?.()}catch(e){};try{renderLanc17()}catch(e){};try{window.renderProjection?.()}catch(e){};try{window.renderDashboard?.()}catch(e){};renderUpcoming()}
 
   // Stop obsolete onclick handlers from firing on the critical card controls.
   document.addEventListener('click',function(e){
@@ -9215,7 +9222,7 @@ Os dados atuais deste navegador serão substituídos.`);
     const addP=e.target.closest?.('#addCardPurchaseBtn');if(addP){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openPurchase('');return}
     const addC=e.target.closest?.('#addCardBtn');if(addC){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openCardClean('');return}
   },true);
-  document.getElementById('cardFilter')?.addEventListener('change',renderCards17);document.getElementById('cardPurchaseStatus')?.addEventListener('change',renderCards17);document.getElementById('cardSearch')?.addEventListener('input',renderCards17);
+  document.getElementById('cardFilter')?.addEventListener('change',()=>window.renderCards?.());document.getElementById('cardPurchaseStatus')?.addEventListener('change',()=>window.renderCards?.());document.getElementById('cardSearch')?.addEventListener('input',()=>window.renderCards?.());
 
   ensurePurchaseUI();refreshAll();setTimeout(refreshAll,250);
 })();
@@ -14173,5 +14180,40 @@ input[inputmode="decimal"].money-br{text-align:right;font-variant-numeric:tabula
 
   ensureDateFields();isolateSaveButton();render();
   setTimeout(()=>{ensureDateFields();isolateSaveButton();render()},150);
+})();
+</script>
+
+
+<script id="pp-v18-cloud-session-reconcile">
+(function(){
+  'use strict';
+  let repairing=false;
+  async function reconcileCloudV18(){
+    if(repairing)return;
+    const sb=window.ppSupabase;
+    if(!sb?.auth)return;
+    repairing=true;
+    try{
+      const {data,error}=await sb.auth.getSession();
+      if(error)return;
+      const session=data?.session||null;
+      if(session){
+        // If the underlying Supabase session exists but the v66 controller has
+        // not yet reflected it, re-emit the session through the auth client.
+        if(window.ppCloudV66?.connected && !window.ppCloudV66.connected()){
+          try{await sb.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token})}catch(e){}
+        }
+        const warning=document.getElementById('ppV66CloudWarning');
+        if(warning)warning.style.display='none';
+        const badge=document.getElementById('cloudStatusV40');
+        if(badge){badge.classList.remove('pp-v66-offline','error');badge.classList.add('online')}
+        setTimeout(()=>{try{window.ppCloudV66?.sync?.({reload:false})}catch(e){}},300);
+      }
+    }finally{repairing=false}
+  }
+  setTimeout(reconcileCloudV18,350);
+  setTimeout(reconcileCloudV18,1500);
+  window.addEventListener('focus',()=>setTimeout(reconcileCloudV18,120));
+  window.addEventListener('online',()=>setTimeout(reconcileCloudV18,120));
 })();
 </script>
