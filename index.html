@@ -1144,6 +1144,30 @@ html.pp-session-resume-v45 #loginOverlay{display:none!important}
 }
 </style>
 
+
+<style id="pp-v67-debt-fixes-style">
+/* v67: ajustes visuais/funcionais sem limpeza de histórico ou dados */
+#accountMini{display:none!important}
+#sessionTimerV45 .session-state{display:none!important}
+#sessionTimerV45{min-width:78px!important}
+#debtModal .debt-creditor-line{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:end
+}
+#debtModal .debt-creditor-line .btn{
+  min-height:40px;white-space:nowrap
+}
+#debtModal #dTotal[readonly]{
+  background:#f4f6f8!important;color:#344054!important;font-weight:800!important
+}
+#debtModal .debt-auto-note{
+  display:block;margin-top:4px;font-size:9px;color:#7b8794;line-height:1.3
+}
+@media(max-width:600px){
+  #debtModal .debt-creditor-line{grid-template-columns:1fr}
+  #debtModal .debt-creditor-line .btn{width:100%}
+}
+</style>
+
 </head>
 <body><div class="app">
 <header class="topbar"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button data-view="dashboard" class="active">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="projecao">Projeção</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx>+ Lançamento</button></div></div></header>
@@ -12842,6 +12866,290 @@ setTimeout(initEssence,0);
   }
 
   setTimeout(repaintChristianEmpty,120);
+})();
+</script>
+
+<script id="pp-v67-debt-fixes">
+(function(){
+  const MANUAL_PREFIX='DEBT_MANUAL_';
+
+  function debtNum(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(','))s=s.replace(',','.');
+    s=s.replace(/[^0-9.-]/g,'');
+    const n=Number(s);
+    return Number.isFinite(n)?n:0;
+  }
+  function debtInput(v){
+    return (Number(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+  function creditorList(){
+    try{
+      const a=JSON.parse(localStorage.getItem('planejador_creditores_v1')||'[]');
+      return Array.isArray(a)?a:[];
+    }catch(e){return []}
+  }
+
+  // ----- Dívidas manuais passam a integrar getDebts, sem alterar as dívidas antigas -----
+  const baseGetDebts=window.getDebts || (typeof getDebts==='function'?getDebts:null);
+  function getDebtsV67(includeArchived=true){
+    const base=typeof baseGetDebts==='function'
+      ? baseGetDebts.call(window,true).filter(x=>!String(x.id||'').startsWith(MANUAL_PREFIX))
+      : [];
+
+    const manual=Object.entries(debtEdits||{})
+      .filter(([id,x])=>String(id).startsWith(MANUAL_PREFIX) && x && !debtDeleted.includes(id))
+      .map(([id,x])=>({
+        id,
+        descricao:x.descricao||'Dívida',
+        credor:x.credor||'',
+        banco:x.banco||'',
+        parcela:debtNum(x.parcela),
+        total:debtNum(x.total),
+        quitado:debtNum(x.quitado),
+        pendente:Math.max(0,debtNum(x.pendente)),
+        negociado:x.negociado||'Não',
+        parcelasTotal:Math.max(1,Number(x.parcelasTotal)||1),
+        parcelasQuitadas:Math.max(0,Number(x.parcelasQuitadas)||0),
+        ultimoPagamento:x.ultimoPagamento||'',
+        origem:'Site',
+        arquivado:debtArchived.includes(id)
+      }));
+
+    const rows=[...base,...manual];
+    return rows.filter(x=>includeArchived||!x.arquivado);
+  }
+  window.getDebts=getDebtsV67;
+  try{getDebts=getDebtsV67}catch(e){}
+
+  // ----- Estrutura do modal -----
+  function ensureDebtUI(){
+    const modal=document.getElementById('debtModal');
+    if(!modal)return;
+
+    const h=modal.querySelector('.modal h2');
+    if(h)h.id='debtModalTitleV67';
+
+    const old=document.getElementById('dCreditor');
+    if(old && old.tagName!=='SELECT'){
+      const select=document.createElement('select');
+      select.id='dCreditor';
+      select.className=old.className||'';
+      old.replaceWith(select);
+    }
+
+    const sel=document.getElementById('dCreditor');
+    if(sel){
+      const field=sel.closest('.field');
+      if(field && !field.querySelector('.debt-creditor-line')){
+        const label=field.querySelector('label');
+        const line=document.createElement('div');
+        line.className='debt-creditor-line';
+        sel.parentNode.insertBefore(line,sel);
+        line.appendChild(sel);
+
+        const add=document.createElement('button');
+        add.type='button';
+        add.className='btn';
+        add.id='addDebtCreditorV67';
+        add.textContent='+ Novo';
+        line.appendChild(add);
+        if(label)label.textContent='Credor';
+      }
+    }
+
+    const total=document.getElementById('dTotal');
+    if(total){
+      total.readOnly=true;
+      if(!total.parentElement.querySelector('.debt-auto-note')){
+        total.insertAdjacentHTML('afterend','<small class="debt-auto-note">Calculado automaticamente: valor da parcela × total de parcelas.</small>');
+      }
+    }
+
+    const installments=document.getElementById('dInstallments');
+    if(installments){
+      installments.min='1';
+      installments.step='1';
+    }
+    const paidInst=document.getElementById('dInstallmentsPaid');
+    if(paidInst){
+      paidInst.min='0';
+      paidInst.step='1';
+    }
+
+    // Add "Nova dívida" button to section, without disturbing filters.
+    const filterbar=document.querySelector('#dividas .section-tools .filterbar');
+    if(filterbar && !document.getElementById('addDebtV67')){
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='primary';
+      btn.id='addDebtV67';
+      btn.textContent='+ Nova dívida';
+      filterbar.appendChild(btn);
+    }
+  }
+
+  function populateDebtCreditors(selected=''){
+    const sel=document.getElementById('dCreditor');
+    if(!sel)return;
+    const list=creditorList()
+      .filter(c=>c && c.name && c.status!=='Arquivado')
+      .sort((a,b)=>String(a.name).localeCompare(String(b.name),'pt-BR'));
+
+    sel.innerHTML='<option value="">Selecione o credor</option>'+
+      list.map(c=>`<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+
+    if(selected && !list.some(c=>c.name===selected)){
+      sel.insertAdjacentHTML('beforeend',`<option value="${esc(selected)}">${esc(selected)}</option>`);
+    }
+    sel.value=selected||'';
+  }
+
+  function recalcDebtTotal(){
+    const installment=debtNum(document.getElementById('dInstallment')?.value);
+    const qty=Math.max(1,Number(document.getElementById('dInstallments')?.value)||1);
+    const total=installment*qty;
+    const el=document.getElementById('dTotal');
+    if(el)el.value=debtInput(total);
+    return total;
+  }
+
+  function openDebtV67(id=''){
+    ensureDebtUI();
+    const isNew=!id;
+    const x=isNew?null:getDebtsV67(true).find(d=>d.id===id);
+    if(!isNew&&!x)return;
+
+    document.getElementById('dId').value=isNew?'':id;
+    document.getElementById('debtModalTitleV67').textContent=isNew?'Nova dívida':'Editar dívida';
+    document.getElementById('dDesc').value=x?.descricao||'';
+    populateDebtCreditors(x?.credor||'');
+    document.getElementById('dBank').value=x?.banco||'';
+    document.getElementById('dInstallment').value=x?debtInput(x.parcela):'';
+    document.getElementById('dInstallments').value=x?.parcelasTotal||1;
+    document.getElementById('dPaid').value=x?debtInput(x.quitado):'0,00';
+    document.getElementById('dInstallmentsPaid').value=x?.parcelasQuitadas||0;
+    document.getElementById('dNegotiated').value=String(x?.negociado||'Não').toLowerCase()==='sim'?'Sim':'Não';
+    recalcDebtTotal();
+    document.getElementById('debtModal').classList.add('open');
+  }
+
+  async function saveDebtV67(){
+    const id=document.getElementById('dId').value || (MANUAL_PREFIX+Date.now());
+    const desc=document.getElementById('dDesc').value.trim();
+    const creditor=document.getElementById('dCreditor').value.trim();
+    const installment=debtNum(document.getElementById('dInstallment').value);
+    const installments=Math.max(1,parseInt(document.getElementById('dInstallments').value,10)||1);
+    const installmentsPaid=Math.max(0,Math.min(installments,parseInt(document.getElementById('dInstallmentsPaid').value,10)||0));
+    const total=Number((installment*installments).toFixed(2));
+    const paid=Math.max(0,Math.min(total,debtNum(document.getElementById('dPaid').value)));
+
+    if(!desc)return toast('Informe a descrição da dívida.');
+    if(!creditor)return toast('Selecione um credor.');
+    if(!installment)return toast('Informe o valor da parcela.');
+    if(!installments)return toast('Informe o total de parcelas.');
+
+    debtEdits[id]={
+      ...(debtEdits[id]||{}),
+      descricao:desc,
+      credor:creditor,
+      banco:document.getElementById('dBank').value.trim(),
+      parcela:installment,
+      total,
+      quitado:paid,
+      pendente:Math.max(0,Number((total-paid).toFixed(2))),
+      negociado:document.getElementById('dNegotiated').value,
+      parcelasTotal:installments,
+      parcelasQuitadas:installmentsPaid
+    };
+
+    // Preserve every existing storage area; persist only uses the current in-memory state.
+    persist();
+    document.getElementById('debtModal').classList.remove('open');
+    try{renderDebts()}catch(e){}
+    try{renderDashboard()}catch(e){}
+    try{renderProjection()}catch(e){}
+    try{window.ppCloudV66?.save?.()}catch(e){}
+    toast(document.getElementById('dId').value?'Dívida atualizada.':'Dívida adicionada.');
+  }
+
+  function openNewCreditorFromDebt(){
+    const before=new Set(creditorList().map(c=>c.name));
+    if(window.openCreditorV61)window.openCreditorV61();
+    else if(typeof openCreditor==='function')openCreditor();
+
+    // After the creditor modal is saved/closed, repopulate and select the newly created creditor.
+    const t=setInterval(()=>{
+      const cm=document.getElementById('creditorModal');
+      if(cm && cm.classList.contains('open'))return;
+      clearInterval(t);
+      const after=creditorList();
+      const created=after.find(c=>!before.has(c.name));
+      populateDebtCreditors(created?.name||document.getElementById('dCreditor')?.value||'');
+    },180);
+    setTimeout(()=>clearInterval(t),15000);
+  }
+
+  function bindDebtV67(){
+    ensureDebtUI();
+    const inst=document.getElementById('dInstallment');
+    const qty=document.getElementById('dInstallments');
+    if(inst&&!inst.dataset.v67){
+      inst.dataset.v67='1';
+      inst.addEventListener('input',recalcDebtTotal);
+      inst.addEventListener('change',recalcDebtTotal);
+    }
+    if(qty&&!qty.dataset.v67){
+      qty.dataset.v67='1';
+      qty.addEventListener('input',recalcDebtTotal);
+      qty.addEventListener('change',recalcDebtTotal);
+    }
+
+    const add=document.getElementById('addDebtV67');
+    if(add)add.onclick=()=>openDebtV67('');
+
+    const addCred=document.getElementById('addDebtCreditorV67');
+    if(addCred)addCred.onclick=openNewCreditorFromDebt;
+
+    const save=document.getElementById('saveDebt');
+    if(save)save.onclick=saveDebtV67;
+  }
+
+  // Override old edit opener and menu so both old and new debts use the corrected modal.
+  window.openDebtEdit=openDebtV67;
+  try{openDebtEdit=openDebtV67}catch(e){}
+  window.openDebtMenu=(e,id)=>{
+    const archived=debtArchived.includes(id);
+    openRowMenu(e,[
+      ['Editar',()=>openDebtV67(id)],
+      [archived?'Desarquivar':'Arquivar',()=>toggleArchiveDebt(id)],
+      ['Excluir',()=>deleteDebt(id),'danger']
+    ]);
+  };
+
+  // Remove the old Banco Inter account card from header/menu presentation only.
+  const accountMini=document.getElementById('accountMini');
+  if(accountMini)accountMini.remove();
+
+  // Remove the word "sessão" from the timer permanently.
+  function cleanTimerLabel(){
+    const st=document.querySelector('#sessionTimerV45 .session-state');
+    if(st)st.style.display='none';
+  }
+
+  bindDebtV67();
+  cleanTimerLabel();
+  setTimeout(bindDebtV67,120);
+  setTimeout(cleanTimerLabel,120);
+
+  // Rebind after profile/view changes without touching data.
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.('#nav,[data-profile],.profile-card')){
+      setTimeout(()=>{bindDebtV67();cleanTimerLabel()},100);
+    }
+  },true);
 })();
 </script>
 
