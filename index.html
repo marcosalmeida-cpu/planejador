@@ -16841,3 +16841,142 @@ setTimeout(initEssence,0);
   setTimeout(()=>{replaceSaveButton28();refresh28()},100);
 })();
 </script>
+
+<style id="pp-v29-card-invoices-style">
+/* V29: only one visible monthly invoice board */
+#v27InvoiceBoard,#v28InvoiceBoard{display:none!important}
+#v29InvoiceBoard{margin:14px 0 18px}
+.v29-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:10px}
+.v29-head h3{margin:0;font-size:17px}.v29-head p{margin:4px 0 0;color:#768195;font-size:10.5px}
+.v29-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.v29-card{border:1px solid #e4e9f0;background:#fff;border-radius:16px;padding:12px;cursor:pointer;transition:.15s;box-shadow:0 6px 18px rgba(16,24,40,.035)}
+.v29-card:hover{border-color:#94b8ff;background:#f7faff}.v29-card.open{grid-column:1/-1;border-color:#6d9fff;background:#fff;box-shadow:0 12px 28px rgba(11,99,246,.09)}
+.v29-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.v29-month{font-size:13px;font-weight:900}.v29-count{font-size:9.5px;color:#7c8798;margin-top:3px}
+.v29-total{font-size:20px;font-weight:900;margin-top:8px}.v29-status{padding:3px 7px;border-radius:999px;font-size:8.5px;font-weight:900;background:#fff1f3;color:#b4233f}.v29-status.paid{background:#eaf8f2;color:#13805c}
+.v29-preview{display:grid;gap:4px;margin-top:9px;padding-top:8px;border-top:1px solid #edf0f4}.v29-preview-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;font-size:9.5px}.v29-preview-row span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#596679}.v29-preview-row b{font-size:9.5px}
+.v29-hint{font-size:9px;color:#0b63f6;font-weight:800;margin-top:8px}.v29-details{display:none;margin-top:12px;padding-top:12px;border-top:1px solid #e6ebf1;gap:8px}.v29-card.open .v29-details{display:grid}
+.v29-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;border:1px solid #edf0f4;background:#fbfcfd;border-radius:13px;padding:10px}.v29-item b{font-size:11px}.v29-meta{font-size:9.5px;color:#778295;margin-top:3px}.v29-amt{font-weight:900;text-align:right}.v29-actions{display:flex;gap:5px;margin-top:6px;justify-content:flex-end}.v29-actions button{border:1px solid #dfe5ec;background:#fff;border-radius:9px;padding:6px 9px;font-size:9.5px;font-weight:800;cursor:pointer}.v29-actions .danger{color:#b4233f}
+@media(max-width:900px){.v29-grid{grid-template-columns:1fr 1fr}}@media(max-width:620px){.v29-grid{grid-template-columns:1fr}.v29-card.open{grid-column:auto}.v29-item{grid-template-columns:1fr}.v29-amt{text-align:left}.v29-actions{justify-content:flex-start}}
+</style>
+<script id="pp-v29-card-invoices-final">
+(function(){
+  let selectedCardV29='';
+  let requestedInvoiceV29='';
+  let renderingV29=false;
+
+  function money29(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(!s)return 0;
+    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(','))s=s.replace(',','.');
+    else if((s.match(/\./g)||[]).length>1)s=s.replace(/\./g,'');
+    s=s.replace(/[^0-9.-]/g,'');
+    const n=Number(s);return Number.isFinite(n)?n:0;
+  }
+  function r29(n){return Number((Number(n)||0).toFixed(2))}
+  function esc29(v){return typeof esc==='function'?esc(v):String(v??'')}
+  function first29(p){
+    if(p?.date){const d=new Date(String(p.date).slice(0,10)+'T12:00:00');if(!Number.isNaN(d.getTime())){d.setMonth(d.getMonth()+1);return {year:d.getFullYear(),month:d.getMonth()+1}}}
+    return {year:+p?.startYear||currentYear,month:+p?.startMonth||currentMonth};
+  }
+  function past29(y,m){return +y<+currentYear||(+y===+currentYear&&+m<+currentMonth)}
+  function schedules29(){
+    const out=[];
+    (cardPurchases||[]).forEach(p=>{
+      if(!p||p.status==='Arquivado')return;
+      const total=r29(money29(p.total));if(total<=0)return;
+      const start=first29(p);
+      if(p.mode==='recorrente'){
+        for(let i=0;i<48;i++){const ym=nextMonth(start.year,start.month,i);out.push({purchaseId:p.id,cardId:p.cardId,description:p.description||'Compra',category:p.category||'Cartão de crédito',year:ym.year,month:ym.month,installmentNo:1,installments:1,amount:total,totalPurchase:total,paid:past29(ym.year,ym.month),recurring:true})}
+        return;
+      }
+      const qty=p.mode==='parcelado'?Math.max(1,parseInt(p.installments,10)||1):1;
+      const cents=Math.round(total*100),base=Math.floor(cents/qty);let used=0;
+      for(let i=0;i<qty;i++){
+        const ym=nextMonth(start.year,start.month,i),part=i===qty-1?cents-used:base;used+=part;
+        out.push({purchaseId:p.id,cardId:p.cardId,description:p.description||'Compra',category:p.category||'Cartão de crédito',year:ym.year,month:ym.month,installmentNo:i+1,installments:qty,amount:part/100,totalPurchase:total,paid:past29(ym.year,ym.month),recurring:false});
+      }
+    });
+    return out;
+  }
+  function aggregates29(){
+    const map={};
+    schedules29().forEach(r=>{const k=`${r.cardId}_${r.year}_${r.month}`;if(!map[k]){const c=(cards||[]).find(x=>String(x.id)===String(r.cardId))||{};map[k]={id:`CT_${k}`,cardId:r.cardId,tipo:'saida',ano:r.year,mesNum:r.month,descricao:`Fatura ${c.name||'Cartão'}`,valor:0,categoria:'Cartão de crédito',classificacao:'Cartão',origem:c.name||'Cartão',status:'Quitado',origemDados:'Cartões',itemCount:0,_paid:true}};map[k].valor=r29(map[k].valor+r.amount);map[k].itemCount++;if(!r.paid)map[k]._paid=false});
+    return Object.values(map).map(x=>{x.status=x._paid?'Quitado':'Pendente';delete x._paid;return x}).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum);
+  }
+  window.getCardSchedules=function(){return schedules29()};
+  window.cardAggregatedTx=function(){return aggregates29()};
+  window.allTx=function(){return [...(custom||[]),...aggregates29()]};
+  try{getCardSchedules=window.getCardSchedules;cardAggregatedTx=window.cardAggregatedTx;allTx=window.allTx}catch(e){}
+
+  function selected29(){
+    if(selectedCardV29){const c=(cards||[]).find(x=>String(x.id)===String(selectedCardV29));if(c)return c}
+    const id=document.querySelector('#cardsCleanRoot [data-clean-card].selected')?.dataset.cleanCard;
+    if(id){selectedCardV29=id;return (cards||[]).find(x=>String(x.id)===String(id))}
+    const f=document.getElementById('cardFilter')?.value;if(f&&f!=='all')return (cards||[]).find(x=>String(x.id)===String(f));
+    return (cards||[]).find(c=>c.status!=='Cancelado'&&c.status!=='Arquivado')||(cards||[])[0];
+  }
+  function groups29(cardId){
+    const map={};schedules29().filter(r=>String(r.cardId)===String(cardId)).forEach(r=>{const k=`${r.year}-${r.month}`;if(!map[k])map[k]={key:k,year:r.year,month:r.month,total:0,paid:true,rows:[]};map[k].total=r29(map[k].total+r.amount);map[k].rows.push(r);if(!r.paid)map[k].paid=false});return Object.values(map).sort((a,b)=>a.year-b.year||a.month-b.month);
+  }
+  function label29(y,m){return `${monthNames?.[m-1]||String(m).padStart(2,'0')}/${y}`}
+  function ensureBoard29(){
+    let board=document.getElementById('v29InvoiceBoard');if(board)return board;
+    board=document.createElement('section');board.id='v29InvoiceBoard';
+    const section=document.getElementById('cartoes');if(!section)return null;
+    const anchor=document.getElementById('cardsCleanRoot')||section.querySelector('.card-deck')||section.querySelector('.tablewrap');
+    if(anchor)anchor.insertAdjacentElement('afterend',board);else section.appendChild(board);
+    return board;
+  }
+  function renderBoard29(){
+    if(renderingV29)return;renderingV29=true;
+    try{
+      const card=selected29(),board=ensureBoard29();if(!card||!board)return;
+      const gs=groups29(card.id);
+      board.innerHTML=`<div class="v29-head"><div><h3>Faturas por mês · ${esc29(card.name)}</h3><p>Clique no mês para abrir os itens. O valor mostrado é a soma das parcelas daquele mês.</p></div></div><div class="v29-grid">${gs.map(g=>{
+        const target=requestedInvoiceV29===`${card.id}|${g.key}`;
+        const prev=g.rows.slice(0,3).map(r=>`<div class="v29-preview-row"><span>${esc29(r.description)} · ${r.recurring?'recorrente':(+r.installments>1?`${r.installmentNo}/${r.installments}`:'à vista')}</span><b>${brl(r.amount)}</b></div>`).join('');
+        const items=g.rows.map(r=>`<div class="v29-item"><div><b>${esc29(r.description)}</b><div class="v29-meta">${esc29(r.category)} · ${r.recurring?'Recorrente':(+r.installments>1?`Parcela ${r.installmentNo}/${r.installments}`:'À vista')} · total da compra ${brl(r.totalPurchase)}</div></div><div><div class="v29-amt">${brl(r.amount)}</div><div class="v29-actions"><button type="button" data-v29-edit="${esc29(r.purchaseId)}">Editar</button><button type="button" class="danger" data-v29-delete="${esc29(r.purchaseId)}">Excluir</button></div></div></div>`).join('');
+        return `<article class="v29-card ${target?'open':''}" data-v29-card="${g.key}"><div class="v29-top"><div><div class="v29-month">${label29(g.year,g.month)}</div><div class="v29-count">${g.rows.length} item(ns)</div></div><span class="v29-status ${g.paid?'paid':''}">${g.paid?'Quitada':'Pendente'}</span></div><div class="v29-total">${brl(g.total)}</div><div class="v29-preview">${prev}</div><div class="v29-hint">Clique para ${target?'recolher':'ver e editar os itens'}</div><div class="v29-details">${items}</div></article>`;
+      }).join('')||'<div class="empty">Nenhuma fatura para este cartão.</div>'}</div>`;
+      requestedInvoiceV29='';
+    }finally{renderingV29=false}
+  }
+
+  function delete29(id){
+    const p=(cardPurchases||[]).find(x=>String(x.id)===String(id));if(!p)return;
+    if(!confirm(`Excluir a compra “${p.description||'Compra'}”?\n\nTodas as parcelas desta compra serão removidas.`))return;
+    const i=cardPurchases.findIndex(x=>String(x.id)===String(id));if(i>=0)cardPurchases.splice(i,1);
+    try{persist()}catch(e){}try{window.ppCloudV66?.save?.()}catch(e){}
+    try{window.renderCards?.()}catch(e){}try{window.renderLancamentos?.()}catch(e){}try{window.renderDashboard?.()}catch(e){}renderBoard29();
+  }
+
+  // One delegated click handler; no rerender just to expand/collapse.
+  document.addEventListener('click',function(e){
+    const edit=e.target.closest?.('[data-v29-edit]');if(edit){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.openCardPurchase?.(edit.dataset.v29Edit);return}
+    const del=e.target.closest?.('[data-v29-delete]');if(del){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();delete29(del.dataset.v29Delete);return}
+    const inv=e.target.closest?.('#v29InvoiceBoard [data-v29-card]');if(inv){e.preventDefault();e.stopPropagation();const was=inv.classList.contains('open');document.querySelectorAll('#v29InvoiceBoard .v29-card.open').forEach(x=>x.classList.remove('open'));if(!was)inv.classList.add('open');return}
+    const card=e.target.closest?.('[data-clean-card]');if(card){selectedCardV29=card.dataset.cleanCard||'';setTimeout(renderBoard29,20);return}
+    const detail=e.target.closest?.('[data-v28-detail],[data-v27-detail],[data-v26-detail],[data-v22-detail]');if(detail){
+      let raw=detail.dataset.v28Detail||detail.dataset.v27Detail||detail.dataset.v26Detail||detail.dataset.v22Detail||'';const p=raw.split('|');if(p.length>=3){selectedCardV29=p[0];requestedInvoiceV29=`${p[0]}|${p[1]}-${+p[2]}`;showView('cartoes');setTimeout(()=>{renderBoard29();const el=document.querySelector(`#v29InvoiceBoard [data-v29-card="${p[1]}-${+p[2]}"]`);if(el){el.classList.add('open');el.scrollIntoView({behavior:'smooth',block:'center'})}},50);e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();return}
+    }
+  },true);
+
+  // Re-render card board after card-area render, without mutation-observer loops.
+  const previousRenderCards=window.renderCards;
+  if(typeof previousRenderCards==='function'){
+    window.renderCards=function(){const r=previousRenderCards.apply(this,arguments);setTimeout(renderBoard29,0);return r};
+    try{renderCards=window.renderCards}catch(e){}
+  }
+
+  // Use monthly parcel values in Launches; preserve the current stable renderer where possible.
+  const priorLanc=window.renderLancamentos;
+  if(typeof priorLanc==='function'){
+    window.renderLancamentos=function(){return priorLanc.apply(this,arguments)};
+    try{renderLancamentos=window.renderLancamentos}catch(e){}
+  }
+
+  setTimeout(renderBoard29,120);
+})();
+</script>
