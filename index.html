@@ -1383,7 +1383,26 @@ const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho',
 const shortMonths=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const esc=s=>String(s??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const num=v=>Number(String(v??0).replace(/\./g,'').replace(',','.').replace(/[^0-9.-]/g,''))||0;
+const num=v=>{
+  if(typeof v==='number'&&Number.isFinite(v))return v;
+  let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'').replace(/[^0-9,.-]/g,'');
+  if(!s)return 0;
+  if(s.includes(',')){
+    s=s.replace(/\./g,'').replace(',','.');
+  }else{
+    const dots=(s.match(/\./g)||[]).length;
+    if(dots>1){
+      const parts=s.split('.');
+      const last=parts.pop();
+      s=(last&&last.length<=2)?parts.join('')+'.'+last:parts.concat(last||[]).join('');
+    }else if(dots===1){
+      const [a,b='']=s.split('.');
+      if(b.length===3 && a.replace('-','').length<=3)s=a+b;
+    }
+  }
+  const n=Number(s);
+  return Number.isFinite(n)?n:0;
+};
 const sum=(a,f=x=>x)=>a.reduce((t,x)=>t+Number(f(x)||0),0);
 const today=new Date(); let currentYear=today.getFullYear(), currentMonth=today.getMonth()+1;
 let year=currentYear, month=currentMonth;
@@ -16158,5 +16177,90 @@ setTimeout(initEssence,0);
 
   // Após salvar/editar compra, reabre os dados atuais sem tocar na nuvem/autenticação.
   setTimeout(()=>{try{renderLaunches22()}catch(e){}},80);
+})();
+</script>
+
+
+<script id="pp-v23-money-card-fix">
+(function(){
+  function money23(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'').replace(/[^0-9,.-]/g,'');
+    if(!s)return 0;
+    if(s.includes(',')){
+      s=s.replace(/\./g,'').replace(',','.');
+    }else{
+      const dots=(s.match(/\./g)||[]).length;
+      if(dots>1){
+        const parts=s.split('.'),last=parts.pop();
+        s=(last&&last.length<=2)?parts.join('')+'.'+last:parts.concat(last||[]).join('');
+      }else if(dots===1){
+        const p=s.split('.'),a=p[0],b=p[1]||'';
+        if(b.length===3&&a.replace('-','').length<=3)s=a+b;
+      }
+    }
+    const n=Number(s);return Number.isFinite(n)?n:0;
+  }
+
+  // Normalize already-saved card purchase totals that are valid decimals and prevent re-parsing errors.
+  try{
+    let changed=false;
+    (cardPurchases||[]).forEach(p=>{
+      const n=money23(p.total);
+      if(Number.isFinite(n)&&p.total!==n){p.total=n;changed=true;}
+    });
+    (cards||[]).forEach(c=>{
+      const n=money23(c.limit);
+      if(Number.isFinite(n)&&c.limit!==n){c.limit=n;changed=true;}
+    });
+    if(changed)persist();
+  }catch(e){}
+
+  const oldSchedules=window.getCardSchedules;
+  window.getCardSchedules=function(includeArchived=false){
+    const rows=[];
+    (cardPurchases||[]).forEach(p=>{
+      if(p.status==='Arquivado'&&!includeArchived)return;
+      const startY=+p.startYear||currentYear,startM=+p.startMonth||currentMonth;
+      if(p.mode==='recorrente'){
+        for(let i=0;i<60;i++){
+          const ym=nextMonth(startY,startM,i);
+          const paid=(ym.year<currentYear||(ym.year===currentYear&&ym.month<=currentMonth));
+          rows.push({purchaseId:p.id,cardId:p.cardId,description:p.description,category:p.category||'Cartão de crédito',year:ym.year,month:ym.month,installmentNo:1,installments:1,amount:money23(p.total),paid,status:paid?'Quitado':'Pendente',mode:'recorrente',recurring:true});
+        }
+        return;
+      }
+      const inst=Math.max(1,+p.installments||1),paidN=Math.max(0,Math.min(inst,+p.paidInstallments||0)),total=money23(p.total),per=Number((total/inst).toFixed(2));
+      for(let i=0;i<inst;i++){
+        const ym=nextMonth(startY,startM,i);
+        rows.push({purchaseId:p.id,cardId:p.cardId,description:p.description,category:p.category||'Cartão de crédito',year:ym.year,month:ym.month,installmentNo:i+1,installments:inst,amount:i===inst-1?Number((total-per*(inst-1)).toFixed(2)):per,paid:i<paidN,status:i<paidN?'Quitado':'Pendente',mode:p.mode||'avista',recurring:false});
+      }
+    });
+    return rows;
+  };
+  try{getCardSchedules=window.getCardSchedules}catch(e){}
+
+  window.getCardStats=function(card){
+    const schedules=window.getCardSchedules(false).filter(r=>r.cardId===card.id);
+    const currentInv=schedules.filter(r=>r.year===currentYear&&r.month===currentMonth).reduce((t,r)=>t+money23(r.amount),0);
+    const pending=schedules.filter(r=>!r.paid&&!r.recurring).reduce((t,r)=>t+money23(r.amount),0);
+    const paid=schedules.filter(r=>r.paid).reduce((t,r)=>t+money23(r.amount),0);
+    return {currentInv,pending,paid,available:money23(card.limit)-pending,totalUsed:paid+pending,items:new Set(schedules.map(r=>r.purchaseId)).size};
+  };
+  try{getCardStats=window.getCardStats}catch(e){}
+
+  // Ensure totals typed in Brazilian format are saved as numeric decimals once.
+  const prevSave=window.saveCardPurchase;
+  window.saveCardPurchase=function(){
+    const input=document.getElementById('cpTotal');
+    if(input){
+      const parsed=money23(input.value);
+      input.value=parsed.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    }
+    return prevSave.apply(this,arguments);
+  };
+  const btn=document.getElementById('saveCardPurchase');if(btn)btn.onclick=window.saveCardPurchase;
+
+  try{renderCards?.();renderDashboard?.();renderLancamentos?.();renderProjection?.();}catch(e){}
 })();
 </script>
