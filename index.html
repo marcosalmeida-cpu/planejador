@@ -13803,3 +13803,252 @@ setTimeout(initEssence,0);
   setTimeout(()=>{bindModal();pendingDefault()},250);
 })();
 </script>
+
+<style id="pp-v71-cloud-compact-and-debt-pay-style">
+/* Nuvem flutuante compacta: apenas nuvem + ponto de status */
+#cloudStatusV40{
+  width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;
+  padding:0!important;border-radius:14px!important;display:grid!important;place-items:center!important;
+  right:14px!important;bottom:14px!important;gap:0!important;overflow:visible!important;
+  background:rgba(255,255,255,.97)!important;border:1px solid #dde5ef!important;
+  box-shadow:0 10px 28px rgba(15,23,42,.14)!important;color:#075cff!important;
+}
+#cloudStatusV40::before{
+  content:"☁";font-size:22px;line-height:1;color:#075cff;transform:translateY(-1px);pointer-events:none;
+}
+#cloudStatusV40>span,#cloudStatusV40>#ppV66Version{display:none!important}
+#cloudStatusV40>button{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  opacity:0!important;padding:0!important;margin:0!important;cursor:pointer!important;z-index:3!important;
+}
+#cloudStatusV40>i{
+  position:absolute!important;right:6px!important;bottom:6px!important;width:9px!important;height:9px!important;
+  border-radius:50%!important;background:#d92d20!important;border:2px solid #fff!important;z-index:4!important;
+  box-shadow:0 1px 4px rgba(0,0,0,.15)!important;pointer-events:none!important;
+}
+#cloudStatusV40.online>i,#cloudStatusV40.saving>i{background:#12b76a!important;animation:none!important}
+#cloudStatusV40.error>i,#cloudStatusV40.pp-v66-offline>i{background:#d92d20!important}
+</style>
+
+<script id="pp-v71-debt-payment-hard-fix">
+(function(){
+  'use strict';
+  const EDIT_KEY='financeiro_marcos_debt_edits_v3';
+  let openedDebt=null;
+  let userChangedDebtFilter=false;
+
+  function money(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(','))s=s.replace(',','.');
+    s=s.replace(/[^0-9.-]/g,'');
+    const n=Number(s);return Number.isFinite(n)?n:0;
+  }
+  function edits(){
+    try{const o=JSON.parse(localStorage.getItem(EDIT_KEY)||'{}');return o&&typeof o==='object'&&!Array.isArray(o)?o:{}}
+    catch(e){return {}}
+  }
+  function debtById(id){
+    id=String(id||'');
+    if(!id)return null;
+    if(openedDebt&&String(openedDebt.id)===id)return {...openedDebt};
+    let base=null,edit=null;
+    try{base=BASE_DATA?.dividas?.find(x=>String(x?.id)===id)||null}catch(e){}
+    try{edit=(typeof debtEdits!=='undefined'&&debtEdits)?debtEdits[id]||null:null}catch(e){}
+    if(!edit)edit=edits()[id]||null;
+    if(base||edit)return {...(base||{}),...(edit||{}),id};
+    try{
+      const list=typeof window.getDebts==='function'?window.getDebts(true):[];
+      const hit=Array.isArray(list)?list.find(x=>String(x?.id)===id):null;
+      if(hit)return {...hit,id};
+    }catch(e){}
+    return null;
+  }
+  function payModal(){return document.getElementById('debtPayModal')}
+  function mode(){return payModal()?.querySelector('[data-paymode].active')?.dataset.paymode||'current'}
+  function pt(v){return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+
+  function ensurePayUi(){
+    const m=payModal();if(!m)return;
+    const grid=m.querySelector('.pay-choice-grid');
+    if(grid&&!grid.querySelector('[data-paymode="settle"]')){
+      const b=document.createElement('button');b.type='button';b.className='pay-choice';b.dataset.paymode='settle';
+      b.innerHTML='Quitar dívida<small>Liquida todo o saldo pendente desta dívida.</small>';grid.appendChild(b);
+    }
+
+    // Renomeia/substitui o botão para escapar dos listeners antigos que interceptavam #dpSave.
+    let old=document.getElementById('dpSave');
+    if(old){
+      const fresh=old.cloneNode(true);fresh.id='dpSaveV71';fresh.type='button';old.replaceWith(fresh);
+    }
+    let save=document.getElementById('dpSaveV71');
+    if(!save){
+      const foot=m.querySelector('.modalfoot');
+      if(foot){save=document.createElement('button');save.id='dpSaveV71';save.type='button';save.className='primary';save.textContent='Confirmar pagamento';foot.appendChild(save)}
+    }
+    if(save&&!save.dataset.v71){save.dataset.v71='1';save.addEventListener('click',confirmPaymentV71)}
+
+    m.querySelectorAll('[data-paymode]').forEach(b=>{
+      b.onclick=function(e){
+        e.preventDefault();
+        m.querySelectorAll('[data-paymode]').forEach(x=>x.classList.remove('active'));
+        this.classList.add('active');
+        syncPaymentFields();
+      };
+    });
+    const qty=document.getElementById('dpQty');
+    if(qty){qty.oninput=syncPaymentFields;qty.onchange=syncPaymentFields}
+  }
+
+  function calcState(d){
+    const installment=Math.max(0,money(d.parcela));
+    const paidValue=Math.max(0,money(d.quitado));
+    const storedPending=Math.max(0,money(d.pendente));
+    let total=Math.max(0,money(d.total));
+    if(total<=0)total=Math.max(paidValue+storedPending,installment);
+    let totalInst=Math.max(1,parseInt(d.parcelasTotal,10)||0);
+    if(!parseInt(d.parcelasTotal,10)) totalInst=Math.max(1,installment>0?Math.round(total/installment):1);
+    let paidInst=Math.max(0,parseInt(d.parcelasQuitadas,10)||0);
+    if(!parseInt(d.parcelasQuitadas,10)&&paidValue>0&&installment>0)paidInst=Math.min(totalInst,Math.floor((paidValue+.01)/installment));
+    paidInst=Math.min(totalInst,paidInst);
+    const pending=Math.max(0,storedPending>0?storedPending:total-paidValue);
+    return {installment,total,paidValue,pending,totalInst,paidInst,remainingInst:Math.max(0,totalInst-paidInst)};
+  }
+
+  function syncPaymentFields(){
+    ensurePayUi();
+    const id=String(document.getElementById('dpId')?.value||openedDebt?.id||'');
+    const d=debtById(id)||openedDebt;if(!d)return;
+    openedDebt={...d,id};
+    const s=calcState(d),qtyEl=document.getElementById('dpQty'),amtEl=document.getElementById('dpAmount');
+    if(!qtyEl||!amtEl)return;
+    const m=mode();let qty=Math.max(1,parseInt(qtyEl.value,10)||1);let amount=0;
+    if(m==='settle'){
+      qty=Math.max(1,s.remainingInst||1);qtyEl.value=String(qty);qtyEl.disabled=true;amount=s.pending;
+    }else if(m==='current'){
+      qty=1;qtyEl.value='1';qtyEl.disabled=true;
+      amount=(s.remainingInst<=1)?s.pending:Math.min(s.pending,s.installment||s.pending);
+    }else{
+      qty=Math.min(qty,Math.max(1,s.remainingInst||1));qtyEl.value=String(qty);qtyEl.disabled=false;
+      amount=(qty>=s.remainingInst&&s.remainingInst>0)?s.pending:Math.min(s.pending,(s.installment||s.pending)*qty);
+    }
+    amtEl.value=pt(amount);
+    amtEl.readOnly=true;
+  }
+
+  function openPaymentV71(id){
+    // Garante que o modal antigo exista antes de assumir o controle.
+    try{
+      if(!payModal()&&typeof ensureDebtPayModal==='function')ensureDebtPayModal();
+    }catch(e){}
+    ensurePayUi();
+    const d=debtById(id);
+    if(!d){try{toast('Não foi possível abrir esta dívida.')}catch(e){};return}
+    openedDebt={...d,id:String(id)};
+    const idEl=document.getElementById('dpId'),name=document.getElementById('dpDebtName'),pending=document.getElementById('dpPending'),qty=document.getElementById('dpQty');
+    if(idEl)idEl.value=String(id);
+    if(name)name.textContent=d.descricao||d.credor||'Dívida';
+    if(pending)pending.textContent=typeof brl==='function'?brl(calcState(d).pending):'R$ '+pt(calcState(d).pending);
+    if(qty){qty.value='1';qty.disabled=true}
+    payModal()?.querySelectorAll('[data-paymode]').forEach(b=>b.classList.toggle('active',b.dataset.paymode==='current'));
+    syncPaymentFields();
+    payModal()?.classList.add('open');
+  }
+
+  function persistDebtPatch(id,patch){
+    // 1) Mescla no objeto em memória, sem apagar os demais registros.
+    try{
+      if(typeof debtEdits!=='undefined'){
+        debtEdits[id]={...(debtEdits[id]||{}),...patch};
+      }
+    }catch(e){}
+
+    // 2) Persiste o estado geral já mesclado.
+    try{if(typeof persist==='function')persist()}catch(e){}
+
+    // 3) Reforça somente esta dívida na chave específica, preservando todas as outras.
+    const all=edits();all[id]={...(all[id]||{}),...patch};
+    localStorage.setItem(EDIT_KEY,JSON.stringify(all));
+    try{if(typeof debtEdits!=='undefined')debtEdits[id]={...(debtEdits[id]||{}),...all[id]}}catch(e){}
+
+    // 4) Atualiza o snapshot do perfil ativo para não voltar ao valor anterior ao trocar de tela/aparelho.
+    try{
+      const PM=window.__ppV41Profile;
+      const profile=localStorage.getItem('planejador_active_profile')||'Marcos';
+      if(PM?.captureShared&&PM?.saveState)PM.saveState(profile,PM.captureShared());
+    }catch(e){}
+  }
+
+  function confirmPaymentV71(e){
+    if(e){e.preventDefault();e.stopPropagation()}
+    const id=String(document.getElementById('dpId')?.value||openedDebt?.id||'');
+    const d=debtById(id)||openedDebt;
+    if(!id||!d){try{toast('Não foi possível localizar a dívida aberta.')}catch(x){};return}
+    const s=calcState(d);
+    if(s.pending<=0){try{toast('Esta dívida já está quitada.')}catch(x){};payModal()?.classList.remove('open');return}
+
+    const m=mode();
+    let qty=1;
+    if(m==='advance')qty=Math.max(1,parseInt(document.getElementById('dpQty')?.value,10)||1);
+    if(m==='settle')qty=Math.max(1,s.remainingInst||1);
+    qty=Math.min(qty,Math.max(1,s.remainingInst||1));
+
+    let nextPaidInst=s.paidInst;
+    let amount=0;
+    if(m==='settle'){
+      nextPaidInst=s.totalInst;amount=s.pending;
+    }else if(m==='advance'){
+      nextPaidInst=Math.min(s.totalInst,s.paidInst+qty);
+      amount=(nextPaidInst>=s.totalInst)?s.pending:Math.min(s.pending,(s.installment||s.pending)*qty);
+    }else{
+      nextPaidInst=Math.min(s.totalInst,s.paidInst+1);
+      // Regra principal: se esta é a última parcela, quita todo o saldo restante.
+      amount=(nextPaidInst>=s.totalInst||s.remainingInst<=1)?s.pending:Math.min(s.pending,s.installment||s.pending);
+    }
+
+    let paid=Math.min(s.total,Number((s.paidValue+amount).toFixed(2)));
+    let pending=Math.max(0,Number((s.total-paid).toFixed(2)));
+    const lastInstallment=nextPaidInst>=s.totalInst;
+    if(lastInstallment||pending<0.01){
+      nextPaidInst=s.totalInst;paid=s.total;pending=0;
+    }
+
+    const patch={
+      descricao:d.descricao||'',credor:d.credor||'',banco:d.banco||'',
+      parcela:s.installment,total:s.total,quitado:paid,pendente:pending,
+      negociado:d.negociado||'Não',parcelasTotal:s.totalInst,parcelasQuitadas:nextPaidInst,
+      ultimoPagamento:new Date().toISOString().slice(0,10)
+    };
+
+    try{persistDebtPatch(id,patch)}catch(err){console.error(err);try{toast('Não foi possível salvar o pagamento.')}catch(x){};return}
+    openedDebt={...d,...patch,id};
+    payModal()?.classList.remove('open');
+
+    try{window.renderDebts?.()}catch(x){}
+    try{window.renderDashboard?.()}catch(x){}
+    try{window.renderProjection?.()}catch(x){}
+    try{window.ppSessionV47?.captureWorkspace?.()}catch(x){}
+    // flushDirty() faz scan antes de enviar e não puxa estado antigo da nuvem.
+    setTimeout(()=>{try{window.ppCloudV66?.save?.()}catch(x){}},80);
+    try{toast(pending===0?'Dívida quitada.':'Parcela paga com sucesso.')}catch(x){}
+  }
+
+  // Última versão efetiva do abridor.
+  window.openDebtPayment=openPaymentV71;
+  try{openDebtPayment=openPaymentV71}catch(e){}
+
+  function defaultPending(){
+    const f=document.getElementById('debtFilter');if(!f||userChangedDebtFilter)return;
+    if(f.value!=='pending'){f.value='pending';try{window.renderDebts?.()}catch(e){}}
+  }
+  const filter=document.getElementById('debtFilter');
+  if(filter){filter.addEventListener('change',e=>{if(e.isTrusted)userChangedDebtFilter=true},true);defaultPending()}
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.('[data-view="dividas"]'))setTimeout(defaultPending,0);
+  },true);
+
+  ensurePayUi();defaultPending();
+  setTimeout(()=>{ensurePayUi();defaultPending()},350);
+})();
+</script>
