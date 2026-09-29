@@ -10483,49 +10483,6 @@ setTimeout(()=>{prepare39(document.getElementById('cpCategory')?.value);const ad
 #cardPurchaseModal #v39ModeBar{display:flex!important;gap:7px!important;flex-wrap:wrap!important;margin-top:4px!important}
 #cardPurchaseModal #v39ModeHelp{display:block!important;margin-top:7px!important}
 </style>
-<script id="pp-v40-purchase-mode-dedup-controller">
-(function(){
-  'use strict';
-  const KEEP_IDS=new Set(['v39ModeBar','v39ModeHelp']);
-  const OLD_SELECTORS=[
-    '.choice-wrap','#cpModePillsV11','#cpModeHelpV11',
-    '#v32PurchaseModes','#v32ModeHelp',
-    '#v33PurchaseModes','#v33PurchaseModeHelp',
-    '#v37PurchaseModes','#v37ModeHelp',
-    '#v38PurchaseModes','#v38ModeHelp'
-  ];
-  function cleanPurchaseType(){
-    const modal=document.getElementById('cardPurchaseModal');
-    if(!modal)return;
-    OLD_SELECTORS.forEach(sel=>modal.querySelectorAll(sel).forEach(el=>{if(!KEEP_IDS.has(el.id)) el.remove();}));
-    const mode=document.getElementById('cpMode');
-    if(mode) mode.style.display='none';
-    const field=mode?.closest('.field');
-    if(!field)return;
-    // Elimina barras de botões antigas não identificadas, preservando exclusivamente a V39.
-    [...field.children].forEach(el=>{
-      if(el===mode || el.tagName==='LABEL' || el.id==='v39ModeBar' || el.id==='v39ModeHelp') return;
-      const buttons=el.querySelectorAll?.('button')||[];
-      const texts=[...buttons].map(b=>(b.textContent||'').trim());
-      if(buttons.length>=2 && texts.some(t=>['À vista','Parcelado','Recorrente','Estorno'].includes(t))) el.remove();
-      else if(!buttons.length && /À vista:|Parcelado:|Recorrente:|Estorno:/.test((el.textContent||'').trim())) el.remove();
-    });
-  }
-  function arm(){
-    cleanPurchaseType();
-    const modal=document.getElementById('cardPurchaseModal');
-    if(!modal || modal.dataset.v40Dedup==='1')return;
-    modal.dataset.v40Dedup='1';
-    const obs=new MutationObserver(()=>cleanPurchaseType());
-    obs.observe(modal,{childList:true,subtree:true});
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',arm,{once:true}); else arm();
-  document.addEventListener('click',e=>{if(e.target.closest('#addCardPurchaseBtn,[data-purchase-edit],#cardPurchaseModal')) setTimeout(cleanPurchaseType,0)},true);
-  window.cleanPurchaseTypeV40=cleanPurchaseType;
-})();
-</script>
-
-
 <style id="pp-v50-invoice-status-style">
 .v50-invoice-action{margin-left:6px;border:1px solid #d8e0ea;background:#fff;border-radius:9px;padding:6px 9px;font-size:9.5px;font-weight:800;cursor:pointer}
 .v50-invoice-action.pay{color:#0b63f6}.v50-invoice-action.reopen{color:#8a5a00}
@@ -10591,6 +10548,12 @@ const oldRC=window.renderCards;if(typeof oldRC==='function'){window.renderCards=
 [50,400,1400,2600].forEach(ms=>setTimeout(()=>{bindPurchaseUI();patchLaunch();patchBoard()},ms));
 })();
 </script>
+
+<style id="pp-v53-purchase-modal-visibility-fix">
+#cardPurchaseModal #v52ModeBar{display:flex!important;flex-wrap:wrap!important;gap:7px!important;margin-top:6px!important}
+#cardPurchaseModal #v52ModeHelp{display:block!important;margin-top:7px!important}
+#cardPurchaseModal #cpCard,#cardPurchaseModal #cpInstallments,#cardPurchaseModal #cpFirstInvoiceV39,#cardPurchaseModal #cpCategory{pointer-events:auto!important;opacity:1!important}
+</style>
 </body></html>
 <style id="recurring-card-style">
 .recurring-note{margin-top:8px;padding:10px 12px;border-radius:12px;background:#fff8ee;border:1px solid #ffd6a7;color:#8a4b00;font-size:11px;line-height:1.45}
@@ -16195,7 +16158,7 @@ function cleanReplace(id){const old=$id(id);if(!old)return null;const nu=old.clo
 function ensureFirst(){let f=$id('cpFirstInvoiceV39');if(!f){const box=document.createElement('div');box.className='field';box.id='cpFirstInvoiceFieldV39';box.innerHTML='<label>1ª parcela / fatura</label><input id="cpFirstInvoiceV39" type="month"><small>Escolha o mês em que a primeira parcela deve entrar. As demais seguem mês a mês.</small>'; $id('cpDate')?.closest('.field')?.insertAdjacentElement('afterend',box);f=box.querySelector('input')} $id('cpStartYear')?.closest('.field')?.style.setProperty('display','none','important');$id('cpStartMonth')?.closest('.field')?.style.setProperty('display','none','important');return f}
 function activeCardId(){return document.querySelector('#cardsCleanRoot [data-clean-card].selected')?.dataset.cleanCard||document.querySelector('[data-clean-card].selected')?.dataset.cleanCard||''}
 function populateCards(selected){const sel=$id('cpCard');if(!sel)return;const arr=(cards||[]).filter(c=>c.status!=='Cancelado'&&c.status!=='Arquivado'||String(c.id)===String(selected));sel.innerHTML=arr.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if(selected&&arr.some(c=>String(c.id)===String(selected)))sel.value=selected;else if(arr[0])sel.value=arr[0].id;sel.closest('.field')?.style.setProperty('display','','important')}
-function installModeBar(){document.querySelectorAll('#cardPurchaseModal #v39ModeBar,#cardPurchaseModal #v39ModeHelp,#cardPurchaseModal #v52ModeBar,#cardPurchaseModal #v52ModeHelp').forEach(x=>x.remove());const sel=$id('cpMode');if(!sel)return;sel.innerHTML='<option value="avista">À vista</option><option value="parcelado">Parcelado</option><option value="recorrente">Recorrente</option><option value="estorno">Estorno</option>';sel.style.setProperty('display','none','important');const field=sel.closest('.field'),bar=document.createElement('div'),help=document.createElement('div');bar.id='v52ModeBar';help.id='v52ModeHelp';bar.innerHTML='<button type="button" data-mode="avista">À vista</button><button type="button" data-mode="parcelado">Parcelado</button><button type="button" data-mode="recorrente">Recorrente</button><button type="button" data-mode="estorno">Estorno</button>';field.append(bar,help);bar.onclick=e=>{const b=e.target.closest('[data-mode]');if(!b)return;sel.value=b.dataset.mode;syncMode()}}
+function installModeBar(){document.querySelectorAll('#cardPurchaseModal .choice-wrap,#cardPurchaseModal #cpModePillsV11,#cardPurchaseModal #cpModeHelpV11,#cardPurchaseModal #v32PurchaseModes,#cardPurchaseModal #v32ModeHelp,#cardPurchaseModal #v33PurchaseModes,#cardPurchaseModal #v33PurchaseModeHelp,#cardPurchaseModal #v37PurchaseModes,#cardPurchaseModal #v37ModeHelp,#cardPurchaseModal #v38PurchaseModes,#cardPurchaseModal #v38ModeHelp,#cardPurchaseModal #v39ModeBar,#cardPurchaseModal #v39ModeHelp,#cardPurchaseModal #v52ModeBar,#cardPurchaseModal #v52ModeHelp').forEach(x=>x.remove());const sel=$id('cpMode');if(!sel)return;sel.innerHTML='<option value="avista">À vista</option><option value="parcelado">Parcelado</option><option value="recorrente">Recorrente</option><option value="estorno">Estorno</option>';sel.style.setProperty('display','none','important');const field=sel.closest('.field'),bar=document.createElement('div'),help=document.createElement('div');bar.id='v52ModeBar';help.id='v52ModeHelp';bar.innerHTML='<button type="button" data-mode="avista">À vista</button><button type="button" data-mode="parcelado">Parcelado</button><button type="button" data-mode="recorrente">Recorrente</button><button type="button" data-mode="estorno">Estorno</button>';field.append(bar,help);bar.onclick=e=>{const b=e.target.closest('[data-mode]');if(!b)return;sel.value=b.dataset.mode;syncMode()}}
 function syncMode(){const mode=$id('cpMode')?.value||'avista',q=$id('cpInstallments'),qf=q?.closest('.field'),pf=$id('cpPaid')?.closest('.field');document.querySelectorAll('#v52ModeBar [data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));if(qf)qf.style.display=mode==='parcelado'?'':'none';if(pf)pf.style.display=(mode==='parcelado'||mode==='avista')?'':'none';if(mode==='parcelado'){if(q&&(!q.value||+q.value<2))q.value=2;$id('v52ModeHelp').textContent='Parcelado: informe livremente a quantidade de parcelas. Cada parcela entra em uma fatura mensal.'}else if(mode==='estorno'){$id('v52ModeHelp').textContent='Estorno: crédito na fatura escolhida.'}else if(mode==='recorrente'){$id('v52ModeHelp').textContent='Recorrente: repete mensalmente a partir da primeira fatura.'}else{$id('v52ModeHelp').textContent='À vista: valor integral em uma única fatura.'}}
 function open52(id){const p=(cardPurchases||[]).find(x=>String(x.id)===String(id));
   cleanReplace('cpCard');cleanReplace('cpMode');cleanReplace('cpInstallments');
