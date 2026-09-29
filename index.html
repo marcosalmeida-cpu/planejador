@@ -16749,3 +16749,74 @@ document.addEventListener('click',e=>{
 patchLaunchActions();patchBoard();
 })();
 </script>
+
+<!-- V49: authoritative purchase mode + installment quantity -->
+<script id="pp-v49-purchase-mode-installments-authority">
+(()=>{
+'use strict';
+const modal=()=>document.getElementById('cardPurchaseModal');
+const qEl=()=>document.getElementById('cpInstallments');
+const modeEl=()=>document.getElementById('cpMode');
+const num=v=>{if(typeof v==='number')return Number.isFinite(v)?v:0;let s=String(v??'').trim().replace(/R\$|\s/g,'');if(!s)return 0;if(s.includes(',')&&s.includes('.'))s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');else if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const n=Number(s);return Number.isFinite(n)?n:0};
+const ym=v=>{const m=String(v||'').match(/^(\d{4})-(\d{2})$/);return m&&+m[2]>=1&&+m[2]<=12?{year:+m[1],month:+m[2]}:null};
+const addm=(y,m,i)=>{const d=new Date(+y,+m-1+i,1,12);return{year:d.getFullYear(),month:d.getMonth()+1}};
+const past=(y,m)=>+y<+currentYear||(+y===+currentYear&&+m<+currentMonth);
+function state(){const m=modal();if(!m)return {mode:'avista',qty:'1'};return {mode:m.dataset.v49Mode||modeEl()?.value||'avista',qty:m.dataset.v49Qty||qEl()?.value||'1'}}
+function setMode(v){
+ const m=modal(),sel=modeEl(),q=qEl();if(!m||!sel)return;
+ const mode=['avista','parcelado','recorrente','estorno'].includes(v)?v:'avista';m.dataset.v49Mode=mode;sel.value=mode;
+ document.querySelectorAll('#v39ModeBar [data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+ const qf=q?.closest('.field'),pf=document.getElementById('cpPaid')?.closest('.field'),h=document.getElementById('v39ModeHelp');
+ if(qf)qf.style.display=mode==='parcelado'?'':'none';if(pf)pf.style.display=(mode==='parcelado'||mode==='avista')?'':'none';
+ if(mode==='parcelado'){
+   if(q && (!q.value || +q.value<2)){q.value='2';m.dataset.v49Qty='2'}
+   if(h)h.textContent='Parcelado: o valor total será dividido e lançado mês a mês nas faturas.';
+ }else{
+   if(q){q.value='1';m.dataset.v49Qty='1'}
+   if(h)h.textContent=mode==='estorno'?'Estorno: entra como crédito na fatura escolhida e reduz o valor a pagar.':mode==='recorrente'?'Recorrente: repete o mesmo valor mensalmente a partir da primeira fatura.':'À vista: o valor entra integralmente em uma única fatura.';
+ }
+}
+function seedFromForm(){
+ const m=modal(),q=qEl(),sel=modeEl();if(!m||!q||!sel)return;
+ let mode=sel.value||'avista';let qty=String(q.value||'1');
+ const id=document.getElementById('cpId')?.value;const p=(cardPurchases||[]).find(x=>String(x.id)===String(id));
+ if(p){mode=p.modeV44||p.modeV39||p.mode||mode;qty=String(p.installmentCountV44??p.installmentCountV39??p.installments??qty)}
+ m.dataset.v49Mode=mode;m.dataset.v49Qty=qty;q.value=qty;setMode(mode);if(mode==='parcelado'){q.value=qty;m.dataset.v49Qty=qty}
+}
+function save(){
+ const m=modal();if(!m)return;
+ const id=document.getElementById('cpId')?.value||('CP'+Date.now()),old=(cardPurchases||[]).find(x=>String(x.id)===String(id))||{};
+ const cardId=document.getElementById('cpCard')?.value||'',date=document.getElementById('cpDate')?.value||new Date().toISOString().slice(0,10),description=(document.getElementById('cpDesc')?.value||'').trim();
+ const cat=document.getElementById('cpCategory'),category=cat?.dataset.v39Selected||cat?.value||'Cartão de crédito';
+ const total=Math.round(num(document.getElementById('cpTotal')?.value)*100)/100;
+ let mode=m.dataset.v49Mode||modeEl()?.value||'avista';let qty=Math.max(1,parseInt(m.dataset.v49Qty||qEl()?.value,10)||1);
+ if(mode==='parcelado')qty=Math.max(2,qty);else qty=1;
+ const first=ym(document.getElementById('cpFirstInvoiceV39')?.value||document.getElementById('cpFirstInvoiceV44')?.value) || {year:+document.getElementById('cpStartYear')?.value||currentYear,month:+document.getElementById('cpStartMonth')?.value||currentMonth};
+ if(!cardId||!description||total<=0){try{toast('Preencha cartão, descrição e valor.')}catch(e){}return}
+ let paid=0;if(mode!=='recorrente'){for(let i=0;i<qty;i++){const z=addm(first.year,first.month,i);if(past(z.year,z.month))paid++}}
+ const obj={...old,id,cardId,date,description,category,mode,total,installments:qty,paidInstallments:paid,startYear:first.year,startMonth:first.month,status:document.getElementById('cpStatus')?.value||old.status||'Ativo',purchaseTotalV44:total,installmentCountV44:qty,firstInvoiceYearV44:first.year,firstInvoiceMonthV44:first.month,modeV44:mode,entryTypeV44:mode==='estorno'?'refund':'purchase'};
+ const i=(cardPurchases||[]).findIndex(x=>String(x.id)===String(id));if(i>=0)cardPurchases[i]=obj;else cardPurchases.push(obj);
+ try{persist()}catch(e){}
+ document.getElementById('cardPurchaseModal')?.classList.remove('open');
+ try{window.renderCards?.()}catch(e){}try{window.renderLancamentos?.()}catch(e){}try{window.renderDashboard?.()}catch(e){}try{window.renderProjection?.()}catch(e){}try{window.ppCloudV66?.save?.()}catch(e){}
+ try{toast(mode==='estorno'?'Estorno salvo.':mode==='parcelado'?`${qty} parcelas salvas e distribuídas nas faturas.`:'Compra salva.')}catch(e){}
+}
+// Capture before all legacy handlers.
+document.addEventListener('click',e=>{
+ const b=e.target.closest?.('#v39ModeBar [data-mode]');if(b){e.preventDefault();e.stopImmediatePropagation();setMode(b.dataset.mode);return}
+ const s=e.target.closest?.('#saveCardPurchaseV44,#saveCardPurchaseV39,#saveCardPurchase');if(s&&s.closest('#cardPurchaseModal')){e.preventDefault();e.stopImmediatePropagation();save();return}
+ if(e.target.closest?.('#addCardPurchaseBtn,[data-v39-edit],[data-purchase-edit]'))setTimeout(seedFromForm,100);
+},true);
+document.addEventListener('input',e=>{
+ if(e.target?.id!=='cpInstallments')return;
+ const m=modal();if(!m)return; e.stopImmediatePropagation();
+ m.dataset.v49Qty=e.target.value;
+ if((parseInt(e.target.value,10)||0)>1){m.dataset.v49Mode='parcelado';const sel=modeEl();if(sel)sel.value='parcelado';document.querySelectorAll('#v39ModeBar [data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode==='parcelado'));}
+},true);
+document.addEventListener('change',e=>{if(e.target?.id==='cpInstallments'){const m=modal();if(m)m.dataset.v49Qty=e.target.value}},true);
+const oldOpen=window.openCardPurchase;
+if(typeof oldOpen==='function'){
+ window.openCardPurchase=function(){const r=oldOpen.apply(this,arguments);setTimeout(seedFromForm,0);return r};try{openCardPurchase=window.openCardPurchase}catch(e){}
+}
+})();
+</script>
