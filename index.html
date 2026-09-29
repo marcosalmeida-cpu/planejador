@@ -16502,3 +16502,120 @@ setTimeout(initEssence,0);
   setTimeout(()=>{try{window.renderCards?.();window.renderLancamentos?.();window.renderDashboard?.();window.renderProjection?.()}catch(e){}},80);
 })();
 </script>
+
+
+<style id="pp-v27-invoice-board-style">
+#v27InvoiceBoard{margin:14px 0 16px;padding:15px;background:#fff;border:1px solid #e7ebf0;border-radius:20px;box-shadow:0 10px 26px rgba(16,24,40,.045)}
+#v27InvoiceBoard .v27-board-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+#v27InvoiceBoard .v27-board-head h3{margin:0;font-size:16px}.v27-board-head p{margin:4px 0 0;color:#778295;font-size:10.5px}
+.v27-invoice-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.v27-invoice-card{border:1px solid #e5eaf0;background:#f8fafc;border-radius:16px;padding:12px;cursor:pointer;transition:.15s;min-width:0}
+.v27-invoice-card:hover{border-color:#9ebeff;background:#f5f9ff;transform:translateY(-1px)}
+.v27-invoice-card.current{border-color:#8db3ff;background:#eef5ff}
+.v27-invoice-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.v27-invoice-top b{font-size:13px}.v27-invoice-total{font-size:16px;font-weight:900;margin-top:7px}
+.v27-invoice-meta{font-size:9.5px;color:#7a8494;margin-top:3px}.v27-badge{display:inline-flex;padding:3px 6px;border-radius:999px;font-size:8.5px;font-weight:900;background:#fff1f3;color:#b4233f}.v27-badge.paid{background:#eaf8f2;color:#13805c}
+.v27-mini-lines{display:grid;gap:5px;margin-top:9px;padding-top:8px;border-top:1px solid #e8edf2}.v27-mini-line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;font-size:9.5px;align-items:center}.v27-mini-line span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#566174}.v27-mini-line b{font-size:9.5px}.v27-more{font-size:9px;color:#0b63f6;font-weight:800;margin-top:5px}
+@media(max-width:900px){.v27-invoice-grid{grid-template-columns:1fr 1fr}}@media(max-width:600px){.v27-invoice-grid{grid-template-columns:1fr}}
+</style>
+<script id="pp-v27-card-invoice-engine">
+(function(){
+  const NORMALIZED='planejador_cartoes_parcelamento_v27';
+  let injecting=false;
+
+  function money27(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(!s)return 0;
+    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(','))s=s.replace(',','.');
+    else if((s.match(/\./g)||[]).length===1){
+      const [a,b]=s.split('.');
+      if(b && b.length>2)s=a+b;
+    }
+    s=s.replace(/[^0-9.-]/g,'');const n=Number(s);return Number.isFinite(n)?n:0;
+  }
+  function after27(date){
+    if(date){const d=new Date(String(date).slice(0,10)+'T12:00:00');if(!Number.isNaN(d.getTime())){d.setMonth(d.getMonth()+1);return {year:d.getFullYear(),month:d.getMonth()+1}}}
+    return {year:currentYear,month:currentMonth};
+  }
+  function past27(y,m){return +y<+currentYear || (+y===+currentYear&&+m<+currentMonth)}
+  function normalizeExisting27(){
+    let changed=false;
+    (cardPurchases||[]).forEach(p=>{
+      const first=after27(p.date),inst=p.mode==='parcelado'?Math.max(1,parseInt(p.installments,10)||1):1;
+      if(+p.startYear!==+first.year||+p.startMonth!==+first.month){p.startYear=first.year;p.startMonth=first.month;changed=true}
+      if(p.mode!=='recorrente'){
+        let paid=0;for(let i=0;i<inst;i++){const ym=nextMonth(first.year,first.month,i);if(past27(ym.year,ym.month))paid++}
+        paid=Math.min(inst,paid);
+        if(+p.paidInstallments!==paid){p.paidInstallments=paid;changed=true}
+      }
+    });
+    if(changed){try{persist()}catch(e){}try{window.ppCloudV66?.save?.()}catch(e){}}
+    try{localStorage.setItem(NORMALIZED,'1')}catch(e){}
+  }
+
+  function schedules27(){
+    const out=[];
+    (cardPurchases||[]).forEach(p=>{
+      if(p.status==='Arquivado')return;
+      const first=after27(p.date),total=Number(money27(p.total).toFixed(2));
+      if(p.mode==='recorrente'){
+        for(let i=0;i<48;i++){const ym=nextMonth(first.year,first.month,i);out.push({purchaseId:p.id,cardId:p.cardId,description:p.description,category:p.category||'Cartão de crédito',year:ym.year,month:ym.month,installmentNo:1,installments:1,amount:total,paid:past27(ym.year,ym.month),recurring:true,totalPurchase:total})}
+        return;
+      }
+      const inst=p.mode==='parcelado'?Math.max(1,parseInt(p.installments,10)||1):1;
+      const base=Number((total/inst).toFixed(2));
+      for(let i=0;i<inst;i++){
+        const ym=nextMonth(first.year,first.month,i),amount=i===inst-1?Number((total-base*(inst-1)).toFixed(2)):base;
+        out.push({purchaseId:p.id,cardId:p.cardId,description:p.description,category:p.category||'Cartão de crédito',year:ym.year,month:ym.month,installmentNo:i+1,installments:inst,amount,paid:past27(ym.year,ym.month),recurring:false,totalPurchase:total});
+      }
+    });
+    return out;
+  }
+  window.getCardSchedules=function(){return schedules27()};try{getCardSchedules=window.getCardSchedules}catch(e){}
+
+  function aggregate27(){
+    const g={};schedules27().forEach(r=>{const k=`${r.cardId}_${r.year}_${r.month}`;if(!g[k]){const c=(cards||[]).find(x=>String(x.id)===String(r.cardId))||{};g[k]={id:`CT_${k}`,cardId:r.cardId,tipo:'saida',ano:r.year,mesNum:r.month,descricao:`Fatura ${c.name||'Cartão'}`,valor:0,categoria:'Cartão de crédito',classificacao:'Cartão',origem:c.name||'Cartão',status:'Quitado',origemDados:'Cartões',itemCount:0,_paid:true};}g[k].valor=Number((g[k].valor+money27(r.amount)).toFixed(2));g[k].itemCount++;if(!r.paid)g[k]._paid=false});return Object.values(g).map(x=>{x.status=x._paid?'Quitado':'Pendente';delete x._paid;return x}).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum)
+  }
+  window.cardAggregatedTx=aggregate27;try{cardAggregatedTx=aggregate27}catch(e){}
+  window.allTx=function(){return [...(custom||[]),...aggregate27()]};try{allTx=window.allTx}catch(e){}
+
+  window.getCardStats=function(card){const s=schedules27().filter(r=>String(r.cardId)===String(card.id)),current=s.filter(r=>+r.year===+currentYear&&+r.month===+currentMonth).reduce((a,r)=>a+money27(r.amount),0),pending=s.filter(r=>!r.paid&&!r.recurring).reduce((a,r)=>a+money27(r.amount),0),paid=s.filter(r=>r.paid).reduce((a,r)=>a+money27(r.amount),0);return {currentInv:Number(current.toFixed(2)),pending:Number(pending.toFixed(2)),paid:Number(paid.toFixed(2)),available:Number((money27(card.limit)-pending).toFixed(2)),totalUsed:Number((paid+pending).toFixed(2)),items:new Set(s.map(r=>r.purchaseId)).size}};try{getCardStats=window.getCardStats}catch(e){}
+
+  function selectedCard27(){
+    const root=document.getElementById('cardsCleanRoot');
+    const selected=root?.querySelector('[data-clean-card].selected')?.dataset.cleanCard;
+    if(selected)return (cards||[]).find(c=>String(c.id)===String(selected));
+    const filter=document.getElementById('cardFilter')?.value;if(filter&&filter!=='all')return (cards||[]).find(c=>String(c.id)===String(filter));
+    return (cards||[]).find(c=>c.status!=='Cancelado'&&c.status!=='Arquivado')||(cards||[])[0];
+  }
+  function label27(y,m){return `${monthNames?.[m-1]||String(m).padStart(2,'0')}/${y}`}
+  function esc27(v){return typeof esc==='function'?esc(v):String(v??'')}
+  function groups27(cardId){const map={};schedules27().filter(r=>String(r.cardId)===String(cardId)).forEach(r=>{const k=`${r.year}-${r.month}`;if(!map[k])map[k]={year:+r.year,month:+r.month,total:0,paid:true,rows:[]};map[k].total=Number((map[k].total+money27(r.amount)).toFixed(2));map[k].rows.push(r);if(!r.paid)map[k].paid=false});return Object.values(map).sort((a,b)=>a.year-b.year||a.month-b.month)}
+
+  function injectBoard27(){
+    if(injecting)return;injecting=true;
+    try{
+      const root=document.getElementById('cardsCleanRoot'),card=selectedCard27();if(!root||!card)return;
+      let board=document.getElementById('v27InvoiceBoard');if(!board){board=document.createElement('section');board.id='v27InvoiceBoard';const detail=root.querySelector('.clean-detail');(detail||root.lastElementChild)?.insertAdjacentElement('afterend',board)}
+      const gs=groups27(card.id);const useful=gs.filter(g=>g.year>currentYear||(g.year===currentYear&&g.month>=currentMonth-3)).slice(0,12);
+      board.innerHTML=`<div class="v27-board-head"><div><h3>Faturas por mês · ${esc27(card.name)}</h3><p>Cada card contém somente as parcelas lançadas naquela fatura.</p></div></div><div class="v27-invoice-grid">${useful.map(g=>{const current=g.year===currentYear&&g.month===currentMonth;return `<article class="v27-invoice-card ${current?'current':''}" data-v27-invoice="${g.year}-${g.month}"><div class="v27-invoice-top"><div><b>${label27(g.year,g.month)}</b><div class="v27-invoice-meta">${g.rows.length} item(ns)</div></div><span class="v27-badge ${g.paid?'paid':''}">${g.paid?'Quitada':'Pendente'}</span></div><div class="v27-invoice-total">${brl(g.total)}</div><div class="v27-mini-lines">${g.rows.slice(0,4).map(r=>`<div class="v27-mini-line"><span>${esc27(r.description)} · ${r.recurring?'recorrente':(+r.installments>1?`${r.installmentNo}/${r.installments}`:'à vista')}</span><b>${brl(r.amount)}</b></div>`).join('')}${g.rows.length>4?`<div class="v27-more">+ ${g.rows.length-4} item(ns) · clique para ver todos</div>`:''}</div></article>`}).join('')||'<div class="v27-more">Nenhuma fatura para este cartão.</div>'}</div>`;
+      board.querySelectorAll('[data-v27-invoice]').forEach(el=>el.onclick=()=>{const [y,m]=el.dataset.v27Invoice.split('-').map(Number);window.openInvoiceItemsV26?.(card.id,y,m)});
+    }finally{injecting=false}
+  }
+
+  // The visible "Ver fatura" buttons from older card layouts must never call old current-month-only logic.
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest?.('#cleanInvoice,#v16Invoice,#v19Invoice,#v19InvoiceBtn,#cleanInvoiceBtn');
+    if(btn){const card=selectedCard27();if(!card)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();injectBoard27();document.getElementById('v27InvoiceBoard')?.scrollIntoView({behavior:'smooth',block:'start'});return}
+    if(e.target.closest?.('[data-clean-card]'))setTimeout(injectBoard27,20);
+  },true);
+
+  // If old clean renderer rebuilds the card area, rebuild the invoice board immediately afterwards.
+  const root=document.getElementById('cardsCleanRoot');
+  if(root){const mo=new MutationObserver(()=>{if(!injecting)setTimeout(injectBoard27,0)});mo.observe(root,{childList:true,subtree:true})}
+
+  normalizeExisting27();
+  setTimeout(()=>{try{window.renderCards?.();window.renderLancamentos?.();window.renderDashboard?.();window.renderProjection?.()}catch(e){}setTimeout(injectBoard27,30)},80);
+})();
+</script>
