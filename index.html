@@ -1168,6 +1168,22 @@ html.pp-session-resume-v45 #loginOverlay{display:none!important}
 }
 </style>
 
+
+<style id="pp-v68-debt-installments-fix-style">
+#debtModal #dInstallments,
+#debtModal #dInstallmentsPaid{
+  appearance:textfield!important;
+  -moz-appearance:textfield!important;
+}
+#debtModal #dInstallments::-webkit-outer-spin-button,
+#debtModal #dInstallments::-webkit-inner-spin-button,
+#debtModal #dInstallmentsPaid::-webkit-outer-spin-button,
+#debtModal #dInstallmentsPaid::-webkit-inner-spin-button{
+  -webkit-appearance:none!important;
+  margin:0!important;
+}
+</style>
+
 </head>
 <body><div class="app">
 <header class="topbar"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button data-view="dashboard" class="active">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="projecao">Projeção</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx>+ Lançamento</button></div></div></header>
@@ -13155,198 +13171,224 @@ setTimeout(initEssence,0);
 
 <script id="pp-v68-debt-installments-fix">
 (function(){
-  const INSTALL_KEY='planejador_debt_installments_v68';
+  const draft={installments:'',paid:''};
+  let restoring=false;
 
-  function n68(v){
-    if(typeof v==='number'&&Number.isFinite(v))return v;
-    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
-    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
-    else if(s.includes(','))s=s.replace(',','.');
-    return Number(s.replace(/[^0-9.-]/g,''))||0;
+  function onlyInt(v,allowZero=true){
+    const s=String(v??'').replace(/\D/g,'');
+    if(s==='')return '';
+    let n=parseInt(s,10);
+    if(!Number.isFinite(n))return '';
+    if(!allowZero && n<1)n=1;
+    if(allowZero && n<0)n=0;
+    return String(n);
   }
-  function readInstallments(){
-    try{
-      const x=JSON.parse(localStorage.getItem(INSTALL_KEY)||'{}');
-      return x&&typeof x==='object'&&!Array.isArray(x)?x:{};
-    }catch(e){return {}}
+
+  function debtModalOpen(){
+    return document.getElementById('debtModal')?.classList.contains('open');
   }
-  function writeInstallments(map){
-    localStorage.setItem(INSTALL_KEY,JSON.stringify(map||{}));
-    try{
-      const PM=window.__ppV41Profile;
-      const p=localStorage.getItem('planejador_active_profile')||'Marcos';
-      if(PM)PM.saveState(p,PM.captureShared());
-    }catch(e){}
-  }
-  function inferCount(d){
-    const parcel=n68(d?.parcela),total=n68(d?.total);
-    if(parcel>0&&total>0){
-      const q=total/parcel;
-      const rounded=Math.round(q);
-      if(rounded>1 && Math.abs(q-rounded)<0.02)return rounded;
+
+  function installFields(){
+    const a=document.getElementById('dInstallments');
+    const b=document.getElementById('dInstallmentsPaid');
+    if(a){
+      a.type='text';
+      a.inputMode='numeric';
+      a.setAttribute('pattern','[0-9]*');
+      a.removeAttribute('min');
+      a.removeAttribute('max');
+      a.removeAttribute('step');
+      a.autocomplete='off';
     }
-    return Math.max(1,Number(d?.parcelasTotal)||1);
-  }
-  function repairExisting(){
-    const map=readInstallments();
-    let changed=false;
-
-    try{
-      const rows=(typeof window.getDebts==='function'?window.getDebts(true):[]);
-      rows.forEach(d=>{
-        if(!d?.id)return;
-        const current=Math.max(1,Number(d.parcelasTotal)||1);
-        const inferred=inferCount(d);
-        if(!map[d.id] || (Number(map[d.id])<=1 && inferred>1)){
-          map[d.id]=Math.max(current,inferred);
-          changed=true;
-        }
-      });
-    }catch(e){}
-
-    try{
-      Object.entries(debtEdits||{}).forEach(([id,d])=>{
-        const current=Math.max(1,Number(d?.parcelasTotal)||1);
-        const inferred=inferCount(d);
-        if(!map[id] || (Number(map[id])<=1 && inferred>1)){
-          map[id]=Math.max(current,inferred);
-          changed=true;
-        }
-      });
-    }catch(e){}
-
-    if(changed)writeInstallments(map);
-    return map;
+    if(b){
+      b.type='text';
+      b.inputMode='numeric';
+      b.setAttribute('pattern','[0-9]*');
+      b.removeAttribute('min');
+      b.removeAttribute('max');
+      b.removeAttribute('step');
+      b.autocomplete='off';
+    }
+    return {a,b};
   }
 
-  let installmentMap=repairExisting();
+  function syncDraftFromFields(force=false){
+    if(!debtModalOpen()&&!force)return;
+    const {a,b}=installFields();
+    if(a && (force || a.value!==''))draft.installments=onlyInt(a.value,false);
+    if(b && (force || b.value!==''))draft.paid=onlyInt(b.value,true);
+  }
 
-  // Final debt source: dedicated installment count always overrides any stale debtEdits value.
-  const priorGetDebts68=window.getDebts || (typeof getDebts==='function'?getDebts:null);
-  const getDebts68=function(includeArchived=true){
-    installmentMap=readInstallments();
-    const rows=typeof priorGetDebts68==='function'?priorGetDebts68.call(this,includeArchived):[];
-    return rows.map(d=>{
-      const saved=Number(installmentMap[d.id]||0);
-      const inferred=inferCount(d);
-      const totalCount=Math.max(1,saved,inferred,Number(d.parcelasTotal)||0);
-      return {...d,parcelasTotal:totalCount};
+  function restoreDraft(){
+    if(restoring||!debtModalOpen())return;
+    restoring=true;
+    try{
+      const {a,b}=installFields();
+      if(a && draft.installments!=='' && a.value!==draft.installments){
+        a.value=draft.installments;
+      }
+      if(b && draft.paid!=='' && b.value!==draft.paid){
+        b.value=draft.paid;
+      }
+    }finally{restoring=false}
+  }
+
+  function recalcTotalV68(){
+    const installment=(function(v){
+      let s=String(v??'').replace(/R\$/gi,'').trim().replace(/\s/g,'');
+      if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+      else if(s.includes(','))s=s.replace(',','.');
+      s=s.replace(/[^0-9.-]/g,'');
+      const n=Number(s); return Number.isFinite(n)?n:0;
+    })(document.getElementById('dInstallment')?.value);
+
+    const qty=Math.max(1,parseInt(draft.installments||document.getElementById('dInstallments')?.value||'1',10)||1);
+    const total=installment*qty;
+    const el=document.getElementById('dTotal');
+    if(el)el.value=Number(total||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+
+  function bind(){
+    const {a,b}=installFields();
+
+    if(a&&!a.dataset.v68){
+      a.dataset.v68='1';
+      a.addEventListener('input',e=>{
+        if(restoring)return;
+        const val=onlyInt(e.target.value,false);
+        draft.installments=val;
+        if(e.target.value!==val)e.target.value=val;
+        recalcTotalV68();
+      },true);
+      a.addEventListener('change',()=>{
+        if(!draft.installments)draft.installments='1';
+        restoreDraft();recalcTotalV68();
+      },true);
+    }
+
+    if(b&&!b.dataset.v68){
+      b.dataset.v68='1';
+      b.addEventListener('input',e=>{
+        if(restoring)return;
+        const val=onlyInt(e.target.value,true);
+        draft.paid=val;
+        if(e.target.value!==val)e.target.value=val;
+      },true);
+      b.addEventListener('change',()=>{
+        if(draft.paid==='')draft.paid='0';
+        restoreDraft();
+      },true);
+    }
+
+    const installment=document.getElementById('dInstallment');
+    if(installment&&!installment.dataset.v68){
+      installment.dataset.v68='1';
+      installment.addEventListener('input',recalcTotalV68,true);
+      installment.addEventListener('change',recalcTotalV68,true);
+    }
+  }
+
+  // Capture values whenever the debt modal opens. This protects against any
+  // background render/sync rewriting the fields while the user is typing.
+  const modal=document.getElementById('debtModal');
+  if(modal){
+    const mo=new MutationObserver(()=>{
+      bind();
+      if(debtModalOpen()){
+        const a=document.getElementById('dInstallments');
+        const b=document.getElementById('dInstallmentsPaid');
+        if(a && a.value!=='')draft.installments=onlyInt(a.value,false)||'1';
+        if(b && b.value!=='')draft.paid=onlyInt(b.value,true)||'0';
+        if(draft.installments==='')draft.installments='1';
+        if(draft.paid==='')draft.paid='0';
+        restoreDraft();
+      }else{
+        draft.installments='';
+        draft.paid='';
+      }
     });
-  };
-  window.getDebts=getDebts68;
-  try{getDebts=getDebts68}catch(e){}
-
-  function recalc68(){
-    const parcela=n68(document.getElementById('dInstallment')?.value);
-    const qty=Math.max(1,parseInt(document.getElementById('dInstallments')?.value,10)||1);
-    const total=document.getElementById('dTotal');
-    if(total)total.value=(parcela*qty).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+    mo.observe(modal,{attributes:true,attributeFilter:['class']});
   }
 
-  function saveDebt68(ev){
-    if(ev){ev.preventDefault();ev.stopPropagation();ev.stopImmediatePropagation()}
-    const id=document.getElementById('dId')?.value || ('DEBT_MANUAL_'+Date.now());
-    const desc=document.getElementById('dDesc')?.value.trim()||'';
-    const credor=document.getElementById('dCreditor')?.value.trim()||'';
-    const banco=document.getElementById('dBank')?.value.trim()||'';
-    const parcela=n68(document.getElementById('dInstallment')?.value);
-    const qty=Math.max(1,parseInt(document.getElementById('dInstallments')?.value,10)||1);
-    const paidQty=Math.max(0,Math.min(qty,parseInt(document.getElementById('dInstallmentsPaid')?.value,10)||0));
-    const total=Number((parcela*qty).toFixed(2));
-    const paid=Math.max(0,Math.min(total,n68(document.getElementById('dPaid')?.value)));
-    const negotiated=document.getElementById('dNegotiated')?.value||'Não';
+  // Hard protection: while modal is open, keep the user's typed draft in place.
+  setInterval(()=>{
+    if(!debtModalOpen())return;
+    bind();
+    restoreDraft();
+  },100);
+
+  // Override save click at capture phase so old handlers cannot reduce installments to 1.
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest?.('#saveDebt');
+    if(!btn||!debtModalOpen())return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    syncDraftFromFields(false);
+
+    const id=document.getElementById('dId').value || ('DEBT_MANUAL_'+Date.now());
+    const desc=document.getElementById('dDesc').value.trim();
+    const creditor=document.getElementById('dCreditor').value.trim();
+
+    function money(v){
+      let s=String(v??'').replace(/R\$/gi,'').trim().replace(/\s/g,'');
+      if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+      else if(s.includes(','))s=s.replace(',','.');
+      s=s.replace(/[^0-9.-]/g,'');
+      const n=Number(s);return Number.isFinite(n)?n:0;
+    }
+
+    const installment=money(document.getElementById('dInstallment').value);
+    const installments=Math.max(1,parseInt(draft.installments||document.getElementById('dInstallments').value||'1',10)||1);
+    const paidInst=Math.max(0,Math.min(installments,parseInt(draft.paid||document.getElementById('dInstallmentsPaid').value||'0',10)||0));
+    const total=Number((installment*installments).toFixed(2));
+    const paid=Math.max(0,Math.min(total,money(document.getElementById('dPaid').value)));
 
     if(!desc)return toast('Informe a descrição da dívida.');
-    if(!credor)return toast('Selecione um credor.');
-    if(!parcela)return toast('Informe o valor da parcela.');
+    if(!creditor)return toast('Selecione um credor.');
+    if(!installment)return toast('Informe o valor da parcela.');
 
-    // Save into the original debt store.
     debtEdits[id]={
       ...(debtEdits[id]||{}),
       descricao:desc,
-      credor,
-      banco,
-      parcela,
+      credor:creditor,
+      banco:document.getElementById('dBank').value.trim(),
+      parcela:installment,
       total,
       quitado:paid,
       pendente:Math.max(0,Number((total-paid).toFixed(2))),
-      negociado:negotiated,
-      parcelasTotal:qty,
-      parcelasQuitadas:paidQty
+      negociado:document.getElementById('dNegotiated').value,
+      parcelasTotal:installments,
+      parcelasQuitadas:paidInst
     };
 
-    // Save installment count separately as a durable source of truth.
-    installmentMap=readInstallments();
-    installmentMap[id]=qty;
-    writeInstallments(installmentMap);
-
+    // Explicitly persist the corrected object before any render.
     persist();
 
-    // Re-write after persist to guard against any legacy routine changing debtEdits.
-    const stored=JSON.parse(localStorage.getItem('financeiro_marcos_debt_edits_v3')||'{}');
-    stored[id]={...(stored[id]||{}),...(debtEdits[id]||{}),parcelasTotal:qty,parcelasQuitadas:paidQty,total};
-    localStorage.setItem('financeiro_marcos_debt_edits_v3',JSON.stringify(stored));
-    debtEdits=stored;
-
+    // Confirm persisted values in local state before closing.
     try{
-      const PM=window.__ppV41Profile;
-      const p=localStorage.getItem('planejador_active_profile')||'Marcos';
-      if(PM)PM.saveState(p,PM.captureShared());
-    }catch(e){}
-
-    document.getElementById('debtModal')?.classList.remove('open');
-    try{renderDebts()}catch(e){}
-    try{renderDashboard()}catch(e){}
-    try{renderProjection()}catch(e){}
-    try{window.ppCloudV66?.save?.()}catch(e){}
-    try{window.ppCloud?.save?.()}catch(e){}
-    toast('Dívida salva com '+qty+' parcelas.');
-    return false;
-  }
-
-  function bind68(){
-    const qty=document.getElementById('dInstallments');
-    const inst=document.getElementById('dInstallment');
-    if(qty){
-      qty.min='1';qty.step='1';
-      qty.oninput=recalc68;
-      qty.onchange=recalc68;
-    }
-    if(inst){
-      inst.oninput=recalc68;
-      inst.onchange=recalc68;
-    }
-    const btn=document.getElementById('saveDebt');
-    if(btn){
-      btn.onclick=null;
-      btn.addEventListener('click',saveDebt68,true);
-    }
-  }
-
-  // Make edits/opening always show the durable installment count.
-  const priorOpen68=window.openDebtEdit;
-  window.openDebtEdit=function(id){
-    if(typeof priorOpen68==='function')priorOpen68(id);
-    setTimeout(()=>{
-      const x=getDebts68(true).find(d=>d.id===id);
-      if(x&&document.getElementById('dInstallments')){
-        document.getElementById('dInstallments').value=x.parcelasTotal||1;
-        recalc68();
+      const saved=JSON.parse(localStorage.getItem('financeiro_marcos_debt_edits_v3')||'{}');
+      if(saved[id]){
+        saved[id].parcelasTotal=installments;
+        saved[id].parcelasQuitadas=paidInst;
+        saved[id].total=total;
+        localStorage.setItem('financeiro_marcos_debt_edits_v3',JSON.stringify(saved));
+        debtEdits=saved;
       }
-      bind68();
-    },0);
-  };
-  try{openDebtEdit=window.openDebtEdit}catch(e){}
+    }catch(err){}
 
-  // For new debt button/modal too.
-  document.addEventListener('click',e=>{
-    if(e.target.closest?.('#addDebtV67')){
-      setTimeout(()=>{bind68();document.getElementById('dInstallments').value=1;recalc68()},0);
-    }
+    document.getElementById('debtModal').classList.remove('open');
+    try{renderDebts()}catch(err){}
+    try{renderDashboard()}catch(err){}
+    try{renderProjection()}catch(err){}
+    try{window.ppCloudV66?.save?.()}catch(err){}
+    toast('Dívida salva com '+installments+' parcela'+(installments===1?'':'s')+'.');
   },true);
 
-  bind68();
-  setTimeout(bind68,120);
+  bind();
+  setTimeout(bind,120);
 })();
 </script>
 
