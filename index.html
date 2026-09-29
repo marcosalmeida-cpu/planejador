@@ -8017,7 +8017,8 @@ Os dados atuais deste navegador serão substituídos.`);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncRestored);
   else syncRestored();
 })();
-</script>\n<script id="pp-profile-independent-runtime-v42">
+</script>
+<script id="pp-profile-independent-runtime-v42">
 (function(){
   const PM=window.__ppV41Profile;
   if(!PM)return;
@@ -15618,5 +15619,128 @@ setTimeout(initEssence,0);
   const search=document.getElementById('txSearch');if(search)search.oninput=renderCleanLaunches;
   setTimeout(()=>{purgeOldLaunches();renderCleanLaunches();},120);
   setTimeout(()=>{purgeOldLaunches();renderCleanLaunches();},1200);
+})();
+</script>
+
+
+<script id="pp-v81-debt-final-month-persistence">
+(function(){
+  const EDIT_KEY='financeiro_marcos_debt_edits_v3';
+
+  function read81(){
+    try{const o=JSON.parse(localStorage.getItem(EDIT_KEY)||'{}');return o&&typeof o==='object'?o:{}}catch(e){return {}}
+  }
+  function write81(o){
+    try{localStorage.setItem(EDIT_KEY,JSON.stringify(o));if(typeof debtEdits!=='undefined')debtEdits=o}catch(e){}
+  }
+  function n81(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(','))s=s.replace(',','.');
+    s=s.replace(/[^0-9.-]/g,'');const n=Number(s);return Number.isFinite(n)?n:0;
+  }
+  function currentMonth81(){
+    const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  function month81(v){
+    const s=String(v||'').trim();if(!s)return '';
+    let m=s.match(/^(\d{4})-(\d{2})(?:-\d{2})?/);if(m)return `${m[1]}-${m[2]}`;
+    m=s.match(/^(\d{2})\/(\d{4})$/);if(m)return `${m[2]}-${m[1]}`;
+    return '';
+  }
+  function fmt81(v){const m=month81(v)||v;if(!/^\d{4}-\d{2}$/.test(m))return '—';const [y,mo]=m.split('-');return `${mo}/${y}`}
+  function addMonths81(ym,steps){
+    if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(String(ym||'')))return '';
+    const [y,m]=ym.split('-').map(Number),d=new Date(y,m-1+Math.max(0,Number(steps)||0),1);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  function base81(id){
+    try{return (BASE_DATA?.dividas||[]).find(x=>String(x.id)===String(id))||null}catch(e){return null}
+  }
+  function isPaid81(d){
+    const totalInst=Math.max(1,parseInt(d?.parcelasTotal,10)||1),paidInst=Math.max(0,parseInt(d?.parcelasQuitadas,10)||0);
+    const pending=(d?.pendente!==undefined&&d?.pendente!==null&&String(d.pendente).trim()!=='')?n81(d.pendente):Math.max(0,n81(d?.total)-n81(d?.quitado));
+    return pending<=0 || paidInst>=totalInst || String(d?.status||'').toLowerCase()==='quitado';
+  }
+
+  // Migração segura: se no arquivo-base a dívida ainda era pendente, mas o registro editado
+  // passou a quitado posteriormente e não existe mês de encerramento próprio, considera o
+  // mês atual como o mês em que essa quitação foi registrada no site.
+  function migrate81(){
+    const edits=read81();let changed=false;
+    Object.keys(edits).forEach(id=>{
+      const e=edits[id];if(!e||typeof e!=='object'||e.dataQuitacaoMes)return;
+      const b=base81(id);
+      if(!b)return;
+      const baseWasPending=n81(b.pendente)>0 || Math.max(0,(+b.parcelasTotal||1)-(+b.parcelasQuitadas||0))>0;
+      if(baseWasPending && isPaid81(e)){
+        const editPayMonth=month81(e.ultimoPagamentoHistorico||e.ultimoPagamento||'');
+        const basePayMonth=month81(b.ultimoPagamento||'');
+        // Uma data explicitamente posterior à base é confiável. Caso contrário, a quitação
+        // ocorreu depois do snapshot e recebe o mês atual.
+        e.dataQuitacaoMes=(editPayMonth && editPayMonth!==basePayMonth)?editPayMonth:currentMonth81();
+        changed=true;
+      }
+    });
+    if(changed)write81(edits);
+  }
+
+  // Para pagamentos futuros, grava um campo próprio quando o pagamento encerra a dívida.
+  document.addEventListener('click',function(ev){
+    const btn=ev.target.closest?.('#dpSave,#dpSaveV72,#dpConfirmV72,[data-debt-confirm-payment],#debtPayModal .primary');
+    if(!btn)return;
+    const id=String(document.getElementById('dpId')?.value||'');if(!id)return;
+    [120,350,900].forEach(ms=>setTimeout(()=>{
+      const edits=read81(),e=edits[id];if(!e||!isPaid81(e))return;
+      if(!e.dataQuitacaoMes)e.dataQuitacaoMes=currentMonth81();
+      // Mantém a data completa de último pagamento coerente com o encerramento atual.
+      if(!e.ultimoPagamento || month81(e.ultimoPagamento)!==e.dataQuitacaoMes){
+        const [y,m]=e.dataQuitacaoMes.split('-');e.ultimoPagamento=`${y}-${m}-01`;
+      }
+      e.ultimoPagamentoHistorico=e.ultimoPagamento;
+      write81(edits);
+      try{window.renderDebts?.()}catch(x){}
+    },ms));
+  },true);
+
+  function state81(d){
+    const edits=read81(),e=edits[String(d?.id)]||{};
+    const totalInst=Math.max(1,parseInt(d?.parcelasTotal,10)||1),paidInst=Math.max(0,parseInt(d?.parcelasQuitadas,10)||0);
+    const pending=(d?.pendente!==undefined&&d?.pendente!==null&&String(d.pendente).trim()!=='')?n81(d.pendente):Math.max(0,n81(d?.total)-n81(d?.quitado));
+    const paid=pending<=0||paidInst>=totalInst||String(d?.status||'').toLowerCase()==='quitado';
+    let first=d?.primeiraParcelaMes||e.primeiraParcelaMes||month81(d?.primeira||e.primeira||'');
+    let forecast=d?.ultimaParcelaMes||e.ultimaParcelaMes||month81(d?.ultima||e.ultima||'');
+    if(!forecast&&first)forecast=addMonths81(first,totalInst-1);
+    const closure=e.dataQuitacaoMes||d?.dataQuitacaoMes||'';
+    return {paid,finalMonth:(paid&&closure)?closure:forecast};
+  }
+
+  // Envolve o renderizador final apenas para corrigir a coluna "Última parcela" por ID,
+  // sem alterar filtros, valores ou demais colunas.
+  const prior81=window.renderDebts;
+  function render81(){
+    const r=typeof prior81==='function'?prior81.apply(this,arguments):undefined;
+    const section=document.getElementById('dividas'),body=document.getElementById('debtBody');
+    if(!section||!body)return r;
+    const headers=[...section.querySelectorAll('table thead th')];
+    const idx=headers.findIndex(h=>String(h.textContent||'').trim().toLowerCase()==='última parcela');
+    if(idx<0)return r;
+    const visible=(typeof getDebts==='function'?getDebts(true):[]);
+    [...body.rows].forEach(row=>{
+      const desc=row.cells?.[0]?.innerText?.trim();
+      const cred=row.cells?.[1]?.innerText?.trim();
+      if(!desc||!row.cells[idx])return;
+      const d=visible.find(x=>String(x.descricao||'').trim()===desc && String(x.credor||'—').trim()===cred) || visible.find(x=>String(x.descricao||'').trim()===desc);
+      if(!d)return;
+      row.cells[idx].innerHTML=`<b>${fmt81(state81(d).finalMonth)}</b>`;
+    });
+    return r;
+  }
+
+  migrate81();
+  window.renderDebts=render81;try{renderDebts=render81}catch(e){}
+  setTimeout(()=>{migrate81();try{window.renderDebts?.()}catch(e){}},100);
+  setTimeout(()=>{try{window.renderDebts?.()}catch(e){}},700);
 })();
 </script>
