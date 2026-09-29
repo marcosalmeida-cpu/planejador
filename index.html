@@ -1209,7 +1209,7 @@ html.pp-session-resume-v45 #loginOverlay{display:none!important}
 </section>
 
 <section class="view" id="dividas">
-<div class="section-tools"><div><div class="eyebrow">compromissos financeiros</div><h2>Dívidas</h2></div><div class="filterbar"><select id="debtFilter"><option value="all">Todas</option><option value="pending">Pendentes</option><option value="paid">Quitadas</option><option value="negotiated">Negociadas</option><option value="notnegotiated">Não negociadas</option><option value="archived">Arquivadas</option></select><input id="debtSearch" class="search" placeholder="Buscar dívida"></div></div>
+<div class="section-tools"><div><div class="eyebrow">compromissos financeiros</div><h2>Dívidas</h2></div><div class="filterbar"><select id="debtFilter"><option value="all">Todas</option><option value="pending" selected>Pendentes</option><option value="paid">Quitadas</option><option value="negotiated">Negociadas</option><option value="notnegotiated">Não negociadas</option><option value="archived">Arquivadas</option></select><input id="debtSearch" class="search" placeholder="Buscar dívida"></div></div>
 <div class="summary-strip" id="debtSummary"></div>
 <div class="tablewrap"><table><thead><tr><th>Descrição</th><th>Credor</th><th>Banco</th><th>Parcela</th><th>Andamento</th><th>Negociado</th><th>Status</th><th>Pendente</th><th>Ação</th></tr></thead><tbody id="debtBody"></tbody></table></div>
 </section>
@@ -9780,6 +9780,239 @@ Os dados atuais deste navegador serão substituídos.`);
 })();
 </script>
 
+
+<script id="pp-v69-debt-payment-and-default-filter-fix">
+(function(){
+  'use strict';
+
+  const DEBT_EDIT_KEY='financeiro_marcos_debt_edits_v3';
+  let debtFilterChangedByUser=false;
+
+  function moneyV69(v){
+    if(typeof v==='number' && Number.isFinite(v)) return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(s.includes(',') && s.includes('.')) s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(',')) s=s.replace(',','.');
+    s=s.replace(/[^0-9.-]/g,'');
+    const n=Number(s);
+    return Number.isFinite(n)?n:0;
+  }
+
+  function allDebtsV69(){
+    try{
+      if(typeof window.getDebts==='function') return window.getDebts(true)||[];
+      if(typeof getDebts==='function') return getDebts(true)||[];
+    }catch(e){}
+    return [];
+  }
+
+  function setPendingAsDefault(){
+    const f=document.getElementById('debtFilter');
+    if(!f || debtFilterChangedByUser) return;
+    if(f.value!=='pending'){
+      f.value='pending';
+      try{window.renderDebts?.()}catch(e){try{renderDebts()}catch(_){} }
+    }
+  }
+
+  function bindDebtFilterDefault(){
+    const f=document.getElementById('debtFilter');
+    if(!f || f.dataset.v69DefaultBound==='1') return;
+    f.dataset.v69DefaultBound='1';
+    f.addEventListener('change',function(e){
+      if(e.isTrusted) debtFilterChangedByUser=true;
+    },true);
+    setPendingAsDefault();
+  }
+
+  function updatePaymentAmountV69(){
+    const id=document.getElementById('dpId')?.value;
+    const x=allDebtsV69().find(d=>String(d.id)===String(id));
+    if(!x)return;
+    const mode=document.querySelector('#debtPayModal [data-paymode].active')?.dataset.paymode||'current';
+    const qtyEl=document.getElementById('dpQty');
+    const amtEl=document.getElementById('dpAmount');
+    if(!qtyEl||!amtEl)return;
+    let qty=Math.max(1,parseInt(qtyEl.value,10)||1);
+    if(mode==='current') qty=1;
+    if(mode==='settle'){
+      const totalInst=Math.max(1,Number(x.parcelasTotal)||Math.ceil(moneyV69(x.total)/Math.max(moneyV69(x.parcela),.01))||1);
+      const paidInst=Math.max(0,Number(x.parcelasQuitadas)||0);
+      qty=Math.max(1,totalInst-paidInst);
+      qtyEl.value=qty;
+      amtEl.value=moneyV69(x.pendente).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      return;
+    }
+    const amount=Math.min(moneyV69(x.pendente),moneyV69(x.parcela)*qty);
+    amtEl.value=amount.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+
+  function ensureSettleChoice(){
+    const modal=document.getElementById('debtPayModal');
+    if(!modal)return;
+    const grid=modal.querySelector('.pay-choice-grid');
+    if(grid && !grid.querySelector('[data-paymode="settle"]')){
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='pay-choice';
+      b.dataset.paymode='settle';
+      b.innerHTML='Quitar dívida<small>Liquida todo o saldo pendente desta dívida.</small>';
+      grid.appendChild(b);
+    }
+    modal.querySelectorAll('[data-paymode]').forEach(b=>{
+      if(b.dataset.v69Bound==='1')return;
+      b.dataset.v69Bound='1';
+      b.addEventListener('click',function(e){
+        modal.querySelectorAll('[data-paymode]').forEach(x=>x.classList.remove('active'));
+        this.classList.add('active');
+        const qty=document.getElementById('dpQty');
+        const mode=this.dataset.paymode;
+        if(qty){
+          qty.disabled=(mode==='current'||mode==='settle');
+          if(mode==='current')qty.value=1;
+        }
+        updatePaymentAmountV69();
+      },true);
+    });
+    const qty=document.getElementById('dpQty');
+    if(qty && qty.dataset.v69Bound!=='1'){
+      qty.dataset.v69Bound='1';
+      qty.addEventListener('input',updatePaymentAmountV69,true);
+      qty.addEventListener('change',updatePaymentAmountV69,true);
+    }
+  }
+
+  function saveDebtPaymentV69(){
+    const id=document.getElementById('dpId')?.value||'';
+    const x=allDebtsV69().find(d=>String(d.id)===String(id));
+    if(!id || !x){
+      try{toast('Não foi possível localizar esta dívida. Abra novamente e tente de novo.')}catch(e){}
+      return;
+    }
+
+    const mode=document.querySelector('#debtPayModal [data-paymode].active')?.dataset.paymode||'current';
+    const pendingBefore=Math.max(0,moneyV69(x.pendente));
+    const total=Math.max(moneyV69(x.total),moneyV69(x.quitado)+pendingBefore);
+    const installment=Math.max(0,moneyV69(x.parcela));
+    const totalInst=Math.max(1,Number(x.parcelasTotal)||Math.ceil(total/Math.max(installment,.01))||1);
+    const paidInstBefore=Math.max(0,Math.min(totalInst,Number(x.parcelasQuitadas)||0));
+
+    let qty=Math.max(1,parseInt(document.getElementById('dpQty')?.value,10)||1);
+    let amount=Math.max(0,moneyV69(document.getElementById('dpAmount')?.value));
+
+    if(mode==='current'){
+      qty=1;
+      if(amount<=0) amount=Math.min(pendingBefore,installment);
+    }else if(mode==='settle'){
+      qty=Math.max(1,totalInst-paidInstBefore);
+      amount=pendingBefore;
+    }else{
+      qty=Math.min(qty,Math.max(1,totalInst-paidInstBefore));
+      if(amount<=0) amount=Math.min(pendingBefore,installment*qty);
+    }
+
+    amount=Math.min(pendingBefore,Number(amount.toFixed(2)));
+    if(amount<=0){
+      try{toast('Informe um valor válido para o pagamento.')}catch(e){}
+      return;
+    }
+
+    const paid=Math.min(total,Number((moneyV69(x.quitado)+amount).toFixed(2)));
+    const pending=Math.max(0,Number((total-paid).toFixed(2)));
+    let paidInst=paidInstBefore;
+    if(mode==='settle' || pending<=0){
+      paidInst=totalInst;
+    }else if(installment>0){
+      const implied=Math.max(1,Math.round(amount/installment));
+      paidInst=Math.min(totalInst,paidInstBefore+Math.max(qty,implied));
+    }else{
+      paidInst=Math.min(totalInst,paidInstBefore+qty);
+    }
+
+    // Mescla a alteração na dívida existente. Nada é apagado ou reinicializado.
+    const prior=(debtEdits && debtEdits[id]) ? debtEdits[id] : {};
+    debtEdits[id]={
+      ...prior,
+      descricao:x.descricao,
+      credor:x.credor,
+      banco:x.banco,
+      parcela:installment,
+      total,
+      quitado:paid,
+      pendente:pending,
+      negociado:x.negociado,
+      parcelasTotal:totalInst,
+      parcelasQuitadas:paidInst,
+      ultimoPagamento:new Date().toISOString().slice(0,10)
+    };
+
+    try{persist()}catch(e){
+      try{localStorage.setItem(DEBT_EDIT_KEY,JSON.stringify(debtEdits))}catch(_){}
+    }
+
+    // Confere e preserva tudo o que já estava no armazenamento antes de fechar o modal.
+    try{
+      const stored=JSON.parse(localStorage.getItem(DEBT_EDIT_KEY)||'{}');
+      stored[id]={...(stored[id]||{}),...debtEdits[id]};
+      localStorage.setItem(DEBT_EDIT_KEY,JSON.stringify(stored));
+      debtEdits=stored;
+    }catch(e){}
+
+    document.getElementById('debtPayModal')?.classList.remove('open');
+    try{window.renderDebts?.()}catch(e){try{renderDebts()}catch(_){} }
+    try{window.renderDashboard?.()}catch(e){try{renderDashboard()}catch(_){} }
+    try{window.renderProjection?.()}catch(e){try{renderProjection()}catch(_){} }
+    try{window.ppCloudV66?.save?.()}catch(e){}
+    try{window.ppSessionV47?.captureWorkspace?.()}catch(e){}
+    try{toast(pending<=0?'Dívida quitada.':'Pagamento registrado.')}catch(e){}
+  }
+
+  function bindPaymentFix(){
+    const modal=document.getElementById('debtPayModal');
+    if(!modal)return;
+    ensureSettleChoice();
+    const save=document.getElementById('dpSave');
+    if(save && save.dataset.v69Bound!=='1'){
+      save.dataset.v69Bound='1';
+      save.addEventListener('click',function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        saveDebtPaymentV69();
+      },true);
+    }
+  }
+
+  // Mantém o abridor existente, apenas garante que o modal novo esteja corretamente ligado.
+  const previousOpen=window.openDebtPayment;
+  if(typeof previousOpen==='function'){
+    window.openDebtPayment=function(id){
+      previousOpen.call(this,id);
+      bindPaymentFix();
+      ensureSettleChoice();
+      updatePaymentAmountV69();
+    };
+    try{openDebtPayment=window.openDebtPayment}catch(e){}
+  }
+
+  function initV69(){
+    bindDebtFilterDefault();
+    bindPaymentFix();
+    setPendingAsDefault();
+  }
+
+  document.addEventListener('click',function(e){
+    if(e.target.closest?.('[data-view="dividas"],#dividas,.debt-action-pay')){
+      setTimeout(()=>{bindDebtFilterDefault();bindPaymentFix();if(!debtFilterChangedByUser)setPendingAsDefault()},0);
+    }
+  },true);
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initV69,{once:true});
+  else initV69();
+  setTimeout(initV69,150);
+  setTimeout(()=>{if(!debtFilterChangedByUser)setPendingAsDefault()},700);
+})();
+</script>
 </body></html>
 <style id="recurring-card-style">
 .recurring-note{margin-top:8px;padding:10px 12px;border-radius:12px;background:#fff8ee;border:1px solid #ffd6a7;color:#8a4b00;font-size:11px;line-height:1.45}
