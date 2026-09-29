@@ -10264,6 +10264,127 @@ Os dados atuais deste navegador serão substituídos.`);
   setTimeout(()=>{repairStoredPaid73();bindModal73();try{window.renderDebts?.()}catch(e){}},250);
 })();
 </script>
+
+
+<style id="pp-v34-installment-authority-style">
+#v34PlanProof{display:block;margin-top:6px;font-size:10px;color:#41556f;font-weight:800}
+</style>
+<script id="pp-v34-installment-authority-final">
+(function(){
+'use strict';
+function m34(v){
+  if(typeof v==='number'&&Number.isFinite(v))return v;
+  let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+  if(!s)return 0;
+  if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+  else if(s.includes(','))s=s.replace(',','.');
+  else if((s.match(/\./g)||[]).length>1)s=s.replace(/\./g,'');
+  s=s.replace(/[^0-9.-]/g,'');
+  const n=Number(s); return Number.isFinite(n)?n:0;
+}
+const r34=n=>Math.round((Number(n)||0)*100)/100;
+function parseYM34(v){const m=String(v||'').match(/^(\d{4})-(\d{2})$/);if(!m)return null;const y=+m[1],mo=+m[2];return mo>=1&&mo<=12?{year:y,month:mo}:null;}
+function add34(y,m,o){const d=new Date(+y,+m-1+o,1,12);return {year:d.getFullYear(),month:d.getMonth()+1};}
+function past34(y,m){return +y<+currentYear||(+y===+currentYear&&+m<+currentMonth);}
+function monthAfter34(raw){const d=new Date(String(raw||new Date().toISOString().slice(0,10)).slice(0,10)+'T12:00:00');if(Number.isNaN(d.getTime()))return {year:currentYear,month:currentMonth};d.setMonth(d.getMonth()+1);return {year:d.getFullYear(),month:d.getMonth()+1};}
+function label34(y,m){try{return monthLabel(y,m)}catch(e){return `${String(m).padStart(2,'0')}/${y}`}}
+
+function enforceMode34(){
+  const mode=document.getElementById('cpMode');
+  const qtyEl=document.getElementById('cpInstallments');
+  if(!mode||!qtyEl)return;
+  const qty=Math.max(1,parseInt(qtyEl.value,10)||1);
+  if(mode.value!=='estorno'&&mode.value!=='recorrente'&&qty>1) mode.value='parcelado';
+  if(mode.value==='parcelado'&&qty<2) qtyEl.value='2';
+  try{mode._v32sync?.()}catch(e){}
+}
+
+function save34(){
+  try{window.ensureForm32?.()}catch(e){}
+  const id=document.getElementById('cpId')?.value||('CP'+Date.now());
+  const old=(cardPurchases||[]).find(x=>String(x.id)===String(id))||{};
+  const cardId=document.getElementById('cpCard')?.value||'';
+  const date=document.getElementById('cpDate')?.value||new Date().toISOString().slice(0,10);
+  const description=(document.getElementById('cpDesc')?.value||'').trim();
+  const category=document.getElementById('cpCategory')?.value||'Cartão de crédito';
+  const total=r34(m34(document.getElementById('cpTotal')?.value));
+  let mode=document.getElementById('cpMode')?.value||'avista';
+  let qtyRaw=Math.max(1,parseInt(document.getElementById('cpInstallments')?.value,10)||1);
+  let first=parseYM34(document.getElementById('cpFirstInvoiceV32')?.value);
+  if(!first) first=monthAfter34(date);
+
+  // REGRA AUTORITATIVA: quantidade > 1 = parcelado, independentemente de handlers antigos.
+  if(mode!=='estorno' && mode!=='recorrente' && qtyRaw>1) mode='parcelado';
+  let qty = mode==='parcelado' ? Math.max(2,qtyRaw) : 1;
+  const kind=mode==='estorno'?'refund':'purchase';
+  if(kind==='refund'||mode==='recorrente')qty=1;
+
+  if(!cardId||!description||total<=0||!first){try{toast('Preencha cartão, descrição, valor e a 1ª parcela/fatura.')}catch(e){}return;}
+
+  let paid=0;
+  if(mode!=='recorrente'&&kind!=='refund'){
+    for(let i=0;i<qty;i++){const ym=add34(first.year,first.month,i);if(past34(ym.year,ym.month))paid++;}
+  } else if(kind==='refund'&&past34(first.year,first.month)) paid=1;
+
+  const obj={...old,id,cardId,date,description,category,mode,total,
+    installments:qty,paidInstallments:paid,startYear:first.year,startMonth:first.month,
+    status:document.getElementById('cpStatus')?.value||old.status||'Ativo',
+    purchaseTotalV31:total,installmentCountV31:qty,purchaseDateV31:date,modeV31:mode,
+    modeV32:mode,entryTypeV32:kind,firstInvoiceYearV32:first.year,firstInvoiceMonthV32:first.month,
+    installmentEngineV34:true
+  };
+  const idx=(cardPurchases||[]).findIndex(x=>String(x.id)===String(id));
+  if(idx>=0)cardPurchases[idx]=obj;else cardPurchases.push(obj);
+  persist();
+  document.getElementById('cardPurchaseModal')?.classList.remove('open');
+  try{window.renderCards?.()}catch(e){}
+  try{window.renderLancamentos?.()}catch(e){}
+  try{window.renderDashboard?.()}catch(e){}
+  try{window.renderProjection?.()}catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  setTimeout(()=>{try{window.renderCards?.();window.renderLancamentos?.();}catch(e){}},60);
+  try{toast(kind==='refund'?`Estorno lançado em ${label34(first.year,first.month)}.`:qty>1?`${qty} parcelas distribuídas de ${label34(first.year,first.month)} em diante.`:`Compra lançada em ${label34(first.year,first.month)}.`)}catch(e){}
+}
+
+function bind34(){
+  const old=document.getElementById('saveCardPurchaseV34')||document.getElementById('saveCardPurchaseV32')||document.getElementById('saveCardPurchaseV31')||document.getElementById('saveCardPurchase');
+  if(!old)return;
+  if(old.id==='saveCardPurchaseV34'&&old.dataset.bound34==='1')return;
+  const b=old.cloneNode(true);b.id='saveCardPurchaseV34';b.dataset.bound34='1';b.removeAttribute('onclick');old.replaceWith(b);
+  b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();save34();},true);
+}
+window.saveCardPurchase=save34;try{saveCardPurchase=save34}catch(e){}
+
+// Garante que editar uma compra carrega a quantidade real e não volta para 1.
+const openBefore34=window.openCardPurchase;
+window.openCardPurchase=function(id){
+  const ret=typeof openBefore34==='function'?openBefore34.apply(this,arguments):undefined;
+  setTimeout(()=>{
+    const p=(cardPurchases||[]).find(x=>String(x.id)===String(id));
+    if(p){
+      const qty=Math.max(1,parseInt(p.installmentCountV31??p.installments,10)||1);
+      const q=document.getElementById('cpInstallments');const mode=document.getElementById('cpMode');
+      if(q)q.value=qty;
+      if(mode&&mode.value!=='estorno'&&mode.value!=='recorrente')mode.value=qty>1?'parcelado':'avista';
+      const fy=+(p.firstInvoiceYearV32??p.startYear),fm=+(p.firstInvoiceMonthV32??p.startMonth);
+      const f=document.getElementById('cpFirstInvoiceV32');if(f&&fy&&fm)f.value=`${fy}-${String(fm).padStart(2,'0')}`;
+    }
+    enforceMode34();bind34();
+  },0);
+  return ret;
+};try{openCardPurchase=window.openCardPurchase}catch(e){}
+
+// Se o usuário digitar 2+ parcelas, o formulário muda imediatamente para Parcelado.
+document.addEventListener('input',e=>{if(e.target?.id==='cpInstallments'){enforceMode34();}},true);
+document.addEventListener('change',e=>{if(e.target?.id==='cpInstallments'){enforceMode34();}},true);
+
+// Reaplica o botão final caso algum observer antigo tente recriá-lo.
+const modal=document.getElementById('cardPurchaseModal');
+if(modal)new MutationObserver(()=>{if(modal.classList.contains('open'))setTimeout(bind34,20)}).observe(modal,{attributes:true,attributeFilter:['class'],subtree:false});
+setInterval(()=>{if(document.getElementById('cardPurchaseModal')?.classList.contains('open'))bind34();},700);
+bind34();
+})();
+</script>
 </body></html>
 <style id="recurring-card-style">
 .recurring-note{margin-top:8px;padding:10px 12px;border-radius:12px;background:#fff8ee;border:1px solid #ffd6a7;color:#8a4b00;font-size:11px;line-height:1.45}
