@@ -15114,3 +15114,149 @@ setTimeout(initEssence,0);
   setTimeout(()=>{ensureFilter77();ensureDateFields77();render77()},850);
 })();
 </script>
+
+
+<style id="pp-v78-debt-last-payment-style">
+#dividas #debtLastMonthFilterV77{display:none!important}
+#dividas .tablewrap table{min-width:1320px!important;table-layout:auto!important}
+#dividas th:nth-child(1),#dividas td:nth-child(1){min-width:175px}
+#dividas th:nth-child(2),#dividas td:nth-child(2){min-width:150px}
+#dividas th:nth-child(3),#dividas td:nth-child(3),#dividas th:nth-child(4),#dividas td:nth-child(4){min-width:68px;width:68px}
+#dividas th:nth-child(5),#dividas td:nth-child(5){min-width:88px}
+#dividas th:nth-child(6),#dividas td:nth-child(6),#dividas th:nth-child(7),#dividas td:nth-child(7){min-width:104px;white-space:nowrap}
+#dividas th:nth-child(8),#dividas td:nth-child(8){min-width:145px}
+#dividas th:nth-child(9),#dividas td:nth-child(9),#dividas th:nth-child(10),#dividas td:nth-child(10){min-width:86px}
+#dividas th:nth-child(11),#dividas td:nth-child(11){min-width:96px}
+#dividas th:last-child,#dividas td:last-child{min-width:62px;white-space:nowrap}
+</style>
+<script id="pp-v78-debt-last-payment">
+(function(){
+  function n78(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(','))s=s.replace(',','.');
+    s=s.replace(/[^0-9.-]/g,'');
+    const n=Number(s);return Number.isFinite(n)?n:0;
+  }
+  function validMonth78(v){return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(v||''))}
+  function addMonths78(ym,steps){
+    if(!validMonth78(ym))return '';
+    const [y,m]=ym.split('-').map(Number);
+    const d=new Date(y,m-1+Math.max(0,Number(steps)||0),1);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  function fmtMonth78(ym){
+    if(!validMonth78(ym))return '—';
+    const [y,m]=ym.split('-');return `${m}/${y}`;
+  }
+  function fmtLastPayment78(v){
+    const s=String(v||'').trim();
+    if(!s)return '—';
+    let m=s.match(/^(\d{4})-(\d{2})(?:-\d{2})?/);
+    if(m)return `${m[2]}/${m[1]}`;
+    m=s.match(/^(\d{2})\/(\d{4})$/);
+    if(m)return `${m[1]}/${m[2]}`;
+    try{
+      const d=new Date(s);
+      if(!Number.isNaN(d.getTime()))return `${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    }catch(e){}
+    return '—';
+  }
+  function state78(d){
+    const totalInst=Math.max(1,parseInt(d?.parcelasTotal,10)||1);
+    let paidInst=Math.max(0,parseInt(d?.parcelasQuitadas,10)||0);
+    let installment=n78(d?.parcela),total=n78(d?.total),paid=n78(d?.quitado);
+    if(!total&&installment>0)total=installment*totalInst;
+    if(!installment&&total>0)installment=Number((total/totalInst).toFixed(2));
+    let pending=(d&&d.pendente!==undefined&&d.pendente!==null&&String(d.pendente).trim()!=='')?n78(d.pendente):Math.max(0,total-paid);
+    if(total>0&&paid>total)paid=total;
+    if(pending<0)pending=0;
+    if((pending===0&&total>0)||String(d?.status||'').toLowerCase()==='quitado'||paidInst>=totalInst){pending=0;paid=total||paid;paidInst=totalInst}
+    const pendingInst=Math.max(0,totalInst-paidInst);
+    const status=(pending===0&&pendingInst===0)?'Quitado':'Pendente';
+    const pct=total>0?Math.min(100,Math.max(0,paid/total*100)):(status==='Quitado'?100:0);
+    const first=validMonth78(d?.primeiraParcelaMes)?d.primeiraParcelaMes:'';
+    const last=validMonth78(d?.ultimaParcelaMes)?d.ultimaParcelaMes:(first?addMonths78(first,totalInst-1):'');
+    return {totalInst,paidInst,pendingInst,installment,total,paid,pending,status,pct,first,last};
+  }
+
+  // Compatibilidade: Banco não aparece na interface, mas o campo interno continua existindo
+  // para que os abridores/salvadores antigos de dívida não quebrem.
+  function ensureHiddenBank78(){
+    const modal=document.getElementById('debtModal');if(!modal)return;
+    let bank=document.getElementById('dBank');
+    if(!bank){
+      bank=document.createElement('input');
+      bank.type='hidden';bank.id='dBank';bank.value='';
+      modal.querySelector('.modal')?.appendChild(bank);
+    }else{
+      const field=bank.closest('.field');
+      if(field)field.style.display='none';
+      bank.style.display='none';
+    }
+  }
+
+  // Remove de verdade o filtro de data criado na versão anterior.
+  function removeTopDateFilter78(){
+    const f=document.getElementById('debtLastMonthFilterV77');
+    if(f)f.remove();
+  }
+
+  function render78(){
+    ensureHiddenBank78();removeTopDateFilter78();
+    const section=document.getElementById('dividas'),body=document.getElementById('debtBody'),summary=document.getElementById('debtSummary');
+    const statusEl=document.getElementById('debtStatusFilterV76'),negoEl=document.getElementById('debtNegotiationFilterV76'),search=document.getElementById('debtSearch');
+    if(!section||!body||!summary||!statusEl||!negoEl||!search)return;
+    const head=section.querySelector('table thead tr');
+    if(head)head.innerHTML='<th>Descrição</th><th>Credor</th><th>Pendentes</th><th>Quitadas</th><th>Parcela</th><th>Última parcela</th><th>Último pagamento</th><th>Andamento</th><th>Negociado</th><th>Status</th><th>Pendente</th><th>Ação</th>';
+    const active=(()=>{try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}})();
+    if(active==='Christian'){
+      summary.innerHTML='';
+      body.innerHTML='<tr><td colspan="12" class="empty">Nenhuma dívida cadastrada para Christian.</td></tr>';
+      return;
+    }
+    const all=(typeof getDebts==='function'?getDebts(true):[]).map(d=>{
+      const s=state78(d);
+      return Object.assign({},d,{banco:'',parcela:s.installment,total:s.total,quitado:s.paid,pendente:s.pending,parcelasTotal:s.totalInst,parcelasQuitadas:s.paidInst,primeiraParcelaMes:s.first,ultimaParcelaMes:s.last,_pinst:s.pendingInst,_pct:s.pct,_status:s.status});
+    });
+    const q=(search.value||'').toLowerCase().trim(),status=statusEl.value,nego=negoEl.value;
+    const visible=all.filter(x=>{
+      if(x.arquivado)return false;
+      if(q&&![x.descricao,x.credor].join(' ').toLowerCase().includes(q))return false;
+      if(status==='pending'&&x.pendente<=0)return false;
+      if(status==='paid'&&x.pendente>0)return false;
+      const isNeg=String(x.negociado||'').toLowerCase()==='sim';
+      if(nego==='negotiated'&&!isNeg)return false;
+      if(nego==='notnegotiated'&&isNeg)return false;
+      return true;
+    });
+    const live=all.filter(x=>!x.arquivado);
+    const total=live.reduce((a,x)=>a+n78(x.total),0),pend=live.reduce((a,x)=>a+n78(x.pendente),0),paid=live.reduce((a,x)=>a+n78(x.quitado),0);
+    const neg=live.filter(x=>x.pendente>0&&String(x.negociado).toLowerCase()==='sim').reduce((a,x)=>a+n78(x.pendente),0);
+    const notneg=live.filter(x=>x.pendente>0&&String(x.negociado).toLowerCase()!=='sim').reduce((a,x)=>a+n78(x.pendente),0);
+    summary.innerHTML=`<div class="card mini"><span>Total contratado</span><b>${brl(total)}</b></div><div class="card mini"><span>Pendente</span><b class="negative">${brl(pend)}</b></div><div class="card mini"><span>Já quitado</span><b class="positive">${brl(paid)}</b></div><div class="card mini"><span>Pendente negociado</span><b class="blue">${brl(neg)}</b></div><div class="card mini"><span>Pendente não negociado</span><b class="warning">${brl(notneg)}</b></div>`;
+    body.innerHTML=visible.sort((a,b)=>n78(b.pendente)-n78(a.pendente)).map(x=>{
+      const pendingN=Math.max(0,parseInt(x._pinst,10)||0),paidN=Math.max(0,parseInt(x.parcelasQuitadas,10)||0),pct=Number(x._pct||0),st=x._status;
+      return `<tr><td><b>${esc(x.descricao||'Dívida')}</b></td><td>${esc(x.credor||'—')}</td><td><b>${pendingN}</b></td><td><b class="positive">${paidN}</b></td><td>${brl(x.parcela||0)}</td><td><b>${fmtMonth78(x.ultimaParcelaMes)}</b></td><td><b>${fmtLastPayment78(x.ultimoPagamento)}</b></td><td><div class="debt-progress-wrap"><div class="progress"><i style="width:${pct}%"></i></div><small>${pct.toFixed(0)}% quitado</small>${x.pendente>0?`<br><button class="debt-action-pay" onclick="openDebtPayment('${x.id}')">✓ pagar / adiantar</button>`:''}</div></td><td><span class="tag ${String(x.negociado).toLowerCase()==='sim'?'green':'amber'}">${esc(x.negociado||'Não')}</span></td><td><span class="tag ${st==='Quitado'?'green':'red'}">${st}</span></td><td class="money ${x.pendente>0?'negative':'positive'}">${brl(x.pendente||0)}</td><td class="actioncell"><button class="dots" onclick="openDebtMenu(event,'${x.id}')">⋯</button></td></tr>`;
+    }).join('')||'<tr><td colspan="12" class="empty">Nenhuma dívida neste filtro.</td></tr>';
+    if(typeof installSorters==='function')installSorters(section);
+  }
+
+  // Garante que Nova dívida e Editar encontrem o campo interno antes de executar.
+  document.addEventListener('pointerdown',function(e){
+    if(e.target.closest?.('#addDebtV67,.dots'))ensureHiddenBank78();
+  },true);
+  const modal=document.getElementById('debtModal');
+  if(modal){
+    const mo=new MutationObserver(()=>ensureHiddenBank78());
+    mo.observe(modal,{attributes:true,attributeFilter:['class'],childList:true,subtree:true});
+  }
+
+  removeTopDateFilter78();ensureHiddenBank78();
+  window.renderDebts=render78;try{renderDebts=render78}catch(e){}
+  render78();
+  setTimeout(()=>{removeTopDateFilter78();ensureHiddenBank78();render78()},150);
+  setTimeout(()=>{removeTopDateFilter78();ensureHiddenBank78();render78()},850);
+})();
+</script>
