@@ -15260,3 +15260,119 @@ setTimeout(initEssence,0);
   setTimeout(()=>{removeTopDateFilter78();ensureHiddenBank78();render78()},850);
 })();
 </script>
+
+
+<script id="pp-v79-debt-last-payment-history">
+(function(){
+  const DEBT_KEY='financeiro_marcos_debt_edits_v3';
+
+  function readEdits79(){
+    try{
+      const o=JSON.parse(localStorage.getItem(DEBT_KEY)||'{}');
+      return o&&typeof o==='object'?o:{};
+    }catch(e){return {}}
+  }
+  function writeEdits79(o){
+    try{
+      localStorage.setItem(DEBT_KEY,JSON.stringify(o));
+      try{debtEdits=o}catch(e){}
+      return true;
+    }catch(e){return false}
+  }
+  function fmt79(v){
+    const s=String(v||'').trim();
+    if(!s)return '—';
+    let m=s.match(/^(\d{4})-(\d{2})(?:-\d{2})?/);
+    if(m)return `${m[2]}/${m[1]}`;
+    m=s.match(/^(\d{2})\/(\d{4})$/);
+    if(m)return `${m[1]}/${m[2]}`;
+    try{
+      const d=new Date(s);
+      if(!Number.isNaN(d.getTime()))return `${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    }catch(e){}
+    return '—';
+  }
+  function lastPayment79(d){
+    if(!d)return '';
+    const edits=readEdits79();
+    const e=edits[String(d.id)]||{};
+    return d.ultimoPagamentoHistorico || e.ultimoPagamentoHistorico || d.ultimoPagamento || e.ultimoPagamento || '';
+  }
+  function normalizeHistory79(){
+    const edits=readEdits79();
+    let changed=false;
+    Object.keys(edits).forEach(id=>{
+      const e=edits[id];
+      if(!e||typeof e!=='object')return;
+      if(e.ultimoPagamento && !e.ultimoPagamentoHistorico){
+        e.ultimoPagamentoHistorico=e.ultimoPagamento;
+        changed=true;
+      }
+    });
+    if(changed)writeEdits79(edits);
+  }
+
+  // Sempre que um pagamento for confirmado, espelha a data do pagamento em um
+  // campo histórico que não depende do status atual da dívida.
+  document.addEventListener('click',function(ev){
+    const btn=ev.target.closest?.('#dpSave,#dpSaveV72,#dpConfirmV72,[data-debt-confirm-payment],#debtPayModal .primary');
+    if(!btn)return;
+    const id=document.getElementById('dpId')?.value;
+    if(!id)return;
+    setTimeout(()=>{
+      const edits=readEdits79();
+      const e=edits[id];
+      if(!e)return;
+      const stamp=e.ultimoPagamento || new Date().toISOString().slice(0,10);
+      e.ultimoPagamento=stamp;
+      e.ultimoPagamentoHistorico=stamp;
+      writeEdits79(edits);
+      try{window.renderDebts?.()}catch(x){}
+    },80);
+  },true);
+
+  const previousRender79=window.renderDebts;
+  function render79(){
+    normalizeHistory79();
+    const r=typeof previousRender79==='function'?previousRender79.apply(this,arguments):undefined;
+
+    // Corrige somente a coluna "Último pagamento" após a renderização atual,
+    // usando diretamente o histórico persistido por ID. Isso vale para Pendentes
+    // e Quitadas e não altera os demais filtros ou cálculos.
+    const section=document.getElementById('dividas');
+    const body=document.getElementById('debtBody');
+    if(!section||!body)return r;
+    const headers=[...section.querySelectorAll('table thead th')];
+    const idx=headers.findIndex(h=>String(h.textContent||'').trim().toLowerCase()==='último pagamento');
+    if(idx<0)return r;
+
+    // A ordem das linhas segue a mesma lista renderizada. Recupera os IDs pela
+    // ação de cada linha e preenche a célula correspondente pelo dado persistido.
+    [...body.querySelectorAll('tr')].forEach(tr=>{
+      const menu=tr.querySelector('button.dots[onclick*="openDebtMenu"]');
+      if(!menu)return;
+      const onclick=menu.getAttribute('onclick')||'';
+      const m=onclick.match(/openDebtMenu\(event,'([^']+)'\)/);
+      if(!m)return;
+      const id=m[1];
+      const edits=readEdits79();
+      const e=edits[id]||{};
+      let value=e.ultimoPagamentoHistorico||e.ultimoPagamento||'';
+      if(!value){
+        try{
+          const d=(typeof getDebts==='function'?getDebts(true):[]).find(x=>String(x.id)===String(id));
+          value=lastPayment79(d);
+        }catch(x){}
+      }
+      const cell=tr.cells[idx];
+      if(cell)cell.innerHTML=`<b>${fmt79(value)}</b>`;
+    });
+    return r;
+  }
+
+  window.renderDebts=render79;
+  try{renderDebts=render79}catch(e){}
+  normalizeHistory79();
+  setTimeout(()=>{try{window.renderDebts?.()}catch(e){}},120);
+})();
+</script>
