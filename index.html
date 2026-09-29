@@ -14639,3 +14639,155 @@ setTimeout(initEssence,0);
   },true);
 })();
 </script>
+
+
+<script id="pp-v75-debt-dual-filters-final">
+(function(){
+  function n75(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(','))s=s.replace(',','.');
+    s=s.replace(/[^0-9.-]/g,'');
+    const n=Number(s);return Number.isFinite(n)?n:0;
+  }
+  function active75(){try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}}
+  function state75(d){
+    const totalInst=Math.max(1,parseInt(d?.parcelasTotal,10)||1);
+    let paidInst=Math.max(0,parseInt(d?.parcelasQuitadas,10)||0);
+    let installment=n75(d?.parcela), total=n75(d?.total), paid=n75(d?.quitado);
+    if(!total&&installment>0)total=installment*totalInst;
+    if(!installment&&total>0)installment=Number((total/totalInst).toFixed(2));
+    let pending=(d&&d.pendente!==undefined&&d.pendente!==null&&String(d.pendente).trim()!=='')?n75(d.pendente):Math.max(0,total-paid);
+    if(total>0&&paid>total)paid=total;
+    if(pending<0)pending=0;
+    if((pending===0&&total>0)||String(d?.status||'').toLowerCase()==='quitado'||paidInst>=totalInst){
+      pending=0;paid=total||paid;paidInst=totalInst;
+    }
+    const pendingInst=Math.max(0,totalInst-paidInst);
+    const status=(pending===0&&pendingInst===0)?'Quitado':'Pendente';
+    const pct=total>0?Math.min(100,Math.max(0,paid/total*100)):(status==='Quitado'?100:0);
+    return {totalInst,paidInst,pendingInst,installment,total,paid,pending,status,pct};
+  }
+
+  function removeBank75(){
+    const b=document.getElementById('dBank');
+    if(b){
+      b.value='';
+      const f=b.closest('.field');
+      if(f){f.style.display='none';f.setAttribute('aria-hidden','true')}
+    }
+    document.querySelectorAll('#dividas th').forEach(th=>{
+      if(/^banco$/i.test((th.textContent||'').trim()))th.remove();
+    });
+  }
+
+  function ensureFilters75(){
+    const bar=document.querySelector('#dividas .section-tools .filterbar');
+    if(!bar)return;
+    let status=document.getElementById('debtFilter');
+    if(status){
+      // Reconstrói o filtro de situação para remover qualquer listener antigo preso ao elemento.
+      const fresh=status.cloneNode(false);
+      fresh.id='debtFilter';
+      fresh.innerHTML='<option value="pending">Pendentes</option><option value="paid">Quitadas</option>';
+      fresh.value=(status.value==='paid')?'paid':'pending';
+      status.replaceWith(fresh);
+      status=fresh;
+    }
+    let nego=document.getElementById('debtNegotiationFilter');
+    if(!nego){
+      nego=document.createElement('select');
+      nego.id='debtNegotiationFilter';
+      nego.innerHTML='<option value="all">Todas</option><option value="negotiated">Negociadas</option><option value="notnegotiated">Não negociadas</option>';
+      const search=document.getElementById('debtSearch');
+      if(search)bar.insertBefore(nego,search);else bar.prepend(nego);
+    }
+    // Reconstrói a busca também para retirar listeners antigos que chamavam a renderização velha.
+    const search=document.getElementById('debtSearch');
+    if(search&&!search.dataset.v75fresh){
+      const fresh=search.cloneNode(true);
+      fresh.dataset.v75fresh='1';
+      search.replaceWith(fresh);
+    }
+  }
+
+  function render75(){
+    const section=document.getElementById('dividas'),body=document.getElementById('debtBody'),summary=document.getElementById('debtSummary');
+    const statusEl=document.getElementById('debtFilter'),negoEl=document.getElementById('debtNegotiationFilter'),search=document.getElementById('debtSearch');
+    if(!section||!body||!summary||!statusEl||!negoEl||!search)return;
+    removeBank75();
+    const head=section.querySelector('table thead tr');
+    if(head)head.innerHTML='<th>Descrição</th><th>Credor</th><th>Parcelas pendentes</th><th>Parcelas quitadas</th><th>Parcela</th><th>Andamento</th><th>Negociado</th><th>Status</th><th>Pendente</th><th>Ação</th>';
+    if(active75()==='Christian'){
+      summary.innerHTML='';
+      body.innerHTML='<tr><td colspan="10" class="empty">Nenhuma dívida cadastrada para Christian.</td></tr>';
+      return;
+    }
+    const all=(typeof getDebts==='function'?getDebts(true):[]).map(d=>{
+      const s=state75(d);
+      return Object.assign({},d,{banco:'',parcela:s.installment,total:s.total,quitado:s.paid,pendente:s.pending,parcelasTotal:s.totalInst,parcelasQuitadas:s.paidInst,_pinst:s.pendingInst,_pct:s.pct,_status:s.status});
+    });
+    const q=(search.value||'').toLowerCase().trim(),status=statusEl.value||'pending',nego=negoEl.value||'all';
+    const visible=all.filter(x=>{
+      if(x.arquivado)return false;
+      if(q&&![x.descricao,x.credor].join(' ').toLowerCase().includes(q))return false;
+      if(status==='pending'&&x.pendente<=0)return false;
+      if(status==='paid'&&x.pendente>0)return false;
+      const isNeg=String(x.negociado||'').toLowerCase()==='sim';
+      if(nego==='negotiated'&&!isNeg)return false;
+      if(nego==='notnegotiated'&&isNeg)return false;
+      return true;
+    });
+    const live=all.filter(x=>!x.arquivado);
+    const total=live.reduce((a,x)=>a+n75(x.total),0),pend=live.reduce((a,x)=>a+n75(x.pendente),0),paid=live.reduce((a,x)=>a+n75(x.quitado),0);
+    const neg=live.filter(x=>x.pendente>0&&String(x.negociado).toLowerCase()==='sim').reduce((a,x)=>a+n75(x.pendente),0);
+    const notneg=live.filter(x=>x.pendente>0&&String(x.negociado).toLowerCase()!=='sim').reduce((a,x)=>a+n75(x.pendente),0);
+    summary.innerHTML=`<div class="card mini"><span>Total contratado</span><b>${brl(total)}</b></div><div class="card mini"><span>Pendente</span><b class="negative">${brl(pend)}</b></div><div class="card mini"><span>Já quitado</span><b class="positive">${brl(paid)}</b></div><div class="card mini"><span>Pendente negociado</span><b class="blue">${brl(neg)}</b></div><div class="card mini"><span>Pendente não negociado</span><b class="warning">${brl(notneg)}</b></div>`;
+    body.innerHTML=visible.sort((a,b)=>n75(b.pendente)-n75(a.pendente)).map(x=>{
+      const pendingN=Math.max(0,parseInt(x._pinst,10)||0),paidN=Math.max(0,parseInt(x.parcelasQuitadas,10)||0),pct=Number(x._pct||0),st=x._status;
+      return `<tr><td><b>${esc(x.descricao||'Dívida')}</b></td><td>${esc(x.credor||'—')}</td><td><b>${pendingN}</b></td><td><b class="positive">${paidN}</b></td><td>${brl(x.parcela||0)}</td><td><div class="debt-progress-wrap"><div class="progress"><i style="width:${pct}%"></i></div><small>${pct.toFixed(0)}% quitado</small>${x.pendente>0?`<br><button class="debt-action-pay" onclick="openDebtPayment('${x.id}')">✓ pagar / adiantar</button>`:''}</div></td><td><span class="tag ${String(x.negociado).toLowerCase()==='sim'?'green':'amber'}">${esc(x.negociado||'Não')}</span></td><td><span class="tag ${st==='Quitado'?'green':'red'}">${st}</span></td><td class="money ${x.pendente>0?'negative':'positive'}">${brl(x.pendente||0)}</td><td class="actioncell"><button class="dots" onclick="openDebtMenu(event,'${x.id}')">⋯</button></td></tr>`;
+    }).join('')||'<tr><td colspan="10" class="empty">Nenhuma dívida neste filtro.</td></tr>';
+    if(typeof installSorters==='function')installSorters(section);
+  }
+
+  ensureFilters75();
+  const status=document.getElementById('debtFilter'),nego=document.getElementById('debtNegotiationFilter'),search=document.getElementById('debtSearch');
+  if(status)status.value='pending';
+  if(nego)nego.value='all';
+
+  // Capture impede handlers antigos de filtros/busca de executar e reconstruir a tabela errada.
+  document.addEventListener('change',function(e){
+    if(e.target?.id==='debtFilter'||e.target?.id==='debtNegotiationFilter'){
+      e.stopImmediatePropagation();render75();
+    }
+  },true);
+  document.addEventListener('input',function(e){
+    if(e.target?.id==='debtSearch'){
+      e.stopImmediatePropagation();render75();
+    }
+  },true);
+
+  // Toda renderização futura da página usa apenas esta versão.
+  window.renderDebts=render75;
+  try{renderDebts=render75}catch(e){}
+
+  const obs=new MutationObserver(()=>removeBank75());
+  obs.observe(document.body,{childList:true,subtree:true});
+  removeBank75();render75();
+  setTimeout(()=>{ensureFilters75();removeBank75();render75()},150);
+})();
+</script>
+
+<style id="pp-v75-debt-dual-filters-style">
+#dividas .filterbar #debtFilter,#dividas .filterbar #debtNegotiationFilter{min-width:130px}
+#dividas .tablewrap table{min-width:1120px!important;table-layout:auto!important}
+#dividas th:nth-child(1),#dividas td:nth-child(1){min-width:200px}
+#dividas th:nth-child(2),#dividas td:nth-child(2){min-width:180px}
+#dividas th:nth-child(3),#dividas td:nth-child(3),#dividas th:nth-child(4),#dividas td:nth-child(4){min-width:112px}
+#dividas th:nth-child(5),#dividas td:nth-child(5){min-width:96px}
+#dividas th:nth-child(6),#dividas td:nth-child(6){min-width:170px}
+#dividas th:nth-child(7),#dividas td:nth-child(7),#dividas th:nth-child(8),#dividas td:nth-child(8){min-width:92px}
+#dividas th:nth-child(9),#dividas td:nth-child(9){min-width:105px}
+#dividas th:last-child,#dividas td:last-child{min-width:68px;white-space:nowrap}
+</style>
