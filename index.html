@@ -15744,3 +15744,223 @@ setTimeout(initEssence,0);
   setTimeout(()=>{try{window.renderDebts?.()}catch(e){}},700);
 })();
 </script>
+
+
+<script id="pp-v16-debt-single-controller">
+(function(){
+  const EDIT_KEY='financeiro_marcos_debt_edits_v3';
+  const DATE_KEY='planejador_debt_dates_v16';
+
+  function readObj(key){try{const o=JSON.parse(localStorage.getItem(key)||'{}');return o&&typeof o==='object'&&!Array.isArray(o)?o:{}}catch(e){return {}}}
+  function writeObj(key,o){try{localStorage.setItem(key,JSON.stringify(o))}catch(e){}}
+  function n(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(','))s=s.replace(',','.');
+    s=s.replace(/[^0-9.-]/g,'');const x=Number(s);return Number.isFinite(x)?x:0;
+  }
+  function moneyInput(v){return (Number(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+  function validYM(v){return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(v||''))}
+  function monthOf(v){
+    const s=String(v||'').trim();if(!s)return '';
+    let m=s.match(/^(\d{4})-(\d{2})(?:-\d{2})?/);if(m)return `${m[1]}-${m[2]}`;
+    m=s.match(/^(\d{2})\/(\d{4})$/);if(m)return `${m[2]}-${m[1]}`;
+    return '';
+  }
+  function fmtYM(v){const x=monthOf(v)||v;if(!validYM(x))return '—';const [y,m]=x.split('-');return `${m}/${y}`}
+  function addMonths(ym,steps){
+    if(!validYM(ym))return '';
+    const [y,m]=ym.split('-').map(Number),d=new Date(y,m-1+(Number(steps)||0),1);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+  }
+  function currentYM(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+  function activeProfile(){try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}}
+
+  function ensureCompatBank(){
+    const modal=document.getElementById('debtModal');if(!modal)return;
+    let bank=document.getElementById('dBank');
+    if(!bank){bank=document.createElement('input');bank.type='hidden';bank.id='dBank';bank.value='';modal.querySelector('.modal')?.appendChild(bank)}
+    bank.style.display='none';const f=bank.closest('.field');if(f)f.style.display='none';
+  }
+
+  function dateMeta(id,d){
+    const map=readObj(DATE_KEY),m=map[String(id)]||{};
+    const edits=readObj(EDIT_KEY),e=edits[String(id)]||{};
+    const totalInst=Math.max(1,parseInt(d?.parcelasTotal??e.parcelasTotal,10)||1);
+    const first=validYM(m.first)?m.first:(validYM(e.primeiraParcelaMes)?e.primeiraParcelaMes:(validYM(d?.primeiraParcelaMes)?d.primeiraParcelaMes:''));
+    const forecast=validYM(m.forecast)?m.forecast:(validYM(e.ultimaParcelaMes)?e.ultimaParcelaMes:(validYM(d?.ultimaParcelaMes)?d.ultimaParcelaMes:(first?addMonths(first,totalInst-1):'')));
+    const closure=validYM(m.closure)?m.closure:(validYM(e.dataQuitacaoMes)?e.dataQuitacaoMes:(validYM(d?.dataQuitacaoMes)?d.dataQuitacaoMes:''));
+    return {first,forecast,closure};
+  }
+
+  function state(d){
+    const totalInst=Math.max(1,parseInt(d?.parcelasTotal,10)||1);
+    let paidInst=Math.max(0,Math.min(totalInst,parseInt(d?.parcelasQuitadas,10)||0));
+    let installment=n(d?.parcela),total=n(d?.total),paid=n(d?.quitado);
+    if(!total&&installment>0)total=Number((installment*totalInst).toFixed(2));
+    if(!installment&&total>0)installment=Number((total/totalInst).toFixed(2));
+    let pending=(d?.pendente!==undefined&&d?.pendente!==null&&String(d.pendente).trim()!=='')?n(d.pendente):Math.max(0,total-paid);
+    // Não usa o texto de status antigo para decidir se está quitada. Os números mandam.
+    if(paidInst>=totalInst){paidInst=totalInst;paid=total;pending=0}
+    else{
+      const maxPaidByInst=Math.min(total,Number((installment*paidInst).toFixed(2)));
+      if(paid>=total && paidInst<totalInst)paid=maxPaidByInst;
+      pending=Math.max(0,Number((total-paid).toFixed(2)));
+    }
+    const pendingInst=Math.max(0,totalInst-paidInst);
+    const paidOff=paidInst>=totalInst && pendingInst===0 && pending<=0.009;
+    const pct=total>0?Math.min(100,Math.max(0,paid/total*100)):(paidOff?100:0);
+    const dm=dateMeta(d?.id,d);
+    return {totalInst,paidInst,pendingInst,installment,total,paid,pending,paidOff,pct,first:dm.first,forecast:dm.forecast,closure:dm.closure,finalMonth:(paidOff&&dm.closure)?dm.closure:dm.forecast};
+  }
+
+  function allDebts(){
+    const rows=typeof getDebts==='function'?getDebts(true):[];
+    return rows.map(d=>{const s=state(d);return Object.assign({},d,{banco:'',parcela:s.installment,total:s.total,quitado:s.paid,pendente:s.pending,parcelasTotal:s.totalInst,parcelasQuitadas:s.paidInst,_s:s})});
+  }
+
+  function render(){
+    ensureCompatBank();
+    const section=document.getElementById('dividas'),body=document.getElementById('debtBody'),summary=document.getElementById('debtSummary');
+    const sf=document.getElementById('debtStatusFilterV76'),nf=document.getElementById('debtNegotiationFilterV76'),search=document.getElementById('debtSearch');
+    if(!section||!body||!summary||!sf||!nf||!search)return;
+    document.getElementById('debtLastMonthFilterV77')?.remove();
+    const head=section.querySelector('table thead tr');
+    if(head)head.innerHTML='<th>Descrição</th><th>Credor</th><th>Pendentes</th><th>Quitadas</th><th>Parcela</th><th>Última parcela</th><th>Andamento</th><th>Negociado</th><th>Status</th><th>Pendente</th><th>Ação</th>';
+    if(activeProfile()==='Christian'){
+      summary.innerHTML='';body.innerHTML='<tr><td colspan="11" class="empty">Nenhuma dívida cadastrada para Christian.</td></tr>';return;
+    }
+    const all=allDebts(),q=(search.value||'').toLowerCase().trim(),status=sf.value||'pending',nego=nf.value||'all';
+    const visible=all.filter(x=>{
+      if(x.arquivado)return false;
+      if(q&&![x.descricao,x.credor].join(' ').toLowerCase().includes(q))return false;
+      if(status==='pending'&&x._s.paidOff)return false;
+      if(status==='paid'&&!x._s.paidOff)return false;
+      const isNeg=String(x.negociado||'').toLowerCase()==='sim';
+      if(nego==='negotiated'&&!isNeg)return false;
+      if(nego==='notnegotiated'&&isNeg)return false;
+      return true;
+    });
+    const live=all.filter(x=>!x.arquivado),total=live.reduce((a,x)=>a+n(x.total),0),pend=live.reduce((a,x)=>a+n(x.pendente),0),paid=live.reduce((a,x)=>a+n(x.quitado),0);
+    const neg=live.filter(x=>!x._s.paidOff&&String(x.negociado).toLowerCase()==='sim').reduce((a,x)=>a+n(x.pendente),0);
+    const notneg=live.filter(x=>!x._s.paidOff&&String(x.negociado).toLowerCase()!=='sim').reduce((a,x)=>a+n(x.pendente),0);
+    summary.innerHTML=`<div class="card mini"><span>Total contratado</span><b>${brl(total)}</b></div><div class="card mini"><span>Pendente</span><b class="negative">${brl(pend)}</b></div><div class="card mini"><span>Já quitado</span><b class="positive">${brl(paid)}</b></div><div class="card mini"><span>Pendente negociado</span><b class="blue">${brl(neg)}</b></div><div class="card mini"><span>Pendente não negociado</span><b class="warning">${brl(notneg)}</b></div>`;
+    body.innerHTML=visible.sort((a,b)=>n(b.pendente)-n(a.pendente)).map(x=>{
+      const s=x._s,st=s.paidOff?'Quitado':'Pendente';
+      return `<tr><td><b>${esc(x.descricao||'Dívida')}</b></td><td>${esc(x.credor||'—')}</td><td><b>${s.pendingInst}</b></td><td><b class="positive">${s.paidInst}</b></td><td>${brl(s.installment||0)}</td><td><b>${fmtYM(s.finalMonth)}</b></td><td><div class="debt-progress-wrap"><div class="progress"><i style="width:${s.pct}%"></i></div><small>${s.pct.toFixed(0)}% quitado</small>${!s.paidOff?`<br><button class="debt-action-pay" onclick="openDebtPayment('${x.id}')">✓ pagar / adiantar</button>`:''}</div></td><td><span class="tag ${String(x.negociado).toLowerCase()==='sim'?'green':'amber'}">${esc(x.negociado||'Não')}</span></td><td><span class="tag ${s.paidOff?'green':'red'}">${st}</span></td><td class="money ${s.paidOff?'positive':'negative'}">${brl(s.pending||0)}</td><td class="actioncell"><button class="dots" onclick="openDebtMenu(event,'${x.id}')">⋯</button></td></tr>`;
+    }).join('')||'<tr><td colspan="11" class="empty">Nenhuma dívida neste filtro.</td></tr>';
+    if(typeof installSorters==='function')installSorters(section);
+  }
+
+  function ensureDateFields(){
+    ensureCompatBank();
+    const modal=document.getElementById('debtModal'),qty=document.getElementById('dInstallments');if(!modal||!qty)return;
+    let first=document.getElementById('dFirstMonthV77');
+    if(!first){const f=document.createElement('div');f.className='field';f.id='dFirstMonthFieldV77';f.innerHTML='<label>Primeira parcela</label><input id="dFirstMonthV77" type="month"><small class="debt-month-note">Informe apenas mês e ano.</small>';qty.closest('.field')?.after(f);first=document.getElementById('dFirstMonthV77')}
+    let last=document.getElementById('dLastMonthV77');
+    if(!last){const f=document.createElement('div');f.className='field';f.id='dLastMonthFieldV77';f.innerHTML='<label>Última parcela</label><input id="dLastMonthV77" type="month" readonly><small class="debt-month-note">Prevista automaticamente; quando quitada, registra o mês real de encerramento.</small>';document.getElementById('dFirstMonthFieldV77')?.after(f);last=document.getElementById('dLastMonthV77')}
+    const recalc=()=>{
+      const totalInst=Math.max(1,parseInt(document.getElementById('dInstallments')?.value,10)||1);
+      const paidInst=Math.max(0,parseInt(document.getElementById('dInstallmentsPaid')?.value,10)||0);
+      const start=first.value||'';
+      const paidOff=paidInst>=totalInst;
+      last.readOnly=!paidOff;
+      last.classList.toggle('editable-closure-v16',paidOff);
+      if(!paidOff)last.value=start?addMonths(start,totalInst-1):'';
+      last.title=paidOff?'Mês/ano real em que a dívida foi encerrada. Pode ser corrigido.':'Calculada automaticamente pela primeira parcela e total de parcelas.';
+    };
+    ['input','change'].forEach(ev=>{
+      if(!first.dataset['v16'+ev]){first.dataset['v16'+ev]='1';first.addEventListener(ev,recalc,true)}
+      const p=document.getElementById('dInstallmentsPaid');if(p&&!p.dataset['v16'+ev]){p.dataset['v16'+ev]='1';p.addEventListener(ev,recalc,true)}
+      if(!qty.dataset['v16'+ev]){qty.dataset['v16'+ev]='1';qty.addEventListener(ev,recalc,true)}
+    });
+    window.__ppV16RecalcDebtDates=recalc;
+  }
+
+  function populateModal(){
+    ensureDateFields();
+    const id=String(document.getElementById('dId')?.value||''),d=id?allDebts().find(x=>String(x.id)===id):null;
+    const first=document.getElementById('dFirstMonthV77'),last=document.getElementById('dLastMonthV77');if(!first||!last)return;
+    if(!d){first.value='';last.value='';last.readOnly=true;window.__ppV16RecalcDebtDates?.();return}
+    const s=d._s;first.value=s.first||'';
+    last.readOnly=!s.paidOff;last.classList.toggle('editable-closure-v16',s.paidOff);
+    last.value=s.paidOff?(s.closure||s.forecast||''):(s.forecast||'');
+    last.title=s.paidOff?'Mês/ano real em que a dívida foi encerrada. Pode ser corrigido.':'Calculada automaticamente pela primeira parcela e total de parcelas.';
+  }
+
+  function isolateSaveButton(){
+    const old=document.getElementById('saveDebt');
+    if(old){old.id='saveDebtV16';old.type='button';old.onclick=null}
+    const b=document.getElementById('saveDebtV16');if(b&&!b.dataset.boundV16){b.dataset.boundV16='1';b.addEventListener('click',saveV16)}
+  }
+
+  function saveV16(ev){
+    ev?.preventDefault();ev?.stopPropagation();
+    ensureDateFields();
+    const wasNew=!String(document.getElementById('dId')?.value||'');
+    const id=wasNew?('DEBT_MANUAL_'+Date.now()):String(document.getElementById('dId').value);
+    const desc=(document.getElementById('dDesc')?.value||'').trim(),cred=(document.getElementById('dCreditor')?.value||'').trim();
+    const installment=n(document.getElementById('dInstallment')?.value),totalInst=Math.max(1,parseInt(document.getElementById('dInstallments')?.value,10)||1);
+    const paidInst=Math.max(0,Math.min(totalInst,parseInt(document.getElementById('dInstallmentsPaid')?.value,10)||0));
+    if(!desc)return toast('Informe a descrição da dívida.');if(!cred)return toast('Selecione um credor.');if(!installment)return toast('Informe o valor da parcela.');
+    const total=Number((installment*totalInst).toFixed(2));
+    const paidOff=paidInst>=totalInst;
+    const paid=paidOff?total:Number(Math.min(total,installment*paidInst).toFixed(2));
+    const pending=paidOff?0:Number(Math.max(0,total-paid).toFixed(2));
+    const first=document.getElementById('dFirstMonthV77')?.value||'';
+    const forecast=first?addMonths(first,totalInst-1):'';
+    const lastInput=document.getElementById('dLastMonthV77')?.value||'';
+    const dates=readObj(DATE_KEY),existingDates=dates[id]||{};
+    const closure=paidOff?(validYM(lastInput)?lastInput:(validYM(existingDates.closure)?existingDates.closure:currentYM())):'';
+    dates[id]={first:validYM(first)?first:'',forecast:validYM(forecast)?forecast:'',closure};writeObj(DATE_KEY,dates);
+
+    const edits=readObj(EDIT_KEY),old=edits[id]||{};
+    const patch={...old,descricao:desc,credor:cred,banco:'',parcela:installment,total,quitado:paid,pendente:pending,negociado:document.getElementById('dNegotiated')?.value||'Não',parcelasTotal:totalInst,parcelasQuitadas:paidInst,primeiraParcelaMes:validYM(first)?first:'',ultimaParcelaMes:validYM(forecast)?forecast:'',status:paidOff?'Quitado':'Pendente'};
+    if(paidOff){patch.dataQuitacaoMes=closure;const [y,m]=closure.split('-');patch.ultimoPagamento=`${y}-${m}-01`;patch.ultimoPagamentoHistorico=patch.ultimoPagamento}
+    else{delete patch.dataQuitacaoMes;/* mantém ultimoPagamento como histórico de pagamento parcial, mas ele não define status */}
+    edits[id]=patch;writeObj(EDIT_KEY,edits);try{debtEdits=edits}catch(e){}
+    document.getElementById('dId').value=id;
+    document.getElementById('debtModal')?.classList.remove('open');
+    render();
+    try{window.renderDashboard?.()}catch(e){}try{window.renderProjection?.()}catch(e){}try{window.ppCloudV66?.save?.()}catch(e){}
+    toast(paidOff?'Dívida salva como quitada.':(old.status==='Quitado'||old.pendente===0?'Dívida retornada para pendente.':(wasNew?'Dívida adicionada.':'Dívida atualizada.')));
+  }
+
+  // Modal: deixa o antigo código abrir/preencher os campos, mas o salvamento passa a ser exclusivamente V16.
+  const modal=document.getElementById('debtModal');
+  if(modal){
+    const mo=new MutationObserver(()=>{
+      ensureDateFields();isolateSaveButton();
+      if(modal.classList.contains('open')){setTimeout(populateModal,0);setTimeout(populateModal,60)}
+    });
+    mo.observe(modal,{attributes:true,attributeFilter:['class'],childList:true,subtree:true});
+  }
+
+  // Pagamento/quitação: registra a data de encerramento em chave independente para não ser revertida por rotinas antigas/sync.
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest?.('#debtPayModal .primary,[data-debt-confirm-payment]');if(!btn)return;
+    const id=String(document.getElementById('dpId')?.value||'');if(!id)return;
+    [180,500].forEach(ms=>setTimeout(()=>{
+      const d=allDebts().find(x=>String(x.id)===id);if(!d)return;
+      const map=readObj(DATE_KEY),cur=map[id]||{},s=d._s;
+      if(s.paidOff){cur.closure=currentYM();if(!cur.first&&s.first)cur.first=s.first;if(!cur.forecast&&s.forecast)cur.forecast=s.forecast;map[id]=cur;writeObj(DATE_KEY,map);const edits=readObj(EDIT_KEY);if(edits[id]){edits[id].dataQuitacaoMes=cur.closure;writeObj(EDIT_KEY,edits);try{debtEdits=edits}catch(x){}}}
+      render();
+    },ms));
+  },true);
+
+  // Um único controlador para os filtros visíveis e busca.
+  function filterEvent(e){const id=e.target?.id;if(id==='debtStatusFilterV76'||id==='debtNegotiationFilterV76'||id==='debtSearch'){e.stopImmediatePropagation();setTimeout(render,0)}}
+  document.addEventListener('change',filterEvent,true);document.addEventListener('input',filterEvent,true);
+
+  // Mantém a coluna estável mesmo quando outras áreas pedem uma atualização da página de dívidas.
+  window.renderDebts=render;try{renderDebts=render}catch(e){}
+  window.ppRenderDebtsV16=render;
+
+  // CSS: o mês real de encerramento fica claramente editável apenas quando quitada.
+  if(!document.getElementById('pp-v16-debt-style')){const st=document.createElement('style');st.id='pp-v16-debt-style';st.textContent='#dLastMonthV77.editable-closure-v16{background:#fff;border-color:#0b63f6;cursor:pointer}';document.head.appendChild(st)}
+
+  ensureDateFields();isolateSaveButton();render();
+  setTimeout(()=>{ensureDateFields();isolateSaveButton();render()},150);
+})();
+</script>
