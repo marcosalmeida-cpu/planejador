@@ -14184,36 +14184,123 @@ input[inputmode="decimal"].money-br{text-align:right;font-variant-numeric:tabula
 </script>
 
 
-<script id="pp-v18-cloud-session-reconcile">
+
+
+<script id="pp-v19-unified-cloud-password-auth">
 (function(){
   'use strict';
-  let repairing=false;
-  async function reconcileCloudV18(){
-    if(repairing)return;
-    const sb=window.ppSupabase;
-    if(!sb?.auth)return;
-    repairing=true;
+  const SESSION_KEY='pp_secure_session_v45';
+  const LIMIT_MS=60*60*1000;
+  let busy=false;
+
+  function activeProfile(){try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}}
+  function passKey(p){return 'planejador_password_'+p}
+  function passFor(p){try{return localStorage.getItem(passKey(p))||'123456'}catch(e){return '123456'}}
+  function setSession(profile){
     try{
-      const {data,error}=await sb.auth.getSession();
-      if(error)return;
-      const session=data?.session||null;
-      if(session){
-        // If the underlying Supabase session exists but the v66 controller has
-        // not yet reflected it, re-emit the session through the auth client.
-        if(window.ppCloudV66?.connected && !window.ppCloudV66.connected()){
-          try{await sb.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token})}catch(e){}
-        }
-        const warning=document.getElementById('ppV66CloudWarning');
-        if(warning)warning.style.display='none';
-        const badge=document.getElementById('cloudStatusV40');
-        if(badge){badge.classList.remove('pp-v66-offline','error');badge.classList.add('online')}
-        setTimeout(()=>{try{window.ppCloudV66?.sync?.({reload:false})}catch(e){}},300);
-      }
-    }finally{repairing=false}
+      const now=Date.now();
+      sessionStorage.setItem(SESSION_KEY,JSON.stringify({authenticated:true,profile,startedAt:now,expiresAt:now+LIMIT_MS}));
+      sessionStorage.removeItem('pp_secure_workspace_v45');
+    }catch(e){}
   }
-  setTimeout(reconcileCloudV18,350);
-  setTimeout(reconcileCloudV18,1500);
-  window.addEventListener('focus',()=>setTimeout(reconcileCloudV18,120));
-  window.addEventListener('online',()=>setTimeout(reconcileCloudV18,120));
+  async function refreshCloudPassword(){
+    try{
+      if(window.ppCloudV66?.connected?.()){
+        await window.ppCloudV66.sync({reload:false});
+        // let pullRows/localStorage settle in the same event loop.
+        await new Promise(r=>setTimeout(r,80));
+      }
+    }catch(e){}
+  }
+  function reveal(){
+    try{window.ppRevealAppAfterLogin?.()}catch(e){}
+    document.documentElement.classList.remove('pp-prelogin','pp-session-resume-v45');
+    document.documentElement.classList.add('pp-authenticated');
+    document.body.style.visibility='';document.body.style.opacity='';
+  }
+
+  function patchLogin(){
+    const ov=document.getElementById('loginOverlay');if(!ov||ov.dataset.v19==='1')return;
+    const oldInput=ov.querySelector('#loginPassword');
+    const oldBtn=ov.querySelector('#loginSubmit');
+    if(!oldInput||!oldBtn)return;
+    ov.dataset.v19='1';
+
+    // Rename the controls so every legacy listener that targets the old ids ignores them.
+    oldInput.id='loginPasswordV19';
+    oldBtn.id='loginSubmitV19';
+    oldInput.removeAttribute('maxlength');
+    oldInput.maxLength=64;
+    oldBtn.onclick=null;oldInput.onkeydown=null;
+
+    const attempt=async()=>{
+      if(busy)return;busy=true;
+      const chosen=ov.querySelector('.profile-choice.active')?.dataset.profile||activeProfile();
+      const input=ov.querySelector('#loginPasswordV19');
+      const err=ov.querySelector('#loginError');
+      const typed=input?.value||'';
+      if(err)err.textContent='Verificando senha…';
+      await refreshCloudPassword();
+      const current=passFor(chosen);
+      if(typed!==current){
+        if(err)err.textContent='Senha incorreta.';
+        if(input){input.value='';input.focus()}
+        busy=false;return;
+      }
+      if(err)err.textContent='';
+      setSession(chosen);
+      if(chosen!==activeProfile() && typeof window.ppV46SwitchProfile==='function'){
+        busy=false;
+        window.ppV46SwitchProfile(chosen);
+        return;
+      }
+      try{localStorage.setItem('planejador_active_profile',chosen)}catch(e){}
+      const form=ov.querySelector('#loginForm'),loading=ov.querySelector('#loginLoading');
+      if(form)form.style.display='none';
+      if(loading)loading.style.display='block';
+      ov.querySelector('#successFill')?.classList.add('done');
+      const ok=ov.querySelector('#loginSuccess');if(ok)ok.textContent='Acesso confirmado ✓';
+      setTimeout(()=>{ov.remove();reveal();try{window.ppCloudV66?.sync?.({reload:false})}catch(e){}},220);
+      busy=false;
+    };
+    oldBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();attempt()},true);
+    oldInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();attempt()}},true);
+    setTimeout(()=>oldInput.focus(),20);
+  }
+
+  function patchPasswordPanel(){
+    const modal=document.getElementById('profilePanelModal');if(!modal)return;
+    const btn=document.getElementById('saveProfilePass');if(!btn||btn.dataset.v19==='1')return;
+    btn.dataset.v19='1';
+    // Replace the old onclick so one save path owns password changes.
+    btn.onclick=async e=>{
+      e?.preventDefault();
+      if(busy)return;busy=true;
+      const profile=activeProfile();
+      const old=document.getElementById('oldProfilePass')?.value||'';
+      const nw=document.getElementById('newProfilePass')?.value||'';
+      const cf=document.getElementById('confirmProfilePass')?.value||'';
+      const msg=document.getElementById('profilePasswordMessage');
+      if(msg){msg.classList.remove('password-success');msg.textContent='Verificando senha…'}
+      await refreshCloudPassword();
+      if(old!==passFor(profile)){if(msg)msg.textContent='A senha atual está incorreta.';busy=false;return}
+      if(nw.length<6){if(msg)msg.textContent='A nova senha precisa ter pelo menos 6 caracteres.';busy=false;return}
+      if(nw!==cf){if(msg)msg.textContent='A confirmação não corresponde à nova senha.';busy=false;return}
+      localStorage.setItem(passKey(profile),nw);
+      // Force an immediate global-key scan/save instead of waiting for the background loop.
+      try{await window.ppCloudV66?.save?.()}catch(e){}
+      if(msg){msg.textContent='Senha alterada e salva na nuvem.';msg.classList.add('password-success')}
+      ['oldProfilePass','newProfilePass','confirmProfilePass'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+      busy=false;
+    };
+    const p=modal.querySelector('.password-box p');if(p)p.textContent='A nova senha será sincronizada na nuvem e usada em todos os aparelhos conectados.';
+  }
+
+  // New login/switch overlays can be recreated several times; patch each instance.
+  const mo=new MutationObserver(()=>{patchLogin();patchPasswordPanel()});
+  mo.observe(document.documentElement,{childList:true,subtree:true});
+  patchLogin();patchPasswordPanel();
+  setTimeout(()=>{patchLogin();patchPasswordPanel()},100);
+  setTimeout(()=>{patchLogin();patchPasswordPanel()},700);
 })();
 </script>
