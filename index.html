@@ -1306,6 +1306,7 @@ html.pp-session-resume-v45 #loginOverlay{display:none!important}
       || k==='planejador_profiles_v46'
       || k.startsWith('planejador_cloud_')
       || k.startsWith('planejador_password_')
+      || k.startsWith('planejador_invoice_status_v50_')
       || k.startsWith(STATE_PREFIX);
   }
   function isProfileKey(k){
@@ -7401,7 +7402,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     });
     for(let i=0;i<localStorage.length;i++){
       const k=localStorage.key(i)||'';
-      if(k.startsWith('rgps_'))out[k]=localStorage.getItem(k);
+      if(k.startsWith('rgps_')||k.startsWith('planejador_invoice_status_v50_'))out[k]=localStorage.getItem(k);
     }
     return out;
   }
@@ -7673,7 +7674,8 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     }finally{applyingRemote=false}
 
     if(changedActive&&reload){
-      try{window.ppSessionV47?.captureWorkspace?.()}catch(e){}
+      // Do not rehydrate stale form fields from another profile on cloud refresh.
+      try{sessionStorage.removeItem('pp_secure_workspace_v45')}catch(e){}
       setTimeout(()=>location.reload(),30);
     }else if(changedActive){
       try{
@@ -7702,6 +7704,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     }finally{syncBusy=false}
   }
   async function initialize(){
+    const workspaceBefore=JSON.stringify(profileState(activeProfile()));
     const rows=await fetchRows();
     if(rows===null)return;
 
@@ -7716,10 +7719,13 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     }else{
       // Existing server becomes canonical on a new device.
       // Local copy has already been backed up, so nothing is silently lost.
-      for(const row of rows){
-        revisions.set(rk(row.profile,row.storage_key),Number(row.revision||0));
-      }
+      // Only baseline the revision map when performing a FIRST DEVICE import.
+      // On a returning device revisions is empty after reload, so pre-seeding it
+      // here would make pullRows skip EVERY server row as already up-to-date.
       if(firstOnThisDevice){
+        for(const row of rows){
+          revisions.set(rk(row.profile,row.storage_key),Number(row.revision||0));
+        }
         // Baseline observed to server values, then apply server.
         for(const row of rows){
           observed.set(rk(row.profile,row.storage_key),row.deleted?null:normalizeValue(row.storage_key,row.value));
@@ -7733,7 +7739,9 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
           }
         }finally{applyingRemote=false}
       }else{
-        // Returning device: server revision wins unless this exact key is dirty locally.
+        // Returning device: preserve a full snapshot, then actually apply server rows.
+        // The revision map MUST still be empty for pullRows to see the new rows.
+        await backupThisDevice('before-returning-sync');
         await pullRows(rows,{reload:false});
       }
     }
@@ -7746,11 +7754,18 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     subscribeRealtime();
     await touchPresence();
     status('online','Tempo real ativo');
+    // On a device already logged in, load data from the cloud into the actual
+    // in-memory app, not merely into localStorage underneath old arrays.
+    const workspaceAfter=JSON.stringify(profileState(activeProfile()));
+    if(workspaceBefore!==workspaceAfter){
+      try{sessionStorage.removeItem('pp_secure_workspace_v45')}catch(e){}
+      setTimeout(()=>location.reload(),120);
+    }
   }
   function startLoops(){
     if(!monitorTimer)monitorTimer=setInterval(scan,150);
     if(!pollTimer)pollTimer=setInterval(()=>{
-      if(!document.hidden&&currentUser&&initialized)syncCycle({reload:false});
+      if(!document.hidden&&currentUser&&initialized)syncCycle({reload:true});
     },2500);
     if(!presenceTimer)presenceTimer=setInterval(touchPresence,30000);
   }
@@ -16453,3 +16468,82 @@ window.ppProfileAuditV56={active:current,hasSaved:p=>!!PM.readState(p),save:mirr
     profiles:['Marcos','Christian'].map(name=>({name,hasData:!!PM.readState(name),keys:Object.keys(PM.readState(name)||{}).length}))})};
 })();
 </script>
+
+<style id="pp-v57-cloud-account-diagnostics-style">
+#ppV57Audit{position:fixed;right:12px;bottom:56px;z-index:9900;font:600 11px/1.4 system-ui,Arial;background:#fff;color:#26374e;border:1px solid #d8e0ea;border-radius:12px;box-shadow:0 5px 19px #14233e19;padding:9px 12px;max-width:min(355px,92vw)}
+#ppV57Audit button{background:transparent;border:1px solid #cdd9e6;border-radius:8px;color:#1355be;font:800 10px system-ui;padding:5px 8px;cursor:pointer;margin-left:6px}
+#ppV57Audit .v57warn{color:#a64818;font-size:10px;display:block;font-weight:650;margin-top:4px}
+#ppV57Dialog{position:fixed;inset:0;background:#0b2039b3;display:grid;place-items:center;z-index:25000;padding:15px;font:12px/1.65 system-ui}
+#ppV57Dialog>section{background:white;color:#24334e;border-radius:18px;padding:23px;width:min(560px,98vw);max-height:85vh;overflow:auto;box-shadow:0 28px 80px #0003}
+#ppV57Dialog h2{font-size:20px;margin:0 0 9px}#ppV57Dialog b{color:#17365a}
+#ppV57Dialog button{border:0;border-radius:10px;background:#075eea;color:white;padding:9px 17px;cursor:pointer;font-weight:800}
+#ppV57Dialog .v57row{border-bottom:1px solid #e5edf6;padding:7px 0}
+</style>
+<script id="pp-v57-cloud-account-diagnostics-final">
+(()=>{
+'use strict';
+const PM=window.__ppV41Profile;
+const acct=window.ppCloudV66;
+const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+function labelCount(p){
+  try{
+    const s=PM?.readState(p)||{};
+    const arr=['financeiro_marcos_custom_tx_v3','financeiro_marcos_cards_v3','financeiro_marcos_card_purchases_v3','financeiro_marcos_debt_edits_v3'];
+    return arr.map(k=>{let v=JSON.parse(s[k]|| (k.endsWith('edits_v3')?'{}':'[]'));return Array.isArray(v)?v.length:Object.keys(v||{}).length}).join(' / ');
+  }catch(e){return 'Indisponível'}
+}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+let lastEmail=null;
+async function session(){
+  try{
+    const {data,error}=await acct?.client?.auth?.getSession();
+    if(error)throw error;
+    return data?.session?.user||null;
+  }catch(e){return null}
+}
+async function audit(){
+  const u=await session();
+  let server=[],err='';
+  if(u&&acct?.client){
+    try{
+      const r=await acct.client.from('planner_key_state_v65').select('profile,storage_key,updated_at,deleted,source_device').eq('user_id',u.id);
+      if(r.error)throw r.error;
+      server=r.data||[];
+    }catch(e){err='Falha ao consultar a nuvem: '+e.message}
+  }
+  const counts=p=>server.filter(x=>x.profile===p&&!x.deleted).length;
+  const latest=p=>server.filter(x=>x.profile===p&&x.updated_at).map(x=>x.updated_at).sort().slice(-1)[0]||'—';
+  const dialog=document.createElement('div');dialog.id='ppV57Dialog';
+  dialog.innerHTML=`<section><h2>Conferência de perfis e nuvem</h2>
+    <div class="v57row"><b>Perfil aberto:</b> ${esc(profile())}</div>
+    <div class="v57row"><b>Conta de nuvem neste computador:</b><br>${u?esc(u.email):'Não conectada'}</div>
+    <div class="v57row"><b>Marcos:</b> ${counts('Marcos')} registros ativos na conta de nuvem; última atualização ${esc(latest('Marcos'))}</div>
+    <div class="v57row"><b>Christian:</b> ${counts('Christian')} registros ativos na conta de nuvem; última atualização ${esc(latest('Christian'))}</div>
+    <div class="v57row"><b>Dados locais (lançamentos / cartões / compras / dívidas editadas):</b><br>
+      Marcos: ${esc(labelCount('Marcos'))}<br>Christian: ${esc(labelCount('Christian'))}</div>
+    ${err?`<p style="color:#a33">${esc(err)}</p>`:''}
+    <p><b>Importante:</b> os dois computadores precisam estar conectados à <b>mesma conta de nuvem</b> para acessar os mesmos registros. A senha de perfil não conecta contas de nuvem diferentes. Compare o e-mail exibido aqui com o do computador do Christian.</p>
+    <p>Se o Christian atualizou os dados usando outra conta de nuvem, esses registros não estão acessíveis nesta conta. Não substitua nem apague registros para tentar corrigir isso. Faça backups dos dois computadores antes de importar dados.</p>
+    <p><small>Esta tela só consulta metadados; não altera nem copia dados de nenhum perfil.</small></p>
+    <button id="ppV57Close">Fechar</button>
+  </section>`;
+  document.getElementById('ppV57Dialog')?.remove();document.body.appendChild(dialog);
+  dialog.querySelector('#ppV57Close').onclick=()=>dialog.remove();
+  dialog.addEventListener('click',e=>{if(e.target===dialog)dialog.remove()});
+}
+async function badge(){
+  const user=await session();
+  const email=user?.email||'Desconectada';
+  const b=document.getElementById('ppV57Audit')||document.createElement('div');
+  b.id='ppV57Audit';
+  b.innerHTML=`Perfil: <b>${esc(profile())}</b> · Nuvem: <b>${esc(email)}</b> <button type="button">Conferir</button>${!user?'<span class="v57warn">Dados de outros computadores indisponíveis enquanto desconectado.</span>':''}`;
+  b.querySelector('button').onclick=audit;
+  if(!b.isConnected)document.body.appendChild(b);
+  lastEmail=email;
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(badge,1000),{once:true});
+else setTimeout(badge,1000);
+window.ppProfileCloudAuditV57={show:audit,refresh:badge};
+})();
+</script>
+
