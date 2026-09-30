@@ -1373,23 +1373,39 @@ html.pp-session-resume-v45 #loginOverlay{display:none!important}
 
   // First migration: everything that existed before independent profiles belongs to Marcos.
   if(localStorage.getItem(INIT_KEY)!=='1'){
-    saveState('Marcos',captureShared());
-    saveState('Christian',blankChristian());
+    // Keep all pre-existing per-profile data when upgrading from another copy.
+    if(!readState('Marcos'))saveState('Marcos',captureShared());
+    if(!readState('Christian'))saveState('Christian',blankChristian());
     localStorage.setItem(CHRISTIAN_RESET,'1');
     localStorage.setItem(INIT_KEY,'1');
   } else if(localStorage.getItem(CHRISTIAN_RESET)!=='1'){
-    // Explicit one-time reset requested: Christian starts from zero, password is untouched.
-    saveState('Christian',blankChristian());
+    // Do not erase a returning user's Christian data merely because a flag is absent.
+    if(!readState('Christian'))saveState('Christian',blankChristian());
     localStorage.setItem(CHRISTIAN_RESET,'1');
   }
 
+  const MATERIALIZED='pp_profile_materialized_v56';
+  const RECOVERY='pp_profile_recovery_v56';
   let active=localStorage.getItem('planejador_active_profile')||'Marcos';
   let st=readState(active);
+  const previousMaterialized=localStorage.getItem(MATERIALIZED);
+  const existingShared=captureShared();
+  // Save a one-time LOCAL recovery snapshot before any replacement. No automatic deletion.
+  if(!localStorage.getItem(RECOVERY)){
+    try{localStorage.setItem(RECOVERY,JSON.stringify({date:new Date().toISOString(),active,shared:existingShared,Marcos:readState('Marcos'),Christian:readState('Christian')}))}catch(e){}
+  }
+  // On subsequent loads, the workspace may have newer edits than its mirror.
+  // Trust it ONLY if we know it belongs to the same profile; never relabel it.
+  if(previousMaterialized===active && Object.keys(existingShared).length){
+    st=Object.assign({},st||{},existingShared);
+    saveState(active,st);
+  }
   if(!st){
-    st=active==='Christian'?blankChristian():captureShared();
+    st=active==='Christian'?blankChristian():existingShared;
     saveState(active,st);
   }
   applyState(st);
+  localStorage.setItem(MATERIALIZED,active);
 
   window.__ppV41Profile={
     isProfileKey, captureShared, blankChristian, stateKey, readState, saveState, applyState
@@ -7265,71 +7281,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
 </style>
 
 
-<script id="pp-v63-christian-cleanup">
-(function(){
-  const DONE='planejador_christian_limpeza_v63';
-  if(localStorage.getItem(DONE)==='1')return;
-
-  const PM=window.__ppV41Profile;
-  const PROFILE='Christian';
-
-  function cleanChristianState(state){
-    const s=Object.assign({},state||{});
-
-    // FGTS: zera saldos e remove histórico/lista de antecipações.
-    s['financeiro_marcos_fgts_summary_v3']=JSON.stringify({
-      saldoAtual:0,
-      saldoBloqueado:0,
-      saldoRescisao:0,
-      saldoDisponivel:0
-    });
-    s['planejador_fgts_item_edits_v1']='{}';
-    s['planejador_fgts_quitados_visiveis']='0';
-
-    // Dívidas / histórico de dívidas / credores.
-    s['financeiro_marcos_debt_edits_v3']='{}';
-    s['financeiro_marcos_debt_archived_v3']='[]';
-    s['financeiro_marcos_debt_deleted_v3']='[]';
-    s['planejador_creditores_v1']='[]';
-
-    return s;
-  }
-
-  try{
-    if(PM){
-      const prior=PM.readState(PROFILE)||{};
-      const cleaned=cleanChristianState(prior);
-      PM.saveState(PROFILE,cleaned);
-
-      // Se Christian estiver aberto agora, limpa também a área de trabalho ativa.
-      if((localStorage.getItem('planejador_active_profile')||'Marcos')===PROFILE){
-        PM.applyState(cleaned);
-      }
-    }else{
-      const key='planejador_profile_state_Christian_v41';
-      let prior={};
-      try{prior=JSON.parse(localStorage.getItem(key)||'{}')}catch(e){}
-      localStorage.setItem(key,JSON.stringify(cleanChristianState(prior)));
-    }
-
-    // Previdência Social do Christian: começa totalmente vazia para cadastro manual.
-    localStorage.removeItem('rgps_previdencia_v55_Christian');
-    localStorage.removeItem('planejador_previdencia_rgps_v51_Christian');
-
-    // Marca especificamente o perfil Christian como alterado para a sincronização v62.
-    try{
-      const revKey='ppsync_profile_revisions_v62';
-      const rev=JSON.parse(localStorage.getItem(revKey)||'{}')||{};
-      rev[PROFILE]=Date.now();
-      localStorage.setItem(revKey,JSON.stringify(rev));
-    }catch(e){}
-
-    localStorage.setItem(DONE,'1');
-  }catch(err){
-    console.error('Falha na limpeza isolada do perfil Christian',err);
-  }
-})();
-</script>
+<!-- v56: removed obsolete, destructive first-run Christian reset; existing records remain untouched. -->
 
 
 <script id="pp-v65-card-duplicate-repair">
@@ -8601,16 +8553,18 @@ Os dados atuais deste navegador serão substituídos.`);
   // Generic profile switching: works for Marcos, Christian and future profiles.
   window.ppV41SwitchProfile=window.ppV42SwitchProfile=window.ppV46SwitchProfile=function(profile){
     if(!profile||profile===active())return;
-    try{window.ppV42SaveProfileState?.()}catch(e){}
     if(PM){
+      // Snapshot belongs to the OLD profile. Save it before the active-profile key changes.
+      PM.saveState(active(),PM.captureShared());
       let target=PM.readState(profile);
       if(!target){
-        target=profile==='Marcos'?PM.captureShared():blankState();
+        target=blankState();
         PM.saveState(profile,target);
       }
       PM.applyState(target);
     }
     localStorage.setItem('planejador_active_profile',profile);
+    localStorage.setItem('pp_profile_materialized_v56',profile);
 
     // Keep the 30-minute authenticated session attached to the selected profile.
     try{
@@ -10490,7 +10444,7 @@ setTimeout(()=>{prepare39(document.getElementById('cpCategory')?.value);const ad
 <script id="pp-v50-purchase-stability-invoice-status">
 (()=>{
 'use strict';
-function profile(){try{return typeof activeProfile==='function'?String(activeProfile()):String(localStorage.getItem('financeiro_active_profile')||localStorage.getItem('activeProfile')||'marcos')}catch(e){return 'marcos'}}
+function profile(){try{return typeof activeProfile==='function'?String(activeProfile()):String(localStorage.getItem('planejador_active_profile')||'Marcos')}catch(e){return 'marcos'}}
 function key(){return 'planejador_invoice_status_v50_'+profile().toLowerCase()}
 function read(){try{return JSON.parse(localStorage.getItem(key())||'{}')||{}}catch(e){return {}}}
 function write(o){try{localStorage.setItem(key(),JSON.stringify(o))}catch(e){}try{window.ppCloudV66?.save?.()}catch(e){}}
@@ -16322,7 +16276,7 @@ function profile55(){
   try{
     if(typeof activeProfile==='function') return String(activeProfile()).toLowerCase();
   }catch(e){}
-  return String(localStorage.getItem('financeiro_active_profile')||localStorage.getItem('activeProfile')||'marcos').toLowerCase();
+  return String(localStorage.getItem('planejador_active_profile')||'Marcos').toLowerCase();
 }
 function statusKey55(){ return 'planejador_invoice_status_v50_'+profile55(); }
 function read55(){ try{return JSON.parse(localStorage.getItem(statusKey55())||'{}')||{}}catch(e){return {}} }
@@ -16453,3 +16407,49 @@ setTimeout(patch55,300);
 })();
 </script>
 
+<script id="pp-v56-profile-safety-final">
+(()=>{
+'use strict';
+const PM=window.__ppV41Profile;
+if(!PM)return;
+const marker='pp_profile_materialized_v56';
+const current=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+let last=current();
+let saved='';
+const serialize=()=>JSON.stringify(PM.captureShared());
+function mirror(){
+  const p=current();
+  if(p!==last){
+    // Another routine switched name without switching the actual workspace.
+    // Do not save the previous person's workspace under the new name.
+    return;
+  }
+  try{
+    const fresh=serialize();
+    if(fresh!==saved){PM.saveState(p,JSON.parse(fresh));saved=fresh}
+    localStorage.setItem(marker,p);
+  }catch(e){console.warn('Não foi possível guardar o perfil atual',e)}
+}
+// Capture normal module edits, including those saved outside persist(). No DOM observers.
+saved=serialize();
+mirror();
+window.addEventListener('pagehide',mirror,{capture:true});
+window.addEventListener('beforeunload',mirror,{capture:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)mirror()});
+const timer=setInterval(mirror,1200);
+// Single verified switch function for explicit profile UI paths.
+const switchProfile=window.ppV46SwitchProfile||window.ppV41SwitchProfile;
+if(typeof switchProfile==='function'){
+  const wrapped=function(p){
+    if(p===current())return;
+    mirror();
+    return switchProfile(p);
+  };
+  window.ppV41SwitchProfile=window.ppV42SwitchProfile=window.ppV46SwitchProfile=wrapped;
+}
+window.ppV42SaveProfileState=mirror;
+window.ppProfileAuditV56={active:current,hasSaved:p=>!!PM.readState(p),save:mirror,
+  status:()=>({active:current(),materialized:localStorage.getItem(marker),
+    profiles:['Marcos','Christian'].map(name=>({name,hasData:!!PM.readState(name),keys:Object.keys(PM.readState(name)||{}).length}))})};
+})();
+</script>
