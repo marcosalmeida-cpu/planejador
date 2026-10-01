@@ -21062,3 +21062,317 @@ window.ppLaunchSummaryV75={refresh:renderSummary75};
 })();
 </script>
 
+<style id="pp-v76-blue-interactive-header">
+:root{
+  --v76-blue:#0c2f66;
+  --v76-blue2:#0a2450;
+  --v76-blue3:#123f82;
+  --v76-glow:rgba(18,63,130,.28);
+}
+
+/* Barra e menu em azul escuro vivo premium */
+.topinner{
+  background:linear-gradient(135deg,var(--v76-blue3),var(--v76-blue) 52%,var(--v76-blue2))!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  box-shadow:0 18px 42px rgba(10,36,80,.24)!important;
+}
+.nav{
+  background:linear-gradient(180deg,#123d7b,#0b2c60)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  box-shadow:0 28px 70px rgba(7,28,62,.34)!important;
+}
+.nav button.active{
+  background:rgba(255,255,255,.13)!important;
+  color:#fff!important;
+  box-shadow:inset 3px 0 0 rgba(255,255,255,.75)!important;
+}
+.nav button:hover{background:rgba(255,255,255,.09)!important}
+.topinner .brandmark,
+.profile-man{
+  color:#fff!important;
+  background:rgba(255,255,255,.10)!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important;
+}
+.menu-trigger{
+  background:rgba(255,255,255,.08)!important;
+  border-color:rgba(255,255,255,.17)!important;
+}
+.topinner .actions .primary{
+  background:#fff!important;
+  color:#0c2f66!important;
+  border-color:#fff!important;
+}
+.topinner .actions .iconbtn{
+  background:rgba(255,255,255,.07)!important;
+  border-color:rgba(255,255,255,.14)!important;
+  color:#fff!important;
+}
+
+/* Transição da barra original */
+.topbar{
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),opacity .22s ease!important;
+}
+body.v76-split-header .topbar{
+  transform:translateY(calc(-100% - 18px))!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+
+/* Menu lateral compacto automático */
+#v76FloatNav{
+  position:fixed;
+  left:14px;
+  top:50%;
+  transform:translate(-120px,-50%);
+  opacity:0;
+  pointer-events:none;
+  z-index:95;
+  width:50px;
+  padding:7px;
+  border-radius:17px;
+  background:linear-gradient(180deg,#123d7b,#0a2858);
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:0 18px 50px rgba(8,31,70,.28);
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),opacity .22s ease;
+  display:grid;
+  gap:5px;
+}
+body.v76-split-header #v76FloatNav{
+  transform:translate(0,-50%);
+  opacity:1;
+  pointer-events:auto;
+}
+#v76FloatNav button{
+  width:36px;
+  height:36px;
+  border:0;
+  border-radius:11px;
+  display:grid;
+  place-items:center;
+  background:transparent;
+  color:rgba(255,255,255,.78);
+  cursor:pointer;
+  font-size:0;
+  position:relative;
+}
+#v76FloatNav button:hover{
+  background:rgba(255,255,255,.10);
+  color:#fff;
+}
+#v76FloatNav button.active{
+  background:rgba(255,255,255,.16);
+  color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+}
+#v76FloatNav button:before{
+  margin:0!important;
+  width:auto!important;
+  font-size:17px!important;
+  line-height:1!important;
+}
+#v76FloatNav button[data-view="dashboard"]:before{content:"⌂"}
+#v76FloatNav button[data-view="lancamentos"]:before{content:"↕"}
+#v76FloatNav button[data-view="cartoes"]:before{content:"▣"}
+#v76FloatNav button[data-view="dividas"]:before{content:"◴"}
+#v76FloatNav button[data-view="fgts"]:before{content:"◇"}
+#v76FloatNav button[data-view="previdencia"]:before{content:"◎"}
+#v76FloatNav button[data-view="investimentos"]:before{content:"↗"}
+#v76FloatNav button[data-view="patrimonio"]:before{content:"⌂"}
+#v76FloatNav button[data-view="projecao"]:before{content:"⌁"}
+#v76FloatNav button[data-view="nuvem"]:before{content:"☁"}
+
+/* Card flutuante do perfil */
+#v76ProfilePod{
+  position:fixed;
+  right:14px;
+  top:18px;
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  background:linear-gradient(145deg,#123d7b,#0a2858);
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:0 16px 44px rgba(8,31,70,.26);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  z-index:95;
+  transform:translateY(-90px);
+  opacity:0;
+  pointer-events:none;
+  cursor:pointer;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),opacity .22s ease;
+}
+body.v76-split-header #v76ProfilePod{
+  transform:translateY(0);
+  opacity:1;
+  pointer-events:auto;
+}
+#v76ProfilePod svg{
+  width:26px;height:26px;
+  fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+
+/* pequena assinatura visual no estado flutuante */
+#v76FloatNav:after{
+  content:"";
+  width:20px;height:2px;border-radius:999px;
+  background:rgba(255,255,255,.25);
+  justify-self:center;margin:2px 0 0;
+}
+
+@media(max-width:760px){
+  #v76FloatNav{left:8px;width:46px;border-radius:15px;padding:5px}
+  #v76FloatNav button{width:34px;height:34px;border-radius:10px}
+  #v76ProfilePod{right:8px;top:10px;width:44px;height:44px;border-radius:14px}
+}
+@media(max-width:520px){
+  /* Em celular pequeno mantém a barra normal para não ocupar a área útil */
+  body.v76-split-header .topbar{
+    transform:none!important;opacity:1!important;pointer-events:auto!important;
+  }
+  #v76FloatNav,#v76ProfilePod{display:none!important}
+}
+</style>
+
+<script id="pp-v76-blue-interactive-header-final">
+(()=>{
+'use strict';
+
+let ticking76=false;
+let lastY76=0;
+
+function iconSvg76(){
+  return `<svg viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="7.2" r="3.2"/>
+    <path d="M5.2 20c.5-4.3 2.8-6.5 6.8-6.5s6.3 2.2 6.8 6.5"/>
+    <path d="M8.8 14.2 12 17l3.2-2.8"/>
+  </svg>`;
+}
+
+function ensureFloating76(){
+  if(!document.getElementById('v76FloatNav')){
+    const rail=document.createElement('div');
+    rail.id='v76FloatNav';
+    rail.setAttribute('aria-label','Navegação rápida');
+
+    document.querySelectorAll('#nav button[data-view]').forEach(src=>{
+      const b=document.createElement('button');
+      b.type='button';
+      b.dataset.view=src.dataset.view;
+      b.title=src.textContent.trim();
+      b.setAttribute('aria-label',src.textContent.trim());
+      if(src.classList.contains('active'))b.classList.add('active');
+      b.onclick=()=>{
+        try{window.showView?.(b.dataset.view)}catch(e){}
+        syncActive76();
+      };
+      rail.appendChild(b);
+    });
+    document.body.appendChild(rail);
+  }
+
+  if(!document.getElementById('v76ProfilePod')){
+    const pod=document.createElement('button');
+    pod.id='v76ProfilePod';
+    pod.type='button';
+    pod.title='Perfil';
+    pod.setAttribute('aria-label','Abrir perfil');
+    pod.innerHTML=iconSvg76();
+    pod.onclick=()=>{
+      const original=document.querySelector('.profile-man');
+      if(original)original.click();
+      else if(typeof window.reopenLogin==='function')window.reopenLogin();
+    };
+    document.body.appendChild(pod);
+  }
+}
+
+function syncActive76(){
+  const active=document.querySelector('#nav button.active')?.dataset.view;
+  document.querySelectorAll('#v76FloatNav button[data-view]').forEach(b=>{
+    b.classList.toggle('active',b.dataset.view===active);
+  });
+}
+
+function activeViewHasOwnStaticMenu76(){
+  const view=document.querySelector('.view.active');
+  if(!view)return false;
+
+  /* Detecta menus/controles realmente fixos ou sticky dentro da página ativa.
+     A barra global, modais e elementos invisíveis são ignorados. */
+  const candidates=[...view.querySelectorAll('nav,.sticky,.sticky-menu,.tabs,.tabbar,.section-nav,[data-sticky-menu]')];
+  return candidates.some(el=>{
+    const cs=getComputedStyle(el);
+    const r=el.getBoundingClientRect();
+    if(r.width<20||r.height<20||cs.display==='none'||cs.visibility==='hidden')return false;
+    return cs.position==='sticky'||cs.position==='fixed'||el.hasAttribute('data-sticky-menu');
+  });
+}
+
+function shouldSplit76(){
+  if(window.innerWidth<=520)return false;
+  if(window.scrollY<170)return false;
+  if(activeViewHasOwnStaticMenu76())return false;
+  if(document.querySelector('.modalback.open,.login-overlay'))return false;
+  return true;
+}
+
+function apply76(){
+  ticking76=false;
+  const split=shouldSplit76();
+  document.body.classList.toggle('v76-split-header',split);
+  syncActive76();
+}
+
+function schedule76(){
+  lastY76=window.scrollY;
+  if(ticking76)return;
+  ticking76=true;
+  requestAnimationFrame(apply76);
+}
+
+ensureFloating76();
+syncActive76();
+apply76();
+
+window.addEventListener('scroll',schedule76,{passive:true});
+window.addEventListener('resize',schedule76,{passive:true});
+
+document.addEventListener('click',e=>{
+  if(
+    e.target.closest?.('#nav button[data-view]') ||
+    e.target.closest?.('#v76FloatNav button[data-view]') ||
+    e.target.closest?.('[data-view]')
+  ){
+    setTimeout(()=>{
+      syncActive76();
+      apply76();
+    },30);
+  }
+},false);
+
+/* Se showView for chamado por outro script, a barra se recompõe no topo e
+   volta ao modo flutuante apenas depois de uma nova rolagem. */
+const previousShow76=window.showView;
+if(typeof previousShow76==='function'&&!previousShow76.__v76){
+  const wrapped=function(){
+    document.body.classList.remove('v76-split-header');
+    const r=previousShow76.apply(this,arguments);
+    setTimeout(()=>{syncActive76();apply76()},350);
+    return r;
+  };
+  wrapped.__v76=true;
+  window.showView=wrapped;
+  try{showView=wrapped}catch(e){}
+}
+
+window.ppInteractiveHeaderV76={
+  refresh:()=>{ensureFloating76();syncActive76();apply76()},
+  split:()=>document.body.classList.add('v76-split-header'),
+  normal:()=>document.body.classList.remove('v76-split-header')
+};
+})();
+</script>
+
