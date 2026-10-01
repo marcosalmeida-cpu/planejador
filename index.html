@@ -21376,3 +21376,38 @@ window.ppInteractiveHeaderV76={
 })();
 </script>
 
+<style id="pp-v77-swap-interactive-header">
+/* V77 — mantém estética V76 e apenas inverte os lados no modo interativo */
+
+/* Menu compacto passa para a direita */
+#v76FloatNav{
+  left:auto!important;
+  right:14px!important;
+  transform:translate(120px,-50%)!important;
+}
+body.v76-split-header #v76FloatNav{
+  transform:translate(0,-50%)!important;
+}
+
+/* Perfil passa para a esquerda */
+#v76ProfilePod{
+  right:auto!important;
+  left:14px!important;
+  transform:translateY(-90px)!important;
+}
+body.v76-split-header #v76ProfilePod{
+  transform:translateY(0)!important;
+}
+
+@media(max-width:760px){
+  #v76FloatNav{
+    left:auto!important;
+    right:8px!important;
+  }
+  #v76ProfilePod{
+    right:auto!important;
+    left:8px!important;
+  }
+}
+</style>
+
