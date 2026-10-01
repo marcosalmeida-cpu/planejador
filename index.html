@@ -21411,3 +21411,396 @@ body.v76-split-header #v76ProfilePod{
 }
 </style>
 
+<style id="pp-v78-premium-site-theme">
+:root{
+  --v78-navy:#0c2f66;
+  --v78-navy-2:#10254b;
+  --v78-ink:#161b25;
+  --v78-ink-soft:#29303d;
+  --v78-surface:#f7f8fa;
+  --v78-surface-2:#f0f2f5;
+  --v78-border:#dde2e9;
+  --v78-muted:#747e8e;
+  --v78-shadow:0 14px 38px rgba(20,31,50,.075);
+  --v78-shadow-soft:0 8px 24px rgba(20,31,50,.055);
+}
+
+/* Atmosfera geral: clara, porém mais sóbria */
+html,body{
+  background:
+    radial-gradient(circle at 15% 0%,rgba(12,47,102,.055),transparent 34%),
+    linear-gradient(180deg,#eef1f4 0%,#e9edf1 100%)!important;
+  color:var(--v78-ink)!important;
+}
+.main{
+  background:transparent!important;
+}
+.card,.panel,.plan-card,.annual-card,.capacity-card,.six-month-card,
+.projection-hero-card,.investment-card,.debt-card{
+  background:linear-gradient(180deg,#fafbfc,#f5f7f9)!important;
+  border-color:var(--v78-border)!important;
+  box-shadow:var(--v78-shadow-soft)!important;
+}
+.panelhead{
+  border-bottom-color:#e4e8ee!important;
+}
+.panelhead h2,.section-tools h2,.hero h1{
+  color:#151b26!important;
+}
+.panelhead span,.section-tools p,.hero p{
+  color:var(--v78-muted)!important;
+}
+
+/* Filtros e campos com acabamento mais refinado */
+select,input,textarea{
+  border-color:#d6dce5!important;
+  background:#f9fafb!important;
+}
+select:focus,input:focus,textarea:focus{
+  border-color:#5479ad!important;
+  box-shadow:0 0 0 3px rgba(12,47,102,.08)!important;
+}
+
+/* tabelas */
+.tablewrap{
+  background:#f8f9fb!important;
+  border-color:#dfe4eb!important;
+  box-shadow:0 10px 26px rgba(21,31,48,.045)!important;
+}
+table thead th{
+  background:#eef1f5!important;
+  color:#687386!important;
+}
+table tbody tr:hover{
+  background:#f0f4f9!important;
+}
+
+/* Visão Geral */
+#dashboardKpis{
+  gap:11px!important;
+}
+#dashboardKpis .kpi{
+  background:linear-gradient(160deg,#f9fafb,#eef2f6)!important;
+  border:1px solid #dce2e9!important;
+  box-shadow:0 12px 30px rgba(19,32,53,.06)!important;
+  border-top:0!important;
+  min-height:128px!important;
+  padding:16px!important;
+}
+#dashboardKpis .kpi:nth-child(1){box-shadow:inset 0 3px 0 #214f8e,var(--v78-shadow-soft)!important}
+#dashboardKpis .kpi:nth-child(2){box-shadow:inset 0 3px 0 #7c3f47,var(--v78-shadow-soft)!important}
+#dashboardKpis .kpi:nth-child(3){box-shadow:inset 0 3px 0 #2d6a54,var(--v78-shadow-soft)!important}
+#dashboardKpis .kpi:nth-child(4){box-shadow:inset 0 3px 0 #66527b,var(--v78-shadow-soft)!important}
+#dashboardKpis .kpi:nth-child(5){box-shadow:inset 0 3px 0 #526983,var(--v78-shadow-soft)!important}
+#dashboardKpis .kpi-icon{
+  background:#e6ebf1!important;
+  border:1px solid #d8dee7!important;
+}
+#dashboardKpis .kpi-icon svg{stroke:#243a5a!important}
+#dashboardKpis .kpi strong{color:#141b26!important}
+#dashboardKpis .kpi .label{color:#586478!important}
+
+/* faixa dinâmica de leitura rápida */
+#v78InsightDeck{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin:12px 0 16px;
+}
+.v78-insight{
+  position:relative;
+  min-height:106px;
+  border-radius:17px;
+  padding:14px 15px;
+  overflow:hidden;
+  border:1px solid #dce2ea;
+  background:linear-gradient(145deg,#f8f9fb,#eef1f5);
+  box-shadow:var(--v78-shadow-soft);
+}
+.v78-insight:after{
+  content:"";
+  position:absolute;
+  width:86px;height:86px;
+  right:-34px;bottom:-42px;
+  border-radius:50%;
+  background:rgba(12,47,102,.055);
+}
+.v78-insight .v78-icon{
+  width:28px;height:28px;border-radius:9px;
+  display:grid;place-items:center;
+  background:#e2e8f0;color:#183d70;
+  font-size:14px;font-weight:900;
+}
+.v78-insight span{
+  display:block;margin-top:10px;
+  font-size:8.7px;font-weight:900;
+  color:#7a8494;text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.v78-insight b{
+  display:block;margin-top:4px;
+  font-size:18px;letter-spacing:-.025em;
+  color:#171d27;
+  position:relative;z-index:1;
+}
+.v78-insight small{
+  display:block;margin-top:3px;
+  color:#8992a1;font-size:8.7px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.v78-insight.accent{
+  background:linear-gradient(145deg,#143d75,#0d2d5b);
+  border-color:#1d4f8e;
+}
+.v78-insight.accent span,.v78-insight.accent small{color:rgba(255,255,255,.66)}
+.v78-insight.accent b{color:#fff}
+.v78-insight.accent .v78-icon{
+  background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(255,255,255,.12)
+}
+.v78-insight.warning{
+  background:linear-gradient(145deg,#423038,#2d2429);
+  border-color:#5d414b;
+}
+.v78-insight.warning span,.v78-insight.warning small{color:rgba(255,255,255,.62)}
+.v78-insight.warning b{color:#fff}
+.v78-insight.warning .v78-icon{background:rgba(255,255,255,.09);color:#fff}
+
+/* Resumo patrimonial compacto */
+#dashboard .v60-asset-panel{
+  min-height:0!important;
+  background:linear-gradient(180deg,#f8f9fb,#eff2f6)!important;
+}
+#dashboard .v60-asset-panel>.panelhead{
+  padding:16px 16px 0!important;
+}
+#dashboard #assetSnapshot{
+  padding:12px 16px 16px!important;
+}
+#dashboard .v78-wealth-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+}
+#dashboard .v78-wealth-card{
+  border:1px solid #dce2e9;
+  border-radius:15px;
+  background:linear-gradient(145deg,#fafbfc,#eef2f6);
+  padding:12px;
+  min-height:92px;
+  text-align:left;
+  cursor:pointer;
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+  color:inherit;
+}
+#dashboard .v78-wealth-card:hover{
+  transform:translateY(-2px);
+  border-color:#b9c7d8;
+  box-shadow:0 10px 24px rgba(21,34,55,.08);
+}
+#dashboard .v78-wealth-card .v78-wicon{
+  width:26px;height:26px;border-radius:8px;
+  display:grid;place-items:center;
+  background:#e1e7ef;color:#173b6c;
+  font-size:13px;
+}
+#dashboard .v78-wealth-card span{
+  display:block;margin-top:8px;
+  font-size:8.3px;font-weight:900;text-transform:uppercase;
+  letter-spacing:.065em;color:#7a8494;
+}
+#dashboard .v78-wealth-card b{
+  display:block;margin-top:3px;
+  font-size:14px;color:#19212d;
+}
+#dashboard .v78-wealth-card.blocked .v78-wicon{
+  background:#ece5e8;color:#754452;
+}
+#dashboard .v78-wealth-card.available .v78-wicon{
+  background:#e2ece7;color:#285f48;
+}
+
+/* melhora blocos inferiores sem escurecer tudo */
+#premiumTrend,.capacity-shell,.annual-premium,.plan-grid{
+  filter:saturate(.88);
+}
+#premiumTrend{
+  background:linear-gradient(180deg,#fafbfc,#f2f4f7)!important;
+  border:1px solid #dfe4ea!important;
+  box-shadow:var(--v78-shadow-soft)!important;
+}
+.plan-card{
+  border-radius:16px!important;
+}
+.plan-icon{
+  background:#e3e8ef!important;
+  color:#223c61!important;
+}
+
+/* modais */
+.modal{
+  background:linear-gradient(180deg,#fafbfc,#f3f5f8)!important;
+  border:1px solid #dde3ea!important;
+  box-shadow:0 34px 90px rgba(10,24,45,.28)!important;
+}
+.modalback{
+  background:rgba(9,18,33,.44)!important;
+  backdrop-filter:blur(4px)!important;
+}
+
+/* pequenos acabamentos */
+.tag{border-radius:999px!important}
+.dots{background:#edf1f5!important;border-color:#d8dee7!important;color:#38475d!important}
+.dots:hover{background:#e4e9f0!important}
+
+@media(max-width:1000px){
+  #v78InsightDeck{grid-template-columns:1fr 1fr}
+  #dashboard .v78-wealth-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  #v78InsightDeck{grid-template-columns:1fr 1fr;gap:8px}
+  .v78-insight{min-height:98px;padding:12px}
+  .v78-insight b{font-size:16px}
+  #dashboard .v78-wealth-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+
+<script id="pp-v78-dashboard-premium-final">
+(()=>{
+'use strict';
+
+function n78(v){
+  if(typeof v==='number'&&Number.isFinite(v))return v;
+  let s=String(v??'').trim().replace(/\s/g,'').replace(/R\$/gi,'');
+  if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+  else if(s.includes(','))s=s.replace(',','.');
+  s=s.replace(/[^0-9.-]/g,'');
+  const n=Number(s);return Number.isFinite(n)?n:0;
+}
+function status78(x){
+  try{
+    if(x?.origemDados==='Cartões'&&window.ppInvoiceActionsV61?.status){
+      return window.ppInvoiceActionsV61.status(x.cardId,+x.ano,+x.mesNum,x.status||'Pendente');
+    }
+  }catch(e){}
+  return x?.status||'Pendente';
+}
+function selectedMonth78(){
+  const y=+document.getElementById('yearFilter')?.value||+currentYear;
+  const m=+document.getElementById('monthFilter')?.value||+currentMonth;
+  return {y,m};
+}
+function monthRows78(){
+  const {y,m}=selectedMonth78();
+  let rows=[];
+  try{rows=window.allTx?.()||[]}catch(e){}
+  return rows.filter(x=>+x.ano===y&&+x.mesNum===m);
+}
+function ensureInsights78(){
+  let deck=document.getElementById('v78InsightDeck');
+  if(deck)return deck;
+  const k=document.getElementById('dashboardKpis');
+  if(!k)return null;
+  deck=document.createElement('div');
+  deck.id='v78InsightDeck';
+  k.insertAdjacentElement('afterend',deck);
+  return deck;
+}
+function renderInsights78(){
+  const deck=ensureInsights78();if(!deck)return;
+  const rows=monthRows78();
+  const inc=rows.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+n78(x.valor),0);
+  const outs=rows.filter(x=>x.tipo==='saida');
+  const pendingRows=outs.filter(x=>String(status78(x)).toLowerCase()!=='quitado');
+  const pending=pendingRows.reduce((a,x)=>a+n78(x.valor),0);
+  const free=inc-pending;
+  const commitment=inc>0?Math.max(0,pending/inc*100):0;
+  const largest=outs.slice().sort((a,b)=>n78(b.valor)-n78(a.valor))[0];
+  const {y,m}=selectedMonth78();
+
+  deck.innerHTML=`
+    <article class="v78-insight warning">
+      <div class="v78-icon">!</div>
+      <span>Pendências do mês</span>
+      <b>${brl(pending)}</b>
+      <small>${pendingRows.length} compromisso${pendingRows.length===1?'':'s'} ainda aberto${pendingRows.length===1?'':'s'}</small>
+    </article>
+    <article class="v78-insight accent">
+      <div class="v78-icon">↗</div>
+      <span>Livre após pendências</span>
+      <b>${brl(free)}</b>
+      <small>Receitas menos valores ainda pendentes</small>
+    </article>
+    <article class="v78-insight">
+      <div class="v78-icon">%</div>
+      <span>Comprometimento</span>
+      <b>${commitment.toFixed(1).replace('.',',')}%</b>
+      <small>Da renda do mês comprometida por pendências</small>
+    </article>
+    <article class="v78-insight">
+      <div class="v78-icon">◆</div>
+      <span>Maior saída do mês</span>
+      <b>${largest?brl(largest.valor):brl(0)}</b>
+      <small>${largest?largest.descricao:'Nenhuma saída em '+monthNames[m-1]+'/'+y}</small>
+    </article>`;
+}
+
+function renderWealth78(){
+  const el=document.getElementById('assetSnapshot');if(!el)return;
+  let inv=0,pat=0;
+  try{inv=(investments||[]).filter(x=>x.status==='Ativo').reduce((a,x)=>a+n78(x.currentValue),0)}catch(e){}
+  try{pat=(assets||[]).reduce((a,x)=>a+n78(x.value),0)}catch(e){}
+  const livre=n78(window.fgtsSummary?.saldoDisponivel ?? fgtsSummary?.saldoDisponivel);
+  const bloq=n78(window.fgtsSummary?.saldoBloqueado ?? fgtsSummary?.saldoBloqueado);
+
+  el.innerHTML=`<div class="v78-wealth-grid">
+    <button type="button" class="v78-wealth-card" data-v78-view="patrimonio">
+      <div class="v78-wicon">⌂</div><span>Patrimônio</span><b>${brl(pat)}</b>
+    </button>
+    <button type="button" class="v78-wealth-card" data-v78-view="investimentos">
+      <div class="v78-wicon">↗</div><span>Investimentos</span><b>${brl(inv)}</b>
+    </button>
+    <button type="button" class="v78-wealth-card available" data-v78-view="fgts">
+      <div class="v78-wicon">✓</div><span>FGTS livre</span><b>${brl(livre)}</b>
+    </button>
+    <button type="button" class="v78-wealth-card blocked" data-v78-view="fgts">
+      <div class="v78-wicon">◷</div><span>FGTS bloqueado</span><b>${brl(bloq)}</b>
+    </button>
+  </div>`;
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('[data-v78-view]');
+  if(!b)return;
+  try{window.showView?.(b.dataset.v78View)}catch(err){}
+},false);
+
+const prev78=window.renderDashboard;
+if(typeof prev78==='function'&&!prev78.__v78){
+  const w=function(){
+    const r=prev78.apply(this,arguments);
+    setTimeout(()=>{renderInsights78();renderWealth78()},0);
+    return r;
+  };
+  w.__v78=true;
+  window.renderDashboard=w;
+  try{renderDashboard=w}catch(e){}
+}
+
+['yearFilter','monthFilter'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change',()=>setTimeout(()=>{
+    renderInsights78();renderWealth78();
+  },20));
+});
+
+function init78(){
+  renderInsights78();
+  renderWealth78();
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(init78,400),{once:true});
+}else setTimeout(init78,400);
+
+window.ppPremiumThemeV78={refresh:init78,insights:renderInsights78,wealth:renderWealth78};
+})();
+</script>
+
