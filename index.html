@@ -20347,3 +20347,718 @@ window.ppDebtV73={
 })();
 </script>
 
+<style id="pp-v74-debt-detail-style">
+/* Tabela de dívidas mais compacta, sem rolagem horizontal */
+#dividas .tablewrap{overflow-x:hidden!important}
+#dividas .tablewrap table{
+  width:100%!important;
+  min-width:0!important;
+  table-layout:fixed!important;
+}
+#dividas .tablewrap th,
+#dividas .tablewrap td{
+  padding:9px 7px!important;
+  vertical-align:middle!important;
+  line-height:1.25!important;
+}
+#dividas .tablewrap th{font-size:8.7px!important}
+#dividas .tablewrap td{font-size:10px!important}
+#dividas .tablewrap th:nth-child(1),#dividas .tablewrap td:nth-child(1){width:15%}
+#dividas .tablewrap th:nth-child(2),#dividas .tablewrap td:nth-child(2){width:10%}
+#dividas .tablewrap th:nth-child(3),#dividas .tablewrap td:nth-child(3){width:7%}
+#dividas .tablewrap th:nth-child(4),#dividas .tablewrap td:nth-child(4){width:7%}
+#dividas .tablewrap th:nth-child(5),#dividas .tablewrap td:nth-child(5){width:9%}
+#dividas .tablewrap th:nth-child(6),#dividas .tablewrap td:nth-child(6){width:9%}
+#dividas .tablewrap th:nth-child(7),#dividas .tablewrap td:nth-child(7){width:9%}
+#dividas .tablewrap th:nth-child(8),#dividas .tablewrap td:nth-child(8){width:11%}
+/* Negociado continua na estrutura para manter estabilidade da V73, mas fica oculto */
+#dividas .tablewrap th:nth-child(9),#dividas .tablewrap td:nth-child(9){display:none!important}
+#dividas .tablewrap th:nth-child(10),#dividas .tablewrap td:nth-child(10){width:8%}
+#dividas .tablewrap th:nth-child(11),#dividas .tablewrap td:nth-child(11){width:10%}
+#dividas .tablewrap th:nth-child(12),#dividas .tablewrap td:nth-child(12){width:5%;text-align:right}
+#dividas #debtBody tr[data-v74-debt]{cursor:pointer}
+#dividas #debtBody tr[data-v74-debt]:hover{background:#f8fafc}
+#dividas .v74-progress{display:flex;align-items:center;gap:6px}
+#dividas .v74-progress .progress{flex:1;min-width:36px;height:5px}
+#dividas .v74-progress small{white-space:nowrap;font-size:8.5px;color:var(--muted)}
+#dividas .v72-last-paid,#dividas .v72-last-installment{font-size:9.5px!important}
+#dividas .actioncell .dots{padding:4px 8px!important}
+@media(max-width:1080px){
+  #dividas .tablewrap th:nth-child(2),#dividas .tablewrap td:nth-child(2){display:none}
+  #dividas .tablewrap th:nth-child(1),#dividas .tablewrap td:nth-child(1){width:20%}
+  #dividas .tablewrap th:nth-child(8),#dividas .tablewrap td:nth-child(8){width:13%}
+}
+@media(max-width:760px){
+  #dividas .tablewrap th:nth-child(3),#dividas .tablewrap td:nth-child(3),
+  #dividas .tablewrap th:nth-child(4),#dividas .tablewrap td:nth-child(4),
+  #dividas .tablewrap th:nth-child(8),#dividas .tablewrap td:nth-child(8){display:none}
+  #dividas .tablewrap th:nth-child(1),#dividas .tablewrap td:nth-child(1){width:28%}
+  #dividas .tablewrap th:nth-child(5),#dividas .tablewrap td:nth-child(5){width:16%}
+  #dividas .tablewrap th:nth-child(6),#dividas .tablewrap td:nth-child(6){width:15%}
+  #dividas .tablewrap th:nth-child(7),#dividas .tablewrap td:nth-child(7){width:15%}
+  #dividas .tablewrap th:nth-child(10),#dividas .tablewrap td:nth-child(10){width:12%}
+  #dividas .tablewrap th:nth-child(11),#dividas .tablewrap td:nth-child(11){width:10%}
+  #dividas .tablewrap th:nth-child(12),#dividas .tablewrap td:nth-child(12){width:4%}
+}
+
+/* Extrato detalhado da dívida */
+#debtDetailModal74 .modal{max-width:900px!important;padding:0!important;overflow:hidden}
+#debtDetailModal74 .v74-head{
+  padding:20px 22px 16px;
+  background:linear-gradient(180deg,#fbfcfe,#fff);
+  border-bottom:1px solid #e9edf3;
+}
+#debtDetailModal74 .v74-headtop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+#debtDetailModal74 .v74-head h2{margin:0;font-size:20px}
+#debtDetailModal74 .v74-head p{margin:4px 0 0;color:#7b8798;font-size:10px}
+#debtDetailModal74 .v74-close{
+  border:1px solid #dce3ed;background:#fff;border-radius:10px;width:34px;height:34px;cursor:pointer;font-weight:900
+}
+#debtDetailModal74 .v74-kpis{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px
+}
+#debtDetailModal74 .v74-kpi{
+  border:1px solid #e7ebf1;border-radius:13px;padding:10px;background:#fff
+}
+#debtDetailModal74 .v74-kpi span{display:block;color:#7b8798;font-size:8.5px;text-transform:uppercase;font-weight:850}
+#debtDetailModal74 .v74-kpi b{display:block;margin-top:4px;font-size:14px}
+#debtDetailModal74 .v74-actions{
+  display:flex;gap:7px;flex-wrap:wrap;padding:14px 22px;border-bottom:1px solid #edf1f5;background:#fff
+}
+#debtDetailModal74 .v74-actions button{
+  border:1px solid #cfd8e6;background:#fff;border-radius:10px;padding:8px 11px;font-size:9.5px;font-weight:900;cursor:pointer
+}
+#debtDetailModal74 .v74-actions button.primary74{background:#0b63f6;color:#fff;border-color:#0b63f6}
+#debtDetailModal74 .v74-actions button.danger74{color:#b42335;border-color:#efc8ce}
+#debtDetailModal74 .v74-history{padding:16px 22px 20px;max-height:55vh;overflow:auto}
+#debtDetailModal74 .v74-history-title{display:flex;justify-content:space-between;align-items:end;margin-bottom:10px}
+#debtDetailModal74 .v74-history-title h3{margin:0;font-size:14px}
+#debtDetailModal74 .v74-history-title span{font-size:9px;color:#8490a2}
+#debtDetailModal74 .v74-months{display:grid;gap:7px}
+#debtDetailModal74 .v74-month{
+  display:grid;grid-template-columns:110px 1fr 110px 105px;gap:10px;align-items:center;
+  border:1px solid #e8edf3;border-radius:12px;padding:9px 11px;background:#fff
+}
+#debtDetailModal74 .v74-month.current{border-color:#b9d1ff;background:#f7faff}
+#debtDetailModal74 .v74-month .month74{font-weight:900;font-size:10px}
+#debtDetailModal74 .v74-month .amount74{text-align:right;font-weight:850;font-size:10px}
+#debtDetailModal74 .v74-month .status74{font-size:9px}
+#debtDetailModal74 .v74-month .action74{text-align:right}
+#debtDetailModal74 .v74-month button{
+  border:1px solid #d3dbe7;background:#fff;border-radius:9px;padding:6px 9px;font-size:9px;font-weight:900;cursor:pointer
+}
+#debtDetailModal74 .v74-month button.reopen74{color:#8a5a00}
+#debtDetailModal74 .v74-month button.pay74{color:#0b63f6}
+@media(max-width:650px){
+  #debtDetailModal74 .v74-kpis{grid-template-columns:1fr 1fr}
+  #debtDetailModal74 .v74-month{grid-template-columns:1fr auto}
+  #debtDetailModal74 .v74-month .status74{grid-column:1}
+  #debtDetailModal74 .v74-month .amount74{grid-column:2;grid-row:1}
+  #debtDetailModal74 .v74-month .action74{grid-column:2;grid-row:2}
+}
+</style>
+
+<script id="pp-v74-debt-detail-final">
+(()=>{
+'use strict';
+
+const EDIT_KEY74='financeiro_marcos_debt_edits_v3';
+const DATE_KEY74='planejador_debt_dates_v16';
+let activeDebtId74=null;
+
+function profile74(){try{return String(localStorage.getItem('planejador_active_profile')||'Marcos').toLowerCase()}catch(e){return 'marcos'}}
+function ledgerKey74(){return 'planejador_debt_payment_ledger_v74_'+profile74()}
+function readObj74(k){try{const x=JSON.parse(localStorage.getItem(k)||'{}');return x&&typeof x==='object'&&!Array.isArray(x)?x:{}}catch(e){return {}}}
+function writeObj74(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function n74(v){
+  if(typeof v==='number'&&Number.isFinite(v))return v;
+  let x=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+  if(x.includes(',')&&x.includes('.'))x=x.replace(/\./g,'').replace(',','.');
+  else if(x.includes(','))x=x.replace(',','.');
+  x=x.replace(/[^0-9.-]/g,'');
+  const n=Number(x);return Number.isFinite(n)?n:0;
+}
+function ymNow74(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function today74(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function monthOf74(v){
+  let s=String(v||'').trim(),m=s.match(/^(\d{4})-(\d{2})/);if(m)return `${m[1]}-${m[2]}`;
+  m=s.match(/^(\d{2})\/(\d{4})$/);return m?`${m[2]}-${m[1]}`:'';
+}
+function validYM74(v){return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(v||''))}
+function idx74(ym){if(!validYM74(ym))return NaN;const [y,m]=ym.split('-').map(Number);return y*12+m-1}
+function fromIdx74(i){return `${Math.floor(i/12)}-${String(i%12+1).padStart(2,'0')}`}
+function add74(ym,d){const i=idx74(ym);return Number.isFinite(i)?fromIdx74(i+d):''}
+function fmt74(ym){if(!validYM74(ym))return '—';const [y,m]=ym.split('-');return `${m}/${y}`}
+function monthName74(ym){
+  if(!validYM74(ym))return '—';
+  const [y,m]=ym.split('-').map(Number);
+  const names=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return `${names[m-1]}/${y}`;
+}
+function debts74(){try{return window.getDebts?.(true)||getDebts(true)||[]}catch(e){return []}}
+function debt74(id){return debts74().find(x=>String(x.id)===String(id))||null}
+function state74(d){
+  const installment=Math.max(0,n74(d?.parcela));
+  let totalInst=Math.max(1,parseInt(d?.parcelasTotal,10)||1);
+  let total=Math.max(0,n74(d?.total));
+  if(!total&&installment)total=Number((installment*totalInst).toFixed(2));
+  let paidInst=Math.max(0,Math.min(totalInst,parseInt(d?.parcelasQuitadas,10)||0));
+  let paid=Math.max(0,Math.min(total,n74(d?.quitado)));
+  if(paidInst>=totalInst){paidInst=totalInst;paid=total}
+  return {installment,totalInst,total,paidInst,paid,pending:Math.max(0,Number((total-paid).toFixed(2)))}
+}
+function first74(d){
+  const meta=readObj74(DATE_KEY74)[String(d.id)]||{};
+  for(const v of [meta.first,d.primeiraParcelaMes,d.primeira]){
+    const x=monthOf74(v);if(validYM74(x))return x;
+  }
+  const last=monthOf74(meta.forecast||d.ultimaParcelaMes||d.ultima);
+  if(validYM74(last))return add74(last,-(state74(d).totalInst-1));
+  return '';
+}
+function last74(d){
+  const meta=readObj74(DATE_KEY74)[String(d.id)]||{};
+  for(const v of [meta.forecast,d.ultimaParcelaMes,d.ultima]){
+    const x=monthOf74(v);if(validYM74(x))return x;
+  }
+  const f=first74(d);return f?add74(f,state74(d).totalInst-1):'';
+}
+function savePatch74(id,patch){
+  const edits=readObj74(EDIT_KEY74);
+  edits[id]={...(edits[id]||{}),...patch};
+  writeObj74(EDIT_KEY74,edits);
+  try{debtEdits=edits}catch(e){}
+  try{persist()}catch(e){}
+  const again=readObj74(EDIT_KEY74);
+  again[id]={...(again[id]||{}),...patch};
+  writeObj74(EDIT_KEY74,again);
+  try{debtEdits=again}catch(e){}
+}
+function ensureLedger74(d){
+  const all=readObj74(ledgerKey74()),id=String(d.id);
+  let ledger=all[id]&&typeof all[id]==='object'?all[id]:{};
+  const st=state74(d),f=first74(d);
+  if(validYM74(f)){
+    for(let i=0;i<st.totalInst;i++){
+      const ym=add74(f,i);
+      if(!ledger[ym]){
+        ledger[ym]={status:i<st.paidInst?'Quitado':'Pendente',amount:i<st.paidInst?st.installment:0,inferred:i<st.paidInst};
+      }
+    }
+  }
+  all[id]=ledger;writeObj74(ledgerKey74(),all);
+  return ledger;
+}
+function setLedger74(id,ledger){const all=readObj74(ledgerKey74());all[String(id)]=ledger;writeObj74(ledgerKey74(),all)}
+function recompute74(d,ledger){
+  const st=state74(d),f=first74(d);
+  const months=validYM74(f)?Array.from({length:st.totalInst},(_,i)=>add74(f,i)):[];
+  let paidInst=0,paid=0,lastPaid='';
+  months.forEach((ym,i)=>{
+    const r=ledger[ym]||{};
+    if(r.status==='Quitado'){
+      paidInst++;
+      let amt=n74(r.amount);
+      if(!amt)amt=(i===st.totalInst-1)?Math.max(0,st.total-(st.installment*(st.totalInst-1))):st.installment;
+      paid+=amt;lastPaid=ym;
+    }
+  });
+  paid=Math.min(st.total,Number(paid.toFixed(2)));
+  if(paidInst>=st.totalInst){paidInst=st.totalInst;paid=st.total}
+  const pending=Math.max(0,Number((st.total-paid).toFixed(2)));
+  savePatch74(String(d.id),{
+    parcelasQuitadas:paidInst,quitado:paid,pendente:pending,
+    status:pending<0.01?'Quitado':'Pendente',
+    ultimoPagamento:lastPaid?`${lastPaid}-01`:'',
+    ultimoPagamentoHistorico:lastPaid?`${lastPaid}-01`:''
+  });
+  return {paidInst,paid,pending,lastPaid};
+}
+
+function ensureModal74(){
+  let m=document.getElementById('debtDetailModal74');
+  if(m)return m;
+  m=document.createElement('div');m.className='modalback';m.id='debtDetailModal74';
+  m.innerHTML='<div class="modal"></div>';document.body.appendChild(m);
+  m.addEventListener('click',e=>{if(e.target===m||e.target.closest('[data-v74-close]'))m.classList.remove('open')});
+  return m;
+}
+function renderDetail74(){
+  const d=debt74(activeDebtId74);if(!d)return;
+  const st=state74(d),ledger=ensureLedger74(d),f=first74(d),last=last74(d),now=ymNow74();
+  const months=validYM74(f)?Array.from({length:st.totalInst},(_,i)=>add74(f,i)):[];
+  const lastPaid=months.filter(x=>ledger[x]?.status==='Quitado').slice(-1)[0]||'';
+  const modal=ensureModal74();
+  modal.querySelector('.modal').innerHTML=`
+    <div class="v74-head">
+      <div class="v74-headtop">
+        <div><h2>${esc(d.descricao||'Dívida')}</h2><p>${esc(d.credor||'Sem credor')} · clique nos meses para conferir o histórico de pagamento</p></div>
+        <button type="button" class="v74-close" data-v74-close>×</button>
+      </div>
+      <div class="v74-kpis">
+        <div class="v74-kpi"><span>Parcela</span><b>${brl(st.installment)}</b></div>
+        <div class="v74-kpi"><span>Saldo pendente</span><b>${brl(st.pending)}</b></div>
+        <div class="v74-kpi"><span>Último pagamento</span><b>${fmt74(lastPaid)}</b></div>
+        <div class="v74-kpi"><span>Última parcela</span><b>${fmt74(last)}</b></div>
+      </div>
+    </div>
+    <div class="v74-actions">
+      <button type="button" class="primary74" data-v74-pay-current>✓ Pagar parcela do mês</button>
+      <button type="button" data-v74-advance>Adiantar parcelas</button>
+      <button type="button" data-v74-settle>Quitar dívida</button>
+    </div>
+    <div class="v74-history">
+      <div class="v74-history-title"><h3>Histórico de parcelas</h3><span>${st.paidInst} de ${st.totalInst} quitadas</span></div>
+      <div class="v74-months">
+        ${months.length?months.map((ym,i)=>{
+          const r=ledger[ym]||{status:'Pendente'};
+          const paid=r.status==='Quitado';
+          const amt=paid?(n74(r.amount)||st.installment):st.installment;
+          return `<div class="v74-month ${ym===now?'current':''}">
+            <div class="month74">${monthName74(ym)}${ym===now?' · mês atual':''}</div>
+            <div class="status74"><span class="tag ${paid?'green':'amber'}">${paid?'Quitado':'Pendente'}</span></div>
+            <div class="amount74">${brl(amt)}</div>
+            <div class="action74">
+              <button type="button" class="${paid?'reopen74':'pay74'}" data-v74-month="${ym}" data-v74-action="${paid?'reopen':'pay'}">${paid?'Reabrir':'Quitar'}</button>
+            </div>
+          </div>`;
+        }).join(''):'<div class="empty">Não foi possível determinar o calendário de parcelas desta dívida.</div>'}
+      </div>
+    </div>`;
+  modal.classList.add('open');
+}
+function payMonth74(ym){
+  const d=debt74(activeDebtId74);if(!d)return;
+  const st=state74(d),ledger=ensureLedger74(d),f=first74(d);
+  const i=validYM74(f)?idx74(ym)-idx74(f):0;
+  const amount=(i===st.totalInst-1)?Math.max(0,Number((st.total-st.installment*(st.totalInst-1)).toFixed(2))):st.installment;
+  ledger[ym]={...(ledger[ym]||{}),status:'Quitado',amount:amount,paidAt:today74(),inferred:false};
+  setLedger74(d.id,ledger);recompute74(d,ledger);
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  try{window.renderDebts?.()}catch(e){}
+  renderDetail74();
+}
+function reopenMonth74(ym){
+  const d=debt74(activeDebtId74);if(!d)return;
+  const ledger=ensureLedger74(d);
+  ledger[ym]={...(ledger[ym]||{}),status:'Pendente',amount:0,reopenedAt:today74(),inferred:false};
+  setLedger74(d.id,ledger);recompute74(d,ledger);
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  try{window.renderDebts?.()}catch(e){}
+  renderDetail74();
+}
+function payCurrent74(){
+  const d=debt74(activeDebtId74);if(!d)return;
+  const ledger=ensureLedger74(d),now=ymNow74();
+  if(ledger[now]?.status==='Quitado'){try{toast('A parcela deste mês já está quitada.')}catch(e){};return}
+  if(!ledger[now]){try{toast('Este mês não faz parte do calendário desta dívida.')}catch(e){};return}
+  payMonth74(now);
+}
+function advance74(){
+  const d=debt74(activeDebtId74);if(!d)return;
+  const ledger=ensureLedger74(d),f=first74(d),st=state74(d);
+  if(!validYM74(f))return;
+  let q=parseInt(prompt('Quantas parcelas deseja adiantar?','1'),10);
+  if(!Number.isFinite(q)||q<1)return;
+  const months=Array.from({length:st.totalInst},(_,i)=>add74(f,i)).filter(ym=>ledger[ym]?.status!=='Quitado');
+  months.slice(0,q).forEach(ym=>{
+    const i=idx74(ym)-idx74(f);
+    const amount=(i===st.totalInst-1)?Math.max(0,Number((st.total-st.installment*(st.totalInst-1)).toFixed(2))):st.installment;
+    ledger[ym]={...(ledger[ym]||{}),status:'Quitado',amount,paidAt:today74(),inferred:false};
+  });
+  setLedger74(d.id,ledger);recompute74(d,ledger);
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  try{window.renderDebts?.()}catch(e){}
+  renderDetail74();
+}
+function settle74(){
+  const d=debt74(activeDebtId74);if(!d)return;
+  if(!confirm('Quitar todas as parcelas pendentes desta dívida?'))return;
+  const ledger=ensureLedger74(d),f=first74(d),st=state74(d);
+  if(!validYM74(f))return;
+  Array.from({length:st.totalInst},(_,i)=>add74(f,i)).forEach((ym,i)=>{
+    if(ledger[ym]?.status!=='Quitado'){
+      const amount=(i===st.totalInst-1)?Math.max(0,Number((st.total-st.installment*(st.totalInst-1)).toFixed(2))):st.installment;
+      ledger[ym]={...(ledger[ym]||{}),status:'Quitado',amount,paidAt:today74(),inferred:false};
+    }
+  });
+  setLedger74(d.id,ledger);recompute74(d,ledger);
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  try{window.renderDebts?.()}catch(e){}
+  renderDetail74();
+}
+
+document.addEventListener('click',e=>{
+  const row=e.target.closest?.('#debtBody tr[data-v74-debt]');
+  if(row && !e.target.closest('button,a,input,select')){
+    activeDebtId74=row.dataset.v74Debt;renderDetail74();return;
+  }
+  const month=e.target.closest?.('[data-v74-month]');
+  if(month){
+    e.preventDefault();e.stopPropagation();
+    month.dataset.v74Action==='reopen'?reopenMonth74(month.dataset.v74Month):payMonth74(month.dataset.v74Month);
+    return;
+  }
+  if(e.target.closest?.('[data-v74-pay-current]')){payCurrent74();return}
+  if(e.target.closest?.('[data-v74-advance]')){advance74();return}
+  if(e.target.closest?.('[data-v74-settle]')){settle74();return}
+},true);
+
+/* Render final: mantém a mesma estrutura de 12 colunas da V73 para não disparar conflito,
+   mas oculta Negociado e remove pagar/adiantar da linha. */
+function renderDebts74(){
+  const section=document.getElementById('dividas'),body=document.getElementById('debtBody'),summary=document.getElementById('debtSummary');
+  if(!section||!body||!summary)return;
+
+  const sf=document.getElementById('debtStatusFilterV76');
+  const nf=document.getElementById('debtNegotiationFilterV76');
+  const legacy=document.getElementById('debtFilter');
+  const search=document.getElementById('debtSearch');
+  const status=sf?.value||legacy?.value||'pending';
+  const nego=nf?.value||'all';
+  const q=(search?.value||'').toLowerCase().trim();
+
+  const head=section.querySelector('table thead tr');
+  if(head)head.innerHTML='<th>Descrição</th><th>Credor</th><th>Pendentes</th><th>Quitadas</th><th>Parcela</th><th>Último pagamento</th><th>Última parcela</th><th>Andamento</th><th>Negociado</th><th>Status</th><th>Pendente</th><th>Ação</th>';
+
+  let all=debts74().map(d=>({...d,_74:state74(d)}));
+  const visible=all.filter(x=>{
+    if(x.arquivado&&status!=='archived')return false;
+    if(status==='archived'&&!x.arquivado)return false;
+    if(q&&![x.descricao,x.credor].join(' ').toLowerCase().includes(q))return false;
+    const paid=x._74.pending<=.009||x._74.paidInst>=x._74.totalInst;
+    if(status==='pending'&&paid)return false;
+    if(status==='paid'&&!paid)return false;
+    const isNeg=String(x.negociado||'').toLowerCase()==='sim';
+    if(nego==='negotiated'&&!isNeg)return false;
+    if(nego==='notnegotiated'&&isNeg)return false;
+    return true;
+  });
+
+  const live=all.filter(x=>!x.arquivado),sum74=(arr,f)=>arr.reduce((a,x)=>a+n74(f(x)),0);
+  const total=sum74(live,x=>x._74.total),pend=sum74(live,x=>x._74.pending),paid=sum74(live,x=>x._74.paid);
+  const neg=sum74(live.filter(x=>x._74.pending>0&&String(x.negociado||'').toLowerCase()==='sim'),x=>x._74.pending);
+  const notneg=sum74(live.filter(x=>x._74.pending>0&&String(x.negociado||'').toLowerCase()!=='sim'),x=>x._74.pending);
+  summary.innerHTML=`<div class="card mini"><span>Total contratado</span><b>${brl(total)}</b></div>
+    <div class="card mini"><span>Pendente</span><b class="negative">${brl(pend)}</b></div>
+    <div class="card mini"><span>Já quitado</span><b class="positive">${brl(paid)}</b></div>
+    <div class="card mini"><span>Pendente negociado</span><b class="blue">${brl(neg)}</b></div>
+    <div class="card mini"><span>Pendente não negociado</span><b class="warning">${brl(notneg)}</b></div>`;
+
+  body.innerHTML=visible.sort((a,b)=>b._74.pending-a._74.pending).map(x=>{
+    const st=x._74,ledger=ensureLedger74(x),f=first74(x);
+    const months=validYM74(f)?Array.from({length:st.totalInst},(_,i)=>add74(f,i)):[];
+    const paidMonths=months.filter(m=>ledger[m]?.status==='Quitado');
+    const lastPaid=paidMonths.slice(-1)[0]||monthOf74(x.ultimoPagamentoHistorico||x.ultimoPagamento);
+    const paidOff=st.pending<=.009||st.paidInst>=st.totalInst;
+    const pct=st.total>0?Math.min(100,Math.max(0,st.paid/st.total*100)):0;
+    return `<tr data-v74-debt="${esc(x.id)}">
+      <td><b>${esc(x.descricao||'Dívida')}</b></td>
+      <td>${esc(x.credor||'—')}</td>
+      <td><b>${Math.max(0,st.totalInst-st.paidInst)}</b></td>
+      <td><b class="positive">${st.paidInst}</b></td>
+      <td>${brl(st.installment)}</td>
+      <td class="v72-date v72-last-paid">${fmt74(lastPaid)}</td>
+      <td class="v72-date v72-last-installment">${fmt74(last74(x))}</td>
+      <td><div class="v74-progress"><div class="progress"><i style="width:${pct}%"></i></div><small>${pct.toFixed(0)}%</small></div></td>
+      <td><span class="tag ${String(x.negociado||'').toLowerCase()==='sim'?'green':'amber'}">${esc(x.negociado||'Não')}</span></td>
+      <td><span class="tag ${paidOff?'green':'red'}">${paidOff?'Quitado':'Pendente'}</span></td>
+      <td class="money ${paidOff?'positive':'negative'}">${brl(st.pending)}</td>
+      <td class="actioncell"><button class="dots" onclick="openDebtMenu(event,'${x.id}')">⋯</button></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="12" class="empty">Nenhuma dívida neste filtro.</td></tr>';
+}
+
+window.renderDebts=renderDebts74;
+try{renderDebts=renderDebts74}catch(e){}
+if(window.ppDebtV72)window.ppDebtV72.render=renderDebts74;
+
+/* V73 chama ppDebtV72.render quando detecta uma renderização antiga.
+   Como agora esse ponteiro também é V74, ele passa a restaurar a tela correta. */
+try{window.ppDebtV73?.repair?.()}catch(e){}
+
+['debtStatusFilterV76','debtNegotiationFilterV76','debtFilter'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change',()=>setTimeout(renderDebts74,0));
+});
+document.getElementById('debtSearch')?.addEventListener('input',()=>setTimeout(renderDebts74,0));
+
+renderDebts74();
+setTimeout(renderDebts74,100);
+
+window.ppDebtV74={render:renderDebts74,open:id=>{activeDebtId74=id;renderDetail74()},ledger:ensureLedger74};
+})();
+</script>
+
+<style id="pp-v75-premium-shell-launch-summary">
+/* V75 — shell premium quase preto */
+:root{
+  --v75-ink:#111318;
+  --v75-ink-2:#171a20;
+  --v75-ink-3:#20242c;
+  --v75-line:rgba(255,255,255,.10);
+  --v75-gold:#d8b574;
+}
+.topbar{
+  background:rgba(247,248,250,.88)!important;
+  backdrop-filter:blur(18px)!important;
+}
+.topinner{
+  background:linear-gradient(135deg,var(--v75-ink),var(--v75-ink-2))!important;
+  border:1px solid rgba(255,255,255,.055)!important;
+  box-shadow:0 16px 42px rgba(5,8,13,.24)!important;
+}
+.topinner .brand,
+.topinner .brand span,
+.topinner .brand small{
+  color:#fff!important;
+}
+.topinner .brand small{opacity:.62!important}
+.topinner .brandmark{
+  background:linear-gradient(145deg,#2b3039,#0d0f13)!important;
+  color:#f1d39b!important;
+  border:1px solid rgba(216,181,116,.26)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06)!important;
+}
+.account-mini{
+  background:rgba(255,255,255,.055)!important;
+  border-color:rgba(255,255,255,.09)!important;
+}
+.account-mini strong{color:#fff!important}
+.account-mini small{color:rgba(255,255,255,.63)!important}
+.menu-trigger{
+  background:rgba(255,255,255,.055)!important;
+  border-color:rgba(255,255,255,.13)!important;
+  color:#fff!important;
+}
+.menu-trigger:hover{background:rgba(255,255,255,.11)!important}
+.nav{
+  background:linear-gradient(180deg,#15181e,#0d0f13)!important;
+  border:1px solid rgba(255,255,255,.075)!important;
+  box-shadow:0 28px 70px rgba(0,0,0,.34)!important;
+}
+.nav button{
+  color:rgba(255,255,255,.78)!important;
+}
+.nav button:hover{
+  background:rgba(255,255,255,.07)!important;
+  color:#fff!important;
+}
+.nav button.active{
+  background:rgba(216,181,116,.13)!important;
+  color:#f5d8a3!important;
+  box-shadow:inset 0 0 0 1px rgba(216,181,116,.10)!important;
+}
+.topinner .actions .primary{
+  background:#f8f9fb!important;
+  border-color:#f8f9fb!important;
+  color:#16191f!important;
+  box-shadow:0 6px 18px rgba(0,0,0,.16)!important;
+}
+.topinner .actions .primary:hover{background:#fff!important}
+.topinner .actions .iconbtn{
+  background:rgba(255,255,255,.055)!important;
+  border-color:rgba(255,255,255,.12)!important;
+  color:rgba(255,255,255,.82)!important;
+}
+
+/* Lançamentos — cards compactos e premium */
+#lancamentos #txSummary{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:11px!important;
+  margin:15px 0 20px!important;
+}
+#lancamentos #txSummary .v63-summary,
+#lancamentos #txSummary .v75-summary{
+  min-height:94px!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  border-radius:17px!important;
+  padding:15px 16px!important;
+  color:#fff!important;
+  box-shadow:
+    0 13px 28px rgba(20,27,38,.10),
+    inset 0 1px 0 rgba(255,255,255,.10)!important;
+  position:relative!important;
+  overflow:hidden!important;
+}
+#lancamentos #txSummary .v63-summary:after,
+#lancamentos #txSummary .v75-summary:after{
+  content:"";
+  position:absolute;
+  width:90px;height:90px;
+  border-radius:999px;
+  right:-35px;top:-42px;
+  background:rgba(255,255,255,.08);
+  pointer-events:none;
+}
+#lancamentos #txSummary .v63-summary span,
+#lancamentos #txSummary .v75-summary span{
+  color:rgba(255,255,255,.67)!important;
+  font-size:8.8px!important;
+  font-weight:900!important;
+  letter-spacing:.10em!important;
+  text-transform:uppercase!important;
+}
+#lancamentos #txSummary .v63-summary b,
+#lancamentos #txSummary .v75-summary b{
+  color:#fff!important;
+  font-size:21px!important;
+  line-height:1.05!important;
+  margin-top:7px!important;
+  font-weight:900!important;
+  letter-spacing:-.035em!important;
+  position:relative;
+  z-index:1;
+}
+#lancamentos #txSummary .v63-entry{
+  background:linear-gradient(145deg,#233e68,#182d4e)!important;
+}
+#lancamentos #txSummary .v63-exit{
+  background:linear-gradient(145deg,#6f2f38,#4f2028)!important;
+}
+#lancamentos #txSummary .v63-balance{
+  background:linear-gradient(145deg,#245844,#173f30)!important;
+}
+#lancamentos #txSummary .v75-pending{
+  background:linear-gradient(145deg,#3b3c43,#202229)!important;
+  border-color:rgba(216,181,116,.20)!important;
+}
+#lancamentos #txSummary .v75-pending span{color:#d9bf8d!important}
+#lancamentos #txSummary .v75-pending:before{
+  content:"";
+  position:absolute;
+  left:0;top:0;bottom:0;
+  width:3px;
+  background:linear-gradient(180deg,#e2c690,#ad8747);
+}
+
+@media(max-width:980px){
+  #lancamentos #txSummary{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:560px){
+  #lancamentos #txSummary{
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+  }
+  #lancamentos #txSummary .v63-summary,
+  #lancamentos #txSummary .v75-summary{
+    min-height:88px!important;
+    padding:13px!important;
+  }
+  #lancamentos #txSummary .v63-summary b,
+  #lancamentos #txSummary .v75-summary b{
+    font-size:18px!important;
+  }
+}
+</style>
+
+<script id="pp-v75-launch-pending-summary-final">
+(()=>{
+'use strict';
+
+function n75(v){
+  if(typeof v==='number'&&Number.isFinite(v))return v;
+  let s=String(v??'').trim().replace(/\s/g,'').replace(/R\$/gi,'');
+  if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+  else if(s.includes(','))s=s.replace(',','.');
+  s=s.replace(/[^0-9.-]/g,'');
+  const n=Number(s);return Number.isFinite(n)?n:0;
+}
+function invoiceStatus75(x){
+  try{
+    if(x?.origemDados==='Cartões' && window.ppInvoiceActionsV61?.status){
+      return window.ppInvoiceActionsV61.status(
+        x.cardId,+x.ano,+x.mesNum,x.status||'Pendente'
+      );
+    }
+  }catch(e){}
+  return x?.status||'Pendente';
+}
+function filtered75(){
+  const y=document.getElementById('txYear')?.value||String(currentYear);
+  const m=document.getElementById('txMonth')?.value||'all';
+  const type=document.getElementById('txType')?.value||'all';
+  const q=(document.getElementById('txSearch')?.value||'').toLowerCase().trim();
+
+  let rows=[];
+  try{rows=window.allTx?.()||[]}catch(e){}
+
+  return rows.filter(x=>{
+    if(y!=='all' && +x.ano!==+y)return false;
+    if(m!=='all' && +x.mesNum!==+m)return false;
+    if(q && ![x.descricao,x.categoria,x.origem].join(' ').toLowerCase().includes(q))return false;
+    if(type!=='all'){
+      if(type==='cartao' && x.origemDados!=='Cartões')return false;
+      if(type!=='cartao' && x.tipo!==type)return false;
+    }
+    return true;
+  });
+}
+function renderSummary75(){
+  const summary=document.getElementById('txSummary');
+  if(!summary)return;
+
+  const rows=filtered75();
+  const entries=rows.filter(x=>x.tipo==='entrada' && x.origemDados!=='Cartões');
+  const cards=rows.filter(x=>x.origemDados==='Cartões');
+  const exits=rows.filter(x=>x.tipo==='saida' && x.origemDados!=='Cartões');
+
+  const inc=entries.reduce((a,x)=>a+n75(x.valor),0);
+  const out=cards.concat(exits).reduce((a,x)=>a+n75(x.valor),0);
+  const pending=cards.concat(exits)
+    .filter(x=>String(invoiceStatus75(x)).toLowerCase()!=='quitado')
+    .reduce((a,x)=>a+n75(x.valor),0);
+  const balance=inc-out;
+
+  summary.innerHTML=`
+    <div class="card mini v63-summary v63-entry">
+      <span>Entradas</span><b>${brl(inc)}</b>
+    </div>
+    <div class="card mini v63-summary v63-exit">
+      <span>Saídas</span><b>${brl(out)}</b>
+    </div>
+    <div class="card mini v63-summary v63-balance">
+      <span>Saldo</span><b>${brl(balance)}</b>
+    </div>
+    <div class="card mini v75-summary v75-pending">
+      <span>Pendentes do período</span><b>${brl(pending)}</b>
+    </div>`;
+}
+
+const prev75=window.renderLancamentos;
+if(typeof prev75==='function'&&!prev75.__v75){
+  const wrapped75=function(){
+    const r=prev75.apply(this,arguments);
+    setTimeout(renderSummary75,0);
+    return r;
+  };
+  wrapped75.__v75=true;
+  window.renderLancamentos=wrapped75;
+  try{renderLancamentos=wrapped75}catch(e){}
+}
+
+['txYear','txMonth','txType'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change',()=>setTimeout(renderSummary75,10));
+});
+document.getElementById('txSearch')?.addEventListener('input',()=>setTimeout(renderSummary75,10));
+
+document.addEventListener('click',e=>{
+  if(
+    e.target.closest?.('[data-v67-tx]') ||
+    e.target.closest?.('[data-v63-pay]') ||
+    e.target.closest?.('#saveTx') ||
+    e.target.closest?.('#saveCardPurchaseV52,#saveCardPurchase')
+  ){
+    setTimeout(renderSummary75,120);
+  }
+},false);
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(renderSummary75,350),{once:true});
+}else{
+  setTimeout(renderSummary75,350);
+}
+
+window.ppLaunchSummaryV75={refresh:renderSummary75};
+})();
+</script>
+
