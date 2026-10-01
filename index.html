@@ -19288,3 +19288,361 @@ window.ppInvoiceMenuV68={refresh:patchInvoiceActions68};
 })();
 </script>
 
+<style id="pp-v69-installment-scope-design">
+/* V69 — modal de parcelamento com a mesma linguagem visual do recorrente */
+#installmentScopeModal66 .modal{
+  max-width:520px!important;
+  border-radius:20px!important;
+  padding:22px!important;
+}
+#installmentScopeModal66 .modal h2{
+  margin:0 0 6px!important;
+  font-size:19px!important;
+  letter-spacing:-.025em!important;
+}
+#installmentScopeModal66 .modal>p{
+  margin:0!important;
+  color:#7b8798!important;
+  font-size:10.5px!important;
+  line-height:1.5!important;
+}
+#installmentScopeModal66 .v64-scope-list{
+  display:grid!important;
+  gap:9px!important;
+  margin-top:15px!important;
+}
+#installmentScopeModal66 .v64-scope-btn{
+  width:100%!important;
+  text-align:left!important;
+  border:1px solid #dce3ed!important;
+  background:#fff!important;
+  border-radius:14px!important;
+  padding:13px 14px!important;
+  cursor:pointer!important;
+  transition:border-color .15s ease,background .15s ease,transform .15s ease!important;
+}
+#installmentScopeModal66 .v64-scope-btn:hover{
+  border-color:#0b63f6!important;
+  background:#f6f9ff!important;
+  transform:translateY(-1px)!important;
+}
+#installmentScopeModal66 .v64-scope-btn b{
+  display:block!important;
+  font-size:12px!important;
+  color:#172033!important;
+  line-height:1.3!important;
+}
+#installmentScopeModal66 .v64-scope-btn span{
+  display:block!important;
+  font-size:9.5px!important;
+  color:#7b8798!important;
+  margin-top:3px!important;
+  line-height:1.4!important;
+}
+#installmentScopeModal66 .modalfoot{
+  margin-top:16px!important;
+  padding-top:14px!important;
+  border-top:1px solid #edf1f5!important;
+}
+#installmentScopeModal66 .modalfoot .ghost{
+  border-radius:10px!important;
+  min-height:38px!important;
+}
+@media(max-width:560px){
+  #installmentScopeModal66{
+    padding:12px!important;
+  }
+  #installmentScopeModal66 .modal{
+    width:100%!important;
+    max-width:none!important;
+    padding:18px!important;
+    border-radius:18px!important;
+  }
+  #installmentScopeModal66 .v64-scope-btn{
+    padding:12px!important;
+  }
+}
+</style>
+
+<style id="pp-v70-dashboard-card-years-style">
+/* V70 — organização visual das faturas por ano, preservando os cards mensais existentes */
+#v39InvoiceBoard .v70-years{
+  display:grid;
+  gap:14px;
+  margin-top:12px;
+}
+#v39InvoiceBoard .v70-year{
+  border:1px solid #e3e8ef;
+  border-radius:18px;
+  background:#fff;
+  overflow:hidden;
+}
+#v39InvoiceBoard .v70-year-head{
+  width:100%;
+  border:0;
+  background:#f8fafc;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:15px 17px;
+  cursor:pointer;
+  text-align:left;
+}
+#v39InvoiceBoard .v70-year-head:hover{background:#f4f7fb}
+#v39InvoiceBoard .v70-year-title{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-width:0;
+}
+#v39InvoiceBoard .v70-year-title strong{
+  font-size:15px;
+  color:#172033;
+}
+#v39InvoiceBoard .v70-year-title span{
+  font-size:9px;
+  font-weight:850;
+  color:#768195;
+  background:#eef2f7;
+  border-radius:999px;
+  padding:4px 7px;
+  white-space:nowrap;
+}
+#v39InvoiceBoard .v70-year-arrow{
+  width:28px;height:28px;
+  border-radius:999px;
+  display:grid;place-items:center;
+  border:1px solid #dce3ec;
+  background:#fff;
+  color:#657286;
+  font-size:12px;
+  transition:transform .15s ease;
+}
+#v39InvoiceBoard .v70-year.open .v70-year-arrow{transform:rotate(180deg)}
+#v39InvoiceBoard .v70-year-body{
+  display:none;
+  padding:14px;
+  border-top:1px solid #e9edf2;
+}
+#v39InvoiceBoard .v70-year.open .v70-year-body{display:block}
+#v39InvoiceBoard .v70-month-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+#v39InvoiceBoard .v70-year-current{
+  border-color:#cddcf7;
+  box-shadow:0 8px 24px rgba(11,99,246,.05);
+}
+#v39InvoiceBoard .v70-year-current>.v70-year-head{
+  background:#f5f9ff;
+}
+@media(max-width:900px){
+  #v39InvoiceBoard .v70-month-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:620px){
+  #v39InvoiceBoard .v70-years{gap:10px}
+  #v39InvoiceBoard .v70-year-head{padding:13px 14px}
+  #v39InvoiceBoard .v70-year-body{padding:10px}
+  #v39InvoiceBoard .v70-month-grid{grid-template-columns:1fr}
+}
+</style>
+
+<script id="pp-v70-dashboard-card-years-final">
+(()=>{
+'use strict';
+
+/* ---------- VISÃO GERAL ----------
+   O dashboard antigo já calcula corretamente quando "custom" contém as
+   ocorrências expandidas. Aqui usamos temporariamente a mesma base manual
+   utilizada em Lançamentos e depois restauramos o array original.
+   Assim não alteramos armazenamento nem duplicamos registros. */
+const dashboardBefore70=window.renderDashboard;
+if(typeof dashboardBefore70==='function'&&!dashboardBefore70.__v70){
+  const wrapped70=function(){
+    let originalCustom;
+    let replaced=false;
+    try{
+      if(typeof window.standardManualRowsV66==='function'){
+        originalCustom=custom;
+        custom=window.standardManualRowsV66();
+        replaced=true;
+      }
+      return dashboardBefore70.apply(this,arguments);
+    }finally{
+      if(replaced)custom=originalCustom;
+    }
+  };
+  wrapped70.__v70=true;
+  window.renderDashboard=wrapped70;
+  try{renderDashboard=wrapped70}catch(e){}
+}
+
+/* ---------- FATURAS POR ANO ----------
+   Apenas reorganiza os mesmos .v39-card que já foram renderizados.
+   Nenhuma rotina de compra, parcela, estorno, quitação ou edição é refeita. */
+let arranging70=false;
+
+function profile70(){
+  return String(localStorage.getItem('planejador_active_profile')||'Marcos').toLowerCase();
+}
+function currentCard70(){
+  return document.querySelector('#cardsCleanRoot [data-clean-card].selected')?.dataset.cleanCard
+      || document.querySelector('[data-clean-card].selected')?.dataset.cleanCard
+      || 'card';
+}
+function yearStateKey70(card,year){
+  return `planejador_card_year_open_v70_${profile70()}_${card}_${year}`;
+}
+function initialOpen70(card,year){
+  const raw=localStorage.getItem(yearStateKey70(card,year));
+  if(raw==='1')return true;
+  if(raw==='0')return false;
+  return +year===+currentYear;
+}
+function setOpen70(card,year,open){
+  try{localStorage.setItem(yearStateKey70(card,year),open?'1':'0')}catch(e){}
+}
+
+function arrangeYears70(){
+  if(arranging70)return;
+  const board=document.getElementById('v39InvoiceBoard');
+  if(!board)return;
+
+  /* Se já estiver organizado e não houver uma grade crua nova, não toca. */
+  const rawGrid=[...board.children].find(el=>el.classList?.contains('v39-grid'));
+  if(!rawGrid)return;
+
+  arranging70=true;
+  try{
+    const cards=[...rawGrid.querySelectorAll(':scope > [data-v39-invoice]')];
+    if(!cards.length)return;
+
+    const byYear=new Map();
+    cards.forEach(card=>{
+      const raw=String(card.dataset.v39Invoice||'');
+      const m=raw.match(/^(\d{4})-(\d{1,2})$/);
+      if(!m)return;
+      const year=+m[1];
+      if(!byYear.has(year))byYear.set(year,[]);
+      byYear.get(year).push(card);
+    });
+
+    if(!byYear.size)return;
+
+    const cardId=currentCard70();
+    const years=[...byYear.keys()].sort((a,b)=>b-a);
+    const yearsWrap=document.createElement('div');
+    yearsWrap.className='v70-years';
+
+    years.forEach(year=>{
+      const items=byYear.get(year).sort((a,b)=>{
+        const ma=+(String(a.dataset.v39Invoice).split('-')[1]||0);
+        const mb=+(String(b.dataset.v39Invoice).split('-')[1]||0);
+        return ma-mb;
+      });
+
+      const section=document.createElement('section');
+      section.className='v70-year'+(+year===+currentYear?' v70-year-current':'');
+      if(initialOpen70(cardId,year))section.classList.add('open');
+      section.dataset.v70Year=String(year);
+
+      const head=document.createElement('button');
+      head.type='button';
+      head.className='v70-year-head';
+      head.innerHTML=`
+        <span class="v70-year-title">
+          <strong>${year}</strong>
+          <span>${items.length} fatura${items.length===1?'':'s'}</span>
+        </span>
+        <span class="v70-year-arrow">⌄</span>`;
+
+      const body=document.createElement('div');
+      body.className='v70-year-body';
+      const grid=document.createElement('div');
+      grid.className='v70-month-grid';
+
+      items.forEach(item=>grid.appendChild(item));
+      body.appendChild(grid);
+      section.append(head,body);
+      yearsWrap.appendChild(section);
+    });
+
+    rawGrid.replaceWith(yearsWrap);
+
+    const headTitle=board.querySelector('.v39-head h3');
+    if(headTitle)headTitle.textContent=headTitle.textContent.replace(/^Faturas por mês/i,'Faturas por ano');
+    const headSub=board.querySelector('.v39-head p');
+    if(headSub)headSub.textContent='Abra um ano para consultar as faturas mensais. O ano vigente fica aberto por padrão.';
+
+  }finally{
+    arranging70=false;
+  }
+}
+
+document.addEventListener('click',e=>{
+  const head=e.target.closest?.('.v70-year-head');
+  if(!head)return;
+  e.preventDefault();
+  e.stopPropagation();
+  const section=head.closest('.v70-year');
+  if(!section)return;
+  section.classList.toggle('open');
+  setOpen70(currentCard70(),+section.dataset.v70Year,section.classList.contains('open'));
+},true);
+
+/* O render original das faturas acontece de forma assíncrona em vários pontos.
+   Este observador apenas detecta quando uma nova grade mensal foi criada. */
+let boardObserver70=null;
+function attach70(){
+  const board=document.getElementById('v39InvoiceBoard');
+  if(!board)return;
+  if(boardObserver70)boardObserver70.disconnect();
+  boardObserver70=new MutationObserver(()=>{
+    if(arranging70)return;
+    if([...board.children].some(el=>el.classList?.contains('v39-grid'))){
+      setTimeout(arrangeYears70,0);
+    }
+  });
+  boardObserver70.observe(board,{childList:true,subtree:false});
+  arrangeYears70();
+}
+
+const cardsBefore70=window.renderCards;
+if(typeof cardsBefore70==='function'&&!cardsBefore70.__v70){
+  const wrappedCards70=function(){
+    const r=cardsBefore70.apply(this,arguments);
+    setTimeout(arrangeYears70,40);
+    setTimeout(attach70,90);
+    return r;
+  };
+  wrappedCards70.__v70=true;
+  window.renderCards=wrappedCards70;
+  try{renderCards=wrappedCards70}catch(e){}
+}
+
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('[data-clean-card]')){
+    setTimeout(attach70,80);
+    setTimeout(arrangeYears70,150);
+  }
+},false);
+
+function init70(){
+  try{window.renderDashboard?.()}catch(e){}
+  attach70();
+  setTimeout(arrangeYears70,250);
+  setTimeout(arrangeYears70,900);
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(init70,300),{once:true});
+}else setTimeout(init70,300);
+
+window.ppV70={
+  refreshDashboard:()=>window.renderDashboard?.(),
+  refreshCardYears:arrangeYears70
+};
+})();
+</script>
+
