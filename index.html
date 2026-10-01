@@ -19646,3 +19646,120 @@ window.ppV70={
 })();
 </script>
 
+<script id="pp-v71-six-months-final">
+(()=>{
+'use strict';
+
+function num71(v){
+  if(typeof v==='number'&&Number.isFinite(v))return v;
+  let s=String(v??'').trim().replace(/\s/g,'').replace(/R\$/gi,'');
+  if(!s)return 0;
+  if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+  else if(s.includes(','))s=s.replace(',','.');
+  s=s.replace(/[^0-9.-]/g,'');
+  const n=Number(s);
+  return Number.isFinite(n)?n:0;
+}
+function addMonth71(y,m,d){
+  const i=(+y*12+(+m-1))+d;
+  return {year:Math.floor(i/12),month:(i%12)+1};
+}
+function totals71(y,m){
+  let rows=[];
+  try{
+    rows=(window.allTx?.()||[]).filter(x=>+x.ano===+y&&+x.mesNum===+m);
+  }catch(e){}
+  const inc=rows.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+num71(x.valor),0);
+  const out=rows.filter(x=>x.tipo==='saida').reduce((a,x)=>a+num71(x.valor),0);
+  const cards=rows.filter(x=>x.tipo==='saida'&&x.origemDados==='Cartões').reduce((a,x)=>a+num71(x.valor),0);
+  const manual=rows.filter(x=>x.tipo==='saida'&&x.origemDados!=='Cartões').reduce((a,x)=>a+num71(x.valor),0);
+  return {inc,out,cards,manual,balance:inc-out};
+}
+
+function selectedBase71(){
+  const y=Number(document.getElementById('yearFilter')?.value)||Number(window.year)||Number(currentYear);
+  const m=Number(document.getElementById('monthFilter')?.value)||Number(window.month)||Number(currentMonth);
+  return {
+    year:Number.isFinite(y)?y:Number(currentYear),
+    month:(Number.isFinite(m)&&m>=1&&m<=12)?m:Number(currentMonth)
+  };
+}
+
+function renderSixMonths71(){
+  const six=document.getElementById('sixMonthCard');
+  if(!six)return;
+
+  const base=selectedBase71();
+  const months=[];
+  for(let i=0;i<6;i++){
+    const d=addMonth71(base.year,base.month,i);
+    months.push({...d,...totals71(d.year,d.month)});
+  }
+
+  const totalInc=months.reduce((a,x)=>a+x.inc,0);
+  const totalOut=months.reduce((a,x)=>a+x.out,0);
+  const totalBalance=totalInc-totalOut;
+
+  six.innerHTML=`
+    <div class="six-head">
+      <div>
+        <h3>Próximos 6 meses</h3>
+        <p>A partir de ${monthNames[base.month-1]} de ${base.year}, usando todos os lançamentos cadastrados.</p>
+      </div>
+      <b>${brl(totalOut)}</b>
+    </div>
+    <div class="six-strip">
+      ${months.map((x,i)=>`
+        <div class="six-item ${i===0?'current':''}">
+          <div class="m">${monthNames[x.month-1]} ${x.year}</div>
+          <div class="v">${brl(x.out)}</div>
+          <div class="d">Entradas ${brl(x.inc)} · saídas ${brl(x.out)}</div>
+          <div class="d">Cartões ${brl(x.cards)} · demais ${brl(x.manual)}</div>
+        </div>`).join('')}
+    </div>
+    <div class="capacity-note">
+      6 meses: entradas ${brl(totalInc)} · saídas ${brl(totalOut)} · saldo ${brl(totalBalance)}.
+      Inclui lançamentos únicos, parcelados, recorrentes e faturas de cartão.
+    </div>`;
+}
+
+/* Torna esta a renderização final do card, depois que o dashboard termina
+   e a V70 já restaurou a base original de custom. */
+const prev71=window.renderDashboard;
+if(typeof prev71==='function'&&!prev71.__v71){
+  const wrapped71=function(){
+    const r=prev71.apply(this,arguments);
+    renderSixMonths71();
+    return r;
+  };
+  wrapped71.__v71=true;
+  window.renderDashboard=wrapped71;
+  try{renderDashboard=wrapped71}catch(e){}
+}
+
+/* Garante atualização após mudanças que podem alterar os próximos meses. */
+['yearFilter','monthFilter'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change',()=>setTimeout(renderSixMonths71,10));
+});
+document.addEventListener('click',e=>{
+  if(
+    e.target.closest?.('#dashboardScope button') ||
+    e.target.closest?.('[data-v67-tx]') ||
+    e.target.closest?.('[data-v63-pay]') ||
+    e.target.closest?.('#saveTx') ||
+    e.target.closest?.('#saveCardPurchaseV52,#saveCardPurchase')
+  ){
+    setTimeout(renderSixMonths71,120);
+  }
+},false);
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(renderSixMonths71,450),{once:true});
+}else{
+  setTimeout(renderSixMonths71,450);
+}
+
+window.ppSixMonthsV71={refresh:renderSixMonths71,totals:totals71};
+})();
+</script>
+
