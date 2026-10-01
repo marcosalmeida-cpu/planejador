@@ -16547,3 +16547,625 @@ window.ppProfileCloudAuditV57={show:audit,refresh:badge};
 })();
 </script>
 
+<style id="pp-v58-invoice-actions-style">
+.v58-invoice-action{
+  border:1px solid #cfd9e7;background:#fff;border-radius:9px;
+  padding:6px 10px;font-size:9.5px;font-weight:850;cursor:pointer;margin-left:6px
+}
+.v58-invoice-action.pay{color:#0b63f6}
+.v58-invoice-action.reopen{color:#8a5a00}
+</style>
+<script id="pp-v58-invoice-actions-final">
+(()=>{
+'use strict';
+
+function profile58(){
+  return String(localStorage.getItem('planejador_active_profile')||'Marcos');
+}
+function key58(){ return 'planejador_invoice_status_v50_'+profile58().toLowerCase(); }
+function read58(){ try{return JSON.parse(localStorage.getItem(key58())||'{}')||{}}catch(e){return {}} }
+function save58(o){
+  localStorage.setItem(key58(),JSON.stringify(o));
+  try{window.ppV42SaveProfileState?.()}catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+}
+function id58(card,y,m){return `${card}|${+y}|${+m}`}
+function status58(card,y,m,def='Pendente'){
+  return read58()[id58(card,y,m)]||def;
+}
+function set58(card,y,m,status){
+  const o=read58();o[id58(card,y,m)]=status;save58(o);
+  try{window.renderLancamentos?.()}catch(e){}
+  try{window.renderCards?.()}catch(e){}
+  try{window.renderDashboard?.()}catch(e){}
+  setTimeout(patchAll58,60);
+}
+
+function selectedCard58(){
+  return document.querySelector('#cardsCleanRoot [data-clean-card].selected')?.dataset.cleanCard
+      || document.querySelector('[data-clean-card].selected')?.dataset.cleanCard
+      || '';
+}
+
+function patchLaunch58(){
+  const body=document.getElementById('txBody'); if(!body)return;
+  body.querySelectorAll('[data-v39-detail]').forEach(detail=>{
+    const p=String(detail.dataset.v39Detail||'').split('|');
+    if(p.length!==3)return;
+    const [card,ys,ms]=p, y=+ys, m=+ms;
+    const row=detail.closest('tr'); if(!row)return;
+    let tag=row.querySelector('td:nth-child(6) .tag');
+    const current=tag?.textContent?.trim();
+    const def=current==='Quitado'?'Quitado':'Pendente';
+    const st=status58(card,y,m,def);
+    if(tag){
+      tag.textContent=st;
+      tag.className='tag '+(st==='Quitado'?'green':'amber');
+    }
+    const parent=detail.parentElement||row;
+    parent.querySelectorAll('.v55-invoice-pay,.v50-invoice-action,.v58-invoice-action').forEach((el,i)=>{
+      if(el.classList.contains('v58-invoice-action'))return;
+      el.remove();
+    });
+    let b=parent.querySelector('.v58-invoice-action');
+    if(!b){
+      b=document.createElement('button');
+      b.type='button';
+      b.className='v58-invoice-action';
+      detail.insertAdjacentElement('afterend',b);
+    }
+    b.dataset.v58Invoice=id58(card,y,m);
+    b.className='v58-invoice-action '+(st==='Quitado'?'reopen':'pay');
+    b.textContent=st==='Quitado'?'Reabrir':'Quitar';
+  });
+}
+
+function patchCards58(){
+  const board=document.getElementById('v39InvoiceBoard'); if(!board)return;
+  const cardId=selectedCard58(); if(!cardId)return;
+  board.querySelectorAll('[data-v39-invoice]').forEach(card=>{
+    const ym=String(card.dataset.v39Invoice||'').split('-');
+    if(ym.length!==2)return;
+    const y=+ym[0],m=+ym[1];
+    const tag=card.querySelector('.v39-status');
+    const def=tag?.textContent?.trim()==='Quitada'?'Quitado':'Pendente';
+    const st=status58(cardId,y,m,def);
+    if(tag){
+      tag.textContent=st==='Quitado'?'Quitada':'Pendente';
+      tag.classList.toggle('paid',st==='Quitado');
+    }
+    const area=card.querySelector('.v39-details')||card;
+    area.querySelectorAll('.v55-invoice-pay,.v50-invoice-action').forEach(el=>el.remove());
+    let b=area.querySelector('.v58-invoice-action');
+    if(!b){
+      b=document.createElement('button');
+      b.type='button';
+      b.className='v58-invoice-action';
+      area.prepend(b);
+    }
+    b.dataset.v58Invoice=id58(cardId,y,m);
+    b.className='v58-invoice-action '+(st==='Quitado'?'reopen':'pay');
+    b.textContent=st==='Quitado'?'Reabrir fatura':'Quitar fatura';
+  });
+}
+
+function patchAll58(){patchLaunch58();patchCards58()}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('[data-v58-invoice]');
+  if(!b)return;
+  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+  const p=String(b.dataset.v58Invoice||'').split('|');
+  if(p.length!==3)return;
+  const [card,ys,ms]=p, y=+ys, m=+ms;
+  const cur=status58(card,y,m,/reabrir/i.test(b.textContent||'')?'Quitado':'Pendente');
+  set58(card,y,m,cur==='Quitado'?'Pendente':'Quitado');
+},true);
+
+/* Reaplica após renders atuais, inclusive os que vieram depois da V55. */
+const rl=window.renderLancamentos;
+if(typeof rl==='function'&&!rl.__v58){
+  const w=function(){const r=rl.apply(this,arguments);setTimeout(patchLaunch58,0);return r};
+  w.__v58=true;window.renderLancamentos=w;try{renderLancamentos=w}catch(e){}
+}
+const rc=window.renderCards;
+if(typeof rc==='function'&&!rc.__v58){
+  const w=function(){const r=rc.apply(this,arguments);setTimeout(patchCards58,0);return r};
+  w.__v58=true;window.renderCards=w;try{renderCards=w}catch(e){}
+}
+
+/* Troca de perfil/navegação pode redesenhar as telas por caminhos antigos. */
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('[data-page],.nav-item,#profileMenu,[data-profile],#txBody,#cardsCleanRoot')){
+    setTimeout(patchAll58,80);
+  }
+},false);
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(patchAll58,200),{once:true});
+}else setTimeout(patchAll58,200);
+
+window.ppInvoiceActionsV58={refresh:patchAll58,set:set58,status:status58};
+})();
+</script>
+
+<style id="pp-v59-cloud-minimal-style">
+/* Apenas nuvem + indicador. Informações somente ao clicar. */
+#ppV57Audit,#ppV66CloudWarning{display:none!important}
+#cloudStatusV40{
+  right:16px!important;bottom:16px!important;
+  width:54px!important;height:38px!important;
+  padding:0 8px!important;gap:6px!important;
+  justify-content:center!important;
+  border-radius:999px!important;
+  cursor:pointer!important
+}
+#cloudStatusV40 span,#cloudStatusV40 #ppV66Version{display:none!important}
+#cloudStatusV40 button{
+  display:block!important;
+  font-size:0!important;
+  width:25px!important;height:28px!important;
+  padding:0!important;cursor:pointer!important
+}
+#cloudStatusV40 button::before{
+  content:"☁";
+  font-size:21px;
+  line-height:28px;
+  color:#526070
+}
+#cloudStatusV40 i{
+  width:9px!important;height:9px!important;flex:0 0 9px!important;
+  background:#ef4444!important;
+  box-shadow:0 0 0 2px #fff
+}
+#cloudStatusV40.online i,
+#cloudStatusV40.saving i{background:#12b76a!important}
+#cloudStatusV40.error i,
+#cloudStatusV40.pp-v66-offline i{background:#ef4444!important}
+</style>
+
+<script id="pp-v59-cloud-autosync-final">
+(()=>{
+'use strict';
+
+const FIVE_MIN=5*60*1000;
+let safetyTimer=null;
+let busy=false;
+
+function cloud(){return window.ppCloudV66||window.ppCloud}
+function connected(){
+  try{return !!cloud()?.connected?.()}catch(e){return false}
+}
+async function safeSync(reload=false){
+  const c=cloud();
+  if(!c||!connected()||busy)return;
+  busy=true;
+  try{
+    /* save() força uma varredura do estado local e envia tudo que mudou.
+       sync() em seguida confere o servidor e recebe alterações de outros aparelhos. */
+    await c.save?.();
+    await c.sync?.({reload});
+  }catch(e){
+    console.warn('v59 cloud safety sync',e);
+  }finally{
+    busy=false;
+    paint();
+  }
+}
+function paint(){
+  const el=document.getElementById('cloudStatusV40');
+  if(!el)return;
+  /* Mantém apenas o símbolo e o ponto. O status interno continua sendo
+     controlado pela rotina de nuvem original. */
+  const span=el.querySelector('span'); if(span)span.setAttribute('aria-hidden','true');
+  const btn=el.querySelector('button');
+  if(btn){
+    btn.textContent='';
+    btn.title=connected()?'Nuvem conectada — clique para ver detalhes':'Nuvem desconectada — clique para conectar';
+    btn.setAttribute('aria-label',btn.title);
+    btn.onclick=()=>cloud()?.open?.();
+  }
+  /* Evita cinza: conectado = verde; sem sessão = vermelho. */
+  if(!connected()){
+    el.classList.remove('online','saving');
+    el.classList.add('pp-v66-offline');
+  }
+}
+function start(){
+  paint();
+  if(!safetyTimer){
+    /* A rotina v66 já trabalha quase em tempo real.
+       Este ciclo é uma camada extra de segurança. */
+    safetyTimer=setInterval(()=>safeSync(false),FIVE_MIN);
+  }
+  /* Ao carregar, dá uma conferida depois que autenticação/inicialização terminarem. */
+  setTimeout(()=>safeSync(false),3500);
+}
+
+/* Alterações relevantes do app normalmente já chamam ppCloud.save().
+   Estes eventos cobrem os casos em que o navegador ficou em segundo plano
+   ou perdeu conexão antes do envio. */
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden)setTimeout(()=>safeSync(true),120);
+});
+window.addEventListener('focus',()=>setTimeout(()=>safeSync(true),160));
+window.addEventListener('online',()=>setTimeout(()=>safeSync(true),200));
+
+/* Antes de sair não é seguro depender de uma requisição assíncrona longa,
+   mas fazemos a varredura imediatamente para marcar tudo que estiver pendente. */
+window.addEventListener('pagehide',()=>{
+  try{cloud()?.save?.()}catch(e){}
+});
+
+/* Troca de perfil: salva o perfil que acabou de ser editado e confere o novo. */
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('[data-profile],#profileMenu,.profile-option,[data-switch-profile]')){
+    try{cloud()?.save?.()}catch(_){}
+    setTimeout(()=>safeSync(true),500);
+  }
+},true);
+
+/* O diagnóstico V57 continua disponível internamente, mas não fica mais
+   ocupando a tela. O clique normal na nuvem abre o painel da própria nuvem. */
+function removeExtra(){
+  document.getElementById('ppV57Audit')?.remove();
+  const w=document.getElementById('ppV66CloudWarning'); if(w)w.style.display='none';
+  paint();
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>{
+    start();setTimeout(removeExtra,1200);
+  },{once:true});
+}else{
+  start();setTimeout(removeExtra,1200);
+}
+
+/* Como status() da rotina antiga pode recriar elementos, fazemos apenas
+   uma correção visual periódica leve, sem renderizar páginas ou alterar dados. */
+setInterval(removeExtra,4000);
+
+window.ppCloudSafetyV59={
+  syncNow:()=>safeSync(true),
+  connected,
+  intervalMinutes:5
+};
+})();
+</script>
+
+<style id="pp-v60-dashboard-clean-style">
+/* V60 — Visão Geral limpa, igual para todos os perfis */
+
+/* O card de próximas faturas foi removido do dashboard.
+   Caso alguma rotina antiga tente recriar algo com o mesmo id, permanece oculto. */
+#dashboard #nextDues,
+#dashboard #nextDues + *,
+#dashboard .pp-card-invoices-v46,
+#dashboard .pp-v58-invoices,
+#dashboard .invoice-showcase-v46{
+  display:none!important;
+}
+
+/* O painel patrimonial passa a ocupar sozinho toda a largura disponível. */
+#dashboard .v60-asset-grid{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  width:100%!important;
+  gap:0!important;
+}
+#dashboard .v60-asset-panel{
+  grid-column:1/-1!important;
+  min-height:420px;
+  overflow:hidden;
+  position:relative;
+  padding:0!important;
+  border:1px solid #e8edf4!important;
+  background:
+    radial-gradient(circle at 86% 0%,rgba(5,104,255,.12),transparent 33%),
+    radial-gradient(circle at 3% 100%,rgba(255,122,0,.10),transparent 32%),
+    #fff!important;
+}
+#dashboard .v60-asset-panel>.panelhead{
+  padding:22px 24px 0!important;
+  border:0!important;
+}
+#dashboard .v60-asset-panel>.panelhead h2{
+  font-size:21px!important;
+  letter-spacing:-.025em;
+}
+#dashboard .v60-asset-panel>.panelhead span{
+  font-size:11px!important;
+}
+#dashboard #assetSnapshot{
+  padding:18px 24px 24px!important;
+}
+#dashboard .v60-wealth-shell{
+  display:grid;
+  grid-template-columns:minmax(240px,.9fr) minmax(0,1.5fr);
+  gap:16px;
+  min-height:330px;
+}
+#dashboard .v60-wealth-hero{
+  border-radius:22px;
+  padding:22px;
+  background:linear-gradient(145deg,#0b63f6,#0848b6);
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  position:relative;
+  overflow:hidden;
+  min-height:300px;
+}
+#dashboard .v60-wealth-hero:after{
+  content:"";
+  position:absolute;
+  width:220px;height:220px;
+  border-radius:50%;
+  right:-90px;bottom:-100px;
+  background:rgba(255,255,255,.11);
+}
+#dashboard .v60-wealth-hero>*{position:relative;z-index:1}
+#dashboard .v60-wealth-kicker{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  font-weight:900;
+  opacity:.82;
+}
+#dashboard .v60-wealth-main{
+  font-size:34px;
+  line-height:1;
+  letter-spacing:-.045em;
+  font-weight:950;
+  margin:9px 0 7px;
+}
+#dashboard .v60-wealth-hero p{
+  font-size:11px;
+  line-height:1.5;
+  margin:0;
+  color:rgba(255,255,255,.82);
+  max-width:290px;
+}
+#dashboard .v60-wealth-foot{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:24px;
+}
+#dashboard .v60-wealth-foot span{
+  display:block;
+  font-size:9px;
+  opacity:.76;
+}
+#dashboard .v60-wealth-foot b{
+  display:block;
+  margin-top:3px;
+  font-size:14px;
+}
+#dashboard .v60-wealth-stack{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  align-content:stretch;
+}
+#dashboard .v60-wealth-item{
+  border:1px solid #e8edf4;
+  border-radius:18px;
+  padding:17px;
+  background:rgba(248,250,253,.9);
+  min-height:142px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+#dashboard .v60-wealth-item .v60-icon{
+  width:34px;height:34px;
+  border-radius:11px;
+  display:grid;place-items:center;
+  background:#edf4ff;
+  color:#0b63f6;
+  font-size:16px;
+  font-weight:900;
+}
+#dashboard .v60-wealth-item.orange .v60-icon{background:#fff2e3;color:#e76f00}
+#dashboard .v60-wealth-item.green .v60-icon{background:#eaf8f1;color:#14845b}
+#dashboard .v60-wealth-item.red .v60-icon{background:#fff0f2;color:#bd2945}
+#dashboard .v60-wealth-item span{
+  display:block;
+  margin-top:12px;
+  color:#748095;
+  font-size:10px;
+  font-weight:800;
+}
+#dashboard .v60-wealth-item b{
+  display:block;
+  color:#172033;
+  font-size:21px;
+  letter-spacing:-.035em;
+  margin-top:4px;
+}
+#dashboard .v60-wealth-item small{
+  color:#97a0ad;
+  font-size:9px;
+  margin-top:5px;
+  line-height:1.35;
+}
+#dashboard .v60-fgts-meter{
+  height:6px;
+  background:#e8edf3;
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:10px;
+}
+#dashboard .v60-fgts-meter i{
+  height:100%;
+  display:block;
+  background:#14845b;
+  border-radius:999px;
+}
+
+/* Na visão ANO, Evolução financeira sai completamente da composição. */
+#dashboard.v60-year-scope #premiumTrend{
+  display:none!important;
+}
+
+@media(max-width:800px){
+  #dashboard .v60-wealth-shell{grid-template-columns:1fr}
+  #dashboard .v60-wealth-hero{min-height:230px}
+}
+@media(max-width:520px){
+  #dashboard .v60-asset-panel{min-height:0}
+  #dashboard .v60-asset-panel>.panelhead{padding:18px 16px 0!important}
+  #dashboard #assetSnapshot{padding:14px 16px 18px!important}
+  #dashboard .v60-wealth-stack{grid-template-columns:1fr}
+  #dashboard .v60-wealth-main{font-size:29px}
+}
+</style>
+
+<script id="pp-v60-dashboard-final">
+(()=>{
+'use strict';
+
+function num60(v){
+  if(typeof v==='number'&&Number.isFinite(v))return v;
+  let s=String(v??'').trim().replace(/\s/g,'').replace(/R\$/gi,'');
+  if(!s)return 0;
+  if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+  else if(s.includes(','))s=s.replace(',','.');
+  s=s.replace(/[^0-9.-]/g,'');
+  const n=Number(s);
+  return Number.isFinite(n)?n:0;
+}
+function money60(v){
+  try{return typeof brl==='function'?brl(v):new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(num60(v))}
+  catch(e){return 'R$ '+num60(v).toFixed(2).replace('.',',')}
+}
+function scope60(){
+  return localStorage.getItem('planejador_dashboard_scope')||'month';
+}
+
+/* Remove o card problemático de próximas faturas do DOM de verdade
+   e transforma a linha patrimonial em bloco único. */
+function cleanDashboard60(){
+  const next=document.getElementById('nextDues');
+  const grid=next?.closest('.grid2');
+  const oldCard=next?.closest('article');
+  if(oldCard)oldCard.remove();
+
+  const asset=document.getElementById('assetSnapshot');
+  const assetCard=asset?.closest('article');
+  const assetGrid=assetCard?.parentElement;
+  if(assetGrid){
+    assetGrid.classList.add('v60-asset-grid');
+    assetGrid.querySelectorAll(':scope > article').forEach(a=>{
+      if(a!==assetCard && a.querySelector('#nextDues'))a.remove();
+    });
+  }
+  if(assetCard)assetCard.classList.add('v60-asset-panel');
+
+  const dash=document.getElementById('dashboard');
+  if(dash)dash.classList.toggle('v60-year-scope',scope60()==='year');
+}
+
+/* Resumo patrimonial em tela cheia, sem somar categorias que podem se sobrepor. */
+function renderWealth60(){
+  const el=document.getElementById('assetSnapshot');
+  if(!el)return;
+
+  let patTotal=0,invTotal=0,fgtsFree=0,fgtsLocked=0;
+  try{patTotal=(Array.isArray(assets)?assets:[]).reduce((a,x)=>a+num60(x.value),0)}catch(e){}
+  try{invTotal=(Array.isArray(investments)?investments:[]).filter(x=>x.status==='Ativo').reduce((a,x)=>a+num60(x.currentValue),0)}catch(e){}
+  try{
+    fgtsFree=num60(fgtsSummary?.saldoDisponivel);
+    fgtsLocked=num60(fgtsSummary?.saldoBloqueado);
+  }catch(e){}
+
+  const fgtsTotal=Math.max(0,fgtsFree+fgtsLocked);
+  const freePct=fgtsTotal>0?Math.max(0,Math.min(100,fgtsFree/fgtsTotal*100)):0;
+
+  el.innerHTML=`
+    <div class="v60-wealth-shell">
+      <section class="v60-wealth-hero">
+        <div>
+          <div class="v60-wealth-kicker">Resumo patrimonial</div>
+          <div class="v60-wealth-main">${money60(patTotal)}</div>
+          <p>Valor dos bens cadastrados no módulo Patrimônio. Investimentos e FGTS aparecem separadamente para evitar dupla contagem.</p>
+        </div>
+        <div class="v60-wealth-foot">
+          <div><span>Itens cadastrados</span><b>${Array.isArray(assets)?assets.length:0}</b></div>
+          <div style="text-align:right"><span>Perfil ativo</span><b>${String(localStorage.getItem('planejador_active_profile')||'Marcos')}</b></div>
+        </div>
+      </section>
+      <section class="v60-wealth-stack">
+        <article class="v60-wealth-item">
+          <div class="v60-icon">↗</div>
+          <div><span>Investimentos ativos</span><b>${money60(invTotal)}</b><small>Posição atual registrada em Investimentos.</small></div>
+        </article>
+        <article class="v60-wealth-item green">
+          <div class="v60-icon">✓</div>
+          <div><span>FGTS livre</span><b>${money60(fgtsFree)}</b><small>Saldo disponível para movimentação conforme cadastro.</small><div class="v60-fgts-meter"><i style="width:${freePct}%"></i></div></div>
+        </article>
+        <article class="v60-wealth-item red">
+          <div class="v60-icon">◇</div>
+          <div><span>FGTS bloqueado</span><b>${money60(fgtsLocked)}</b><small>Parte atualmente marcada como bloqueada.</small></div>
+        </article>
+        <article class="v60-wealth-item orange">
+          <div class="v60-icon">⌂</div>
+          <div><span>FGTS total</span><b>${money60(fgtsTotal)}</b><small>Soma do saldo livre e bloqueado.</small></div>
+        </article>
+      </section>
+    </div>`;
+}
+
+function applyScope60(){
+  const dash=document.getElementById('dashboard');
+  if(!dash)return;
+  const isYear=scope60()==='year';
+  dash.classList.toggle('v60-year-scope',isYear);
+  const trend=document.getElementById('premiumTrend');
+  if(trend && isYear)trend.style.setProperty('display','none','important');
+  else if(trend)trend.style.removeProperty('display');
+}
+
+function renderV60(){
+  cleanDashboard60();
+  renderWealth60();
+  applyScope60();
+}
+
+/* Envolve o render final atual sem alterar cálculos do dashboard. */
+const prev=window.renderDashboard;
+if(typeof prev==='function'&&!prev.__v60){
+  const wrapped=function(){
+    const r=prev.apply(this,arguments);
+    renderV60();
+    return r;
+  };
+  wrapped.__v60=true;
+  window.renderDashboard=wrapped;
+  try{renderDashboard=wrapped}catch(e){}
+}
+
+/* Os botões Mês/Ano/Tudo podem ser controlados por várias camadas antigas;
+   após o clique, apenas ajustamos a composição final. */
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('#dashboardScope button')){
+    setTimeout(renderV60,20);
+    setTimeout(renderV60,140);
+  }
+},false);
+document.getElementById('yearFilter')?.addEventListener('change',()=>setTimeout(renderV60,20));
+document.getElementById('monthFilter')?.addEventListener('change',()=>setTimeout(renderV60,20));
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(renderV60,250),{once:true});
+}else{
+  setTimeout(renderV60,250);
+}
+
+window.ppDashboardV60={refresh:renderV60};
+})();
+</script>
+
