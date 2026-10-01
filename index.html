@@ -18273,3 +18273,300 @@ window.ppRecurringScopeV64={open:window.openTxEdit,rows:expand64};
 })();
 </script>
 
+<style id="pp-v65-launches-polish-style">
+/* V65 — refinamento visual da página de Lançamentos */
+
+#lancamentos{
+  --v65-card-pad:20px;
+}
+#lancamentos .pagehead{
+  margin-bottom:18px!important;
+}
+#lancamentos .filters{
+  gap:10px!important;
+  align-items:end!important;
+}
+#lancamentos #txSummary{
+  gap:14px!important;
+  margin:16px 0 20px!important;
+}
+#lancamentos #txSummary .v63-summary{
+  min-height:108px!important;
+  padding:18px 20px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+}
+#lancamentos #txSummary .v63-summary b{
+  line-height:1.05!important;
+}
+
+/* Cards principais */
+#lancamentos .v63-groups{
+  gap:20px!important;
+}
+#lancamentos .v63-group{
+  border-radius:20px!important;
+  overflow:hidden!important;
+}
+#lancamentos .v63-group-head{
+  min-height:72px;
+  padding:18px var(--v65-card-pad)!important;
+  align-items:center!important;
+}
+#lancamentos .v63-group-head>div:first-child{
+  min-width:0;
+}
+#lancamentos .v63-group-head h3{
+  font-size:16px!important;
+  line-height:1.2!important;
+}
+#lancamentos .v63-group-head p{
+  max-width:720px;
+  line-height:1.45!important;
+}
+
+/* Tabela com colunas proporcionais e alinhadas */
+#lancamentos .v63-tablewrap{
+  padding:0!important;
+  margin:0!important;
+}
+#lancamentos .v63-tablewrap table{
+  width:100%!important;
+  min-width:900px!important;
+  table-layout:fixed!important;
+  border-collapse:collapse!important;
+}
+#lancamentos .v63-tablewrap th,
+#lancamentos .v63-tablewrap td{
+  box-sizing:border-box!important;
+  padding:13px 12px!important;
+  vertical-align:middle!important;
+  border-bottom:1px solid #edf1f5!important;
+  line-height:1.35!important;
+}
+#lancamentos .v63-tablewrap th{
+  background:#fbfcfe!important;
+  color:#748095!important;
+  font-size:9.5px!important;
+  font-weight:900!important;
+  text-transform:uppercase!important;
+  letter-spacing:.045em!important;
+  white-space:nowrap!important;
+  text-align:left!important;
+}
+#lancamentos .v63-tablewrap tbody tr:last-child td{
+  border-bottom:0!important;
+}
+
+/* Larguras planejadas */
+#lancamentos .v63-tablewrap th:nth-child(1),
+#lancamentos .v63-tablewrap td:nth-child(1){width:10%!important}
+#lancamentos .v63-tablewrap th:nth-child(2),
+#lancamentos .v63-tablewrap td:nth-child(2){width:9%!important}
+#lancamentos .v63-tablewrap th:nth-child(3),
+#lancamentos .v63-tablewrap td:nth-child(3){width:23%!important}
+#lancamentos .v63-tablewrap th:nth-child(4),
+#lancamentos .v63-tablewrap td:nth-child(4){width:13%!important}
+#lancamentos .v63-tablewrap th:nth-child(5),
+#lancamentos .v63-tablewrap td:nth-child(5){width:13%!important}
+#lancamentos .v63-tablewrap th:nth-child(6),
+#lancamentos .v63-tablewrap td:nth-child(6){width:10%!important}
+#lancamentos .v63-tablewrap th:nth-child(7),
+#lancamentos .v63-tablewrap td:nth-child(7){width:12%!important;text-align:right!important}
+#lancamentos .v63-tablewrap th:nth-child(8),
+#lancamentos .v63-tablewrap td:nth-child(8){width:10%!important;text-align:right!important}
+
+/* Conteúdo */
+#lancamentos .v63-tablewrap td:nth-child(1),
+#lancamentos .v63-tablewrap td:nth-child(2),
+#lancamentos .v63-tablewrap td:nth-child(6){
+  white-space:nowrap!important;
+}
+#lancamentos .v63-tablewrap td:nth-child(3) b{
+  display:block!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  max-width:100%!important;
+}
+#lancamentos .v63-tablewrap td:nth-child(3) small{
+  display:block!important;
+  margin-top:3px!important;
+  white-space:normal!important;
+}
+#lancamentos .v63-tablewrap td:nth-child(4),
+#lancamentos .v63-tablewrap td:nth-child(5){
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#lancamentos .v63-tablewrap td:nth-child(7){
+  font-variant-numeric:tabular-nums!important;
+  white-space:nowrap!important;
+  font-weight:850!important;
+}
+
+/* Ações não espremem nem quebram */
+#lancamentos .v63-invoice-actions{
+  justify-content:flex-end!important;
+  flex-wrap:nowrap!important;
+  gap:5px!important;
+}
+#lancamentos .v63-detail,
+#lancamentos .v63-pay{
+  min-width:0!important;
+  padding:7px 9px!important;
+  white-space:nowrap!important;
+}
+#lancamentos .dots{
+  margin-left:auto!important;
+}
+
+/* Área de filtros e busca respeita a largura do conteúdo */
+#lancamentos .filters select,
+#lancamentos .filters input{
+  min-height:40px!important;
+}
+#lancamentos #txSearch{
+  min-width:220px!important;
+}
+
+/* Notebook */
+@media(max-width:1180px){
+  #lancamentos{
+    --v65-card-pad:16px;
+  }
+  #lancamentos .v63-tablewrap table{
+    min-width:820px!important;
+  }
+  #lancamentos .v63-tablewrap th,
+  #lancamentos .v63-tablewrap td{
+    padding:12px 9px!important;
+  }
+  #lancamentos .v63-tablewrap th:nth-child(3),
+  #lancamentos .v63-tablewrap td:nth-child(3){width:21%!important}
+  #lancamentos .v63-tablewrap th:nth-child(4),
+  #lancamentos .v63-tablewrap td:nth-child(4){width:12%!important}
+  #lancamentos .v63-tablewrap th:nth-child(5),
+  #lancamentos .v63-tablewrap td:nth-child(5){width:12%!important}
+  #lancamentos .v63-tablewrap th:nth-child(8),
+  #lancamentos .v63-tablewrap td:nth-child(8){width:13%!important}
+}
+
+/* Tablet */
+@media(max-width:820px){
+  #lancamentos #txSummary{
+    grid-template-columns:1fr!important;
+  }
+  #lancamentos .filters{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+  }
+  #lancamentos #txSearch{
+    min-width:0!important;
+    width:100%!important;
+  }
+  #lancamentos .v63-group-head{
+    padding:15px 14px!important;
+  }
+  #lancamentos .v63-tablewrap{
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch;
+  }
+  #lancamentos .v63-tablewrap table{
+    min-width:780px!important;
+  }
+}
+
+/* Celular: transforma cada linha em um card legível */
+@media(max-width:620px){
+  #lancamentos{
+    --v65-card-pad:12px;
+  }
+  #lancamentos .filters{
+    grid-template-columns:1fr!important;
+  }
+  #lancamentos .v63-group{
+    border-radius:16px!important;
+  }
+  #lancamentos .v63-group-head{
+    min-height:0!important;
+    padding:14px!important;
+  }
+  #lancamentos .v63-tablewrap{
+    overflow:visible!important;
+    padding:10px!important;
+  }
+  #lancamentos .v63-tablewrap table,
+  #lancamentos .v63-tablewrap tbody,
+  #lancamentos .v63-tablewrap tr,
+  #lancamentos .v63-tablewrap td{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+  #lancamentos .v63-tablewrap table{
+    min-width:0!important;
+  }
+  #lancamentos .v63-tablewrap thead{
+    display:none!important;
+  }
+  #lancamentos .v63-tablewrap tr{
+    margin-bottom:10px!important;
+    border:1px solid #e8edf4!important;
+    border-radius:14px!important;
+    padding:11px 12px!important;
+    background:#fff!important;
+  }
+  #lancamentos .v63-tablewrap tr:last-child{
+    margin-bottom:0!important;
+  }
+  #lancamentos .v63-tablewrap td{
+    border:0!important;
+    padding:5px 0!important;
+    text-align:left!important;
+    white-space:normal!important;
+    overflow:visible!important;
+  }
+  #lancamentos .v63-tablewrap td:nth-child(1){
+    font-size:10px!important;
+    color:#748095!important;
+    margin-bottom:2px!important;
+  }
+  #lancamentos .v63-tablewrap td:nth-child(2){
+    margin-bottom:3px!important;
+  }
+  #lancamentos .v63-tablewrap td:nth-child(3) b{
+    font-size:13px!important;
+    white-space:normal!important;
+  }
+  #lancamentos .v63-tablewrap td:nth-child(4),
+  #lancamentos .v63-tablewrap td:nth-child(5){
+    display:inline!important;
+    font-size:10px!important;
+    color:#748095!important;
+    margin-right:8px!important;
+  }
+  #lancamentos .v63-tablewrap td:nth-child(6){
+    margin-top:7px!important;
+  }
+  #lancamentos .v63-tablewrap td:nth-child(7){
+    text-align:left!important;
+    font-size:16px!important;
+    padding-top:7px!important;
+  }
+  #lancamentos .v63-tablewrap td:nth-child(8){
+    text-align:left!important;
+    padding-top:8px!important;
+  }
+  #lancamentos .v63-invoice-actions{
+    justify-content:flex-start!important;
+  }
+  #lancamentos .v63-empty{
+    display:block!important;
+    padding:20px 8px!important;
+  }
+}
+</style>
+
