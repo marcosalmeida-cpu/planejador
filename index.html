@@ -18570,3 +18570,611 @@ window.ppRecurringScopeV64={open:window.openTxEdit,rows:expand64};
 }
 </style>
 
+<style id="pp-v66-standard-installment-style">
+#txModal #standardInstallmentFields{
+  display:none;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+#txModal #standardInstallmentFields.show{display:grid}
+#txModal #standardInstallmentFields label{
+  display:block;
+  font-size:9px;
+  font-weight:850;
+  color:#6e7a8d;
+  margin-bottom:4px;
+}
+#txModal #standardInstallmentFields input,
+#txModal #standardInstallmentFields select{
+  width:100%;
+  min-height:39px;
+  border:1px solid #dce3ed;
+  border-radius:10px;
+  background:#fff;
+  padding:8px 9px;
+  font:inherit;
+  box-sizing:border-box;
+}
+@media(max-width:560px){
+  #txModal #standardInstallmentFields{grid-template-columns:1fr}
+}
+</style>
+
+<script id="pp-v66-standard-installment-final">
+(()=>{
+'use strict';
+
+const INST_PREFIX='P66::';
+let instEditCtx66=null;
+let pendingInstScope66=null;
+const prevOpen66=window.openTxEdit;
+const prevSave66=window.saveTx;
+const prevDelete66=window.deleteTxEnhanced;
+
+function n66(v){
+  if(typeof v==='number'&&Number.isFinite(v))return v;
+  let x=String(v??'').trim();
+  if(x.includes(',')&&x.includes('.'))x=x.replace(/\./g,'').replace(',','.');
+  else if(x.includes(','))x=x.replace(',','.');
+  x=x.replace(/[^0-9.-]/g,'');
+  const n=Number(x);return Number.isFinite(n)?n:0;
+}
+function idx66(y,m){return (+y)*12+(+m-1)}
+function fromIdx66(i){return {year:Math.floor(i/12),month:(i%12)+1}}
+function ym66(y,m){return `${+y}-${String(+m).padStart(2,'0')}`}
+function add66(y,m,d){return fromIdx66(idx66(y,m)+d)}
+function vid66(id,y,m){return `${INST_PREFIX}${id}::${+y}::${+m}`}
+function parse66(id){
+  const x=String(id||'');
+  if(!x.startsWith(INST_PREFIX))return null;
+  const p=x.split('::');
+  return p.length>=4?{sourceId:p[1],year:+p[2],month:+p[3]}:null;
+}
+function source66(id){
+  try{return (custom||[]).find(x=>String(x.id)===String(id))||null}catch(e){return null}
+}
+function qty66(v){
+  let raw=String(v??'').trim();
+  if(!raw)return 1;
+  raw=raw.split(/[,.]/)[0].replace(/\D/g,'');
+  let n=parseInt(raw,10);
+  if(!Number.isFinite(n)||n<1)n=1;
+  return Math.min(120,n);
+}
+function partAmount66(total,count,i){
+  const cents=Math.round(n66(total)*100), base=Math.floor(cents/count);
+  const c=i===count-1?cents-base*(count-1):base;
+  return c/100;
+}
+
+function ensureMode66(){
+  const block=document.getElementById('standardRecurringBlock');
+  const sel=document.getElementById('standardRecurringMode');
+  const bar=document.getElementById('standardRecurringBar');
+  if(!block||!sel||!bar)return;
+
+  if(!sel.querySelector('option[value="parcelado"]')){
+    const o=document.createElement('option');o.value='parcelado';o.textContent='Parcelado';sel.appendChild(o);
+  }
+  if(!bar.querySelector('[data-sr-mode="parcelado"]')){
+    const b=document.createElement('button');
+    b.type='button';b.dataset.srMode='parcelado';b.textContent='Parcelado';
+    const recurring=bar.querySelector('[data-sr-mode="recorrente"]');
+    bar.insertBefore(b,recurring||null);
+    b.addEventListener('click',()=>{
+      sel.value='parcelado';
+      sync66();
+    });
+  }
+
+  let fields=document.getElementById('standardInstallmentFields');
+  if(!fields){
+    fields=document.createElement('div');
+    fields.id='standardInstallmentFields';
+    fields.innerHTML=`
+      <div><label>Qtd. de parcelas</label><input id="standardInstallmentQty" type="text" inputmode="numeric" pattern="[0-9]*" value="2" placeholder="Ex.: 7"></div>
+      <div><label>Mês da 1ª parcela</label><select id="standardInstallmentMonth"></select></div>
+      <div><label>Ano da 1ª parcela</label><select id="standardInstallmentYear"></select></div>`;
+    block.appendChild(fields);
+
+    const ms=fields.querySelector('#standardInstallmentMonth');
+    const ys=fields.querySelector('#standardInstallmentYear');
+    const months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    months.forEach((x,i)=>{const o=document.createElement('option');o.value=String(i+1);o.textContent=x;ms.appendChild(o)});
+    const cy=(typeof currentYear!=='undefined'?currentYear:new Date().getFullYear());
+    for(let y=cy-15;y<=cy+15;y++){const o=document.createElement('option');o.value=String(y);o.textContent=String(y);ys.appendChild(o)}
+    const fy=+document.getElementById('fYear')?.value||cy;
+    const fm=+document.getElementById('fMonth')?.value||new Date().getMonth()+1;
+    ms.value=String(fm);ys.value=String(fy);
+
+    const qi=fields.querySelector('#standardInstallmentQty');
+    qi.addEventListener('keydown',e=>{if([',','.','e','E','+','-'].includes(e.key))e.preventDefault()});
+    qi.addEventListener('input',()=>{const q=qty66(qi.value);qi.dataset.qty=String(q)});
+    qi.addEventListener('blur',()=>{qi.value=String(qty66(qi.value))});
+  }
+  sync66();
+}
+function sync66(){
+  const sel=document.getElementById('standardRecurringMode');
+  const block=document.getElementById('standardInstallmentFields');
+  if(!sel)return;
+  document.querySelectorAll('#standardRecurringBar [data-sr-mode]').forEach(b=>b.classList.toggle('active',b.dataset.srMode===sel.value));
+  block?.classList.toggle('show',sel.value==='parcelado');
+  const h=document.getElementById('standardRecurringHelp');
+  if(h){
+    h.textContent=sel.value==='parcelado'
+      ? 'Parcelado: divide o valor total entre os meses a partir da 1ª parcela informada.'
+      : sel.value==='recorrente'
+        ? 'Recorrente: repete o mesmo lançamento todos os meses a partir do mês/ano informado.'
+        : 'Único: o lançamento será considerado somente no mês/ano informado.';
+  }
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('#standardRecurringBar [data-sr-mode]');
+  if(!b)return;
+  const sel=document.getElementById('standardRecurringMode');
+  if(sel){sel.value=b.dataset.srMode;setTimeout(sync66,0)}
+},true);
+document.addEventListener('change',e=>{
+  if(e.target?.id==='standardRecurringMode')sync66();
+},true);
+
+function scopeModal66(){
+  let modal=document.getElementById('installmentScopeModal66');
+  if(modal)return modal;
+  modal=document.createElement('div');
+  modal.id='installmentScopeModal66';
+  modal.className='modalback';
+  modal.innerHTML=`<div class="modal" style="max-width:520px">
+    <h2>Editar parcelamento</h2>
+    <p>Escolha quais parcelas devem receber a alteração.</p>
+    <div class="v64-scope-list">
+      <button type="button" class="v64-scope-btn" data-i66="one"><b>Somente esta parcela</b><span>Altera apenas o mês selecionado.</span></button>
+      <button type="button" class="v64-scope-btn" data-i66="future"><b>Esta e as futuras</b><span>Mantém as anteriores e recalcula a partir desta parcela.</span></button>
+      <button type="button" class="v64-scope-btn" data-i66="all"><b>Todo o parcelamento</b><span>Altera todas as parcelas da sequência.</span></button>
+    </div>
+    <div class="modalfoot"><button type="button" class="ghost" data-i66-cancel>Cancelar</button></div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click',e=>{
+    if(e.target===modal||e.target.closest('[data-i66-cancel]')){modal.classList.remove('open');pendingInstScope66=null;return}
+    const b=e.target.closest('[data-i66]');
+    if(!b||!pendingInstScope66)return;
+    const c={...pendingInstScope66,scope:b.dataset.i66};
+    pendingInstScope66=null;modal.classList.remove('open');beginInstEdit66(c);
+  });
+  return modal;
+}
+function askInst66(c){pendingInstScope66=c;scopeModal66().classList.add('open')}
+
+function effective66(src,y,m){
+  const ov=src.installmentOverrides?.[ym66(y,m)]||{};
+  return {...src,...ov,ano:y,mesNum:m};
+}
+function fillForm66(src,y,m,scope){
+  ensureMode66();
+  const x=effective66(src,y,m);
+  const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!=null)el.value=v};
+  set('fType',x.tipo||'saida');set('fStatus',x.status||'Pendente');
+  set('fYear',y);set('fMonth',m);set('fDesc',x.descricao||'');
+  set('fCategory',x.categoria||'');set('fClass',x.classificacao||'Variável');
+  try{populateCreditorSelects(x.origem||'')}catch(e){}
+  set('fValue',String(scope==='all'?(src.installmentTotal||src.valor||0):(x.valor||0)).replace('.',','));
+  set('fPayMethod','padrao');
+  const mode=document.getElementById('standardRecurringMode');
+  if(mode)mode.value='parcelado';
+
+  const q=document.getElementById('standardInstallmentQty');
+  const mm=document.getElementById('standardInstallmentMonth');
+  const yy=document.getElementById('standardInstallmentYear');
+  if(q)q.value=String(src.installmentCount||1);
+  if(mm)mm.value=String(src.installmentStartMonth||src.mesNum||m);
+  if(yy)yy.value=String(src.installmentStartYear||src.ano||y);
+  sync66();
+}
+function beginInstEdit66(c){
+  const src=source66(c.sourceId);if(!src)return;
+  instEditCtx66=c;
+  prevOpen66?.(src.id);
+  setTimeout(()=>fillForm66(src,c.year,c.month,c.scope),0);
+}
+
+window.openTxEdit=function(id){
+  const p=parse66(id);
+  if(p){askInst66(p);return}
+  instEditCtx66=null;
+  return prevOpen66?.apply(this,arguments);
+};
+try{openTxEdit=window.openTxEdit}catch(e){}
+
+function formObj66(){
+  const tipo=document.getElementById('fType')?.value||'saida';
+  const val=n66(document.getElementById('fValue')?.value);
+  const desc=document.getElementById('fDesc')?.value.trim()||'';
+  const origin=(document.getElementById('fOriginSelect')?.value||'').trim();
+  if(!val||!desc){toast('Informe descrição e valor.');return null}
+  if(tipo==='saida'&&!origin){toast('Selecione a origem / credor.');return null}
+  return {
+    tipo,descricao:desc,valor:val,
+    categoria:tipo==='entrada'?'Receita':document.getElementById('fCategory')?.value,
+    classificacao:tipo==='entrada'?'Entrada':document.getElementById('fClass')?.value,
+    origem:origin,status:document.getElementById('fStatus')?.value||'Pendente',
+    origemDados:'Site'
+  };
+}
+function persist66(msg){
+  try{persist()}catch(e){}
+  document.getElementById('txModal')?.classList.remove('open');
+  instEditCtx66=null;
+  try{renderAll()}catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  toast(msg);
+}
+
+/* Salva novo parcelamento e edições de ocorrências. */
+window.saveTx=function(){
+  ensureMode66();
+  const pay=document.getElementById('fPayMethod')?.value||'padrao';
+  const mode=document.getElementById('standardRecurringMode')?.value||'unico';
+
+  if(instEditCtx66){
+    const c=instEditCtx66,src=source66(c.sourceId);
+    if(!src){instEditCtx66=null;return toast('Parcelamento não encontrado.')}
+    const patch=formObj66();if(!patch)return;
+
+    if(c.scope==='one'){
+      src.installmentOverrides=src.installmentOverrides||{};
+      src.installmentOverrides[ym66(c.year,c.month)]={...patch,valor:patch.valor};
+      persist66('Somente esta parcela foi atualizada.');
+      return;
+    }
+
+    if(c.scope==='all'){
+      const total=patch.valor;
+      const count=qty66(document.getElementById('standardInstallmentQty')?.value||src.installmentCount);
+      const sy=+document.getElementById('standardInstallmentYear')?.value||src.installmentStartYear;
+      const sm=+document.getElementById('standardInstallmentMonth')?.value||src.installmentStartMonth;
+      Object.assign(src,patch,{
+        valor:total,installmentTotal:total,installmentCount:count,
+        installmentStartYear:sy,installmentStartMonth:sm,
+        standardInstallment:true,standardRecurring:false,
+        installmentOverrides:{}
+      });
+      persist66('Todo o parcelamento foi atualizado.');
+      return;
+    }
+
+    /* esta e futuras: encerra série antiga no mês anterior e cria nova série */
+    const originalCount=qty66(src.installmentCount);
+    const originalStart=idx66(src.installmentStartYear||src.ano,src.installmentStartMonth||src.mesNum);
+    const current=idx66(c.year,c.month);
+    const already=Math.max(0,current-originalStart);
+    const remaining=Math.max(1,originalCount-already);
+    const oldEnd=add66(c.year,c.month,-1);
+    src.installmentEndYear=oldEnd.year;src.installmentEndMonth=oldEnd.month;
+
+    const newCount=qty66(document.getElementById('standardInstallmentQty')?.value||remaining);
+    const newSrc={
+      ...src,...patch,id:'U'+Date.now(),
+      ano:c.year,mesNum:c.month,
+      valor:patch.valor,installmentTotal:patch.valor,
+      installmentCount:newCount,
+      installmentStartYear:c.year,installmentStartMonth:c.month,
+      standardInstallment:true,standardRecurring:false,
+      installmentOverrides:{},createdAt:new Date().toISOString()
+    };
+    delete newSrc.installmentEndYear;delete newSrc.installmentEndMonth;
+    custom.push(newSrc);
+    persist66('Esta parcela e as futuras foram atualizadas.');
+    return;
+  }
+
+  if(pay==='padrao'&&mode==='parcelado'){
+    const before=new Set((custom||[]).map(x=>String(x.id)));
+    const result=prevSave66?.apply(this,arguments);
+
+    let target=(custom||[]).slice().reverse().find(x=>!before.has(String(x.id)));
+    if(!target)return result;
+
+    const count=qty66(document.getElementById('standardInstallmentQty')?.value||2);
+    const sy=+document.getElementById('standardInstallmentYear')?.value||+target.ano;
+    const sm=+document.getElementById('standardInstallmentMonth')?.value||+target.mesNum;
+    target.standardInstallment=true;
+    target.standardRecurring=false;
+    target.installmentTotal=n66(target.valor);
+    target.installmentCount=count;
+    target.installmentStartYear=sy;
+    target.installmentStartMonth=sm;
+    target.installmentOverrides={};
+    target.ano=sy;target.mesNum=sm;
+    try{persist()}catch(e){}
+    try{renderAll()}catch(e){}
+    try{window.ppCloudV66?.save?.()}catch(e){}
+    return result;
+  }
+
+  return prevSave66?.apply(this,arguments);
+};
+try{saveTx=window.saveTx}catch(e){}
+const save66=document.getElementById('saveTx');if(save66)save66.onclick=window.saveTx;
+
+function expandAll66(){
+  const out=[];
+  const now=idx66(currentYear,currentMonth);
+
+  (custom||[]).forEach(src=>{
+    if(src.standardInstallment){
+      const count=qty66(src.installmentCount);
+      const sy=+src.installmentStartYear||+src.ano||currentYear;
+      const sm=+src.installmentStartMonth||+src.mesNum||currentMonth;
+      const start=idx66(sy,sm);
+      let maxCount=count;
+      if(src.installmentEndYear&&src.installmentEndMonth){
+        maxCount=Math.min(maxCount,idx66(src.installmentEndYear,src.installmentEndMonth)-start+1);
+      }
+      for(let i=0;i<maxCount;i++){
+        const d=add66(sy,sm,i);
+        const ov=src.installmentOverrides?.[ym66(d.year,d.month)]||{};
+        const amt=Object.prototype.hasOwnProperty.call(ov,'valor')?n66(ov.valor):partAmount66(src.installmentTotal||src.valor,count,i);
+        const st=Object.prototype.hasOwnProperty.call(ov,'status')?ov.status:(idx66(d.year,d.month)<now?'Quitado':'Pendente');
+        out.push({
+          ...src,...ov,
+          id:vid66(src.id,d.year,d.month),
+          ano:d.year,mesNum:d.month,valor:amt,status:st,
+          descricao:`${ov.descricao||src.descricao} · Parcela ${i+1}/${count}`,
+          standardInstallment:true,installmentOccurrence:true,
+          installmentSourceId:src.id,installmentNumber:i+1,
+          origemDados:'Site'
+        });
+      }
+      return;
+    }
+
+    if(src.standardRecurring){
+      /* reaproveita a expansão V64 somente para recorrentes */
+      return;
+    }
+
+    out.push(src);
+  });
+
+  /* Acrescenta recorrências V64 sem duplicar os registros-fonte recorrentes. */
+  try{
+    const recRows=window.standardRecurringTxV64?.()||[];
+    recRows.forEach(x=>{
+      if(x.standardRecurring&&x.recurringOccurrence)out.push(x);
+    });
+  }catch(e){}
+  return out;
+}
+
+window.standardManualRowsV66=expandAll66;
+window.allTx=function(){
+  const manual=expandAll66();
+  const cards=typeof window.cardAggregatedTx==='function'?window.cardAggregatedTx():[];
+  return [...manual,...cards];
+};
+try{allTx=window.allTx}catch(e){}
+
+/* Exclusão de qualquer ocorrência parcelada remove o parcelamento inteiro,
+   com confirmação explícita. */
+window.deleteTxEnhanced=function(id,source){
+  const p=parse66(id);
+  if(p){
+    if(!confirm('Excluir todo este parcelamento?'))return;
+    custom=custom.filter(x=>String(x.id)!==String(p.sourceId));
+    try{persist()}catch(e){}
+    try{renderAll()}catch(e){}
+    try{window.ppCloudV66?.save?.()}catch(e){}
+    toast('Parcelamento excluído.');
+    return;
+  }
+  return prevDelete66?.apply(this,arguments);
+};
+try{deleteTxEnhanced=window.deleteTxEnhanced}catch(e){}
+
+function init66(){
+  ensureMode66();
+  try{window.renderLancamentos?.()}catch(e){}
+  try{window.renderProjection?.()}catch(e){}
+  try{window.renderDashboard?.()}catch(e){}
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('[data-addtx]'))setTimeout(()=>{
+    ensureMode66();
+    const sel=document.getElementById('standardRecurringMode');
+    if(sel)sel.value='unico';
+    const mm=document.getElementById('standardInstallmentMonth');
+    const yy=document.getElementById('standardInstallmentYear');
+    if(mm)mm.value=String(+document.getElementById('fMonth')?.value||currentMonth);
+    if(yy)yy.value=String(+document.getElementById('fYear')?.value||currentYear);
+    sync66();
+  },40);
+},true);
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init66,300),{once:true});
+else setTimeout(init66,300);
+
+window.ppStandardInstallmentV66={rows:expandAll66,refresh:init66};
+})();
+</script>
+
+<style id="pp-v67-manual-pay-style">
+#lancamentos .v67-manual-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+  flex-wrap:nowrap;
+}
+#lancamentos .v67-manual-pay{
+  border:1px solid #cfd9e7;
+  background:#fff;
+  border-radius:10px;
+  padding:7px 9px;
+  font-size:9.5px;
+  font-weight:900;
+  cursor:pointer;
+  white-space:nowrap;
+}
+#lancamentos .v67-manual-pay.pay{color:#0b63f6}
+#lancamentos .v67-manual-pay.reopen{color:#8a5a00}
+#lancamentos .v67-manual-actions .dots{
+  flex:0 0 auto;
+  margin-left:0!important;
+}
+@media(max-width:620px){
+  #lancamentos .v67-manual-actions{
+    justify-content:flex-start;
+  }
+}
+</style>
+
+<script id="pp-v67-manual-pay-final">
+(()=>{
+'use strict';
+
+function escRe67(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
+
+function parseEditId67(btn){
+  const oc=btn?.getAttribute('onclick')||'';
+  let m=oc.match(/openTxEdit\('([^']+)'\)/);
+  if(m)return m[1];
+  m=oc.match(/openTxEdit\("([^"]+)"\)/);
+  return m?m[1]:'';
+}
+function sourceById67(id){
+  try{return (custom||[]).find(x=>String(x.id)===String(id))||null}catch(e){return null}
+}
+function ym67(y,m){return `${+y}-${String(+m).padStart(2,'0')}`}
+
+function parseRecurring67(id){
+  const p=String(id||'').split('::');
+  if(p[0]==='R64'&&p.length>=4)return {type:'recurring',sourceId:p[1],year:+p[2],month:+p[3]};
+  if(p[0]==='P66'&&p.length>=4)return {type:'installment',sourceId:p[1],year:+p[2],month:+p[3]};
+  return null;
+}
+
+function rowData67(id){
+  try{return (window.allTx?.()||[]).find(x=>String(x.id)===String(id))||null}catch(e){return null}
+}
+function currentStatus67(id){
+  const x=rowData67(id);
+  return x?.status||'Pendente';
+}
+function setStatus67(id,status){
+  const parsed=parseRecurring67(id);
+
+  if(parsed?.type==='recurring'){
+    const src=sourceById67(parsed.sourceId);
+    if(!src)return;
+    src.recurringOverrides=src.recurringOverrides||{};
+    const k=ym67(parsed.year,parsed.month);
+    src.recurringOverrides[k]={...(src.recurringOverrides[k]||{}),status};
+  }else if(parsed?.type==='installment'){
+    const src=sourceById67(parsed.sourceId);
+    if(!src)return;
+    src.installmentOverrides=src.installmentOverrides||{};
+    const k=ym67(parsed.year,parsed.month);
+    src.installmentOverrides[k]={...(src.installmentOverrides[k]||{}),status};
+  }else{
+    const src=sourceById67(id);
+    if(!src)return;
+    src.status=status;
+  }
+
+  try{persist()}catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  try{window.renderLancamentos?.()}catch(e){}
+  try{window.renderDashboard?.()}catch(e){}
+  try{window.renderProjection?.()}catch(e){}
+}
+
+function patchRows67(){
+  const root=document.getElementById('v63LaunchGroups');
+  if(!root)return;
+
+  root.querySelectorAll('.v63-group.entry tbody tr,.v63-group.exit tbody tr').forEach(tr=>{
+    const dots=tr.querySelector('.dots');
+    if(!dots)return;
+
+    const id=parseEditId67(dots);
+    if(!id)return;
+
+    const status=currentStatus67(id);
+    const statusTag=tr.querySelector('td:nth-child(6) .tag');
+    if(statusTag){
+      statusTag.textContent=status;
+      statusTag.className='tag '+(String(status).toLowerCase()==='quitado'?'green':'amber');
+    }
+
+    let wrap=dots.closest('.v67-manual-actions');
+    if(!wrap){
+      wrap=document.createElement('div');
+      wrap.className='v67-manual-actions';
+      dots.parentNode.insertBefore(wrap,dots);
+      wrap.appendChild(dots);
+    }
+
+    let pay=wrap.querySelector('.v67-manual-pay');
+    if(!pay){
+      pay=document.createElement('button');
+      pay.type='button';
+      pay.className='v67-manual-pay';
+      wrap.insertBefore(pay,dots);
+    }
+    pay.dataset.v67Tx=id;
+    pay.className='v67-manual-pay '+(status==='Quitado'?'reopen':'pay');
+    pay.textContent=status==='Quitado'?'Reabrir':'Quitar';
+  });
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('[data-v67-tx]');
+  if(!b)return;
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  const id=b.dataset.v67Tx;
+  const cur=currentStatus67(id);
+  setStatus67(id,cur==='Quitado'?'Pendente':'Quitado');
+},true);
+
+/* Reaplica após qualquer renderização da tela de lançamentos. */
+const prev67=window.renderLancamentos;
+if(typeof prev67==='function'&&!prev67.__v67){
+  const w=function(){
+    const r=prev67.apply(this,arguments);
+    setTimeout(patchRows67,0);
+    return r;
+  };
+  w.__v67=true;
+  window.renderLancamentos=w;
+  try{renderLancamentos=w}catch(e){}
+}
+
+/* Observa somente o container das três tabelas para preservar o botão
+   quando os filtros redesenharem as linhas. */
+let obs67=null;
+function observe67(){
+  const root=document.getElementById('v63LaunchGroups');
+  if(!root)return;
+  if(obs67)obs67.disconnect();
+  obs67=new MutationObserver(()=>setTimeout(patchRows67,0));
+  obs67.observe(root,{childList:true,subtree:true});
+  patchRows67();
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(observe67,350),{once:true});
+}else setTimeout(observe67,350);
+
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('[data-page],#txYear,#txMonth,#txType'))setTimeout(observe67,120);
+},false);
+
+window.ppManualPayV67={refresh:patchRows67,set:setStatus67};
+})();
+</script>
+
