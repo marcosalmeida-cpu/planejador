@@ -17169,3 +17169,230 @@ window.ppDashboardV60={refresh:renderV60};
 })();
 </script>
 
+<style id="pp-v61-invoice-action-stable-style">
+.v61-invoice-action{
+  border:1px solid #cfd9e7;background:#fff;border-radius:9px;
+  padding:6px 10px;font-size:9.5px;font-weight:850;cursor:pointer;margin-left:6px
+}
+.v61-invoice-action.pay{color:#0b63f6}
+.v61-invoice-action.reopen{color:#8a5a00}
+</style>
+
+<script id="pp-v61-invoice-action-stable-final">
+(()=>{
+'use strict';
+
+let patching=false;
+
+function profile61(){
+  return String(localStorage.getItem('planejador_active_profile')||'Marcos').toLowerCase();
+}
+function statusKey61(){
+  return 'planejador_invoice_status_v50_'+profile61();
+}
+function read61(){
+  try{return JSON.parse(localStorage.getItem(statusKey61())||'{}')||{}}
+  catch(e){return {}}
+}
+function write61(obj){
+  try{localStorage.setItem(statusKey61(),JSON.stringify(obj))}catch(e){}
+  try{window.ppV56SaveProfileState?.()}catch(e){}
+  try{window.ppV42SaveProfileState?.()}catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+}
+function key61(card,y,m){return `${card}|${+y}|${+m}`}
+function get61(card,y,m,def='Pendente'){
+  return read61()[key61(card,y,m)]||def;
+}
+function set61(card,y,m,status){
+  const o=read61();
+  o[key61(card,y,m)]=status;
+  write61(o);
+  try{window.renderLancamentos?.()}catch(e){}
+  try{window.renderCards?.()}catch(e){}
+  try{window.renderDashboard?.()}catch(e){}
+  setTimeout(patchAll61,80);
+}
+
+function inferCardFromInvoiceCard61(cardEl){
+  const edit=cardEl.querySelector('[data-v39-edit]');
+  const pid=edit?.dataset.v39Edit;
+  if(pid){
+    try{
+      const p=(window.cardPurchases||cardPurchases||[]).find(x=>String(x.id)===String(pid));
+      if(p?.cardId)return String(p.cardId);
+    }catch(e){}
+  }
+
+  const selected=document.querySelector('#cardsCleanRoot [data-clean-card].selected')?.dataset.cleanCard
+    ||document.querySelector('[data-clean-card].selected')?.dataset.cleanCard;
+  if(selected)return String(selected);
+
+  const head=document.querySelector('#v39InvoiceBoard .v39-head h3')?.textContent||'';
+  const name=head.split('·').slice(1).join('·').trim();
+  if(name){
+    try{
+      const c=(window.cards||cards||[]).find(x=>String(x.name||'').trim()===name);
+      if(c?.id)return String(c.id);
+    }catch(e){}
+  }
+  return '';
+}
+
+function cleanOldButtons61(container){
+  if(!container)return;
+  container.querySelectorAll('.v55-invoice-pay,.v50-invoice-action,.v58-invoice-action').forEach(el=>el.remove());
+}
+
+function patchLaunch61(){
+  const body=document.getElementById('txBody');
+  if(!body)return;
+
+  body.querySelectorAll('[data-v39-detail]').forEach(detail=>{
+    const p=String(detail.dataset.v39Detail||'').split('|');
+    if(p.length!==3)return;
+    const card=p[0],y=+p[1],m=+p[2];
+    const row=detail.closest('tr');
+    if(!row)return;
+
+    const tag=row.querySelector('td:nth-child(6) .tag');
+    const def=tag?.textContent?.trim()==='Quitado'?'Quitado':'Pendente';
+    const st=get61(card,y,m,def);
+
+    if(tag){
+      tag.textContent=st;
+      tag.className='tag '+(st==='Quitado'?'green':'amber');
+    }
+
+    const area=detail.parentElement||row;
+    cleanOldButtons61(area);
+
+    let b=area.querySelector('.v61-invoice-action');
+    if(!b){
+      b=document.createElement('button');
+      b.type='button';
+      detail.insertAdjacentElement('afterend',b);
+    }
+    b.dataset.v61Invoice=key61(card,y,m);
+    b.className='v61-invoice-action '+(st==='Quitado'?'reopen':'pay');
+    b.textContent=st==='Quitado'?'Reabrir':'Quitar';
+  });
+}
+
+function patchCards61(){
+  const board=document.getElementById('v39InvoiceBoard');
+  if(!board)return;
+
+  board.querySelectorAll('[data-v39-invoice]').forEach(cardEl=>{
+    const ym=String(cardEl.dataset.v39Invoice||'').split('-');
+    if(ym.length!==2)return;
+    const y=+ym[0],m=+ym[1];
+    const cardId=inferCardFromInvoiceCard61(cardEl);
+    if(!cardId)return;
+
+    const tag=cardEl.querySelector('.v39-status');
+    const def=tag?.textContent?.trim()==='Quitada'?'Quitado':'Pendente';
+    const st=get61(cardId,y,m,def);
+
+    if(tag){
+      tag.textContent=st==='Quitado'?'Quitada':'Pendente';
+      tag.classList.toggle('paid',st==='Quitado');
+    }
+
+    const area=cardEl.querySelector('.v39-details')||cardEl;
+    cleanOldButtons61(area);
+
+    let b=area.querySelector('.v61-invoice-action');
+    if(!b){
+      b=document.createElement('button');
+      b.type='button';
+      b.className='v61-invoice-action';
+      area.prepend(b);
+    }
+    b.dataset.v61Invoice=key61(cardId,y,m);
+    b.className='v61-invoice-action '+(st==='Quitado'?'reopen':'pay');
+    b.textContent=st==='Quitado'?'Reabrir fatura':'Quitar fatura';
+  });
+}
+
+function patchAll61(){
+  if(patching)return;
+  patching=true;
+  try{
+    patchLaunch61();
+    patchCards61();
+  }finally{
+    patching=false;
+  }
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('[data-v61-invoice]');
+  if(!b)return;
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+
+  const p=String(b.dataset.v61Invoice||'').split('|');
+  if(p.length!==3)return;
+  const card=p[0],y=+p[1],m=+p[2];
+  const cur=get61(card,y,m,/reabrir/i.test(b.textContent||'')?'Quitado':'Pendente');
+  set61(card,y,m,cur==='Quitado'?'Pendente':'Quitado');
+},true);
+
+/* Reaplica logo após qualquer render conhecido. */
+for(const name of ['renderLancamentos','renderCards']){
+  const fn=window[name];
+  if(typeof fn==='function'&&!fn.__v61){
+    const w=function(){
+      const r=fn.apply(this,arguments);
+      setTimeout(patchAll61,0);
+      setTimeout(patchAll61,80);
+      return r;
+    };
+    w.__v61=true;
+    window[name]=w;
+    try{eval(name+'=window[name]')}catch(e){}
+  }
+}
+
+/* Observa somente mudanças estruturais nas duas áreas relevantes.
+   O patch é idempotente: se o botão já existe, não cria outro. */
+const obs=new MutationObserver(muts=>{
+  let relevant=false;
+  for(const m of muts){
+    const t=m.target;
+    if(
+      t?.id==='txBody' ||
+      t?.id==='v39InvoiceBoard' ||
+      t?.closest?.('#txBody,#v39InvoiceBoard,#cardsCleanRoot')
+    ){
+      relevant=true;break;
+    }
+    for(const n of m.addedNodes||[]){
+      if(n.nodeType===1 && (
+        n.id==='txBody' || n.id==='v39InvoiceBoard' ||
+        n.matches?.('[data-v39-detail],[data-v39-invoice]') ||
+        n.querySelector?.('[data-v39-detail],[data-v39-invoice]')
+      )){
+        relevant=true;break;
+      }
+    }
+    if(relevant)break;
+  }
+  if(relevant)setTimeout(patchAll61,20);
+});
+if(document.body)obs.observe(document.body,{childList:true,subtree:true});
+else document.addEventListener('DOMContentLoaded',()=>obs.observe(document.body,{childList:true,subtree:true}),{once:true});
+
+/* Fallback leve: só confere a existência dos botões; não redesenha nada. */
+setInterval(patchAll61,1500);
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(patchAll61,250),{once:true});
+}else setTimeout(patchAll61,250);
+
+window.ppInvoiceActionsV61={refresh:patchAll61,set:set61,status:get61};
+})();
+</script>
+
