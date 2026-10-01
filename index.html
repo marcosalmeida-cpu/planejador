@@ -17396,3 +17396,880 @@ window.ppInvoiceActionsV61={refresh:patchAll61,set:set61,status:get61};
 })();
 </script>
 
+<style id="pp-v62-standard-recurring-style">
+#txModal #standardRecurringBlock{
+  margin-top:10px;
+  padding:12px;
+  border:1px solid #e5eaf1;
+  border-radius:14px;
+  background:#fbfcfe;
+}
+#txModal #standardRecurringBlock .sr-title{
+  display:block;
+  font-size:10px;
+  font-weight:900;
+  color:#5f6c80;
+  margin-bottom:8px;
+}
+#txModal #standardRecurringMode{display:none!important}
+#txModal #standardRecurringBar{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+#txModal #standardRecurringBar button{
+  border:1px solid #d7deea;
+  background:#fff;
+  color:#526070;
+  border-radius:10px;
+  padding:9px 10px;
+  font-size:10px;
+  font-weight:850;
+  cursor:pointer;
+}
+#txModal #standardRecurringBar button.active{
+  border-color:#0b63f6;
+  background:#edf4ff;
+  color:#0b63f6;
+}
+#txModal #standardRecurringHelp{
+  margin-top:7px;
+  font-size:9px;
+  line-height:1.4;
+  color:#8490a2;
+}
+</style>
+
+<script id="pp-v62-standard-recurring-final">
+(()=>{
+'use strict';
+
+const HORIZON_MONTHS=60;
+
+function addMonths62(y,m,delta){
+  const idx=(+y*12+(+m-1))+delta;
+  return {year:Math.floor(idx/12),month:(idx%12)+1};
+}
+function monthIndex62(y,m){return (+y)*12+(+m-1)}
+
+function ensureStandardRecurringUI62(){
+  const pay=document.getElementById('fPayMethod');
+  if(!pay)return;
+
+  let block=document.getElementById('standardRecurringBlock');
+  if(!block){
+    block=document.createElement('div');
+    block.id='standardRecurringBlock';
+    block.className='field full';
+    block.innerHTML=`
+      <span class="sr-title">Repetição do lançamento</span>
+      <select id="standardRecurringMode">
+        <option value="unico">Único</option>
+        <option value="recorrente">Recorrente</option>
+      </select>
+      <div id="standardRecurringBar">
+        <button type="button" data-sr-mode="unico">Único</button>
+        <button type="button" data-sr-mode="recorrente">Recorrente</button>
+      </div>
+      <div id="standardRecurringHelp"></div>`;
+    const payField=pay.closest('.field');
+    if(payField) payField.insertAdjacentElement('afterend',block);
+    else pay.insertAdjacentElement('afterend',block);
+
+    block.querySelectorAll('[data-sr-mode]').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const sel=document.getElementById('standardRecurringMode');
+        if(!sel)return;
+        sel.value=btn.dataset.srMode;
+        syncStandardRecurringUI62();
+      });
+    });
+  }
+
+  const sel=document.getElementById('standardRecurringMode');
+  if(sel && !sel.dataset.v62Bound){
+    sel.dataset.v62Bound='1';
+    sel.addEventListener('change',syncStandardRecurringUI62);
+  }
+  syncStandardRecurringUI62();
+}
+
+function syncStandardRecurringUI62(){
+  const block=document.getElementById('standardRecurringBlock');
+  const pay=document.getElementById('fPayMethod')?.value||'padrao';
+  const type=document.getElementById('fType')?.value||'saida';
+  if(!block)return;
+
+  const visible=pay==='padrao' && type==='saida';
+  block.style.display=visible?'block':'none';
+
+  const mode=document.getElementById('standardRecurringMode')?.value||'unico';
+  block.querySelectorAll('[data-sr-mode]').forEach(b=>b.classList.toggle('active',b.dataset.srMode===mode));
+
+  const help=document.getElementById('standardRecurringHelp');
+  if(help){
+    help.textContent=mode==='recorrente'
+      ? 'Recorrente: repete o mesmo lançamento todos os meses a partir do mês/ano informado.'
+      : 'Único: o lançamento será considerado somente no mês/ano informado.';
+  }
+}
+
+function sourceCustom62(id){
+  try{return (custom||[]).find(x=>String(x.id)===String(id))||null}catch(e){return null}
+}
+function loadModeForEdit62(){
+  ensureStandardRecurringUI62();
+  const editId=document.getElementById('txEditId')?.value||'';
+  const src=editId?sourceCustom62(editId):null;
+  const sel=document.getElementById('standardRecurringMode');
+  if(!sel)return;
+  sel.value=src?.standardRecurring?'recorrente':'unico';
+  syncStandardRecurringUI62();
+}
+function resetModeForNew62(){
+  ensureStandardRecurringUI62();
+  const sel=document.getElementById('standardRecurringMode');
+  if(sel)sel.value='unico';
+  syncStandardRecurringUI62();
+}
+
+/* Controles acompanham o método de pagamento e o tipo do lançamento. */
+document.addEventListener('change',e=>{
+  if(e.target?.id==='fPayMethod'||e.target?.id==='fType') setTimeout(syncStandardRecurringUI62,0);
+},true);
+
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('[data-addtx]')){
+    setTimeout(resetModeForNew62,30);
+  }
+},true);
+
+/* Ao editar um lançamento existente, carrega a modalidade salva. */
+const prevOpenEdit62=window.openTxEdit;
+if(typeof prevOpenEdit62==='function'&&!prevOpenEdit62.__v62){
+  const w=function(){
+    const r=prevOpenEdit62.apply(this,arguments);
+    setTimeout(loadModeForEdit62,20);
+    return r;
+  };
+  w.__v62=true;
+  window.openTxEdit=w;
+  try{openTxEdit=w}catch(e){}
+}
+
+/* Envolve o salvamento atual sem reescrever toda a rotina.
+   Depois que o lançamento normal é salvo, acrescenta/remova apenas a marca de recorrência. */
+const prevSave62=window.saveTx;
+if(typeof prevSave62==='function'&&!prevSave62.__v62){
+  const wrapped=function(){
+    ensureStandardRecurringUI62();
+
+    const editId=document.getElementById('txEditId')?.value||'';
+    const source=document.getElementById('txEditSource')?.value||'new';
+    const pay=document.getElementById('fPayMethod')?.value||'padrao';
+    const tipo=document.getElementById('fType')?.value||'saida';
+    const mode=document.getElementById('standardRecurringMode')?.value||'unico';
+    const sy=+document.getElementById('fYear')?.value||currentYear;
+    const sm=+document.getElementById('fMonth')?.value||currentMonth;
+    const beforeIds=new Set((custom||[]).map(x=>String(x.id)));
+
+    const result=prevSave62.apply(this,arguments);
+
+    /* Cartão continua usando a rotina própria. */
+    if(pay==='cartao'||tipo!=='saida')return result;
+
+    let target=null;
+    if(editId && source==='custom'){
+      target=sourceCustom62(editId);
+    }else if(!editId){
+      try{
+        target=(custom||[]).slice().reverse().find(x=>!beforeIds.has(String(x.id)))||null;
+      }catch(e){}
+    }
+
+    if(!target)return result; // validação falhou ou nada foi salvo.
+
+    if(mode==='recorrente'){
+      target.standardRecurring=true;
+      target.paymentMethod='padrao';
+      target.recurringStartYear=sy;
+      target.recurringStartMonth=sm;
+      target.recurringMode='mensal';
+    }else{
+      delete target.standardRecurring;
+      delete target.recurringStartYear;
+      delete target.recurringStartMonth;
+      delete target.recurringMode;
+      target.paymentMethod='padrao';
+    }
+
+    try{persist()}catch(e){}
+    try{window.renderAll?.()}catch(e){}
+    try{window.ppCloudV66?.save?.()}catch(e){}
+    return result;
+  };
+  wrapped.__v62=true;
+  window.saveTx=wrapped;
+  try{saveTx=wrapped}catch(e){}
+  const b=document.getElementById('saveTx');
+  if(b)b.onclick=wrapped;
+}
+
+/* Expande lançamentos recorrentes normais para cada competência.
+   O registro-fonte continua único em custom; as ocorrências são virtuais. */
+function expandCustom62(){
+  const out=[];
+  const nowIdx=monthIndex62(currentYear,currentMonth);
+  const horizonIdx=nowIdx+HORIZON_MONTHS;
+
+  (custom||[]).forEach(src=>{
+    if(!src?.standardRecurring){
+      out.push(src);
+      return;
+    }
+
+    const sy=+src.recurringStartYear||+src.ano||currentYear;
+    const sm=+src.recurringStartMonth||+src.mesNum||currentMonth;
+    let startIdx=monthIndex62(sy,sm);
+
+    /* Proteção de desempenho para cadastros muito antigos. */
+    const minIdx=Math.max(startIdx, nowIdx-180);
+    const endIdx=Math.max(horizonIdx,startIdx);
+
+    for(let idx=minIdx;idx<=endIdx;idx++){
+      const y=Math.floor(idx/12),m=(idx%12)+1;
+      let status='Pendente';
+      if(idx<nowIdx)status='Quitado';
+      else if(idx===startIdx)status=src.status||'Pendente';
+
+      out.push({
+        ...src,
+        id:src.id, /* editar/excluir qualquer ocorrência atua sobre a recorrência inteira */
+        ano:y,
+        mesNum:m,
+        status,
+        standardRecurring:true,
+        recurringOccurrence:true,
+        recurringSourceId:src.id,
+        origemDados:'Site'
+      });
+    }
+  });
+  return out;
+}
+
+window.standardRecurringTxV62=expandCustom62;
+
+window.allTx=function(){
+  const manual=expandCustom62();
+  const cardRows=typeof window.cardAggregatedTx==='function'?window.cardAggregatedTx():[];
+  return [...manual,...cardRows];
+};
+try{allTx=window.allTx}catch(e){}
+
+/* Renderizações e projeção devem usar imediatamente as ocorrências geradas. */
+try{window.renderLancamentos?.()}catch(e){}
+try{window.renderProjection?.()}catch(e){}
+try{window.renderDashboard?.()}catch(e){}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(ensureStandardRecurringUI62,250),{once:true});
+}else setTimeout(ensureStandardRecurringUI62,250);
+
+window.ppStandardRecurringV62={
+  refresh:ensureStandardRecurringUI62,
+  rows:expandCustom62
+};
+})();
+</script>
+
+<style id="pp-v63-launches-layout-style">
+#lancamentos #txSummary{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:12px!important;
+  margin-bottom:18px!important;
+}
+#lancamentos #txSummary .v63-summary{
+  min-height:104px;
+  border:0!important;
+  border-radius:18px;
+  padding:17px 18px;
+  color:#fff!important;
+  box-shadow:0 12px 28px rgba(19,33,55,.12);
+}
+#lancamentos #txSummary .v63-summary span{
+  color:rgba(255,255,255,.82)!important;
+  font-size:10px;
+  font-weight:850;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+#lancamentos #txSummary .v63-summary b{
+  color:#fff!important;
+  font-size:24px!important;
+  margin-top:8px!important;
+  letter-spacing:-.035em;
+}
+#lancamentos #txSummary .v63-entry{background:linear-gradient(135deg,#0b63f6,#0752ce)}
+#lancamentos #txSummary .v63-exit{background:linear-gradient(135deg,#e23b4d,#b91f32)}
+#lancamentos #txSummary .v63-balance{background:linear-gradient(135deg,#16a36a,#0d7d50)}
+
+#lancamentos .v63-groups{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:16px;
+}
+#lancamentos .v63-group{
+  border:1px solid #e8edf4;
+  border-radius:18px;
+  background:#fff;
+  overflow:hidden;
+  box-shadow:0 8px 22px rgba(19,33,55,.045);
+}
+#lancamentos .v63-group-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:16px 18px;
+  border-bottom:1px solid #edf1f5;
+  background:#fbfcfe;
+}
+#lancamentos .v63-group-head h3{
+  margin:0;
+  font-size:16px;
+  letter-spacing:-.02em;
+}
+#lancamentos .v63-group-head p{
+  margin:3px 0 0;
+  font-size:9.5px;
+  color:var(--muted);
+}
+#lancamentos .v63-count{
+  min-width:30px;height:30px;
+  border-radius:999px;
+  display:grid;place-items:center;
+  font-size:10px;font-weight:900;
+  background:#edf2f7;color:#536174;
+}
+#lancamentos .v63-group.entry .v63-count{background:#eaf2ff;color:#0b63f6}
+#lancamentos .v63-group.card .v63-count{background:#fff3df;color:#b76600}
+#lancamentos .v63-group.exit .v63-count{background:#fff0f2;color:#bd2945}
+
+#lancamentos .v63-tablewrap{
+  overflow:auto;
+  width:100%;
+}
+#lancamentos .v63-tablewrap table{
+  width:100%;
+  min-width:760px;
+}
+#lancamentos .v63-empty{
+  padding:28px 18px!important;
+  color:#8a95a6;
+  text-align:center;
+  font-size:11px;
+}
+#lancamentos .v63-invoice-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  align-items:center;
+}
+#lancamentos .v63-pay{
+  border:1px solid #cfd9e7;
+  background:#fff;
+  border-radius:10px;
+  padding:7px 9px;
+  font-size:9.5px;
+  font-weight:900;
+  cursor:pointer;
+}
+#lancamentos .v63-pay.pay{color:#0b63f6}
+#lancamentos .v63-pay.reopen{color:#8a5a00}
+#lancamentos .v63-detail{
+  white-space:nowrap;
+  border:1px solid #b9d1ff;
+  background:#eef5ff;
+  color:#0759c7;
+  border-radius:10px;
+  padding:7px 10px;
+  font-size:10px;
+  font-weight:900;
+  cursor:pointer;
+}
+@media(max-width:760px){
+  #lancamentos #txSummary{grid-template-columns:1fr!important}
+  #lancamentos .v63-group-head{padding:14px}
+}
+</style>
+
+<script id="pp-v63-launches-layout-final">
+(()=>{
+'use strict';
+
+function invoiceStatus63(x){
+  try{
+    if(window.ppInvoiceActionsV61?.status){
+      return window.ppInvoiceActionsV61.status(x.cardId,+x.ano,+x.mesNum,x.status||'Pendente');
+    }
+  }catch(e){}
+  return x.status||'Pendente';
+}
+function setInvoiceStatus63(x,status){
+  try{
+    if(window.ppInvoiceActionsV61?.set){
+      window.ppInvoiceActionsV61.set(x.cardId,+x.ano,+x.mesNum,status);
+      return;
+    }
+  }catch(e){}
+}
+
+function rowHtml63(x){
+  const isCard=x.origemDados==='Cartões';
+  const st=isCard?invoiceStatus63(x):(x.status||'—');
+  let action='';
+  if(isCard){
+    action=`<div class="v63-invoice-actions">
+      <button type="button" class="v63-detail" data-v63-detail="${esc(x.cardId)}|${+x.ano}|${+x.mesNum}">Detalhar</button>
+      <button type="button" class="v63-pay ${st==='Quitado'?'reopen':'pay'}" data-v63-pay="${esc(x.cardId)}|${+x.ano}|${+x.mesNum}|${st==='Quitado'?'Pendente':'Quitado'}">${st==='Quitado'?'Reabrir':'Quitar'}</button>
+    </div>`;
+  }else{
+    action=`<button class="dots" onclick="openRowMenu(event,[['Editar',()=>openTxEdit('${esc(x.id)}')],['Excluir',()=>deleteTxEnhanced('${esc(x.id)}','custom'),'danger']])">⋯</button>`;
+  }
+  return `<tr>
+    <td>${monthLabel(x.ano,x.mesNum)}</td>
+    <td><span class="tag ${isCard?'blue':x.tipo==='entrada'?'green':'red'}">${isCard?'Fatura':x.tipo==='entrada'?'Entrada':'Saída'}</span></td>
+    <td><b>${esc(x.descricao)}</b>${isCard?'<br><small style="color:var(--muted)">Fatura consolidada do cartão.</small>':''}</td>
+    <td>${esc(x.categoria||'—')}</td>
+    <td>${esc(x.origem||'—')}</td>
+    <td><span class="tag ${String(st).toLowerCase()==='quitado'?'green':'amber'}">${esc(st)}</span></td>
+    <td class="money ${x.tipo==='entrada'?'positive':'negative'}">${x.tipo==='entrada'?'+':'−'} ${brl(x.valor)}</td>
+    <td>${action}</td>
+  </tr>`;
+}
+
+function groupHtml63(kind,title,sub,rows){
+  return `<section class="v63-group ${kind}">
+    <div class="v63-group-head">
+      <div><h3>${title}</h3><p>${sub}</p></div>
+      <div class="v63-count">${rows.length}</div>
+    </div>
+    <div class="v63-tablewrap">
+      <table>
+        <thead><tr><th>Período</th><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>Origem</th><th>Status</th><th>Valor</th><th>Ação</th></tr></thead>
+        <tbody>${rows.length?rows.map(rowHtml63).join(''):`<tr><td colspan="8" class="v63-empty">Nenhum registro neste grupo.</td></tr>`}</tbody>
+      </table>
+    </div>
+  </section>`;
+}
+
+function ensureLayout63(){
+  const oldBody=document.getElementById('txBody');
+  const oldWrap=oldBody?.closest('.tablewrap');
+  if(!oldWrap)return null;
+
+  let root=document.getElementById('v63LaunchGroups');
+  if(!root){
+    root=document.createElement('div');
+    root.id='v63LaunchGroups';
+    root.className='v63-groups';
+    oldWrap.insertAdjacentElement('afterend',root);
+  }
+  oldWrap.style.display='none';
+  return root;
+}
+
+function render63(){
+  const y=document.getElementById('txYear')?.value||String(currentYear);
+  const m=document.getElementById('txMonth')?.value||'all';
+  const type=document.getElementById('txType')?.value||'all';
+  const q=(document.getElementById('txSearch')?.value||'').toLowerCase();
+
+  let rows=window.allTx().filter(x=>
+    (y==='all'||+x.ano===+y) &&
+    (m==='all'||+x.mesNum===+m) &&
+    (!q||[x.descricao,x.categoria,x.origem].join(' ').toLowerCase().includes(q))
+  );
+
+  if(type!=='all'){
+    rows=rows.filter(x=>type==='cartao'?x.origemDados==='Cartões':x.tipo===type);
+  }
+
+  rows.sort((a,b)=>b.ano-a.ano||b.mesNum-a.mesNum||b.valor-a.valor);
+
+  const entries=rows.filter(x=>x.tipo==='entrada'&&x.origemDados!=='Cartões');
+  const cards=rows.filter(x=>x.origemDados==='Cartões');
+  const exits=rows.filter(x=>x.tipo==='saida'&&x.origemDados!=='Cartões');
+
+  const inc=sum(entries,x=>x.valor);
+  const cardOut=sum(cards,x=>x.valor);
+  const normalOut=sum(exits,x=>x.valor);
+  const totalOut=cardOut+normalOut;
+  const balance=inc-totalOut;
+
+  const summary=document.getElementById('txSummary');
+  if(summary){
+    summary.innerHTML=`
+      <div class="card mini v63-summary v63-entry"><span>Entradas</span><b>${brl(inc)}</b></div>
+      <div class="card mini v63-summary v63-exit"><span>Saídas</span><b>${brl(totalOut)}</b></div>
+      <div class="card mini v63-summary v63-balance"><span>Saldo</span><b>${brl(balance)}</b></div>`;
+  }
+
+  const root=ensureLayout63();
+  if(!root)return;
+
+  root.innerHTML=
+    groupHtml63('entry','Entradas','Receitas e créditos do período.',entries)+
+    groupHtml63('card','Faturas de cartão','Faturas consolidadas por cartão e competência.',cards)+
+    groupHtml63('exit','Saídas','Despesas pagas por conta, débito, dinheiro e demais origens.',exits);
+}
+
+document.addEventListener('click',e=>{
+  const detail=e.target.closest?.('[data-v63-detail]');
+  if(detail){
+    const p=detail.dataset.v63Detail.split('|');
+    if(p.length===3)window.openInvoiceEssence?.(p[0],+p[1],+p[2],false);
+    return;
+  }
+  const pay=e.target.closest?.('[data-v63-pay]');
+  if(pay){
+    const p=pay.dataset.v63Pay.split('|');
+    if(p.length===4){
+      setInvoiceStatus63({cardId:p[0],ano:+p[1],mesNum:+p[2]},p[3]);
+      setTimeout(render63,80);
+    }
+  }
+},true);
+
+/* Esta é a renderização final da tela de lançamentos. */
+window.renderLancamentos=render63;
+try{renderLancamentos=render63}catch(e){}
+
+['txYear','txMonth','txType'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el)el.onchange=render63;
+});
+const search=document.getElementById('txSearch');
+if(search)search.oninput=render63;
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(render63,300),{once:true});
+}else setTimeout(render63,300);
+
+window.ppLaunchesV63={refresh:render63};
+})();
+</script>
+
+<style id="pp-v64-recurring-scope-style">
+#recurrenceScopeModal64 .modal{max-width:520px}
+#recurrenceScopeModal64 .v64-scope-list{display:grid;gap:9px;margin-top:15px}
+#recurrenceScopeModal64 .v64-scope-btn{
+  width:100%;text-align:left;border:1px solid #dce3ed;background:#fff;
+  border-radius:14px;padding:13px 14px;cursor:pointer
+}
+#recurrenceScopeModal64 .v64-scope-btn:hover{border-color:#0b63f6;background:#f6f9ff}
+#recurrenceScopeModal64 .v64-scope-btn b{display:block;font-size:12px;color:#172033}
+#recurrenceScopeModal64 .v64-scope-btn span{display:block;font-size:9.5px;color:#7b8798;margin-top:3px;line-height:1.4}
+</style>
+
+<script id="pp-v64-recurring-edit-scope-final">
+(()=>{
+'use strict';
+
+const REC_PREFIX='R64::';
+let editCtx64=null;
+let pendingScope64=null;
+const baseOpenTxEdit64=window.openTxEdit;
+const baseSaveTx64=window.saveTx;
+const baseDeleteTx64=window.deleteTxEnhanced;
+
+function source64(id){
+  try{return (custom||[]).find(x=>String(x.id)===String(id))||null}catch(e){return null}
+}
+function ym64(y,m){return `${+y}-${String(+m).padStart(2,'0')}`}
+function idx64(y,m){return (+y)*12+(+m-1)}
+function fromIdx64(i){return {year:Math.floor(i/12),month:(i%12)+1}}
+function prevMonth64(y,m){return fromIdx64(idx64(y,m)-1)}
+
+function parseVirtual64(id){
+  const s=String(id||'');
+  if(!s.startsWith(REC_PREFIX))return null;
+  const parts=s.split('::');
+  if(parts.length<4)return null;
+  return {sourceId:parts[1],year:+parts[2],month:+parts[3]};
+}
+function virtualId64(sourceId,y,m){
+  return `${REC_PREFIX}${sourceId}::${+y}::${+m}`;
+}
+function effectiveOccurrence64(src,y,m){
+  const ov=src?.recurringOverrides?.[ym64(y,m)]||{};
+  return {...src,...ov,ano:+y,mesNum:+m,id:virtualId64(src.id,y,m),recurringSourceId:src.id,recurringOccurrence:true};
+}
+
+function ensureScopeModal64(){
+  if(document.getElementById('recurrenceScopeModal64'))return;
+  const wrap=document.createElement('div');
+  wrap.className='modalback';
+  wrap.id='recurrenceScopeModal64';
+  wrap.innerHTML=`<div class="modal">
+    <h2>Editar recorrência</h2>
+    <p>Escolha quais lançamentos desta sequência devem receber a alteração.</p>
+    <div class="v64-scope-list">
+      <button type="button" class="v64-scope-btn" data-v64-scope="one">
+        <b>Somente este lançamento</b>
+        <span>Altera apenas a competência selecionada e mantém os demais meses como estão.</span>
+      </button>
+      <button type="button" class="v64-scope-btn" data-v64-scope="future">
+        <b>Este e os futuros</b>
+        <span>Mantém o histórico anterior e cria uma nova sequência a partir deste mês.</span>
+      </button>
+      <button type="button" class="v64-scope-btn" data-v64-scope="all">
+        <b>Toda a sequência</b>
+        <span>Aplica a alteração ao passado, presente e futuro desta recorrência.</span>
+      </button>
+    </div>
+    <div class="modalfoot"><button type="button" class="ghost" data-v64-cancel>Cancelar</button></div>
+  </div>`;
+  document.body.appendChild(wrap);
+
+  wrap.addEventListener('click',e=>{
+    if(e.target===wrap || e.target.closest('[data-v64-cancel]')){
+      wrap.classList.remove('open');pendingScope64=null;return;
+    }
+    const b=e.target.closest('[data-v64-scope]');
+    if(!b||!pendingScope64)return;
+    const ctx={...pendingScope64,scope:b.dataset.v64Scope};
+    pendingScope64=null;
+    wrap.classList.remove('open');
+    beginEdit64(ctx);
+  });
+}
+function askScope64(ctx){
+  ensureScopeModal64();
+  pendingScope64=ctx;
+  document.getElementById('recurrenceScopeModal64').classList.add('open');
+}
+
+function populateOccurrence64(src,y,m){
+  const x=effectiveOccurrence64(src,y,m);
+  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!=null)el.value=val};
+  set('fType',x.tipo==='entrada'?'entrada':'saida');
+  set('fStatus',x.status||'Quitado');
+  set('fYear',y);
+  set('fMonth',m);
+  set('fDesc',x.descricao||'');
+  set('fCategory',x.tipo==='entrada'?'Receita':(x.categoria||''));
+  set('fClass',x.classificacao||'Variável');
+  try{populateCreditorSelects(x.origem||'')}catch(e){}
+  set('fValue',String(x.valor||0).replace('.',','));
+  set('fPayMethod','padrao');
+  const rec=document.getElementById('standardRecurringMode');
+  if(rec)rec.value='recorrente';
+  try{window.ppStandardRecurringV62?.refresh?.()}catch(e){}
+}
+function beginEdit64(ctx){
+  const src=source64(ctx.sourceId);
+  if(!src)return;
+  editCtx64=ctx;
+  baseOpenTxEdit64?.(ctx.sourceId);
+  setTimeout(()=>{
+    if(ctx.scope==='all'){
+      /* Toda a sequência abre a base da própria recorrência. */
+      const rec=document.getElementById('standardRecurringMode');
+      if(rec)rec.value='recorrente';
+    }else{
+      populateOccurrence64(src,ctx.year,ctx.month);
+    }
+    const title=document.querySelector('#txModal .modal h2');
+    if(title) title.textContent=
+      ctx.scope==='one'?'Editar somente este lançamento':
+      ctx.scope==='future'?'Editar este e os futuros':
+      'Editar toda a sequência';
+  },0);
+}
+
+window.openTxEdit=function(id){
+  const v=parseVirtual64(id);
+  if(v){
+    askScope64({action:'edit',...v});
+    return;
+  }
+  editCtx64=null;
+  return baseOpenTxEdit64?.apply(this,arguments);
+};
+try{openTxEdit=window.openTxEdit}catch(e){}
+
+function formPatch64(){
+  const val=num(document.getElementById('fValue')?.value);
+  const desc=document.getElementById('fDesc')?.value.trim()||'';
+  const tipo=document.getElementById('fType')?.value||'saida';
+  const origin=(document.getElementById('fOriginSelect')?.value||'').trim();
+  if(!val||!desc){toast('Informe descrição e valor.');return null}
+  if(tipo==='saida'&&!origin){toast('Selecione a origem / credor.');return null}
+  return {
+    tipo,
+    descricao:desc,
+    valor:val,
+    categoria:tipo==='entrada'?'Receita':document.getElementById('fCategory')?.value,
+    classificacao:tipo==='entrada'?'Entrada':document.getElementById('fClass')?.value,
+    origem:origin,
+    status:document.getElementById('fStatus')?.value||'Pendente',
+    origemDados:'Site'
+  };
+}
+function finish64(msg){
+  persist();
+  document.getElementById('txModal')?.classList.remove('open');
+  editCtx64=null;
+  try{renderAll()}catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  toast(msg);
+}
+
+window.saveTx=function(){
+  if(!editCtx64)return baseSaveTx64?.apply(this,arguments);
+
+  const ctx=editCtx64;
+  const src=source64(ctx.sourceId);
+  if(!src){editCtx64=null;return toast('Recorrência não encontrada.')}
+
+  const patch=formPatch64();
+  if(!patch)return;
+
+  if(ctx.scope==='one'){
+    src.recurringOverrides=src.recurringOverrides||{};
+    src.recurringOverrides[ym64(ctx.year,ctx.month)]={...patch};
+    finish64('Somente este lançamento foi atualizado.');
+    return;
+  }
+
+  if(ctx.scope==='future'){
+    const boundary=idx64(ctx.year,ctx.month);
+    const prev=prevMonth64(ctx.year,ctx.month);
+
+    const oldOverrides=src.recurringOverrides||{};
+    const pastOverrides={},futureOverrides={};
+    Object.entries(oldOverrides).forEach(([k,v])=>{
+      const [y,m]=k.split('-').map(Number);
+      (idx64(y,m)>=boundary?futureOverrides:pastOverrides)[k]=v;
+    });
+
+    src.recurringOverrides=pastOverrides;
+    src.recurringEndYear=prev.year;
+    src.recurringEndMonth=prev.month;
+
+    const newSrc={
+      ...src,
+      ...patch,
+      id:'U'+Date.now(),
+      ano:ctx.year,
+      mesNum:ctx.month,
+      standardRecurring:true,
+      recurringMode:'mensal',
+      recurringStartYear:ctx.year,
+      recurringStartMonth:ctx.month,
+      recurringOverrides:futureOverrides,
+      createdAt:new Date().toISOString()
+    };
+    delete newSrc.recurringEndYear;
+    delete newSrc.recurringEndMonth;
+    custom.push(newSrc);
+
+    finish64('Este lançamento e os futuros foram atualizados.');
+    return;
+  }
+
+  /* Toda a sequência */
+  Object.assign(src,patch);
+  const y=+document.getElementById('fYear')?.value||src.recurringStartYear||src.ano;
+  const m=+document.getElementById('fMonth')?.value||src.recurringStartMonth||src.mesNum;
+  src.ano=y;src.mesNum=m;
+  src.recurringStartYear=y;src.recurringStartMonth=m;
+  src.standardRecurring=true;
+  src.recurringMode='mensal';
+  src.recurringOverrides={};
+  finish64('Toda a sequência foi atualizada.');
+};
+try{saveTx=window.saveTx}catch(e){}
+const saveBtn64=document.getElementById('saveTx');
+if(saveBtn64)saveBtn64.onclick=window.saveTx;
+
+/* Nova expansão: considera fim de sequência, exceções e ids únicos por competência. */
+function expand64(){
+  const out=[];
+  const nowIdx=idx64(currentYear,currentMonth);
+  const horizonIdx=nowIdx+60;
+
+  (custom||[]).forEach(src=>{
+    if(!src?.standardRecurring){
+      out.push(src);return;
+    }
+    const sy=+src.recurringStartYear||+src.ano||currentYear;
+    const sm=+src.recurringStartMonth||+src.mesNum||currentMonth;
+    const startIdx=idx64(sy,sm);
+    const minIdx=Math.max(startIdx,nowIdx-180);
+    let endIdx=horizonIdx;
+    if(src.recurringEndYear&&src.recurringEndMonth){
+      endIdx=Math.min(endIdx,idx64(src.recurringEndYear,src.recurringEndMonth));
+    }
+    if(endIdx<minIdx)return;
+
+    for(let i=minIdx;i<=endIdx;i++){
+      const d=fromIdx64(i);
+      const ov=src.recurringOverrides?.[ym64(d.year,d.month)]||{};
+      let status;
+      if(Object.prototype.hasOwnProperty.call(ov,'status'))status=ov.status;
+      else if(i<nowIdx)status='Quitado';
+      else if(i===startIdx)status=src.status||'Pendente';
+      else status='Pendente';
+
+      out.push({
+        ...src,
+        ...ov,
+        id:virtualId64(src.id,d.year,d.month),
+        ano:d.year,
+        mesNum:d.month,
+        status,
+        standardRecurring:true,
+        recurringOccurrence:true,
+        recurringSourceId:src.id,
+        recurringOccurrenceYear:d.year,
+        recurringOccurrenceMonth:d.month,
+        origemDados:'Site'
+      });
+    }
+  });
+  return out;
+}
+
+window.standardRecurringTxV64=expand64;
+window.allTx=function(){
+  const manual=expand64();
+  const cards=typeof window.cardAggregatedTx==='function'?window.cardAggregatedTx():[];
+  return [...manual,...cards];
+};
+try{allTx=window.allTx}catch(e){}
+
+/* Exclusão de ocorrência recorrente: evita que o menu pareça funcionar e não faça nada.
+   Por segurança, pergunta o mesmo escopo. */
+window.deleteTxEnhanced=function(id,source){
+  const v=parseVirtual64(id);
+  if(!v)return baseDeleteTx64?.apply(this,arguments);
+  if(!confirm('Excluir toda a recorrência? Para excluir apenas um mês, edite esse lançamento e ajuste o valor/status.'))return;
+  custom=custom.filter(x=>String(x.id)!==String(v.sourceId));
+  persist();
+  try{renderAll()}catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  toast('Recorrência excluída.');
+};
+try{deleteTxEnhanced=window.deleteTxEnhanced}catch(e){}
+
+try{window.renderLancamentos?.()}catch(e){}
+try{window.renderProjection?.()}catch(e){}
+try{window.renderDashboard?.()}catch(e){}
+
+window.ppRecurringScopeV64={open:window.openTxEdit,rows:expand64};
+})();
+</script>
+
