@@ -20169,3 +20169,181 @@ window.ppDebtV72={
 })();
 </script>
 
+<script id="pp-v73-debt-render-lock-final">
+(()=>{
+'use strict';
+
+/* V73
+   A página de Dívidas acumulou vários renderizadores antigos com listeners
+   próprios. Alguns deles ainda desenham a tabela diretamente após filtros,
+   navegação ou fechamento de modal. Este controlador não altera os dados:
+   apenas garante que a última renderização visível seja sempre a V72. */
+
+let repairing73=false;
+let scheduled73=null;
+
+const expectedHeaders73=[
+  'Descrição','Credor','Pendentes','Quitadas','Parcela',
+  'Último pagamento','Última parcela','Andamento',
+  'Negociado','Status','Pendente','Ação'
+];
+
+function normalized73(s){
+  return String(s||'').replace(/\s+/g,' ').trim();
+}
+
+function headerIsFinal73(){
+  const head=document.querySelector('#dividas table thead tr');
+  if(!head)return false;
+  const got=[...head.querySelectorAll('th')].map(x=>normalized73(x.textContent));
+  return got.length===expectedHeaders73.length &&
+    expectedHeaders73.every((x,i)=>got[i]===x);
+}
+
+function bodyLooksFinal73(){
+  const body=document.getElementById('debtBody');
+  if(!body)return false;
+  const rows=[...body.querySelectorAll(':scope > tr')];
+  if(!rows.length)return true;
+  return rows.every(tr=>{
+    if(tr.querySelector('.empty'))return true;
+    const cells=tr.querySelectorAll(':scope > td');
+    return cells.length===12 &&
+      !!tr.querySelector('.v72-last-paid') &&
+      !!tr.querySelector('.v72-last-installment');
+  });
+}
+
+function finalIsVisible73(){
+  return headerIsFinal73() && bodyLooksFinal73();
+}
+
+function forceFinal73(){
+  if(repairing73)return;
+  if(finalIsVisible73())return;
+
+  repairing73=true;
+  try{
+    if(typeof window.ppDebtV72?.render==='function'){
+      window.ppDebtV72.render();
+    }else if(typeof window.renderDebts==='function'){
+      window.renderDebts();
+    }
+  }catch(e){}
+  finally{
+    repairing73=false;
+  }
+}
+
+function scheduleFinal73(delay=0){
+  clearTimeout(scheduled73);
+  scheduled73=setTimeout(forceFinal73,delay);
+}
+
+/* Reafirma o renderizador global, inclusive se alguma rotina antiga tentar
+   repor window.renderDebts posteriormente. */
+const finalRender73=window.ppDebtV72?.render || window.renderDebts;
+if(typeof finalRender73==='function'){
+  window.renderDebts=finalRender73;
+  try{renderDebts=finalRender73}catch(e){}
+}
+
+/* Observa exclusivamente a página de Dívidas. Se uma rotina antiga trocar
+   cabeçalho ou linhas, a V72 é reaplicada. Não há loop: quando a estrutura
+   correta já está presente, nenhuma nova renderização é feita. */
+let observer73=null;
+function attachDebtLock73(){
+  const section=document.getElementById('dividas');
+  if(!section)return;
+
+  observer73?.disconnect();
+  observer73=new MutationObserver(mutations=>{
+    if(repairing73)return;
+
+    let relevant=false;
+    for(const m of mutations){
+      const t=m.target;
+      if(
+        t?.id==='debtBody' ||
+        t?.closest?.('#debtBody') ||
+        t?.closest?.('#dividas table thead') ||
+        [...(m.addedNodes||[])].some(n=>
+          n.nodeType===1 && (
+            n.id==='debtBody' ||
+            n.matches?.('tr,th,td') ||
+            n.querySelector?.('#debtBody,tr,th,td')
+          )
+        )
+      ){
+        relevant=true;
+        break;
+      }
+    }
+    if(relevant && !finalIsVisible73())scheduleFinal73(0);
+  });
+
+  observer73.observe(section,{
+    childList:true,
+    subtree:true,
+    characterData:true
+  });
+
+  scheduleFinal73(0);
+}
+
+/* Os pontos abaixo são justamente os eventos em que os renderizadores antigos
+   costumavam disparar diretamente por closure. A checagem posterior garante
+   que a tabela final permaneça visível. */
+document.addEventListener('click',e=>{
+  if(
+    e.target.closest?.('#dividas') ||
+    e.target.closest?.('[data-page="dividas"]') ||
+    e.target.closest?.('[data-view="dividas"]')
+  ){
+    scheduleFinal73(30);
+    scheduleFinal73(180);
+  }
+},false);
+
+document.addEventListener('change',e=>{
+  if(e.target?.closest?.('#dividas'))scheduleFinal73(20);
+},false);
+
+document.addEventListener('input',e=>{
+  if(e.target?.closest?.('#dividas'))scheduleFinal73(20);
+},false);
+
+/* Alguns scripts antigos usam timeouts maiores depois de abrir a página/modal.
+   Esta verificação é apenas estrutural e não redesenha quando tudo está certo. */
+setInterval(()=>{
+  const section=document.getElementById('dividas');
+  if(!section)return;
+  if(!finalIsVisible73())forceFinal73();
+},1200);
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(attachDebtLock73,250),{once:true});
+}else{
+  setTimeout(attachDebtLock73,250);
+}
+
+/* Se a página for reconstruída por navegação, reconecta o observador. */
+const pageObserver73=new MutationObserver(()=>{
+  const section=document.getElementById('dividas');
+  if(section && (!observer73 || !finalIsVisible73())){
+    setTimeout(()=>{
+      attachDebtLock73();
+      scheduleFinal73(0);
+    },30);
+  }
+});
+if(document.body)pageObserver73.observe(document.body,{childList:true,subtree:true});
+
+window.ppDebtV73={
+  repair:forceFinal73,
+  check:finalIsVisible73,
+  headers:expectedHeaders73.slice()
+};
+})();
+</script>
+
