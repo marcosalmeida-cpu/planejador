@@ -21959,3 +21959,94 @@ window.ppPremiumThemeV78={refresh:init78,insights:renderInsights78,wealth:render
 }
 </style>
 
+<style id="pp-v81-specific-premium-cards-icons">
+/* V81 — ajustes pontuais solicitados, somente CSS */
+
+/* 1) Comprometimento da renda: azul vivo, contraste integral */
+#dashboard #incomeCommitCard.capacity-card,
+#dashboard #incomeCommitCard.capacity-main{
+  background:linear-gradient(145deg,#0b67ff 0%,#0757db 55%,#0645ad 100%)!important;
+  border:1px solid rgba(255,255,255,.13)!important;
+  color:#fff!important;
+  box-shadow:0 18px 38px rgba(11,103,255,.22)!important;
+}
+#dashboard #incomeCommitCard .capacity-head h3,
+#dashboard #incomeCommitCard .capacity-percent,
+#dashboard #incomeCommitCard .capacity-meta b{
+  color:#fff!important;
+}
+#dashboard #incomeCommitCard .capacity-head p,
+#dashboard #incomeCommitCard .capacity-meta span{
+  color:rgba(255,255,255,.74)!important;
+}
+#dashboard #incomeCommitCard .capacity-percent{
+  text-shadow:0 3px 14px rgba(0,0,0,.12)!important;
+}
+#dashboard #incomeCommitCard .capacity-track{
+  background:rgba(255,255,255,.17)!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+}
+#dashboard #incomeCommitCard .capacity-track i{
+  background:linear-gradient(90deg,#ffffff 0%,#9fd0ff 58%,#5ab2ff 100%)!important;
+  box-shadow:0 0 16px rgba(255,255,255,.24)!important;
+}
+#dashboard #incomeCommitCard .capacity-meta div{
+  background:rgba(255,255,255,.105)!important;
+  border:1px solid rgba(255,255,255,.105)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06)!important;
+}
+#dashboard #incomeCommitCard .capacity-meta div:hover{
+  background:rgba(255,255,255,.15)!important;
+}
+
+/* 2) Projeção — Planejamento futuro em tom próprio premium */
+#projecao #projectionHeroCard.projection-hero-card{
+  background:linear-gradient(135deg,#51347a 0%,#3c285e 58%,#2d1f48 100%)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  box-shadow:0 18px 38px rgba(56,37,88,.20)!important;
+  color:#fff!important;
+}
+#projecao #projectionHeroCard h3{
+  color:#fff!important;
+}
+#projecao #projectionHeroCard p{
+  color:rgba(255,255,255,.72)!important;
+}
+#projecao #projectionHeroCard #projectionHeroValue,
+#projecao #projectionHeroCard b{
+  color:#77d7ff!important;
+  text-shadow:0 2px 16px rgba(92,207,255,.18)!important;
+}
+
+/* 3) Credores — ícone monocromático no mesmo tom e linguagem dos demais */
+.nav button[data-view="credores"]:before{
+  content:"◎"!important;
+  color:inherit!important;
+  opacity:.95!important;
+}
+#v76FloatNav button[data-view="credores"]:before{
+  content:"◎"!important;
+  color:inherit!important;
+  opacity:1!important;
+}
+
+/* 4) Calculadora — ícone de calculadora no menu normal e flutuante.
+   A página continua usando data-view="nuvem" internamente. */
+.nav button[data-view="nuvem"]:before{
+  content:"▦"!important;
+  color:inherit!important;
+  opacity:.95!important;
+}
+#v76FloatNav button[data-view="nuvem"]:before{
+  content:"▦"!important;
+  color:inherit!important;
+  opacity:1!important;
+}
+
+/* força todos os ícones do menu a herdarem exatamente a mesma tonalidade */
+.nav button:before,
+#v76FloatNav button:before{
+  color:inherit!important;
+}
+</style>
+
