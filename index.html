@@ -22448,3 +22448,154 @@ window.ppPremiumThemeV78={refresh:init78,insights:renderInsights78,wealth:render
 }
 </style>
 
+<style id="pp-v85-clean-bank-home">
+#dashboard #annualPremium,
+#dashboard #premiumTrend,
+#dashboard #planningCards,
+#dashboard #sixMonthCard,
+#dashboard > .grid2:first-of-type{display:none!important}
+
+#dashboardKpis{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+  margin-bottom:14px!important;
+}
+#dashboardKpis .kpi:nth-child(n+4){display:none!important}
+#dashboardKpis .kpi{
+  min-height:112px!important;
+  border-radius:20px!important;
+  padding:15px 16px!important;
+}
+#dashboardKpis .kpi .kpi-icon{
+  width:34px!important;height:34px!important;margin-bottom:9px!important;
+}
+#dashboardKpis .kpi strong{font-size:clamp(21px,2.25vw,28px)!important}
+#dashboardKpis .kpi .delta{margin-top:6px!important;font-size:10px!important}
+
+#dashboard #capacityShell{
+  grid-template-columns:minmax(0,1.18fr) minmax(280px,.82fr)!important;
+  gap:0!important;
+  border:1px solid #dbe3ee!important;
+  border-radius:24px!important;
+  overflow:hidden!important;
+  background:linear-gradient(180deg,#f9fbfd,#eef3f8)!important;
+  box-shadow:0 14px 34px rgba(18,32,54,.065)!important;
+  margin:0 0 14px!important;
+}
+#dashboard #capacityShell > article{
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  margin:0!important;min-height:166px!important;
+}
+#dashboard #incomeCommitCard{border-right:1px solid rgba(255,255,255,.14)!important}
+#dashboard #installmentCapacityCard{border-left:1px solid rgba(255,255,255,.06)!important}
+#dashboard #incomeCommitCard .capacity-meta{gap:6px!important}
+#dashboard #incomeCommitCard .capacity-meta div{padding:9px!important;border-radius:11px!important}
+
+#dashboard > .grid2:nth-of-type(2){
+  display:grid!important;
+  grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)!important;
+  gap:10px!important;
+}
+#dashboard > .grid2:nth-of-type(2) > .panel{
+  border-radius:20px!important;
+  box-shadow:0 10px 26px rgba(18,32,54,.05)!important;
+}
+#dashboard > .grid2:nth-of-type(2) > .panel .panelhead{padding:14px 15px 0!important}
+#dashboard > .grid2:nth-of-type(2) > .panel .panelhead h2{font-size:16px!important}
+#dashboard > .grid2:nth-of-type(2) > .panel .panelhead span{font-size:9.5px!important}
+#dashboard #nextDues,#dashboard #assetSnapshot{padding:10px 15px 14px!important}
+
+#dashboard #assetSnapshot .v78-wealth-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important;
+}
+#dashboard #assetSnapshot .v78-wealth-card{
+  min-height:76px!important;padding:9px 10px!important;border-radius:14px!important;
+}
+#dashboard #assetSnapshot .v78-wealth-card .v78-wicon{
+  width:22px!important;height:22px!important;font-size:11px!important;
+}
+#dashboard #assetSnapshot .v78-wealth-card span{margin-top:5px!important;font-size:7.8px!important}
+#dashboard #assetSnapshot .v78-wealth-card b{font-size:12px!important}
+
+#dashboard .obligation-carousel{
+  min-height:132px!important;padding:13px!important;border-radius:16px!important;
+}
+#dashboard .obligation-main h3{font-size:15px!important;margin:8px 0 3px!important}
+#dashboard .obligation-main b{font-size:23px!important}
+#dashboard .obligation-main p{font-size:9.5px!important}
+
+@media(max-width:980px){
+  #dashboard #capacityShell,#dashboard > .grid2:nth-of-type(2){grid-template-columns:1fr!important}
+  #dashboard #incomeCommitCard{border-right:0!important;border-bottom:1px solid rgba(255,255,255,.12)!important}
+  #dashboard #installmentCapacityCard{border-left:0!important}
+}
+@media(max-width:700px){
+  #dashboardKpis{grid-template-columns:1fr!important}
+  #dashboard #assetSnapshot .v78-wealth-grid{grid-template-columns:1fr 1fr!important}
+}
+</style>
+
+<script id="pp-v85-final-navigation-controller">
+(()=>{
+'use strict';
+
+function activateView85(viewId){
+  if(!viewId)return;
+
+  const target=document.getElementById(viewId);
+  if(target){
+    document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v===target));
+  }
+
+  document.querySelectorAll('#nav button[data-view]').forEach(b=>{
+    b.classList.toggle('active',b.dataset.view===viewId);
+  });
+  document.querySelectorAll('#v76FloatNav button[data-view]').forEach(b=>{
+    b.classList.toggle('active',b.dataset.view===viewId);
+  });
+
+  document.getElementById('nav')?.classList.remove('open');
+  document.body.classList.remove('menu-open');
+
+  try{
+    const map={
+      dashboard:'renderDashboard',
+      lancamentos:'renderLancamentos',
+      cartoes:'renderCards',
+      dividas:'renderDebts',
+      fgts:'renderFgts',
+      previdencia:'renderPrevidencia',
+      investimentos:'renderInvestments',
+      patrimonio:'renderAssets',
+      projecao:'renderProjection',
+      nuvem:'renderNuvem',
+      credores:'renderCreditors'
+    };
+    const fn=map[viewId]&&window[map[viewId]];
+    if(typeof fn==='function')fn();
+  }catch(e){}
+}
+
+document.addEventListener('click',e=>{
+  const btn=e.target.closest?.('#nav button[data-view],#v76FloatNav button[data-view]');
+  if(!btn)return;
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  activateView85(btn.dataset.view);
+},true);
+
+document.addEventListener('click',e=>{
+  const trigger=e.target.closest?.('.menu-trigger');
+  if(!trigger)return;
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  document.getElementById('nav')?.classList.toggle('open');
+},true);
+
+window.ppNavV85={open:activateView85};
+})();
+</script>
+
