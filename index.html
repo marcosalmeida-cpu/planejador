@@ -22096,3 +22096,135 @@ window.ppPremiumThemeV78={refresh:init78,insights:renderInsights78,wealth:render
 }
 </style>
 
+<style id="pp-v83-projection-clean-capacity-highlight">
+/* V83 — ajustes visuais pontuais, sem alterar cálculos ou renderizadores */
+
+/* PROJEÇÃO: mantém os elementos no DOM para as rotinas existentes,
+   mas remove visualmente os blocos que o usuário não quer mais ver. */
+#projecao .projection-grid{
+  grid-template-columns:1fr!important;
+  gap:0!important;
+}
+#projecao .projection-grid > article:nth-child(2){
+  display:none!important; /* Componentes da projeção */
+}
+#projecao > .tablewrap{
+  display:none!important; /* tabela com linhas no final */
+}
+
+/* Visão mensal ocupando toda a largura */
+#projecao .projection-grid > article:first-child{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding-bottom:16px!important;
+}
+#projecao .projection-grid > article:first-child .panelhead{
+  padding:17px 18px 13px!important;
+}
+#projecao #projMonths.month-cards{
+  display:grid!important;
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  gap:9px!important;
+  padding:0 16px 16px!important;
+  align-items:stretch!important;
+}
+#projecao #projMonths .month-card{
+  min-width:0!important;
+  min-height:128px!important;
+  padding:13px!important;
+  border-radius:15px!important;
+  background:linear-gradient(155deg,#fbfdff,#eef3f9)!important;
+  border:1px solid #dbe3ed!important;
+  box-shadow:0 8px 20px rgba(20,35,58,.055)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+}
+#projecao #projMonths .month-card h4{
+  margin:0 0 10px!important;
+  color:#26344a!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  line-height:1.25!important;
+}
+#projecao #projMonths .month-card .big{
+  font-size:17px!important;
+  font-weight:900!important;
+  line-height:1.1!important;
+  color:#0b63f6!important;
+  letter-spacing:-.025em!important;
+}
+#projecao #projMonths .month-card .meta{
+  margin-top:6px!important;
+  font-size:8.8px!important;
+  color:#727f91!important;
+  line-height:1.35!important;
+}
+#projecao #projMonths .month-card:nth-child(1){
+  background:linear-gradient(145deg,#0b63f6,#0849ad)!important;
+  border-color:#1c73f5!important;
+  box-shadow:0 12px 26px rgba(11,99,246,.18)!important;
+}
+#projecao #projMonths .month-card:nth-child(1) h4,
+#projecao #projMonths .month-card:nth-child(1) .big{
+  color:#fff!important;
+}
+#projecao #projMonths .month-card:nth-child(1) .meta{
+  color:rgba(255,255,255,.74)!important;
+}
+
+@media(max-width:1180px){
+  #projecao #projMonths.month-cards{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+@media(max-width:680px){
+  #projecao #projMonths.month-cards{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    padding:0 10px 12px!important;
+  }
+}
+@media(max-width:420px){
+  #projecao #projMonths.month-cards{
+    grid-template-columns:1fr!important;
+  }
+}
+
+/* VISÃO GERAL: Capacidade adicional estimada com maior destaque */
+#dashboard #installmentCapacityCard{
+  background:linear-gradient(145deg,#233149 0%,#172337 55%,#111a29 100%)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  box-shadow:0 16px 36px rgba(17,26,41,.20)!important;
+  color:#fff!important;
+}
+#dashboard #installmentCapacityCard .cap-eyebrow{
+  color:#8fc2ff!important;
+  font-weight:900!important;
+  letter-spacing:.09em!important;
+}
+#dashboard #installmentCapacityCard .cap-value{
+  color:#fff!important;
+  font-weight:950!important;
+  text-shadow:0 2px 12px rgba(0,0,0,.15)!important;
+}
+#dashboard #installmentCapacityCard p{
+  color:rgba(255,255,255,.72)!important;
+}
+#dashboard #installmentCapacityCard .threshold-pills button{
+  background:rgba(255,255,255,.08)!important;
+  border-color:rgba(255,255,255,.13)!important;
+  color:rgba(255,255,255,.80)!important;
+}
+#dashboard #installmentCapacityCard .threshold-pills button:hover{
+  background:rgba(255,255,255,.14)!important;
+  color:#fff!important;
+}
+#dashboard #installmentCapacityCard .threshold-pills button.active{
+  background:#0b63f6!important;
+  border-color:#3580f5!important;
+  color:#fff!important;
+  box-shadow:0 5px 14px rgba(11,99,246,.24)!important;
+}
+</style>
+
