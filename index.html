@@ -22228,3 +22228,223 @@ window.ppPremiumThemeV78={refresh:init78,insights:renderInsights78,wealth:render
 }
 </style>
 
+
+
+<style id="pp-v84-dashboard-bank-home-redesign">
+/* V84 — redesign total da Visão Geral com estética de banco digital */
+
+/* Estrutura geral */
+#dashboard{
+  display:block!important;
+}
+#dashboard > .hero{
+  position:relative;
+  display:grid!important;
+  grid-template-columns:minmax(0,1.25fr) minmax(290px,.85fr)!important;
+  gap:18px!important;
+  align-items:stretch!important;
+  background:linear-gradient(135deg,#0a244d 0%,#0b3c84 52%,#0a5ddb 100%)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  border-radius:30px!important;
+  padding:24px 24px 22px!important;
+  box-shadow:0 22px 60px rgba(7,34,79,.26)!important;
+  overflow:hidden!important;
+  margin-bottom:16px!important;
+}
+#dashboard > .hero:before{
+  content:"";
+  position:absolute;
+  width:280px;height:280px;border-radius:50%;
+  right:-90px;top:-120px;
+  background:rgba(255,255,255,.08);
+}
+#dashboard > .hero:after{
+  content:"";
+  position:absolute;
+  width:220px;height:220px;border-radius:50%;
+  left:-70px;bottom:-120px;
+  background:rgba(255,255,255,.05);
+}
+#dashboard > .hero > div,
+#dashboard > .hero .filterbar{position:relative;z-index:1}
+#dashboard > .hero .eyebrow{color:rgba(255,255,255,.72)!important}
+#dashboard > .hero h1{color:#fff!important;font-size:clamp(30px,3.2vw,42px)!important;letter-spacing:-.05em!important;margin:6px 0 10px!important}
+#dashboard > .hero p#periodText{color:rgba(255,255,255,.84)!important;max-width:720px!important;font-size:13px!important;line-height:1.5!important}
+#dashboard > .hero .filterbar{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:10px!important;
+  align-content:start!important;
+  background:rgba(255,255,255,.10)!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  border-radius:22px!important;
+  padding:12px!important;
+  backdrop-filter:blur(8px)!important;
+}
+#dashboard > .hero .filterbar select{
+  min-height:46px!important;
+  border-radius:14px!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  background:rgba(255,255,255,.18)!important;
+  color:#fff!important;
+  box-shadow:none!important;
+}
+#dashboard > .hero .filterbar select option{color:#172033!important;background:#fff!important}
+
+/* KPIs principais — só os 3 importantes na home */
+#dashboardKpis{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:12px!important;
+  margin:0 0 16px!important;
+}
+#dashboardKpis .kpi:nth-child(n+4){display:none!important}
+#dashboardKpis .kpi{
+  min-height:132px!important;
+  padding:18px 18px 16px!important;
+  border-radius:24px!important;
+  background:linear-gradient(180deg,#fbfcfe,#eef3f9)!important;
+  border:1px solid #dbe3ee!important;
+  box-shadow:0 14px 34px rgba(18,32,54,.06)!important;
+  position:relative!important;
+  overflow:hidden!important;
+}
+#dashboardKpis .kpi:before{
+  content:"";
+  position:absolute;
+  right:-26px;top:-28px;
+  width:92px;height:92px;border-radius:50%;
+  background:rgba(11,99,246,.06);
+}
+#dashboardKpis .kpi:nth-child(1):before{background:rgba(11,99,246,.07)!important}
+#dashboardKpis .kpi:nth-child(2):before{background:rgba(255,138,0,.08)!important}
+#dashboardKpis .kpi:nth-child(3):before{background:rgba(19,162,107,.08)!important}
+#dashboardKpis .kpi .kpi-icon{
+  width:40px!important;height:40px!important;border-radius:13px!important;
+  background:#e9f1ff!important;border:1px solid #d4e2fb!important;
+  margin-bottom:12px!important;
+}
+#dashboardKpis .kpi:nth-child(1) .kpi-icon,
+#dashboardKpis .kpi:nth-child(3) .kpi-icon{background:#e8f0ff!important}
+#dashboardKpis .kpi:nth-child(2) .kpi-icon{background:#fff1df!important;border-color:#ffe0b4!important}
+#dashboardKpis .kpi .kpi-icon svg{stroke:#0b63f6!important}
+#dashboardKpis .kpi:nth-child(2) .kpi-icon svg{stroke:#ff8a00!important}
+#dashboardKpis .kpi .label{
+  display:block!important;
+  margin-bottom:6px!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  text-transform:uppercase!important;
+  letter-spacing:.08em!important;
+  color:#748092!important;
+}
+#dashboardKpis .kpi strong{
+  display:block!important;
+  font-size:clamp(22px,2.5vw,31px)!important;
+  line-height:1.05!important;
+  letter-spacing:-.045em!important;
+  color:#172033!important;
+}
+#dashboardKpis .kpi .delta{
+  display:block!important;
+  margin-top:8px!important;
+  color:#7d8899!important;
+  font-size:11px!important;
+  line-height:1.4!important;
+}
+
+/* Limpeza: remove blocos mais pesados da home */
+#dashboard > .grid2:first-of-type,
+#dashboard #annualPremium,
+#dashboard #premiumTrend,
+#dashboard #planningCards,
+#dashboard #sixMonthCard{
+  display:none!important;
+}
+
+/* Capacidade e planejamento em foco */
+#dashboard #capacityShell,
+#dashboard .capacity-shell{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.1fr) minmax(340px,.9fr)!important;
+  gap:12px!important;
+  margin:0 0 16px!important;
+}
+#dashboard #incomeCommitCard,
+#dashboard #installmentCapacityCard{
+  min-height:178px!important;
+  border-radius:24px!important;
+}
+#dashboard #incomeCommitCard .capacity-head h3,
+#dashboard #installmentCapacityCard .cap-eyebrow{text-transform:none!important}
+
+/* Linha inferior: próximas faturas + patrimônio */
+#dashboard > .grid2:nth-of-type(2){
+  display:grid!important;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)!important;
+  gap:12px!important;
+}
+#dashboard > .grid2:nth-of-type(2) > .panel{
+  border-radius:24px!important;
+  overflow:hidden!important;
+}
+#dashboard > .grid2:nth-of-type(2) > .panel .panelhead{
+  padding:18px 18px 0!important;
+}
+#dashboard > .grid2:nth-of-type(2) > .panel .panelhead h2{
+  font-size:19px!important;letter-spacing:-.035em!important;
+}
+#dashboard > .grid2:nth-of-type(2) > .panel .panelhead span{
+  color:#7a8697!important
+}
+#dashboard #nextDues,
+#dashboard #assetSnapshot{padding:14px 18px 18px!important}
+
+/* Próxima fatura com visual mais clean */
+#dashboard .next-card-due,
+#dashboard .obligation-carousel{
+  border-radius:20px!important;
+  min-height:0!important;
+}
+#dashboard .obligation-carousel{
+  box-shadow:none!important;
+}
+
+/* Resumo patrimonial ultra-compacto */
+#dashboard #assetSnapshot .v78-wealth-grid{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+#dashboard #assetSnapshot .v78-wealth-card{
+  min-height:98px!important;
+  border-radius:18px!important;
+}
+
+/* Esconde qualquer sobra antiga do assetSnapshot */
+#dashboard #assetSnapshot > :not(.v78-wealth-grid){display:none!important}
+
+/* Ajuste tipográfico geral da home */
+#dashboard .panelhead h2,
+#dashboard .capacity-head h3,
+#dashboard .six-head h3{font-weight:850!important}
+
+/* Mobile / tablet */
+@media(max-width:1100px){
+  #dashboard > .hero{grid-template-columns:1fr!important}
+  #dashboard #capacityShell,
+  #dashboard .capacity-shell,
+  #dashboard > .grid2:nth-of-type(2){grid-template-columns:1fr!important}
+}
+@media(max-width:760px){
+  #dashboardKpis{grid-template-columns:1fr!important}
+  #dashboard > .hero{padding:18px 16px!important;border-radius:24px!important}
+  #dashboard > .hero .filterbar{grid-template-columns:1fr 1fr!important;padding:10px!important;border-radius:18px!important}
+  #dashboard #assetSnapshot .v78-wealth-grid{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:430px){
+  #dashboard > .hero .filterbar,
+  #dashboard #assetSnapshot .v78-wealth-grid{grid-template-columns:1fr!important}
+}
+</style>
+
