@@ -21804,3 +21804,261 @@ window.ppPremiumThemeV78={refresh:init78,insights:renderInsights78,wealth:render
 })();
 </script>
 
+<style id="pp-v79-dashboard-year-contrast-fix">
+/* V79 — corrige contraste da Visão Geral e elimina blocos patrimoniais antigos no modo Ano */
+
+:root{
+  --v79-blue:#0b63f6;
+  --v79-blue-deep:#0a3f9e;
+  --v79-blue-soft:#eaf2ff;
+  --v79-ink:#172033;
+  --v79-muted:#6f7a8d;
+}
+
+/* Contraste geral dos cards claros */
+#dashboard .card,
+#dashboard .panel,
+#dashboard .kpi,
+#dashboard .v78-insight,
+#dashboard .v78-wealth-card{
+  color:var(--v79-ink)!important;
+}
+#dashboard .card span,
+#dashboard .panel span,
+#dashboard .kpi span,
+#dashboard .v78-insight span,
+#dashboard .v78-wealth-card span{
+  color:var(--v79-muted)!important;
+}
+#dashboard .card b,
+#dashboard .panel b,
+#dashboard .kpi b,
+#dashboard .v78-insight b,
+#dashboard .v78-wealth-card b{
+  color:var(--v79-ink)!important;
+}
+
+/* Mantém branco apenas em superfícies realmente escuras */
+#dashboard .v78-insight.accent,
+#dashboard .v78-insight.warning,
+#dashboard .v79-vibrant{
+  color:#fff!important;
+}
+#dashboard .v78-insight.accent span,
+#dashboard .v78-insight.accent small,
+#dashboard .v78-insight.warning span,
+#dashboard .v78-insight.warning small,
+#dashboard .v79-vibrant span,
+#dashboard .v79-vibrant small{
+  color:rgba(255,255,255,.72)!important;
+}
+#dashboard .v78-insight.accent b,
+#dashboard .v78-insight.warning b,
+#dashboard .v79-vibrant b{
+  color:#fff!important;
+}
+
+/* Azul mais vivo em pontos de destaque */
+#dashboard .v78-insight.accent{
+  background:linear-gradient(145deg,var(--v79-blue),var(--v79-blue-deep))!important;
+  border-color:#2e79ef!important;
+  box-shadow:0 14px 32px rgba(11,99,246,.20)!important;
+}
+#dashboard .v78-insight.accent .v78-icon{
+  background:rgba(255,255,255,.14)!important;
+  border-color:rgba(255,255,255,.20)!important;
+  color:#fff!important;
+}
+#dashboard .v78-wealth-card{
+  background:linear-gradient(145deg,#fbfcfe,#eef3f9)!important;
+}
+#dashboard .v78-wealth-card:hover{
+  border-color:#8fb3eb!important;
+  box-shadow:0 12px 26px rgba(11,99,246,.10)!important;
+}
+#dashboard .v78-wealth-card .v78-wicon{
+  background:var(--v79-blue-soft)!important;
+  color:var(--v79-blue)!important;
+}
+#dashboard .v78-wealth-card.available .v78-wicon{
+  background:#e8f4ee!important;
+  color:#226247!important;
+}
+#dashboard .v78-wealth-card.blocked .v78-wicon{
+  background:#f2e9ec!important;
+  color:#7a4552!important;
+}
+
+/* KPIs com contraste correto e acentos mais nítidos */
+#dashboardKpis .kpi{
+  background:linear-gradient(160deg,#fbfcfe,#eef2f7)!important;
+  color:var(--v79-ink)!important;
+}
+#dashboardKpis .kpi strong,
+#dashboardKpis .kpi b{
+  color:#101722!important;
+}
+#dashboardKpis .kpi .label,
+#dashboardKpis .kpi small{
+  color:#667287!important;
+}
+#dashboardKpis .kpi-icon{
+  background:#e7eef9!important;
+  color:var(--v79-blue)!important;
+}
+#dashboardKpis .kpi-icon svg{
+  stroke:var(--v79-blue)!important;
+}
+
+/* Modo Ano: esconde definitivamente qualquer legado de FGTS/Patrimônio grande */
+#dashboard.v60-year-scope #assetSnapshot .v60-wealth-shell,
+#dashboard.v60-year-scope #assetSnapshot .v60-wealth-hero,
+#dashboard.v60-year-scope #assetSnapshot .v60-wealth-stack,
+#dashboard.v60-year-scope #assetSnapshot .v60-wealth-item,
+#dashboard.v60-year-scope .v60-wealth-shell,
+#dashboard.v60-year-scope .v60-wealth-hero,
+#dashboard.v60-year-scope .v60-wealth-stack,
+#dashboard.v60-year-scope .v60-wealth-item{
+  display:none!important;
+}
+
+/* O resumo compacto continua visível no Ano */
+#dashboard.v60-year-scope #assetSnapshot .v78-wealth-grid{
+  display:grid!important;
+}
+
+/* Se alguma rotina antiga recriar cards grandes específicos de FGTS, some no Ano */
+#dashboard.v60-year-scope [data-legacy-fgts],
+#dashboard.v60-year-scope .fgts-dashboard-card:not(.v78-wealth-card),
+#dashboard.v60-year-scope .asset-large-card,
+#dashboard.v60-year-scope .wealth-large-card{
+  display:none!important;
+}
+
+/* Melhora legibilidade de blocos inferiores */
+#dashboard .capacity-shell,
+#dashboard .annual-premium,
+#dashboard .plan-card,
+#dashboard #premiumTrend{
+  color:var(--v79-ink)!important;
+}
+#dashboard .capacity-shell b,
+#dashboard .annual-premium b,
+#dashboard .plan-card b,
+#dashboard #premiumTrend b{
+  color:#121925!important;
+}
+#dashboard .capacity-shell span,
+#dashboard .annual-premium span,
+#dashboard .plan-card span,
+#dashboard #premiumTrend span{
+  color:#687487!important;
+}
+
+/* Alguns blocos com fundo azul precisam manter texto branco */
+#dashboard .blue,
+#dashboard .blue-card,
+#dashboard [class*="gradient-blue"],
+#dashboard .hero-premium{
+  color:#fff!important;
+}
+#dashboard .blue b,
+#dashboard .blue-card b,
+#dashboard [class*="gradient-blue"] b,
+#dashboard .hero-premium b{
+  color:#fff!important;
+}
+
+/* refinamento responsivo */
+@media(max-width:760px){
+  #dashboard .v78-wealth-grid{
+    gap:8px!important;
+  }
+  #dashboard .v78-wealth-card{
+    min-height:86px!important;
+    padding:11px!important;
+  }
+}
+</style>
+
+<script id="pp-v79-dashboard-year-clean-final">
+(()=>{
+'use strict';
+
+function isYear79(){
+  return String(localStorage.getItem('planejador_dashboard_scope')||'month')==='year';
+}
+
+function cleanYearLegacy79(){
+  const dash=document.getElementById('dashboard');
+  if(!dash)return;
+
+  const year=isYear79();
+  dash.classList.toggle('v79-year-clean',year);
+
+  const asset=document.getElementById('assetSnapshot');
+  if(asset){
+    /* Se a V78 já gerou o grid compacto, qualquer irmão legado dentro
+       de assetSnapshot é removido apenas visualmente, sem alterar dados. */
+    const compact=asset.querySelector('.v78-wealth-grid');
+    if(compact && year){
+      [...asset.children].forEach(el=>{
+        if(el!==compact) el.style.display='none';
+      });
+      compact.style.display='grid';
+    }else if(compact){
+      [...asset.children].forEach(el=>el.style.removeProperty('display'));
+      compact.style.removeProperty('display');
+    }
+  }
+
+  /* Corrige contraste de cards que ficaram com texto branco mas fundo claro. */
+  dash.querySelectorAll('.card,.panel,.kpi,.v78-insight,.v78-wealth-card').forEach(el=>{
+    const bg=getComputedStyle(el).backgroundColor;
+    const m=bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if(!m)return;
+    const [r,g,b]=m.slice(1).map(Number);
+    const lum=(0.2126*r+0.7152*g+0.0722*b);
+    if(lum>180 && !el.classList.contains('accent') && !el.classList.contains('warning')){
+      el.classList.remove('v79-vibrant');
+      el.style.color='#172033';
+      el.querySelectorAll('b,strong').forEach(x=>x.style.color='#172033');
+      el.querySelectorAll('span,small,p').forEach(x=>{
+        if(!x.closest('.tag'))x.style.color='#6f7a8d';
+      });
+    }
+  });
+}
+
+const prev79=window.renderDashboard;
+if(typeof prev79==='function'&&!prev79.__v79){
+  const w=function(){
+    const r=prev79.apply(this,arguments);
+    setTimeout(cleanYearLegacy79,0);
+    return r;
+  };
+  w.__v79=true;
+  window.renderDashboard=w;
+  try{renderDashboard=w}catch(e){}
+}
+
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('#dashboardScope button')){
+    setTimeout(cleanYearLegacy79,30);
+  }
+},false);
+
+['yearFilter','monthFilter'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change',()=>setTimeout(cleanYearLegacy79,20));
+});
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(cleanYearLegacy79,400),{once:true});
+}else{
+  setTimeout(cleanYearLegacy79,400);
+}
+
+window.ppDashboardV79={refresh:cleanYearLegacy79};
+})();
+</script>
+
