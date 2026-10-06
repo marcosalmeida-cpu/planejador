@@ -23307,3 +23307,234 @@ window.ppRecurringEditV92={open:openTxEdit92};
 })();
 </script>
 
+<style id="pp-v93-fun-premium-loader">
+/* V93 — loader mais jovem, profissional e impactante */
+.login-spinner{
+  position:relative!important;
+  display:grid!important;
+  place-items:center!important;
+  overflow:visible!important;
+  width:126px!important;
+  height:126px!important;
+  margin:0 auto!important;
+}
+.login-spinner:after{content:none!important}
+.login-spinner .pig-loader{display:none!important}
+
+.login-spinner .v93-loader{
+  position:relative;
+  width:126px;
+  height:126px;
+  border-radius:34px;
+  background:
+    radial-gradient(circle at 24% 22%, rgba(255,255,255,.92) 0 8%, transparent 9%),
+    linear-gradient(145deg, #0d2452 0%, #0d4ab2 45%, #19a0ff 100%);
+  box-shadow:
+    0 24px 50px rgba(5, 32, 84, .30),
+    inset 0 1px 0 rgba(255,255,255,.22);
+  overflow:hidden;
+}
+.login-spinner .v93-loader::before{
+  content:"";
+  position:absolute;
+  inset:11px;
+  border-radius:27px;
+  background:linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+  border:1px solid rgba(255,255,255,.12);
+}
+.login-spinner .v93-ring,
+.login-spinner .v93-ring::before,
+.login-spinner .v93-ring::after{
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+}
+.login-spinner .v93-ring{
+  width:94px;height:94px;
+  inset:16px auto auto 16px;
+  border:3px solid rgba(255,255,255,.10);
+}
+.login-spinner .v93-ring::before{
+  content:"";
+  inset:0;
+  border:4px solid transparent;
+  border-top-color:#ffb546;
+  border-right-color:#6fe1ff;
+  animation:v93Spin 1.4s linear infinite;
+}
+.login-spinner .v93-ring::after{
+  content:"";
+  inset:10px;
+  border:3px dashed rgba(255,255,255,.18);
+  animation:v93SpinReverse 2.2s linear infinite;
+}
+.login-spinner .v93-core{
+  position:absolute;
+  inset:50% auto auto 50%;
+  transform:translate(-50%,-50%);
+  width:52px;height:52px;border-radius:18px;
+  background:linear-gradient(145deg,#ffffff 0%, #eef6ff 100%);
+  box-shadow:0 12px 24px rgba(3,20,46,.22);
+  display:grid;place-items:center;
+}
+.login-spinner .v93-core span{
+  font-size:24px;
+  line-height:1;
+  filter:saturate(1.15);
+  animation:v93Pop 1.35s ease-in-out infinite;
+}
+.login-spinner .v93-pulse{
+  position:absolute;
+  width:12px;height:12px;border-radius:50%;
+  background:linear-gradient(180deg,#fff,#d9f1ff);
+  box-shadow:0 0 0 0 rgba(255,255,255,.55);
+  animation:v93Pulse 1.8s ease-in-out infinite;
+}
+.login-spinner .v93-pulse.p1{left:14px;top:22px;animation-delay:0s}
+.login-spinner .v93-pulse.p2{right:16px;top:24px;animation-delay:.45s}
+.login-spinner .v93-pulse.p3{right:18px;bottom:18px;animation-delay:.9s}
+.login-spinner .v93-pulse.p4{left:16px;bottom:16px;animation-delay:1.35s}
+.login-spinner .v93-glow{
+  position:absolute;
+  inset:auto 18px 10px 18px;
+  height:18px;
+  border-radius:999px;
+  background:radial-gradient(circle, rgba(111,225,255,.65), rgba(111,225,255,0) 70%);
+  filter:blur(6px);
+}
+#loginLoading .login-copy{
+  margin-top:14px;
+  text-align:center;
+}
+#loginLoading .login-copy b{
+  display:block;
+  color:#183153;
+  font-size:14px;
+  letter-spacing:-.01em;
+}
+#loginLoading .login-copy span{
+  display:block;
+  margin-top:5px;
+  color:#667085;
+  font-size:11px;
+}
+#ppProfileLoadingV88 .v93-profile-card{
+  min-width:290px;
+  max-width:360px;
+  background:linear-gradient(180deg,#ffffff,#f7fbff);
+  border:1px solid rgba(17,24,39,.08);
+  border-radius:24px;
+  padding:22px 22px 18px;
+  box-shadow:0 30px 80px rgba(9,25,55,.22);
+  color:#183153;
+  text-align:center;
+}
+#ppProfileLoadingV88 .v93-profile-loader-wrap{
+  display:grid;
+  place-items:center;
+  margin-bottom:14px;
+}
+#ppProfileLoadingV88 .v93-profile-card b{
+  display:block;
+  font-size:16px;
+  line-height:1.2;
+}
+#ppProfileLoadingV88 .v93-profile-card .sub{
+  font-size:11px;
+  color:#6b7280;
+  margin-top:6px;
+}
+#ppProfileLoadingV88 .v93-progress{
+  margin-top:14px;
+  height:8px;
+  border-radius:999px;
+  background:#e8eef7;
+  overflow:hidden;
+}
+#ppProfileLoadingV88 .v93-progress > i{
+  display:block;
+  width:42%;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#0e45a2,#1aa7ff,#ffb546);
+  animation:v93LoadBar 1.55s ease-in-out infinite;
+}
+@keyframes v93Spin{to{transform:rotate(360deg)}}
+@keyframes v93SpinReverse{to{transform:rotate(-360deg)}}
+@keyframes v93Pop{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes v93Pulse{
+  0%{transform:scale(.85);box-shadow:0 0 0 0 rgba(255,255,255,.52);opacity:.75}
+  60%{transform:scale(1.12);box-shadow:0 0 0 12px rgba(255,255,255,0);opacity:1}
+  100%{transform:scale(.9);box-shadow:0 0 0 0 rgba(255,255,255,0);opacity:.8}
+}
+@keyframes v93LoadBar{
+  0%{transform:translateX(-65%)}
+  50%{transform:translateX(95%)}
+  100%{transform:translateX(205%)}
+}
+</style>
+
+<script id="pp-v93-fun-premium-loader-script">
+(function(){
+  function loaderMarkup(){
+    return (
+      '<div class="v93-loader" aria-hidden="true">' +
+        '<div class="v93-ring"></div>' +
+        '<div class="v93-core"><span>✦</span></div>' +
+        '<i class="v93-pulse p1"></i>' +
+        '<i class="v93-pulse p2"></i>' +
+        '<i class="v93-pulse p3"></i>' +
+        '<i class="v93-pulse p4"></i>' +
+        '<div class="v93-glow"></div>' +
+      '</div>'
+    );
+  }
+
+  function applyLoginLoader(root){
+    (root.querySelectorAll ? root.querySelectorAll('.login-spinner') : []).forEach(function(sp){
+      if(!sp.querySelector('.v93-loader')){
+        sp.innerHTML = loaderMarkup();
+      }
+    });
+
+    (root.querySelectorAll ? root.querySelectorAll('#loginLoading') : []).forEach(function(box){
+      if(!box.querySelector('.login-copy')){
+        var copy=document.createElement('div');
+        copy.className='login-copy';
+        copy.innerHTML='<b>Preparando seu Planejador</b><span>Organizando seus dados com segurança…</span>';
+        box.appendChild(copy);
+      }
+    });
+  }
+
+  function applyProfileOverlay(){
+    var overlay=document.getElementById('ppProfileLoadingV88');
+    if(!overlay) return;
+    if(overlay.querySelector('.v93-profile-card')) return;
+    var title=(overlay.querySelector('#ppProfileLoadingTitleV88')?.textContent || 'Abrindo perfil');
+    overlay.innerHTML=
+      '<div class="v93-profile-card">' +
+        '<div class="v93-profile-loader-wrap"><div class="login-spinner">' + loaderMarkup() + '</div></div>' +
+        '<b>'+title.replace(/[<>&]/g,'')+'</b>' +
+        '<div class="sub">Sincronizando seus dados em nuvem antes de abrir o perfil…</div>' +
+        '<div class="v93-progress"><i></i></div>' +
+      '</div>';
+  }
+
+  applyLoginLoader(document);
+  applyProfileOverlay();
+
+  var mo = new MutationObserver(function(ms){
+    ms.forEach(function(m){
+      m.addedNodes.forEach(function(n){
+        if(n.nodeType===1){
+          applyLoginLoader(n);
+          applyProfileOverlay();
+        }
+      });
+    });
+  });
+  mo.observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
