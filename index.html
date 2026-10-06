@@ -10054,8 +10054,15 @@ Os dados atuais deste navegador serão substituídos.`);
   }
 
   function openPage(){
-    document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id==='previdencia'));
-    document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view==='previdencia'));
+    document.querySelectorAll('.main > .view').forEach(v=>{
+      const on=v.id==='previdencia';
+      v.classList.toggle('active',on);
+      v.style.setProperty('display',on?'block':'none','important');
+      v.style.setProperty('visibility',on?'visible':'hidden','important');
+    });
+    document.querySelectorAll('#nav button[data-view],#v76FloatNav button[data-view]').forEach(b=>{
+      b.classList.toggle('active',b.dataset.view==='previdencia');
+    });
     document.getElementById('nav')?.classList.remove('open');
     render();
     window.scrollTo({top:0,behavior:'auto'});
@@ -23673,6 +23680,440 @@ document.addEventListener('click',e=>{
 },false);
 
 window.ppRecurringEditV92={open:openTxEdit92};
+})();
+</script>
+
+<style id="pp-v99-dashboard-now-invoices-categories">
+/* AGORA */
+#dashboard .v99-result{
+  margin-top:15px;
+  font-size:28px;
+  font-weight:950;
+  letter-spacing:-.045em;
+}
+#dashboard .v99-result.positive{color:#0c8a61!important}
+#dashboard .v99-result.negative{color:#c0394a!important}
+#dashboard .v99-result.neutral{color:#172033!important}
+#dashboard .v99-result small{
+  display:block;
+  margin-top:5px;
+  font-size:9px;
+  font-weight:750;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+  color:#7d8797!important;
+}
+#dashboard .v99-balance-line{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:end;
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid #e3e7ed;
+}
+#dashboard .v99-balance-line span{font-size:9px;color:#788395}
+#dashboard .v99-balance-line b{font-size:16px;color:#172033}
+
+/* Próximas faturas — carrossel horizontal */
+#dashboard .v99-invoice-wrap{position:relative;margin-top:13px}
+#dashboard .v99-invoice-track{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  padding:1px 1px 5px;
+  scroll-behavior:smooth;
+}
+#dashboard .v99-invoice-track::-webkit-scrollbar{display:none}
+#dashboard .v99-invoice-card{
+  flex:0 0 min(250px,78%);
+  min-height:126px;
+  scroll-snap-align:start;
+  border-radius:17px;
+  padding:15px;
+  color:#fff;
+  position:relative;
+  overflow:hidden;
+  background:linear-gradient(145deg,#17253a,#0d1725);
+  box-shadow:0 10px 24px rgba(15,23,42,.12);
+}
+#dashboard .v99-invoice-card:after{
+  content:"";
+  position:absolute;
+  width:120px;height:120px;border-radius:50%;
+  right:-38px;bottom:-55px;
+  background:rgba(255,255,255,.07);
+}
+#dashboard .v99-invoice-card>*{position:relative;z-index:1}
+#dashboard .v99-invoice-card .period{font-size:9px;color:rgba(255,255,255,.65)}
+#dashboard .v99-invoice-card strong{display:block;margin-top:4px;font-size:14px;color:#fff}
+#dashboard .v99-invoice-card b{display:block;margin-top:16px;font-size:24px;letter-spacing:-.04em;color:#fff}
+#dashboard .v99-invoice-card small{display:block;margin-top:4px;font-size:9px;color:rgba(255,255,255,.64)}
+#dashboard .v99-invoice-controls{
+  display:flex;
+  justify-content:flex-end;
+  gap:6px;
+  margin-top:9px;
+}
+#dashboard .v99-invoice-controls button{
+  width:30px;height:30px;
+  border:1px solid #dfe5ee;
+  border-radius:10px;
+  background:#fff;
+  color:#435168;
+  cursor:pointer;
+  font-size:17px;
+}
+
+/* Top 6 categorias — faixa horizontal entre os blocos */
+#dashboard .v99-categories{
+  border:1px solid #dce3ec;
+  border-radius:20px;
+  background:linear-gradient(180deg,#fbfcfe,#f3f6fa);
+  padding:15px 16px 14px;
+  box-shadow:0 9px 24px rgba(18,32,54,.045);
+}
+#dashboard .v99-cat-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:12px;
+  margin-bottom:12px;
+}
+#dashboard .v99-cat-head h2{
+  margin:0;
+  font-size:16px;
+  letter-spacing:-.025em;
+  color:#172033;
+}
+#dashboard .v99-cat-head span{
+  font-size:9px;
+  color:#7b8697;
+}
+#dashboard .v99-cat-track{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:8px;
+}
+#dashboard .v99-cat{
+  border:1px solid #e0e6ee;
+  background:#fff;
+  border-radius:15px;
+  padding:11px;
+  text-align:left;
+  cursor:pointer;
+  min-width:0;
+  transition:.18s ease;
+}
+#dashboard .v99-cat:hover{
+  transform:translateY(-2px);
+  border-color:#b8cff2;
+  box-shadow:0 8px 18px rgba(25,70,130,.08);
+}
+#dashboard .v99-cat .rank{
+  width:22px;height:22px;
+  display:grid;place-items:center;
+  border-radius:8px;
+  background:#edf4ff;
+  color:#0b63f6;
+  font-size:9px;
+  font-weight:950;
+}
+#dashboard .v99-cat strong{
+  display:block;
+  margin-top:8px;
+  color:#253247;
+  font-size:10px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#dashboard .v99-cat b{
+  display:block;
+  margin-top:5px;
+  color:#172033;
+  font-size:12px;
+}
+#dashboard .v99-cat .bar{
+  height:5px;
+  margin-top:8px;
+  border-radius:999px;
+  background:#e8edf3;
+  overflow:hidden;
+}
+#dashboard .v99-cat .bar i{
+  display:block;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#0b63f6,#69a8ff);
+}
+#dashboard .v99-cat-empty{
+  grid-column:1/-1;
+  padding:14px;
+  border-radius:14px;
+  background:#f1f4f8;
+  color:#7b8697;
+  font-size:10px;
+}
+
+@media(max-width:1000px){
+  #dashboard .v99-cat-track{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:620px){
+  #dashboard .v99-cat-track{
+    display:flex;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    scrollbar-width:none;
+  }
+  #dashboard .v99-cat-track::-webkit-scrollbar{display:none}
+  #dashboard .v99-cat{flex:0 0 145px;scroll-snap-align:start}
+}
+</style>
+
+<script id="pp-v99-dashboard-logic-final">
+(()=>{
+'use strict';
+
+function n99(v){
+  if(typeof v==='number'&&Number.isFinite(v))return v;
+  let x=String(v??'').trim().replace(/\s/g,'').replace(/R\$/gi,'');
+  if(x.includes(',')&&x.includes('.'))x=x.replace(/\./g,'').replace(',','.');
+  else if(x.includes(','))x=x.replace(',','.');
+  x=x.replace(/[^0-9.-]/g,'');
+  const n=Number(x);
+  return Number.isFinite(n)?n:0;
+}
+function m99(v){
+  try{return brl(v)}catch(e){
+    return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  }
+}
+function scope99(){
+  return localStorage.getItem('planejador_dashboard_scope')||'month';
+}
+function rows99(){
+  const all=window.allTx?.()||[];
+  const sc=scope99();
+  if(sc==='month')return all.filter(x=>+x.ano===+year&&+x.mesNum===+month);
+  if(sc==='year')return all.filter(x=>+x.ano===+year);
+  return all.filter(x=>+x.ano<currentYear||(+x.ano===currentYear&&+x.mesNum<=currentMonth));
+}
+function label99(){
+  const sc=scope99();
+  if(sc==='month')return `${monthNames[month-1]} de ${year}`;
+  if(sc==='year')return `Ano de ${year}`;
+  return 'Histórico realizado';
+}
+function years99(){
+  const set=new Set([currentYear,year]);
+  (window.allTx?.()||[]).forEach(x=>{if(+x.ano)set.add(+x.ano)});
+  return [...set].sort((a,b)=>b-a);
+}
+function invoiceGroups99(){
+  let src=[];
+  try{src=getCardSchedules(false)||[]}catch(e){}
+  const nowKey=currentYear*12+currentMonth;
+  const groups={};
+  src.forEach(r=>{
+    const kNum=(+r.year)*12+(+r.month);
+    if(r.paid||kNum<nowKey)return;
+    const k=`${r.cardId}|${r.year}|${r.month}`;
+    if(!groups[k])groups[k]={cardId:r.cardId,year:+r.year,month:+r.month,total:0,count:0};
+    groups[k].total+=n99(r.amount);
+    groups[k].count++;
+  });
+  return Object.values(groups).sort((a,b)=>a.year-b.year||a.month-b.month||String(a.cardId).localeCompare(String(b.cardId)));
+}
+function wealth99(){
+  let pat=0,inv=0,debt=0;
+  try{pat=(assets||[]).reduce((a,x)=>a+n99(x.value),0)}catch(e){}
+  try{inv=(investments||[]).filter(x=>x.status==='Ativo').reduce((a,x)=>a+n99(x.currentValue),0)}catch(e){}
+  try{debt=(getDebts(false)||[]).reduce((a,x)=>a+n99(x.pendente),0)}catch(e){}
+  return {pat,inv,debt,fgts:n99(fgtsSummary?.saldoDisponivel)};
+}
+function categories99(rows){
+  const map={};
+  rows.filter(x=>x.tipo==='saida').forEach(x=>{
+    const cat=String(x.categoria||'Outros').trim()||'Outros';
+    map[cat]=(map[cat]||0)+n99(x.valor);
+  });
+  return Object.entries(map).map(([name,value])=>({name,value})).sort((a,b)=>b.value-a.value).slice(0,6);
+}
+
+function render99(){
+  const dash=document.getElementById('dashboard');
+  if(!dash)return;
+  let root=document.getElementById('v86BankHome');
+  if(!root){
+    root=document.createElement('div');
+    root.id='v86BankHome';
+    dash.prepend(root);
+  }
+
+  const rows=rows99();
+  const income=rows.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+n99(x.valor),0);
+  const expense=rows.filter(x=>x.tipo==='saida').reduce((a,x)=>a+n99(x.valor),0);
+  const result=income-expense;
+
+  // Regra solicitada:
+  // normal = despesa / receita; 0/0 = 100%; sem receita com despesa = 200% (déficit sem cobertura).
+  const commitment=income>0 ? (expense/income*100) : (expense>0 ? 200 : 100);
+  const status=result>0?'Superávit':result<0?'Déficit':'Equilíbrio';
+  const statusClass=result>0?'positive':result<0?'negative':'neutral';
+
+  const invoices=invoiceGroups99();
+  const cats=categories99(rows);
+  const maxCat=Math.max(1,...cats.map(x=>x.value));
+  const w=wealth99();
+  const sc=scope99();
+
+  root.innerHTML=`
+    <section class="v86-hero">
+      <div class="v86-hero-main">
+        <div class="v86-kicker">visão financeira · ${label99()}</div>
+        <div class="v86-balance-label">Saldo do período</div>
+        <div class="v86-balance">${m99(result)}</div>
+        <div class="v86-inline">
+          <div><span>Receitas</span><b>${m99(income)}</b></div>
+          <div><span>Despesas</span><b>${m99(expense)}</b></div>
+          <div><span>Situação</span><b>${status}</b></div>
+        </div>
+      </div>
+      <div class="v86-controls">
+        <div class="v86-scope">
+          <button type="button" data-v99-scope="month" class="${sc==='month'?'active':''}">Mês</button>
+          <button type="button" data-v99-scope="year" class="${sc==='year'?'active':''}">Ano</button>
+          <button type="button" data-v99-scope="all" class="${sc==='all'?'active':''}">Histórico</button>
+        </div>
+        <div class="v86-selects">
+          <select id="v99Year">${years99().map(y=>`<option value="${y}" ${+y===+year?'selected':''}>${y}</option>`).join('')}</select>
+          <select id="v99Month" ${sc!=='month'?'disabled':''}>${monthNames.map((n,i)=>`<option value="${i+1}" ${i+1===+month?'selected':''}>${n}</option>`).join('')}</select>
+        </div>
+      </div>
+    </section>
+
+    <section class="v86-focus">
+      <div class="v86-focus-section">
+        <div class="v86-focus-title"><h2>Agora</h2><span>${label99()}</span></div>
+        <div class="v99-result ${statusClass}">${status}<small>${m99(Math.abs(result))} ${result>0?'acima das despesas':result<0?'acima das receitas':'sem diferença no período'}</small></div>
+        <div class="v86-health-row"><span>Comprometimento da renda</span><b>${commitment.toFixed(1).replace('.',',')}%</b></div>
+        <div class="v86-track"><i style="width:${Math.min(100,commitment)}%"></i></div>
+        <div class="v99-balance-line"><span>Receitas − despesas</span><b class="${statusClass}">${m99(result)}</b></div>
+      </div>
+
+      <div class="v86-focus-section v86-next">
+        <div class="v86-focus-title"><h2>Próximas faturas</h2><span>${invoices.length?invoices.length+' previstas':'cartões'}</span></div>
+        ${invoices.length?`
+          <div class="v99-invoice-wrap">
+            <div class="v99-invoice-track" id="v99InvoiceTrack">
+              ${invoices.map(x=>{
+                const c=(cards||[]).find(c=>String(c.id)===String(x.cardId))||{name:'Cartão'};
+                return `<article class="v99-invoice-card">
+                  <span class="period">${monthNames[x.month-1]} de ${x.year}</span>
+                  <strong>${String(c.name||'Cartão').replace(/[<>&]/g,'')}</strong>
+                  <b>${m99(x.total)}</b>
+                  <small>${x.count} lançamento${x.count===1?'':'s'} na fatura</small>
+                </article>`;
+              }).join('')}
+            </div>
+            <div class="v99-invoice-controls">
+              <button type="button" onclick="window.ppV99ShiftInvoices(-1)">‹</button>
+              <button type="button" onclick="window.ppV99ShiftInvoices(1)">›</button>
+            </div>
+          </div>`:
+          `<div class="v86-next-empty">Nenhuma fatura futura cadastrada.</div>`}
+      </div>
+    </section>
+
+    <section class="v99-categories">
+      <div class="v99-cat-head">
+        <h2>Onde seu dinheiro mais foi</h2>
+        <span>6 maiores categorias · ${label99()}</span>
+      </div>
+      <div class="v99-cat-track">
+        ${cats.length?cats.map((x,i)=>`
+          <button type="button" class="v99-cat" data-v99-category="${String(x.name).replace(/"/g,'&quot;')}">
+            <span class="rank">${i+1}</span>
+            <strong>${String(x.name).replace(/[<>&]/g,'')}</strong>
+            <b>${m99(x.value)}</b>
+            <div class="bar"><i style="width:${Math.max(8,x.value/maxCat*100)}%"></i></div>
+          </button>`).join(''):
+          `<div class="v99-cat-empty">Ainda não há despesas neste período para comparar categorias.</div>`}
+      </div>
+    </section>
+
+    <section class="v86-wealth">
+      <button type="button" data-v99-view="patrimonio"><span>Patrimônio</span><b>${m99(w.pat)}</b></button>
+      <button type="button" data-v99-view="investimentos"><span>Investimentos</span><b>${m99(w.inv)}</b></button>
+      <button type="button" data-v99-view="fgts"><span>FGTS livre</span><b>${m99(w.fgts)}</b></button>
+      <button type="button" data-v99-view="dividas"><span>Dívidas pendentes</span><b>${m99(w.debt)}</b></button>
+    </section>`;
+}
+
+function open99(id){
+  if(window.ppNavV87?.open)return window.ppNavV87.open(id);
+  if(typeof window.showView==='function')return window.showView(id);
+}
+
+window.ppV99ShiftInvoices=function(dir){
+  const track=document.getElementById('v99InvoiceTrack');
+  if(!track)return;
+  const card=track.querySelector('.v99-invoice-card');
+  const amount=(card?.getBoundingClientRect().width||240)+10;
+  track.scrollBy({left:dir*amount,behavior:'smooth'});
+};
+
+window.ppV99OpenCategory=function(cat){
+  open99('lancamentos');
+  setTimeout(()=>{
+    const t=document.getElementById('txType');
+    if(t){t.value='saida';t.dispatchEvent(new Event('change',{bubbles:true}))}
+    const q=document.getElementById('txSearch');
+    if(q){q.value=cat;q.dispatchEvent(new Event('input',{bubbles:true}))}
+  },80);
+};
+
+document.addEventListener('click',e=>{
+  const s=e.target.closest?.('[data-v99-scope]');
+  if(s){
+    localStorage.setItem('planejador_dashboard_scope',s.dataset.v99Scope);
+    render99();
+    return;
+  }
+  const c=e.target.closest?.('[data-v99-category]');
+  if(c){
+    window.ppV99OpenCategory(c.dataset.v99Category);
+    return;
+  }
+  const go=e.target.closest?.('[data-v99-view]');
+  if(go){
+    open99(go.dataset.v99View);
+  }
+},false);
+
+document.addEventListener('change',e=>{
+  if(e.target?.id==='v99Year'){
+    year=+e.target.value;
+    const old=document.getElementById('yearFilter');if(old)old.value=String(year);
+    render99();
+  }
+  if(e.target?.id==='v99Month'){
+    month=+e.target.value;
+    const old=document.getElementById('monthFilter');if(old)old.value=String(month);
+    render99();
+  }
+},false);
+
+window.renderDashboard=render99;
+try{renderDashboard=render99}catch(e){}
+if(window.ppV86)window.ppV86.render=render99;
+
+if(document.getElementById('dashboard')?.classList.contains('active'))render99();
+
+window.ppDashboardV99={render:render99};
 })();
 </script>
 
