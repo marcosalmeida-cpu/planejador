@@ -1517,7 +1517,7 @@ function openRowMenu(e,items){ e.stopPropagation(); let m=$('#rowMenu'),r=e.curr
 document.addEventListener('click',()=>$('#rowMenu').classList.remove('open'));
 function showView(id){ $$('.view').forEach(v=>v.classList.toggle('active',v.id===id)); $$('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id)); if(id==='lancamentos')renderLancamentos(); if(id==='cartoes')renderCards(); if(id==='dividas')renderDebts(); if(id==='fgts')renderFgts(); if(id==='investimentos')renderInvestments(); if(id==='patrimonio')renderAssets(); if(id==='projecao')renderProjection(); if(id==='nuvem')renderNuvem(); window.scrollTo({top:0,behavior:'smooth'}) }
 function openTx(){ $('#fYear').value=year||currentYear; $('#fMonth').value=month||currentMonth; $('#fValue').value=''; $('#fDesc').value=''; $('#fOrigin').value=''; $('#txModal').classList.add('open') }
-function saveTx(){ let tipo=$('#fType').value,val=num($('#fValue').value),desc=$('#fDesc').value.trim(); if(!val||!desc)return toast('Informe descrição e valor.'); custom.push({id:'U'+Date.now(),tipo,ano:+$('#fYear').value,mesNum:+$('#fMonth').value,descricao:desc,valor:val,categoria:$('#fCategory').value||(tipo==='entrada'?'Receita':''),classificacao:tipo==='entrada'?'Entrada':$('#fClass').value,origem:$('#fOrigin').value.trim(),status:$('#fStatus').value,origemDados:'Site',createdAt:new Date().toISOString()}); persist(); $('#txModal').classList.remove('open'); saveSelectOptions(); renderAll(); toast('Lançamento salvo.'); }
+function saveTx(){ let tipo=$('#fType').value,val=num($('#fValue').value),desc=$('#fDesc').value.trim(); if(!val||!desc)return toast('Informe descrição e valor.'); custom.push({id:'U'+Date.now(),tipo,ano:+$('#fYear').value,mesNum:+$('#fMonth').value,descricao:desc,valor:val,categoria:tipo==='entrada'?'Receita':$('#fCategory').value,classificacao:tipo==='entrada'?'Entrada':$('#fClass').value,origem:$('#fOrigin').value.trim(),status:$('#fStatus').value,origemDados:'Site',createdAt:new Date().toISOString()}); persist(); $('#txModal').classList.remove('open'); saveSelectOptions(); renderAll(); toast('Lançamento salvo.'); }
 function renderAll(){ renderDashboard(); renderLancamentos(); renderCards(); renderDebts(); renderFgts(); renderInvestments(); renderAssets(); renderProjection(); renderNuvem(); }
 $('#yearFilter').onchange=e=>{ year=+e.target.value; renderDashboard() }; $('#monthFilter').onchange=e=>{ month=+e.target.value; renderDashboard() }; $('#txYear').onchange=renderLancamentos; $('#txSearch').oninput=renderLancamentos; $('#txType').onchange=renderLancamentos; $('#debtSearch').oninput=renderDebts; $('#debtFilter').onchange=renderDebts; $('#fgtsYear').onchange=renderFgts; $('#fgtsSearch').oninput=renderFgts; $('#fgtsStatus').onchange=renderFgts; $('#assetYear').onchange=renderAssets; $('#assetType').onchange=renderAssets; $('#invYear').onchange=renderInvestments; $('#invType').onchange=renderInvestments; $('#invSearch').oninput=renderInvestments; $('#cardFilter').onchange=renderCards; $('#cardPurchaseStatus').onchange=renderCards; $('#cardSearch').oninput=renderCards; $('#projHorizon').onchange=renderProjection;
 $('#addAsset').onclick=()=>openAsset(); $('#editFgtsSummary').onclick=openFgtsEdit; $('#saveFgts').onclick=saveFgts; $('#saveAsset').onclick=saveAsset; $('#saveDebt').onclick=saveDebt; $('#saveTx').onclick=saveTx; $('#addCardBtn').onclick=()=>openCard(); $('#saveCard').onclick=saveCard; $('#addCardPurchaseBtn').onclick=()=>openCardPurchase(); $('#saveCardPurchase').onclick=saveCardPurchase; $('#addInvestmentBtn').onclick=()=>openInvestment(); $('#saveInvestment').onclick=saveInvestment; $$('[data-addtx]').forEach(b=>b.onclick=openTx); $$('[data-close]').forEach(b=>b.onclick=()=>$('#'+b.dataset.close).classList.remove('open')); $$('.modalback').forEach(m=>m.onclick=e=>{ if(e.target===m)m.classList.remove('open') }); $$('#nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view)); $('#backupBtn').onclick=()=>{ let payload={version:3,exportedAt:new Date().toISOString(),custom,debtEdits,debtArchived,debtDeleted,assets,fgtsSummary,cards,cardPurchases,investments}; let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`financeiro-marcos-backup-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href); };
@@ -1564,9 +1564,9 @@ const _origBaseTx=baseTx; const _origAllTx=allTx;
 window.baseTx=function(){ let rows=_origBaseTx().filter(x=>!txDeleted.includes(x.id)).map(x=>Object.assign({},x,txEdits[x.id]||{})); return rows; };
 window.allTx=function(){ return [...baseTx(),...custom,...cardAggregatedTx()]; };
 function txById(id){let src='base', tx=baseTx().find(x=>x.id===id); if(!tx){src='custom'; tx=custom.find(x=>x.id===id);} if(!tx){src='cardagg'; tx=cardAggregatedTx().find(x=>x.id===id);} return {src,tx};}
-window.openTxEdit=function(id){const found=txById(id); if(!found.tx) return; const x=found.tx; document.getElementById('txEditId').value=x.id; document.getElementById('txEditSource').value=found.src; document.getElementById('fType').value=x.tipo==='entrada'?'entrada':'saida'; document.getElementById('fStatus').value=x.status||'Quitado'; document.getElementById('fYear').value=x.ano||currentYear; document.getElementById('fMonth').value=x.mesNum||currentMonth; document.getElementById('fDesc').value=x.descricao||''; document.getElementById('fCategory').value=(x.categoria||(x.tipo==='entrada'?'Receita':'Cartão de crédito')); document.getElementById('fClass').value=x.classificacao||'Variável'; populateCreditorSelects(x.origem||x.credor||''); document.getElementById('fValue').value=String(x.valor||0).replace('.',','); document.getElementById('fPayMethod').value='padrao'; toggleTxCardBlock(); document.getElementById('txModal').classList.add('open'); };
+window.openTxEdit=function(id){const found=txById(id); if(!found.tx) return; const x=found.tx; document.getElementById('txEditId').value=x.id; document.getElementById('txEditSource').value=found.src; document.getElementById('fType').value=x.tipo==='entrada'?'entrada':'saida'; document.getElementById('fStatus').value=x.status||'Quitado'; document.getElementById('fYear').value=x.ano||currentYear; document.getElementById('fMonth').value=x.mesNum||currentMonth; document.getElementById('fDesc').value=x.descricao||''; document.getElementById('fCategory').value=(x.tipo==='entrada'?'Receita':(x.categoria||'Cartão de crédito')); document.getElementById('fClass').value=x.classificacao||'Variável'; populateCreditorSelects(x.origem||x.credor||''); document.getElementById('fValue').value=String(x.valor||0).replace('.',','); document.getElementById('fPayMethod').value='padrao'; toggleTxCardBlock(); document.getElementById('txModal').classList.add('open'); };
 window.openTx= function(){document.getElementById('txEditId').value=''; document.getElementById('txEditSource').value='new'; document.getElementById('fType').value='saida'; document.getElementById('fStatus').value='Quitado'; document.getElementById('fYear').value=year||currentYear; document.getElementById('fMonth').value=month||currentMonth; document.getElementById('fDesc').value=''; document.getElementById('fCategory').value='Cartão de crédito'; document.getElementById('fClass').value='Variável'; populateCreditorSelects(); document.getElementById('fValue').value=''; document.getElementById('fPayMethod').value='padrao'; document.getElementById('fCardMode').value='avista'; document.getElementById('fCardInstallments').value='1'; document.getElementById('fCardStart').value='next'; populateCardSelects(); toggleTxCardBlock(); document.getElementById('txModal').classList.add('open'); };
-window.saveTx=function(){ let editId=document.getElementById('txEditId').value, source=document.getElementById('txEditSource').value||'new'; let tipo=document.getElementById('fType').value, val=num(document.getElementById('fValue').value), desc=document.getElementById('fDesc').value.trim(); if(!val||!desc) return toast('Informe descrição e valor.'); let origin=(document.getElementById('fOriginSelect')?.value||'').trim(); if(tipo==='saida' && !origin) return toast('Selecione a origem / credor.'); let payMethod=document.getElementById('fPayMethod').value; if(!editId && tipo==='saida' && payMethod==='cartao'){ let sy=+document.getElementById('fYear').value||currentYear, sm=+document.getElementById('fMonth').value||currentMonth; if(document.getElementById('fCardStart').value==='next'){let nm=nextMonth(sy,sm,1); sy=nm.year; sm=nm.month;} let installments=Math.max(1,+document.getElementById('fCardInstallments').value||1); if(document.getElementById('fCardMode').value==='avista') installments=1; cardPurchases.push({id:'CP'+Date.now(),cardId:document.getElementById('fCardId').value,date:new Date().toISOString().slice(0,10),description:desc,category:document.getElementById('fCategory').value,mode:document.getElementById('fCardMode').value,total:val,installments,paidInstallments:0,startYear:sy,startMonth:sm,status:'Ativo'}); persist(); document.getElementById('txModal').classList.remove('open'); renderAll(); toast('Compra lançada no cartão.'); return; } let obj={id:editId||('U'+Date.now()),tipo,ano:+document.getElementById('fYear').value,mesNum:+document.getElementById('fMonth').value,descricao:desc,valor:val,categoria:document.getElementById('fCategory').value||(tipo==='entrada'?'Receita':''),classificacao:tipo==='entrada'?'Entrada':document.getElementById('fClass').value,origem:origin,status:document.getElementById('fStatus').value,origemDados:'Site',createdAt:new Date().toISOString()}; if(editId){ if(source==='custom'){ let i=custom.findIndex(x=>x.id===editId); if(i>=0) custom[i]=Object.assign(custom[i], obj); } else if(source==='base'){ txEdits[editId]=obj; saveEnhancements(); } } else custom.push(obj); persist(); document.getElementById('txModal').classList.remove('open'); renderAll(); toast(editId?'Lançamento atualizado.':'Lançamento salvo.'); };
+window.saveTx=function(){ let editId=document.getElementById('txEditId').value, source=document.getElementById('txEditSource').value||'new'; let tipo=document.getElementById('fType').value, val=num(document.getElementById('fValue').value), desc=document.getElementById('fDesc').value.trim(); if(!val||!desc) return toast('Informe descrição e valor.'); let origin=(document.getElementById('fOriginSelect')?.value||'').trim(); if(tipo==='saida' && !origin) return toast('Selecione a origem / credor.'); let payMethod=document.getElementById('fPayMethod').value; if(!editId && tipo==='saida' && payMethod==='cartao'){ let sy=+document.getElementById('fYear').value||currentYear, sm=+document.getElementById('fMonth').value||currentMonth; if(document.getElementById('fCardStart').value==='next'){let nm=nextMonth(sy,sm,1); sy=nm.year; sm=nm.month;} let installments=Math.max(1,+document.getElementById('fCardInstallments').value||1); if(document.getElementById('fCardMode').value==='avista') installments=1; cardPurchases.push({id:'CP'+Date.now(),cardId:document.getElementById('fCardId').value,date:new Date().toISOString().slice(0,10),description:desc,category:document.getElementById('fCategory').value,mode:document.getElementById('fCardMode').value,total:val,installments,paidInstallments:0,startYear:sy,startMonth:sm,status:'Ativo'}); persist(); document.getElementById('txModal').classList.remove('open'); renderAll(); toast('Compra lançada no cartão.'); return; } let obj={id:editId||('U'+Date.now()),tipo,ano:+document.getElementById('fYear').value,mesNum:+document.getElementById('fMonth').value,descricao:desc,valor:val,categoria:tipo==='entrada'?'Receita':document.getElementById('fCategory').value,classificacao:tipo==='entrada'?'Entrada':document.getElementById('fClass').value,origem:origin,status:document.getElementById('fStatus').value,origemDados:'Site',createdAt:new Date().toISOString()}; if(editId){ if(source==='custom'){ let i=custom.findIndex(x=>x.id===editId); if(i>=0) custom[i]=Object.assign(custom[i], obj); } else if(source==='base'){ txEdits[editId]=obj; saveEnhancements(); } } else custom.push(obj); persist(); document.getElementById('txModal').classList.remove('open'); renderAll(); toast(editId?'Lançamento atualizado.':'Lançamento salvo.'); };
 window.renderLancamentos=function(){ let y=document.getElementById('txYear').value, type=document.getElementById('txType').value, q=document.getElementById('txSearch').value.toLowerCase(); let rows=allTx().filter(x=>(y==='all'||+x.ano===+y)&&(!q||[x.descricao,x.categoria,x.origem].join(' ').toLowerCase().includes(q))).filter(x=> type==='all' ? true : (type==='cartao' ? x.origemDados==='Cartões' : x.tipo===type)).sort((a,b)=>b.ano-a.ano||b.mesNum-a.mesNum||(b.valor-a.valor)); let inV=sum(rows.filter(x=>x.tipo==='entrada'),x=>x.valor), outV=sum(rows.filter(x=>x.tipo==='saida'),x=>x.valor); document.getElementById('txSummary').innerHTML=`<div class="card mini"><span>Entradas</span><b class="positive">${brl(inV)}</b></div><div class="card mini"><span>Saídas</span><b class="negative">${brl(outV)}</b></div><div class="card mini"><span>Saldo</span><b>${brl(inV-outV)}</b></div><div class="card mini"><span>Registros</span><b>${rows.length}</b></div><div class="card mini"><span>Faturas agregadas</span><b>${rows.filter(x=>x.origemDados==='Cartões').length}</b></div>`; document.getElementById('txBody').innerHTML=rows.slice(0,1200).map(x=>{ let source=txById(x.id).src; let action=x.origemDados==='Cartões'?`<button class="ghost" onclick="showView('cartoes')">Detalhar</button>`:`<button class="dots" onclick="openRowMenu(event, [['Editar', ()=>openTxEdit('${x.id}')], ['Excluir', ()=>window.deleteTxEnhanced('${x.id}','${source}'),'danger']])">⋯</button>`; return `<tr><td>${monthLabel(x.ano,x.mesNum)}</td><td><span class="tag ${x.origemDados==='Cartões'?'blue':x.tipo==='entrada'?'green':'red'}">${x.origemDados==='Cartões'?'Fatura':(x.tipo==='entrada'?'Entrada':'Saída')}</span></td><td><b>${esc(x.descricao)}</b>${x.origemDados==='Cartões'?'<br><small style="color:var(--muted)">Detalhamento na aba Cartões</small>':''}</td><td>${esc(x.categoria||'—')}</td><td>${esc(x.origem||'—')}</td><td><span class="tag ${String(x.status).toLowerCase()==='quitado'?'green':'amber'}">${esc(x.status||'—')}</span></td><td class="money ${x.tipo==='entrada'?'positive':'negative'}">${x.tipo==='entrada'?'+':'−'} ${brl(x.valor)}</td><td>${action}</td></tr>`; }).join('')||'<tr><td colspan="8" class="empty">Nenhum lançamento encontrado.</td></tr>'; };
 window.deleteTxEnhanced=function(id,source){ if(!confirm('Excluir este lançamento do site?')) return; if(source==='custom') custom=custom.filter(x=>x.id!==id); else if(source==='base') txDeleted=[...new Set([...txDeleted,id])]; saveEnhancements(); renderAll(); toast('Lançamento excluído.'); };
 window.showView=function(id){ document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===id)); document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id)); if(id==='lancamentos')renderLancamentos(); if(id==='cartoes')renderCards(); if(id==='credores')renderCreditors(); if(id==='dividas')renderDebts(); if(id==='fgts')renderFgts(); if(id==='investimentos')renderInvestments(); if(id==='patrimonio')renderAssets(); if(id==='projecao')renderProjection(); if(id==='nuvem')renderNuvem(); window.scrollTo({top:0,behavior:'smooth'}); };
@@ -4867,7 +4867,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       persist();document.getElementById('txModal').classList.remove('open');renderAll();toast('Compra lançada no cartão.');return;
     }
 
-    const obj={id:editId||('U'+Date.now()),tipo,ano:+document.getElementById('fYear').value,mesNum:+document.getElementById('fMonth').value,descricao:desc,valor:val,categoria:cat||(tipo==='entrada'?'Receita':''),classificacao:tipo==='entrada'?'Entrada':document.getElementById('fClass').value,origem:origin,status:document.getElementById('fStatus').value,origemDados:'Site',createdAt:new Date().toISOString()};
+    const obj={id:editId||('U'+Date.now()),tipo,ano:+document.getElementById('fYear').value,mesNum:+document.getElementById('fMonth').value,descricao:desc,valor:val,categoria:tipo==='entrada'?'Receita':cat,classificacao:tipo==='entrada'?'Entrada':document.getElementById('fClass').value,origem:origin,status:document.getElementById('fStatus').value,origemDados:'Site',createdAt:new Date().toISOString()};
     if(editId&&source==='custom'){const i=custom.findIndex(x=>x.id===editId);if(i>=0)custom[i]=Object.assign(custom[i],obj)}
     else if(!editId)custom.push(obj);
     persist();document.getElementById('txModal').classList.remove('open');renderAll();toast(editId?'Lançamento atualizado.':'Lançamento salvo.');
@@ -23091,22 +23091,6 @@ function ensureVaVr89(){
     sel.insertBefore(opt,ref||null);
   }
 
-  /* A interface visual de categorias é recriada por scripts antigos.
-     Se já houver o wrapper, acrescenta VA/VR também nele sem duplicar. */
-  const field=sel.closest('.field');
-  const wrap=field?.querySelector('.choice-wrap');
-  if(wrap && !wrap.querySelector('[data-choice-value="VA/VR"]')){
-    const btn=document.createElement('button');
-    btn.type='button';
-    btn.dataset.choiceValue='VA/VR';
-    btn.textContent='VA/VR';
-    btn.addEventListener('click',()=>{
-      sel.value='VA/VR';
-      sel.dispatchEvent(new Event('change',{bubbles:true}));
-      wrap.querySelectorAll('[data-choice-value]').forEach(x=>x.classList.toggle('active',x.dataset.choiceValue==='VA/VR'));
-    });
-    wrap.appendChild(btn);
-  }
 }
 
 function refresh89(){
@@ -23151,201 +23135,115 @@ window.ppEntryRecurringV89={refresh:refresh89};
 })();
 </script>
 
-<style id="pp-v90-launch-type-category-stability">
-/* V90 — usa somente o componente visual original das categorias */
-#txModal .field:has(#fCategory) [data-choice-value]{
-  display:none!important;
-}
-</style>
-
-<script id="pp-v90-launch-type-category-stability-final">
+<script id="pp-v91-tx-type-stability-minimal">
 (()=>{
 'use strict';
 
-let syncing90=false;
-let lastType90=localStorage.getItem('pp_last_tx_type_v90')||'saida';
+/* Não recria nenhum componente visual.
+   Apenas mantém o select real e os botões já existentes sincronizados. */
 
-function categoryArrays90(type){
-  try{
-    if(type==='entrada' && typeof INCOME_CATS!=='undefined') return [...INCOME_CATS];
-    if(type==='saida' && typeof EXPENSE_CATS!=='undefined') return EXPENSE_CATS.map(x=>Array.isArray(x)?x[0]:x);
-  }catch(e){}
-  const sel=document.getElementById('fCategory');
-  return [...(sel?.options||[])].map(o=>o.value);
+function filteredType91(){
+  const f=document.getElementById('txType')?.value;
+  return (f==='entrada'||f==='saida')?f:null;
 }
 
-function removeRogueCategory90(){
-  const sel=document.getElementById('fCategory');
-  const field=sel?.closest('.field');
-  if(!field)return;
-
-  /* Remove exclusivamente o botão extra que a V89 criou. */
-  field.querySelectorAll('[data-choice-value]').forEach(x=>x.remove());
-}
-
-function rebuildTypeChoices90(){
+function syncTypeVisual91(){
   const sel=document.getElementById('fType');
-  const field=sel?.closest('.field');
-  if(!sel||!field||typeof makeChoices!=='function')return;
-
-  field.querySelectorAll('.choice-wrap').forEach(x=>x.remove());
-  makeChoices('fType',[
-    {value:'entrada',label:'↗ Entrada'},
-    {value:'saida',label:'↘ Saída'}
-  ],'blue');
+  if(!sel)return;
+  const field=sel.closest('.field');
+  field?.querySelectorAll('.choice-wrap .choice-btn').forEach(b=>{
+    b.classList.toggle('active',String(b.dataset.choice)===String(sel.value));
+  });
 }
 
-function rebuildCategory90(preferred){
-  const type=document.getElementById('fType')?.value||'saida';
-  const sel=document.getElementById('fCategory');
-  const field=sel?.closest('.field');
-  if(!sel||!field)return;
-
-  removeRogueCategory90();
-
-  const arr=categoryArrays90(type);
-  const wanted=preferred ?? sel.value;
-
-  /* Recria o select com UMA única fonte de categorias. */
-  sel.innerHTML=arr.map(x=>`<option value="${String(x).replace(/"/g,'&quot;')}">${String(x)}</option>`).join('');
-  if(arr.includes(wanted))sel.value=wanted;
-  else if(type==='entrada' && arr.includes('Salário'))sel.value='Salário';
-  else if(arr.length)sel.value=arr[0];
-
-  /* Remove todos os visuais antigos e usa somente a rotina original. */
-  field.querySelectorAll('.choice-wrap').forEach(x=>x.remove());
-  if(typeof makeChoices==='function'){
-    makeChoices('fCategory',null,type==='entrada'?'green':'orange');
-  }
-
-  removeRogueCategory90();
+function removeLegacyVaVr91(){
+  const field=document.getElementById('fCategory')?.closest('.field');
+  if(!field)return;
+  /* Só remove o botão manual legado da V89. */
+  field.querySelectorAll('[data-choice-value="VA/VR"]').forEach(x=>x.remove());
 }
 
-function syncRecurring90(){
-  try{window.ppEntryRecurringV89?.refresh?.()}catch(e){}
-  try{window.ppStandardRecurringV62?.refresh?.()}catch(e){}
-}
-
-function setType90(type,preferredCategory){
-  if(syncing90)return;
-  if(type!=='entrada'&&type!=='saida')type='saida';
-  syncing90=true;
-  try{
-    const sel=document.getElementById('fType');
-    if(!sel)return;
-    sel.value=type;
-    lastType90=type;
-    localStorage.setItem('pp_last_tx_type_v90',type);
-
-    rebuildTypeChoices90();
-    rebuildCategory90(preferredCategory);
-
-    /* Reflete o tipo também nos demais campos visuais. */
-    try{refreshChoice?.('fType')}catch(e){}
-    try{togglePayroll?.()}catch(e){}
-    try{toggleTxCardBlock?.()}catch(e){}
-    syncRecurring90();
-  }finally{
-    syncing90=false;
-  }
-}
-
-function desiredNewType90(){
-  const filter=document.getElementById('txType')?.value;
-  if(filter==='entrada'||filter==='saida')return filter;
-  return lastType90==='entrada'?'entrada':'saida';
-}
-
-function stabilizeNewLaunch90(){
-  const modal=document.getElementById('txModal');
-  if(!modal?.classList.contains('open'))return;
-  const editId=document.getElementById('txEditId')?.value||'';
-  if(editId)return;
-
-  setType90(desiredNewType90());
-}
-
-function stabilizeEdit90(id){
-  const modal=document.getElementById('txModal');
-  if(!modal?.classList.contains('open'))return;
-
-  let row=null;
-  try{row=(window.allTx?.()||[]).find(x=>String(x.id)===String(id))||null}catch(e){}
-  const type=row?.tipo||document.getElementById('fType')?.value||'saida';
-  const cat=row?.categoria||document.getElementById('fCategory')?.value;
-  setType90(type,cat);
-}
-
-/* Clique no botão visual Entrada/Saída:
-   o valor real, o visual e as categorias passam a mudar juntos. */
-document.addEventListener('click',e=>{
-  const btn=e.target.closest?.('#txModal .choice-btn');
-  if(!btn)return;
-  const field=btn.closest('.field');
-  if(!field?.querySelector('#fType'))return;
-
-  const type=btn.dataset.choice;
+function applyType91(type){
   if(type!=='entrada'&&type!=='saida')return;
+  const sel=document.getElementById('fType');
+  if(!sel)return;
 
-  e.preventDefault();
-  e.stopPropagation();
-  setType90(type);
-},true);
-
-/* Caso algum script altere o select nativo, refaz o visual imediatamente. */
-document.addEventListener('change',e=>{
-  if(e.target?.id==='fType'&&!syncing90){
-    const type=e.target.value;
-    setTimeout(()=>setType90(type),0);
+  if(sel.value!==type){
+    sel.value=type;
+    /* Dispara as rotinas ORIGINAIS:
+       - updateCategorySelect
+       - rebuildTxCategoryChoices
+       - recorrência
+       - contracheque */
+    sel.dispatchEvent(new Event('change',{bubbles:true}));
   }
-},true);
 
-/* + Lançamento: espera os handlers antigos abrirem o modal e então
-   aplica UMA única seleção coerente. Se o filtro da página estiver em
-   Entrada/Saída, o modal respeita esse filtro. */
-document.addEventListener('click',e=>{
-  if(!e.target.closest?.('[data-addtx]'))return;
-  setTimeout(stabilizeNewLaunch90,0);
-  setTimeout(stabilizeNewLaunch90,40);
-  setTimeout(stabilizeNewLaunch90,120);
-},false);
+  syncTypeVisual91();
+  removeLegacyVaVr91();
 
-/* Edição: preserva tipo e categoria reais do lançamento. */
-const oldOpen90=window.openTxEdit;
-if(typeof oldOpen90==='function'&&!oldOpen90.__v90){
-  const wrapped=function(id){
-    const r=oldOpen90.apply(this,arguments);
-    setTimeout(()=>stabilizeEdit90(id),20);
-    setTimeout(()=>stabilizeEdit90(id),80);
+  /* As rotinas originais de categoria trabalham em setTimeout(0). */
+  setTimeout(()=>{
+    syncTypeVisual91();
+    removeLegacyVaVr91();
+  },10);
+}
+
+/* Corrige a abertura de NOVO lançamento.
+   Se Lançamentos estiver filtrado em Entrada/Saída, o modal respeita o filtro.
+   Fora da página filtrada, mantém o comportamento original. */
+const oldOpen91=window.openTx;
+if(typeof oldOpen91==='function'&&!oldOpen91.__v91){
+  const wrapped=function(){
+    const desired=filteredType91();
+    const r=oldOpen91.apply(this,arguments);
+    if(desired)applyType91(desired);
+    else{
+      syncTypeVisual91();
+      removeLegacyVaVr91();
+    }
     return r;
   };
-  wrapped.__v90=true;
-  window.openTxEdit=wrapped;
-  try{openTxEdit=wrapped}catch(e){}
+  wrapped.__v91=true;
+  window.openTx=wrapped;
+  try{openTx=wrapped}catch(e){}
 }
 
-/* Limpeza de qualquer duplicação residual criada pela V89. */
-function clean90(){
-  removeRogueCategory90();
-  const sel=document.getElementById('fCategory');
-  const field=sel?.closest('.field');
-  if(field){
-    const wraps=[...field.querySelectorAll('.choice-wrap')];
-    if(wraps.length>1){
-      wraps.forEach(x=>x.remove());
-      rebuildCategory90(sel.value);
+/* Alguns botões antigos capturaram openTx antes do wrapper.
+   Após o clique, apenas reafirma o filtro — sem bloquear nem reconstruir a UI. */
+document.addEventListener('click',e=>{
+  if(!e.target.closest?.('[data-addtx]'))return;
+  const desired=filteredType91();
+  setTimeout(()=>{
+    if(desired)applyType91(desired);
+    else{
+      syncTypeVisual91();
+      removeLegacyVaVr91();
     }
+  },0);
+  setTimeout(removeLegacyVaVr91,60);
+},false);
+
+/* Ao clicar nos botões ORIGINAIS Entrada/Saída, deixa o próprio makeChoices
+   fazer o trabalho; só remove qualquer resíduo legado depois. */
+document.addEventListener('change',e=>{
+  if(e.target?.id==='fType'){
+    setTimeout(()=>{
+      syncTypeVisual91();
+      removeLegacyVaVr91();
+    },10);
   }
+},false);
+
+/* Limpeza inicial. */
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(removeLegacyVaVr91,450),{once:true});
+}else{
+  setTimeout(removeLegacyVaVr91,450);
 }
 
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(clean90,350),{once:true});
-}else setTimeout(clean90,350);
-
-window.ppTxTypeCategoryV90={
-  setType:setType90,
-  rebuildCategory:rebuildCategory90,
-  clean:clean90
+window.ppTxStableV91={
+  apply:applyType91,
+  clean:removeLegacyVaVr91
 };
 })();
 </script>
