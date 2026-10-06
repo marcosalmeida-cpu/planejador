@@ -24594,9 +24594,12 @@ function card(v){
         <h4>Histórico recente</h4>
         ${(v.history||[]).length
           ? [...v.history].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,4).map(x=>`
-            <button type="button" class="maintenance-row-v101 maintenance-click-v102" onclick="window.ppVehicleV101.openMaintenanceDetail('${v.id}','${x.id}')">
-              <span>${dateBR(x.date)}</span><span>${km(x.km)}</span><b>${br(x.value)}</b><span>${escV(x.service||'Manutenção')}</span>
-            </button>`).join('')
+            <div class="maintenance-row-v101 maintenance-row-shell-v103">
+              <button type="button" class="maintenance-click-v102 maintenance-main-v103" onclick="window.ppVehicleV101.openMaintenanceDetail('${v.id}','${x.id}')">
+                <span>${dateBR(x.date)}</span><span>${km(x.km)}</span><b>${br(x.value)}</b><span>${escV(x.service||'Manutenção')}</span>
+              </button>
+              <button type="button" class="maintenance-more-v103" aria-label="Mais opções" onclick="event.stopPropagation();window.ppVehicleV101.openMaintenanceMenu('${v.id}','${x.id}',this)">⋯</button>
+            </div>`).join('')
           : '<div class="vehicle-empty-v101">Nenhuma manutenção registrada ainda.</div>'}
       </div>
     </div>
@@ -24736,6 +24739,104 @@ async function refreshFipe(id,force=false){
   }catch(e){}
 }
 
+
+function closeMaintenanceMenuV103(){
+  document.querySelectorAll('.maintenance-menu-v103').forEach(x=>x.remove());
+}
+function openMaintenanceMenu(vehicleId,maintenanceId,anchor){
+  closeMaintenanceMenuV103();
+  const menu=document.createElement('div');
+  menu.className='maintenance-menu-v103';
+  menu.innerHTML=`
+    <button type="button" data-action="edit">Editar</button>
+    <button type="button" data-action="delete" class="danger">Excluir</button>`;
+  document.body.appendChild(menu);
+
+  const r=anchor.getBoundingClientRect();
+  const mw=150, mh=92;
+  let left=Math.min(window.innerWidth-mw-10, Math.max(10,r.right-mw));
+  let top=r.bottom+6;
+  if(top+mh>window.innerHeight-8)top=Math.max(8,r.top-mh-6);
+  menu.style.left=left+'px';
+  menu.style.top=top+'px';
+
+  menu.querySelector('[data-action="edit"]').onclick=()=>{
+    closeMaintenanceMenuV103();
+    openMaintenanceEdit(vehicleId,maintenanceId);
+  };
+  menu.querySelector('[data-action="delete"]').onclick=()=>{
+    closeMaintenanceMenuV103();
+    deleteMaintenance(vehicleId,maintenanceId);
+  };
+
+  setTimeout(()=>{
+    const close=e=>{
+      if(!menu.contains(e.target) && e.target!==anchor){
+        closeMaintenanceMenuV103();
+        document.removeEventListener('click',close,true);
+      }
+    };
+    document.addEventListener('click',close,true);
+  },0);
+}
+function openMaintenanceEdit(vehicleId,maintenanceId){
+  const v=data[vehicleId];
+  const item=(v?.history||[]).find(x=>String(x.id)===String(maintenanceId));
+  if(!v||!item)return;
+
+  const ov=modalBase(
+    'vehicleModalV101',
+    'Editar manutenção · '+v.name,
+    'Altere os dados desta revisão/manutenção.',
+    `<div class="vehicle-form-v101">
+      <label>Data<input id="vmEditDate" type="date" value="${escV(item.date||'')}"></label>
+      <label>Quilometragem<input id="vmEditKm" inputmode="numeric" value="${Math.round(n(item.km))}"></label>
+      <label>Valor da manutenção<input id="vmEditValue" inputmode="decimal" value="${String(n(item.value)).replace('.',',')}"></label>
+      <label>Serviço<input id="vmEditService" value="${escV(item.service||'Manutenção')}"></label>
+      <label class="full">Observações<textarea id="vmEditNotes">${escV(item.notes||'')}</textarea></label>
+    </div>
+    <div class="vehicle-modal-actions-v101">
+      <button type="button" onclick="document.getElementById('vehicleModalV101').remove()">Cancelar</button>
+      <button type="button" class="save" id="vmEditSave">Salvar alterações</button>
+    </div>`
+  );
+
+  ov.querySelector('#vmEditSave').onclick=()=>{
+    item.date=ov.querySelector('#vmEditDate').value;
+    item.km=Math.max(0,n(ov.querySelector('#vmEditKm').value));
+    item.value=Math.max(0,n(ov.querySelector('#vmEditValue').value));
+    item.service=ov.querySelector('#vmEditService').value.trim()||'Manutenção';
+    item.notes=ov.querySelector('#vmEditNotes').value.trim();
+
+    /* Recalcula os campos de última manutenção com base no histórico atualizado. */
+    const latest=[...(v.history||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
+    if(latest){
+      v.lastMaintenanceDate=latest.date||'';
+      v.lastMaintenanceValue=n(latest.value);
+    }
+    if(item.km>n(v.currentKm))v.currentKm=item.km;
+
+    save();render();ov.remove();
+    try{toast('Manutenção atualizada.')}catch(e){}
+  };
+}
+function deleteMaintenance(vehicleId,maintenanceId){
+  const v=data[vehicleId];
+  const item=(v?.history||[]).find(x=>String(x.id)===String(maintenanceId));
+  if(!v||!item)return;
+
+  if(!confirm(`Excluir a manutenção "${item.service||'Manutenção'}" de ${dateBR(item.date)}?`))return;
+
+  v.history=(v.history||[]).filter(x=>String(x.id)!==String(maintenanceId));
+
+  const latest=[...(v.history||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
+  v.lastMaintenanceDate=latest?.date||'';
+  v.lastMaintenanceValue=latest?Math.max(0,n(latest.value)):0;
+
+  save();render();
+  try{toast('Manutenção excluída.')}catch(e){}
+}
+
 function openMaintenanceDetail(vehicleId,maintenanceId){
   const v=data[vehicleId];
   const item=(v?.history||[]).find(x=>String(x.id)===String(maintenanceId));
@@ -24767,7 +24868,7 @@ function init(){
   render();
   setTimeout(()=>{refreshFipe('cobalt');refreshFipe('fazer')},1200);
 }
-window.ppVehicleV101={render,openVehicle,openMaintenance,openMaintenanceDetail,openFipe,refreshFipe};
+window.ppVehicleV101={render,openVehicle,openMaintenance,openMaintenanceDetail,openMaintenanceMenu,openMaintenanceEdit,deleteMaintenance,openFipe,refreshFipe};
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
 else init();
@@ -24835,6 +24936,78 @@ else init();
 }
 @media(max-width:520px){
   .maintenance-detail-grid-v102{grid-template-columns:1fr}
+}
+</style>
+
+<style id="pp-v103-maintenance-menu-style">
+.maintenance-row-shell-v103{
+  position:relative;
+  display:grid!important;
+  grid-template-columns:1fr 34px!important;
+  gap:6px!important;
+  align-items:center!important;
+}
+.maintenance-main-v103{
+  display:grid!important;
+  grid-template-columns:1.1fr .8fr .8fr 1.3fr!important;
+  gap:7px!important;
+  align-items:center!important;
+  width:100%!important;
+  padding:8px 0!important;
+  border:0!important;
+  background:transparent!important;
+  text-align:left!important;
+  cursor:pointer!important;
+}
+.maintenance-main-v103:hover{
+  background:#edf3f9!important;
+  border-radius:10px!important;
+  padding-left:7px!important;
+  padding-right:7px!important;
+}
+.maintenance-more-v103{
+  width:30px;height:30px;
+  display:grid;place-items:center;
+  border:1px solid #d9e1ea;
+  border-radius:10px;
+  background:#fff;
+  color:#455468;
+  font-size:18px;
+  line-height:1;
+  cursor:pointer;
+}
+.maintenance-more-v103:hover{
+  background:#edf3f9;
+  border-color:#c5d2df;
+}
+.maintenance-menu-v103{
+  position:fixed;
+  z-index:200000;
+  width:150px;
+  padding:5px;
+  border-radius:12px;
+  background:#fff;
+  border:1px solid #dce3eb;
+  box-shadow:0 18px 44px rgba(15,23,42,.18);
+}
+.maintenance-menu-v103 button{
+  display:block;
+  width:100%;
+  border:0;
+  background:transparent;
+  text-align:left;
+  padding:9px 10px;
+  border-radius:8px;
+  color:#344054;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+}
+.maintenance-menu-v103 button:hover{background:#f1f4f8}
+.maintenance-menu-v103 button.danger{color:#b42318}
+.maintenance-menu-v103 button.danger:hover{background:#fff0f0}
+@media(max-width:580px){
+  .maintenance-main-v103{grid-template-columns:1fr 1fr!important}
 }
 </style>
 
