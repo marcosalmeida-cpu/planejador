@@ -23538,3 +23538,291 @@ window.ppRecurringEditV92={open:openTxEdit92};
 })();
 </script>
 
+
+
+<style id="pp-v94-futuristic-loading-screen">
+/* V94 — tela de carregamento futurista e integrada */
+#loginOverlay.login-overlay{
+  background:
+    radial-gradient(circle at 20% 15%, rgba(32,115,255,.26), transparent 28%),
+    radial-gradient(circle at 78% 20%, rgba(0,219,170,.18), transparent 26%),
+    radial-gradient(circle at 50% 88%, rgba(255,181,70,.16), transparent 28%),
+    linear-gradient(135deg,#071224 0%,#0b1830 48%,#0d2246 100%)!important;
+  backdrop-filter:blur(16px)!important;
+  overflow:hidden;
+}
+#loginOverlay.login-overlay::before{
+  content:"";position:absolute;inset:-10% -5%;
+  background:
+    linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size:54px 54px,54px 54px;
+  mask-image:radial-gradient(circle at center, black 40%, transparent 85%);
+  opacity:.38;animation:v94GridFloat 14s linear infinite;
+}
+#loginOverlay.login-overlay::after{
+  content:"";position:absolute;inset:auto auto -140px -120px;width:320px;height:320px;border-radius:50%;
+  background:radial-gradient(circle, rgba(34,139,255,.22), rgba(34,139,255,0) 70%);
+  filter:blur(8px);animation:v94Aura 6s ease-in-out infinite alternate;
+}
+#loginOverlay .login-card{
+  width:min(920px,96vw)!important;min-height:520px;
+  display:grid;grid-template-columns:minmax(280px,.92fr) minmax(360px,1.08fr);
+  gap:0;padding:0!important;border-radius:34px!important;
+  background:rgba(12,22,42,.72)!important;border:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:0 42px 120px rgba(0,0,0,.42)!important;overflow:hidden;position:relative;
+  backdrop-filter:blur(14px)!important;
+}
+#loginOverlay .login-card::before{
+  content:"";position:absolute;inset:0;background:linear-gradient(145deg, rgba(255,255,255,.08), rgba(255,255,255,.02) 42%, rgba(255,255,255,.05));pointer-events:none;
+}
+#loginOverlay #loginForm,
+#loginOverlay #loginLoading{position:relative;z-index:1}
+#loginOverlay #loginForm{padding:30px 28px;background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01))}
+#loginOverlay #loginLoading{padding:0;display:none}
+#loginOverlay .login-form-side{
+  display:flex;flex-direction:column;justify-content:space-between;height:100%;
+}
+#loginOverlay .v94-hero-side{
+  position:relative;padding:34px 34px 28px;
+  background:
+    radial-gradient(circle at 70% 14%, rgba(111,225,255,.18), transparent 26%),
+    radial-gradient(circle at 18% 80%, rgba(255,181,70,.16), transparent 28%),
+    linear-gradient(180deg, rgba(17,37,73,.96) 0%, rgba(9,20,40,.96) 100%);
+  color:#fff;display:flex;flex-direction:column;justify-content:space-between;
+}
+#loginOverlay .v94-overline{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:900;color:rgba(255,255,255,.65)}
+#loginOverlay .v94-hero-side h2{margin:12px 0 10px;font-size:34px;line-height:1.02;letter-spacing:-.05em}
+#loginOverlay .v94-hero-side p{margin:0;color:rgba(255,255,255,.76);font-size:13px;max-width:340px}
+#loginOverlay .v94-hero-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+#loginOverlay .v94-metric{padding:14px 15px;border-radius:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+#loginOverlay .v94-metric span{display:block;font-size:10px;color:rgba(255,255,255,.62)}
+#loginOverlay .v94-metric b{display:block;margin-top:6px;font-size:16px;letter-spacing:-.02em}
+#loginOverlay .v94-lineup{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+#loginOverlay .v94-chip{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);font-size:10px;font-weight:800;color:#fff}
+#loginOverlay .v94-chip strong{color:#6fe1ff}
+#loginOverlay .login-brand{background:linear-gradient(135deg,#0d5bff,#18a0ff)!important;box-shadow:0 16px 34px rgba(13,91,255,.28)!important}
+#loginOverlay .login-card h1{color:#fff!important;font-size:29px!important}
+#loginOverlay .login-card>p{color:rgba(255,255,255,.72)!important}
+#loginOverlay .profile-choice{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.1)!important;color:#fff!important}
+#loginOverlay .profile-choice:hover{border-color:rgba(111,225,255,.52)!important;transform:translateY(-1px)}
+#loginOverlay .profile-choice.active{background:rgba(19,128,255,.18)!important;border-color:#38b6ff!important;box-shadow:inset 0 0 0 1px rgba(111,225,255,.4)!important}
+#loginOverlay .profile-avatar{background:rgba(255,255,255,.12)!important;color:#fff!important}
+#loginOverlay .profile-choice span span,
+#loginOverlay .profile-choice .profile-avatar + span > span{color:rgba(255,255,255,.6)!important}
+#loginOverlay .login-pass label{color:rgba(255,255,255,.75)!important}
+#loginOverlay .login-pass input{
+  background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.12)!important;color:#fff!important
+}
+#loginOverlay .login-pass input::placeholder{color:rgba(255,255,255,.34)!important}
+#loginOverlay .login-submit{background:linear-gradient(135deg,#0f6cff,#21b0ff)!important;color:#fff!important;box-shadow:0 16px 30px rgba(12,105,255,.25)}
+#loginOverlay .login-error{color:#ff9bb1!important}
+#loginOverlay .v94-loading-stage{
+  height:100%;display:grid;grid-template-columns:1.03fr .97fr;min-height:520px;
+}
+#loginOverlay .v94-left{
+  position:relative;padding:34px;background:
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,.08), transparent 18%),
+    linear-gradient(180deg, rgba(14,28,52,.98) 0%, rgba(9,18,34,.98) 100%);
+  color:#fff;overflow:hidden;
+}
+#loginOverlay .v94-left::after{
+  content:"";position:absolute;inset:auto -100px -110px auto;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle, rgba(111,225,255,.22), rgba(111,225,255,0) 72%);filter:blur(10px)
+}
+#loginOverlay .v94-right{
+  padding:34px 30px;background:linear-gradient(180deg, rgba(255,255,255,.97), rgba(246,250,255,.97));
+  display:flex;flex-direction:column;justify-content:space-between;color:#173153;
+}
+#loginOverlay .v94-loading-top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+#loginOverlay .v94-badge{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#6fe1ff}
+#loginOverlay .v94-loading-title{margin-top:16px}
+#loginOverlay .v94-loading-title h2{margin:0;font-size:34px;line-height:1.02;letter-spacing:-.05em}
+#loginOverlay .v94-loading-title p{margin:10px 0 0;color:rgba(255,255,255,.72);font-size:13px;max-width:360px}
+#loginOverlay .v94-loader-wrap{margin-top:26px;display:flex;align-items:center;gap:22px}
+#loginOverlay .login-spinner{width:92px!important;height:92px!important;margin:0!important;flex:0 0 auto}
+#loginOverlay .login-spinner .v93-loader{width:92px;height:92px;border-radius:28px}
+#loginOverlay .login-spinner .v93-loader::before{inset:8px;border-radius:22px}
+#loginOverlay .login-spinner .v93-ring{width:68px;height:68px;inset:12px auto auto 12px}
+#loginOverlay .login-spinner .v93-core{width:38px;height:38px;border-radius:13px}
+#loginOverlay .login-spinner .v93-core span{font-size:18px}
+#loginOverlay .v94-loader-copy b{display:block;font-size:16px}
+#loginOverlay .v94-loader-copy span{display:block;margin-top:6px;font-size:11px;color:rgba(255,255,255,.65)}
+#loginOverlay .v94-timeline{margin-top:24px;display:grid;gap:10px}
+#loginOverlay .v94-step{
+  display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:center;
+  padding:9px 11px;border-radius:15px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);
+  color:rgba(255,255,255,.72);transition:.25s ease
+}
+#loginOverlay .v94-step .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.18);box-shadow:0 0 0 0 rgba(111,225,255,0)}
+#loginOverlay .v94-step b{font-size:11.5px;color:#fff;display:block}
+#loginOverlay .v94-step span{font-size:10px;color:rgba(255,255,255,.62);display:block;margin-top:2px}
+#loginOverlay .v94-step.active{background:rgba(17,122,255,.18);border-color:rgba(111,225,255,.32);transform:translateX(4px)}
+#loginOverlay .v94-step.active .dot{background:#6fe1ff;box-shadow:0 0 0 8px rgba(111,225,255,.14)}
+#loginOverlay .v94-kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#loginOverlay .v94-kpi{padding:14px;border-radius:18px;background:#fff;border:1px solid #e4ecf6;box-shadow:0 8px 18px rgba(19,34,64,.05)}
+#loginOverlay .v94-kpi span{display:block;font-size:10px;color:#6b7280}
+#loginOverlay .v94-kpi b{display:block;margin-top:6px;font-size:16px;color:#173153}
+#loginOverlay .v94-kpi p{margin:6px 0 0;font-size:10.5px;color:#7a8493}
+#loginOverlay .success-fill{height:12px!important;background:#e5edf6!important;margin-top:18px!important;border-radius:999px!important;overflow:hidden!important;position:relative}
+#loginOverlay .success-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg, rgba(14,108,255,.08), rgba(26,167,255,.08), rgba(255,181,70,.08));pointer-events:none}
+#loginOverlay .success-fill i{background:linear-gradient(90deg,#0e6cff,#1aa7ff,#52d2ff,#ffb546)!important;box-shadow:0 0 24px rgba(26,167,255,.4)}
+#loginOverlay .login-success{margin-top:11px!important;font-size:13px!important;color:#0d7c63!important}
+#loginOverlay .v94-fin-line{margin-top:16px;padding:13px 14px;border-radius:18px;background:linear-gradient(135deg,#173153,#0d4ba7);color:#fff;box-shadow:0 16px 34px rgba(10,40,94,.18)}
+#loginOverlay .v94-fin-line small{display:block;font-size:10px;color:rgba(255,255,255,.68)}
+#loginOverlay .v94-fin-line b{display:block;margin-top:7px;font-size:17px;letter-spacing:-.02em}
+#loginOverlay .v94-fin-line span{display:block;margin-top:4px;font-size:10.5px;color:rgba(255,255,255,.72)}
+#loginOverlay .v94-orbit{position:absolute;right:36px;top:34px;width:92px;height:92px;opacity:.85}
+#loginOverlay .v94-orbit::before,
+#loginOverlay .v94-orbit::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.12);inset:0;animation:v94SpinSlow 14s linear infinite}
+#loginOverlay .v94-orbit::after{inset:16px;animation-direction:reverse;animation-duration:10s}
+#loginOverlay .v94-orbit i{position:absolute;width:12px;height:12px;border-radius:50%;background:#6fe1ff;left:50%;top:0;transform:translateX(-50%);box-shadow:0 0 0 8px rgba(111,225,255,.08)}
+#loginOverlay .v94-orbit i:nth-child(2){background:#ffb546;top:auto;bottom:4px;left:18%}
+#loginOverlay .v94-orbit i:nth-child(3){background:#9cffd3;left:auto;right:10px;top:42%}
+#loginOverlay .login-copy{display:none!important}
+#ppProfileLoadingV88{background:rgba(6,14,26,.68)!important;backdrop-filter:blur(16px)!important}
+#ppProfileLoadingV88 .v93-profile-card{
+  min-width:330px!important;max-width:420px!important;padding:28px 26px 22px!important;border-radius:28px!important;
+  background:linear-gradient(180deg, rgba(12,22,42,.96), rgba(10,18,32,.96))!important;color:#fff!important;border:1px solid rgba(255,255,255,.08)!important;position:relative;overflow:hidden
+}
+#ppProfileLoadingV88 .v93-profile-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 18% 20%, rgba(26,167,255,.16), transparent 28%),linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.01) 40%, rgba(255,255,255,.04));pointer-events:none}
+#ppProfileLoadingV88 .v93-profile-card b{position:relative;z-index:1;color:#fff!important;font-size:18px!important}
+#ppProfileLoadingV88 .v93-profile-card .sub{position:relative;z-index:1;color:rgba(255,255,255,.7)!important}
+#ppProfileLoadingV88 .v93-progress{position:relative;z-index:1;background:rgba(255,255,255,.1)!important;height:10px!important}
+#ppProfileLoadingV88 .v93-progress>i{background:linear-gradient(90deg,#0e6cff,#1aa7ff,#52d2ff,#ffb546)!important}
+@keyframes v94GridFloat{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-54px,-54px,0)}}
+@keyframes v94Aura{0%{transform:translateY(0) scale(1)}100%{transform:translateY(-18px) scale(1.08)}}
+@keyframes v94SpinSlow{to{transform:rotate(360deg)}}
+@media(max-width:840px){
+  #loginOverlay .login-card{grid-template-columns:1fr!important;width:min(520px,96vw)!important;min-height:auto}
+  #loginOverlay .v94-hero-side{display:none}
+  #loginOverlay .v94-loading-stage{grid-template-columns:1fr!important;min-height:auto}
+  #loginOverlay .v94-left,#loginOverlay .v94-right{padding:24px}
+  #loginOverlay .v94-kpi-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  #loginOverlay .login-card{border-radius:26px!important}
+  #loginOverlay #loginForm{padding:22px}
+  #loginOverlay .v94-left,#loginOverlay .v94-right{padding:22px}
+  #loginOverlay .v94-loading-title h2{font-size:28px}
+  #loginOverlay .v94-kpi-grid{grid-template-columns:1fr}
+  #loginOverlay .v94-hero-metrics{grid-template-columns:1fr}
+}
+</style>
+<script id="pp-v94-futuristic-loading-screen-script">
+(function(){
+  function esc(s){return String(s||'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+  function heroMarkup(){
+    return '<div class="v94-hero-side">'+
+      '<div>'+
+        '<div class="v94-overline">experiência premium</div>'+
+        '<h2>Seu dinheiro,<br>em modo inteligente.</h2>'+
+        '<p>Um carregamento mais jovem, futurista e criativo para preparar o seu ambiente financeiro com estilo.</p>'+
+        '<div class="v94-hero-metrics">'+
+          '<div class="v94-metric"><span>Visão</span><b>Clara & dinâmica</b></div>'+
+          '<div class="v94-metric"><span>Fluxo</span><b>Perfis sincronizados</b></div>'+
+        '</div>'+
+        '<div class="v94-lineup">'+
+          '<div class="v94-chip"><strong>•</strong> cartões</div>'+
+          '<div class="v94-chip"><strong>•</strong> lançamentos</div>'+
+          '<div class="v94-chip"><strong>•</strong> projeção</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="v94-lineup"><div class="v94-chip">feito para <strong>Marcos</strong> & Christian</div></div>'+
+    '</div>';
+  }
+  function loadingMarkup(kind){
+    var title = kind==='profile' ? 'Abrindo seu perfil' : 'Rumo ao sucesso financeiro';
+    var sub = kind==='profile'
+      ? 'Sincronizando a nuvem e preparando todos os seus dados para uma troca segura.'
+      : 'Organizando entradas, saídas, cartões e projeções para uma leitura clara do seu financeiro.';
+    return '<div class="v94-loading-stage">'+
+      '<div class="v94-left">'+
+        '<div class="v94-orbit"><i></i><i></i><i></i></div>'+
+        '<div class="v94-loading-top"><div class="v94-badge">loading experience</div></div>'+
+        '<div class="v94-loading-title"><h2>'+title+'</h2><p>'+sub+'</p></div>'+
+        '<div class="v94-loader-wrap">'+
+          '<div class="login-spinner"></div>'+
+          '<div class="v94-loader-copy"><b>Construindo seu cenário financeiro</b><span id="v94StatusText">Conectando os blocos do seu planejamento…</span></div>'+
+        '</div>'+
+        '<div class="v94-timeline">'+
+          '<div class="v94-step active" data-v94-step="0"><div class="dot"></div><div><b>Sincronizando informações</b><span>Checando perfil, conta e preferências.</span></div></div>'+
+          '<div class="v94-step" data-v94-step="1"><div class="dot"></div><div><b>Montando sua visão financeira</b><span>Organizando lançamentos, faturas e recorrências.</span></div></div>'+
+          '<div class="v94-step" data-v94-step="2"><div class="dot"></div><div><b>Preparando o ambiente final</b><span>Quase tudo pronto para você continuar.</span></div></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="v94-right">'+
+        '<div>'+
+          '<div class="v94-kpi-grid">'+
+            '<div class="v94-kpi"><span>Objetivo</span><b>Mais controle</b><p>Organização clara para decisões melhores.</p></div>'+
+            '<div class="v94-kpi"><span>Energia</span><b>Design jovem</b><p>Mais impacto visual e sensação de app premium.</p></div>'+
+            '<div class="v94-kpi"><span>Experiência</span><b>Interativa</b><p>Feedback visual enquanto os dados carregam.</p></div>'+
+            '<div class="v94-kpi"><span>Foco</span><b>Seu progresso</b><p>Cada etapa aproxima você do próximo passo.</p></div>'+
+          '</div>'+
+          '<div class="v94-fin-line"><small>Mensagem do sistema</small><b>Estamos abrindo um caminho mais claro para o seu financeiro.</b><span>Da visão mensal às projeções futuras, tudo sendo preparado para você.</span></div>'+
+          '<div class="success-fill" id="successFill"><i></i></div>'+
+          '<div class="login-success" id="loginSuccess"></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+  function enhanceForm(){
+    document.querySelectorAll('#loginOverlay .login-card').forEach(function(card){
+      if(card.querySelector('.v94-hero-side')) return;
+      var form=card.querySelector('#loginForm');
+      if(!form || form.closest('.login-form-side')) return;
+      var side=document.createElement('div');
+      side.className='login-form-side';
+      side.innerHTML=heroMarkup();
+      form.parentNode.insertBefore(side, form.nextSibling);
+      form.insertAdjacentHTML('afterbegin','<div class="v94-overline" style="margin-bottom:10px;color:#6fe1ff">planejador pessoal</div>');
+    });
+  }
+  function enhanceLoading(){
+    document.querySelectorAll('#loginOverlay #loginLoading').forEach(function(box){
+      if(box.dataset.v94Ready==='1') return;
+      var isProfile=/Trocar perfil/i.test(document.querySelector('#loginOverlay #loginForm h1')?.textContent||'');
+      box.innerHTML=loadingMarkup(isProfile?'profile':'login');
+      box.dataset.v94Ready='1';
+      if(window.ppEntryRecurringV89){/* no-op, only to keep linter happy */}
+      if(window.ppV93LoaderMarkup){/* no-op */}
+      var spinner=box.querySelector('.login-spinner');
+      if(spinner && !spinner.querySelector('.v93-loader')){
+        spinner.innerHTML = '<div class="v93-loader" aria-hidden="true"><div class="v93-ring"></div><div class="v93-core"><span>✦</span></div><i class="v93-pulse p1"></i><i class="v93-pulse p2"></i><i class="v93-pulse p3"></i><i class="v93-pulse p4"></i><div class="v93-glow"></div></div>';
+      }
+      runStepCycle(box);
+    });
+  }
+  function runStepCycle(box){
+    if(box._v94Timer) return;
+    var steps=[...box.querySelectorAll('[data-v94-step]')];
+    var text=box.querySelector('#v94StatusText');
+    var msgs=[
+      'Conectando os blocos do seu planejamento…',
+      'Distribuindo lançamentos e projeções com inteligência…',
+      'Finalizando uma experiência financeira mais clara…'
+    ];
+    var i=0;
+    box._v94Timer=setInterval(function(){
+      i=(i+1)%steps.length;
+      steps.forEach(function(step,idx){step.classList.toggle('active',idx===i)});
+      if(text) text.textContent=msgs[i]||msgs[0];
+    },1450);
+  }
+  function enhanceProfileOverlay(){
+    var overlay=document.getElementById('ppProfileLoadingV88');
+    if(!overlay) return;
+    var card=overlay.querySelector('.v93-profile-card');
+    if(!card || card.dataset.v94Ready==='1') return;
+    var title=overlay.querySelector('#ppProfileLoadingTitleV88')?.textContent || 'Abrindo perfil';
+    card.innerHTML='<div class="v94-overline" style="color:#6fe1ff;margin-bottom:10px">perfil em sincronização</div>'+
+      '<div class="v93-profile-loader-wrap"><div class="login-spinner"><div class="v93-loader" aria-hidden="true"><div class="v93-ring"></div><div class="v93-core"><span>✦</span></div><i class="v93-pulse p1"></i><i class="v93-pulse p2"></i><i class="v93-pulse p3"></i><i class="v93-pulse p4"></i><div class="v93-glow"></div></div></div></div>'+
+      '<b>'+esc(title)+'</b><div class="sub">Conferindo dados locais, enviando o que mudou e baixando a versão mais atual da nuvem.</div><div class="v93-progress"><i></i></div>';
+    card.dataset.v94Ready='1';
+  }
+  function applyAll(){enhanceForm();enhanceLoading();enhanceProfileOverlay();}
+  applyAll();
+  var mo=new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType===1) applyAll();});});});
+  mo.observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
