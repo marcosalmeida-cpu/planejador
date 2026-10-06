@@ -1211,6 +1211,14 @@ html.pp-session-resume-v45 #loginOverlay{display:none!important}
 body.v86-ready #dashboard{visibility:visible!important}
 </style>
 
+
+<style id="pp-v95-loading-prepaint">
+#loginLoading{visibility:hidden!important}
+#loginLoading[data-v95-ready="1"]{visibility:visible!important}
+#ppProfileLoadingV88 .v93-profile-card{visibility:hidden!important}
+#ppProfileLoadingV88 .v93-profile-card[data-v95-ready="1"]{visibility:visible!important}
+</style>
+
 </head>
 <body><div class="app">
 <header class="topbar"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button data-view="dashboard" class="active">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="projecao">Projeção</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx>+ Lançamento</button></div></div></header>
@@ -23822,6 +23830,278 @@ window.ppRecurringEditV92={open:openTxEdit92};
   function applyAll(){enhanceForm();enhanceLoading();enhanceProfileOverlay();}
   applyAll();
   var mo=new MutationObserver(function(ms){ms.forEach(function(m){m.addedNodes.forEach(function(n){if(n.nodeType===1) applyAll();});});});
+  mo.observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
+<style id="pp-v95-minimal-futuristic-loader">
+/* V95 — futurista, colorido e clean */
+#loginOverlay #loginLoading{
+  padding:0!important;
+}
+#loginOverlay .v95-stage{
+  min-height:520px;
+  display:grid;
+  place-items:center;
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(29,116,255,.22), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(0,221,180,.16), transparent 28%),
+    radial-gradient(circle at 50% 88%, rgba(255,184,72,.14), transparent 30%),
+    linear-gradient(145deg,#071224 0%,#0b1830 48%,#0d2246 100%);
+}
+#loginOverlay .v95-stage::before{
+  content:"";
+  position:absolute;inset:-20%;
+  background:
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:58px 58px;
+  mask-image:radial-gradient(circle at center, black 36%, transparent 78%);
+  animation:v95Grid 16s linear infinite;
+}
+#loginOverlay .v95-stage::after{
+  content:"";
+  position:absolute;
+  width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle, rgba(25,156,255,.18), rgba(25,156,255,0) 68%);
+  filter:blur(10px);
+  animation:v95Aura 5.5s ease-in-out infinite alternate;
+}
+#loginOverlay .v95-center{
+  width:min(500px,86%);
+  position:relative;
+  z-index:2;
+  text-align:center;
+  color:#fff;
+}
+#loginOverlay .v95-loader-shell{
+  width:128px;height:128px;
+  margin:0 auto 28px;
+  position:relative;
+  display:grid;
+  place-items:center;
+}
+#loginOverlay .v95-orbit{
+  position:absolute;inset:0;border-radius:50%;
+  border:1px solid rgba(255,255,255,.10);
+  animation:v95Spin 8s linear infinite;
+}
+#loginOverlay .v95-orbit::before,
+#loginOverlay .v95-orbit::after{
+  content:"";
+  position:absolute;
+  width:12px;height:12px;border-radius:50%;
+  box-shadow:0 0 22px currentColor;
+}
+#loginOverlay .v95-orbit::before{
+  left:8px;top:18px;background:#6fe1ff;color:#6fe1ff;
+}
+#loginOverlay .v95-orbit::after{
+  right:8px;bottom:18px;background:#ffbd56;color:#ffbd56;
+}
+#loginOverlay .v95-ring{
+  position:absolute;inset:18px;border-radius:50%;
+  border:3px solid rgba(255,255,255,.10);
+}
+#loginOverlay .v95-ring::before{
+  content:"";
+  position:absolute;inset:-3px;border-radius:50%;
+  border:3px solid transparent;
+  border-top-color:#22a7ff;
+  border-right-color:#65f0d1;
+  animation:v95Spin 1.35s linear infinite;
+}
+#loginOverlay .v95-core{
+  width:64px;height:64px;border-radius:22px;
+  background:linear-gradient(145deg,#ffffff,#eef7ff);
+  box-shadow:0 18px 38px rgba(0,0,0,.28),0 0 28px rgba(74,184,255,.18);
+  display:grid;place-items:center;
+}
+#loginOverlay .v95-core span{
+  font-size:27px;
+  color:#0f69ff;
+  animation:v95Pulse 1.6s ease-in-out infinite;
+}
+#loginOverlay .v95-eyebrow{
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+  color:#70dcff;
+  margin-bottom:10px;
+}
+#loginOverlay .v95-center h2{
+  margin:0;
+  font-size:clamp(28px,4vw,40px);
+  line-height:1.04;
+  letter-spacing:-.05em;
+  color:#fff;
+}
+#loginOverlay .v95-status{
+  margin-top:14px;
+  min-height:20px;
+  font-size:12px;
+  color:rgba(255,255,255,.70);
+  transition:.25s ease;
+}
+#loginOverlay .v95-progress{
+  width:min(420px,100%);
+  height:10px;
+  margin:24px auto 0;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:999px;
+  overflow:hidden;
+  position:relative;
+}
+#loginOverlay .v95-progress i{
+  display:block;
+  height:100%;
+  width:38%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#0d6dff,#24b5ff,#61edd2,#ffbd56);
+  box-shadow:0 0 24px rgba(32,177,255,.42);
+  animation:v95Bar 1.65s ease-in-out infinite;
+}
+#loginOverlay #loginSuccess{
+  margin-top:13px!important;
+  color:#7ef0d0!important;
+  font-size:12px!important;
+  min-height:18px;
+}
+#loginOverlay #successFill{
+  display:none!important;
+}
+
+/* Neutraliza o layout informativo da V94 apenas durante o loading */
+#loginOverlay #loginLoading .v94-loading-stage,
+#loginOverlay #loginLoading .v94-left,
+#loginOverlay #loginLoading .v94-right,
+#loginOverlay #loginLoading .v94-kpi-grid,
+#loginOverlay #loginLoading .v94-fin-line,
+#loginOverlay #loginLoading .v94-timeline{
+  display:none!important;
+}
+
+/* Troca de perfil: mesma linguagem, sem excesso de informação */
+#ppProfileLoadingV88{
+  background:
+    radial-gradient(circle at 20% 20%,rgba(29,116,255,.20),transparent 30%),
+    radial-gradient(circle at 80% 25%,rgba(0,221,180,.13),transparent 28%),
+    rgba(5,13,25,.78)!important;
+  backdrop-filter:blur(16px)!important;
+}
+#ppProfileLoadingV88 .v93-profile-card{
+  min-width:320px!important;
+  max-width:390px!important;
+  background:linear-gradient(180deg,rgba(11,22,42,.97),rgba(7,15,28,.98))!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  color:#fff!important;
+  border-radius:28px!important;
+  padding:26px!important;
+  box-shadow:0 34px 90px rgba(0,0,0,.38)!important;
+}
+#ppProfileLoadingV88 .v93-profile-card .sub{
+  color:rgba(255,255,255,.64)!important;
+  font-size:11px!important;
+}
+#ppProfileLoadingV88 .v93-progress{
+  height:9px!important;
+  background:rgba(255,255,255,.10)!important;
+}
+#ppProfileLoadingV88 .v93-progress > i{
+  background:linear-gradient(90deg,#0d6dff,#24b5ff,#61edd2,#ffbd56)!important;
+}
+@keyframes v95Spin{to{transform:rotate(360deg)}}
+@keyframes v95Pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.10)}}
+@keyframes v95Bar{0%{transform:translateX(-120%)}55%{transform:translateX(115%)}100%{transform:translateX(260%)}}
+@keyframes v95Grid{to{transform:translate(-58px,-58px)}}
+@keyframes v95Aura{from{transform:scale(.96);opacity:.7}to{transform:scale(1.08);opacity:1}}
+@media(max-width:560px){
+  #loginOverlay .v95-stage{min-height:440px}
+  #loginOverlay .v95-loader-shell{width:110px;height:110px}
+  #loginOverlay .v95-center{width:88%}
+}
+</style>
+
+<script id="pp-v95-minimal-futuristic-loader-script">
+(function(){
+  function loadingHTML(){
+    return ''+
+      '<div class="v95-stage">'+
+        '<div class="v95-center">'+
+          '<div class="v95-loader-shell">'+
+            '<div class="v95-orbit"></div>'+
+            '<div class="v95-ring"></div>'+
+            '<div class="v95-core"><span>✦</span></div>'+
+          '</div>'+
+          '<div class="v95-eyebrow">planejador pessoal</div>'+
+          '<h2>Preparando seu ambiente financeiro</h2>'+
+          '<div class="v95-status" id="v95Status">Sincronizando seus dados com segurança…</div>'+
+          '<div class="v95-progress"><i></i></div>'+
+          '<div class="login-success" id="loginSuccess"></div>'+
+          '<div class="success-fill" id="successFill"><i></i></div>'+
+        '</div>'+
+      '</div>';
+  }
+
+  function runStatus(box){
+    if(box._v95Timer)return;
+    var msgs=[
+      'Sincronizando seus dados com segurança…',
+      'Organizando lançamentos e recorrências…',
+      'Finalizando seu ambiente financeiro…'
+    ];
+    var i=0, el=box.querySelector('#v95Status');
+    box._v95Timer=setInterval(function(){
+      i=(i+1)%msgs.length;
+      if(el){
+        el.style.opacity='0';
+        setTimeout(function(){
+          el.textContent=msgs[i];
+          el.style.opacity='1';
+        },180);
+      }
+    },1500);
+  }
+
+  function enhanceLogin(){
+    document.querySelectorAll('#loginOverlay #loginLoading').forEach(function(box){
+      if(box.dataset.v95Ready==='1')return;
+      box.innerHTML=loadingHTML();
+      box.dataset.v94Ready='1';
+      box.dataset.v95Ready='1';
+      runStatus(box);
+    });
+  }
+
+  function enhanceProfile(){
+    var overlay=document.getElementById('ppProfileLoadingV88');
+    if(!overlay)return;
+    var card=overlay.querySelector('.v93-profile-card');
+    if(!card||card.dataset.v95Ready==='1')return;
+    var title=overlay.querySelector('#ppProfileLoadingTitleV88')?.textContent||'Abrindo perfil';
+    card.innerHTML=
+      '<div class="v95-loader-shell" style="width:96px;height:96px;margin:0 auto 20px">'+
+        '<div class="v95-orbit"></div><div class="v95-ring"></div><div class="v95-core"><span>✦</span></div>'+
+      '</div>'+
+      '<b style="display:block;font-size:18px;color:#fff">'+String(title).replace(/[<>&]/g,'')+'</b>'+
+      '<div class="sub" style="margin-top:7px">Sincronizando a versão mais atual do perfil…</div>'+
+      '<div class="v93-progress" style="margin-top:18px"><i></i></div>';
+    card.dataset.v95Ready='1';
+  }
+
+  function apply(){
+    enhanceLogin();
+    enhanceProfile();
+  }
+
+  apply();
+  var mo=new MutationObserver(function(){
+    apply();
+  });
   mo.observe(document.body,{childList:true,subtree:true});
 })();
 </script>
