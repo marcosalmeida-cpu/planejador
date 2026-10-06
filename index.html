@@ -24594,9 +24594,9 @@ function card(v){
         <h4>Histórico recente</h4>
         ${(v.history||[]).length
           ? [...v.history].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,4).map(x=>`
-            <div class="maintenance-row-v101">
+            <button type="button" class="maintenance-row-v101 maintenance-click-v102" onclick="window.ppVehicleV101.openMaintenanceDetail('${v.id}','${x.id}')">
               <span>${dateBR(x.date)}</span><span>${km(x.km)}</span><b>${br(x.value)}</b><span>${escV(x.service||'Manutenção')}</span>
-            </div>`).join('')
+            </button>`).join('')
           : '<div class="vehicle-empty-v101">Nenhuma manutenção registrada ainda.</div>'}
       </div>
     </div>
@@ -24735,14 +24735,106 @@ async function refreshFipe(id,force=false){
     save();render();
   }catch(e){}
 }
+
+function openMaintenanceDetail(vehicleId,maintenanceId){
+  const v=data[vehicleId];
+  const item=(v?.history||[]).find(x=>String(x.id)===String(maintenanceId));
+  if(!v||!item)return;
+
+  const ov=modalBase(
+    'vehicleModalV101',
+    'Detalhes da manutenção · '+v.name,
+    'Registro completo desta manutenção.',
+    `<div class="maintenance-detail-v102">
+      <div class="maintenance-detail-grid-v102">
+        <div><span>Data</span><b>${dateBR(item.date)}</b></div>
+        <div><span>Quilometragem</span><b>${km(item.km)}</b></div>
+        <div><span>Valor</span><b>${br(item.value)}</b></div>
+        <div><span>Serviço</span><b>${escV(item.service||'Manutenção')}</b></div>
+      </div>
+      <div class="maintenance-notes-v102">
+        <span>Observações</span>
+        <p>${item.notes ? escV(item.notes).replace(/\n/g,'<br>') : 'Nenhuma observação registrada.'}</p>
+      </div>
+    </div>
+    <div class="vehicle-modal-actions-v101">
+      <button type="button" class="save" onclick="document.getElementById('vehicleModalV101').remove()">Fechar</button>
+    </div>`
+  );
+}
+
 function init(){
   render();
   setTimeout(()=>{refreshFipe('cobalt');refreshFipe('fazer')},1200);
 }
-window.ppVehicleV101={render,openVehicle,openMaintenance,openFipe,refreshFipe};
+window.ppVehicleV101={render,openVehicle,openMaintenance,openMaintenanceDetail,openFipe,refreshFipe};
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
 else init();
 })();
 </script>
+
+<style id="pp-v102-maintenance-detail-style">
+.maintenance-click-v102{
+  width:100%;
+  border:0;
+  background:transparent;
+  text-align:left;
+  cursor:pointer;
+  color:inherit;
+  font:inherit;
+}
+.maintenance-click-v102:hover{
+  background:#edf3f9;
+  border-radius:10px;
+  padding-left:7px;
+  padding-right:7px;
+}
+.maintenance-detail-v102{
+  margin-top:14px;
+}
+.maintenance-detail-grid-v102{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+.maintenance-detail-grid-v102>div{
+  background:#edf1f5;
+  border:1px solid #dce3eb;
+  border-radius:14px;
+  padding:12px;
+}
+.maintenance-detail-grid-v102 span,
+.maintenance-notes-v102>span{
+  display:block;
+  font-size:8.5px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:#788395;
+}
+.maintenance-detail-grid-v102 b{
+  display:block;
+  margin-top:5px;
+  color:#1e293b;
+  font-size:13px;
+}
+.maintenance-notes-v102{
+  margin-top:10px;
+  padding:13px;
+  border-radius:14px;
+  background:#fff;
+  border:1px solid #dde4ec;
+}
+.maintenance-notes-v102 p{
+  margin:7px 0 0!important;
+  color:#344054!important;
+  font-size:11px!important;
+  line-height:1.55!important;
+  white-space:normal;
+}
+@media(max-width:520px){
+  .maintenance-detail-grid-v102{grid-template-columns:1fr}
+}
+</style>
 
