@@ -23248,3 +23248,62 @@ window.ppTxStableV91={
 })();
 </script>
 
+<script id="pp-v92-recurring-edit-router-final">
+(()=>{
+'use strict';
+
+const previousOpen92=window.openTxEdit;
+
+function isRecurringVirtual92(id){
+  return String(id||'').startsWith('R64::');
+}
+function sourceRecurring92(id){
+  try{
+    return (custom||[]).find(x=>String(x.id)===String(id)&&x.standardRecurring)||null;
+  }catch(e){return null}
+}
+
+/* Roteador final:
+   qualquer ocorrência recorrente passa obrigatoriamente pelo modal V64
+   "Somente este / Este e futuros / Toda a sequência". */
+function openTxEdit92(id){
+  if(isRecurringVirtual92(id)){
+    const scopeOpen=window.ppRecurringScopeV64?.open;
+    if(typeof scopeOpen==='function'){
+      return scopeOpen(id);
+    }
+  }
+
+  /* Fallback para um registro-fonte recorrente, caso algum render antigo
+     entregue o id da fonte em vez do id virtual da competência. */
+  const src=sourceRecurring92(id);
+  if(src){
+    const y=+src.recurringStartYear||+src.ano||currentYear;
+    const m=+src.recurringStartMonth||+src.mesNum||currentMonth;
+    const virtual=`R64::${src.id}::${y}::${m}`;
+    const scopeOpen=window.ppRecurringScopeV64?.open;
+    if(typeof scopeOpen==='function'){
+      return scopeOpen(virtual);
+    }
+  }
+
+  return previousOpen92?.apply(this,arguments);
+}
+
+window.openTxEdit=openTxEdit92;
+try{openTxEdit=openTxEdit92}catch(e){}
+
+/* Após a escolha do escopo, reafirma a UI de Entrada recorrente
+   sem recriar botões/categorias. */
+document.addEventListener('click',e=>{
+  if(!e.target.closest?.('#recurrenceScopeModal64 [data-v64-scope]'))return;
+  setTimeout(()=>{
+    try{window.ppEntryRecurringV89?.refresh?.()}catch(_){}
+    try{window.ppTxStableV91?.clean?.()}catch(_){}
+  },60);
+},false);
+
+window.ppRecurringEditV92={open:openTxEdit92};
+})();
+</script>
+
