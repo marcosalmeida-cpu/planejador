@@ -24035,12 +24035,12 @@ function render99(){
       </div>
       <div class="v99-cat-track">
         ${cats.length?cats.map((x,i)=>`
-          <button type="button" class="v99-cat" data-v99-category="${String(x.name).replace(/"/g,'&quot;')}">
+          <div class="v99-cat">
             <span class="rank">${i+1}</span>
             <strong>${String(x.name).replace(/[<>&]/g,'')}</strong>
             <b>${m99(x.value)}</b>
             <div class="bar"><i style="width:${Math.max(8,x.value/maxCat*100)}%"></i></div>
-          </button>`).join(''):
+          </div>`).join(''):
           `<div class="v99-cat-empty">Ainda não há despesas neste período para comparar categorias.</div>`}
       </div>
     </section>
@@ -24116,4 +24116,159 @@ if(document.getElementById('dashboard')?.classList.contains('active'))render99()
 window.ppDashboardV99={render:render99};
 })();
 </script>
+
+<style id="pp-v100-previdencia-light-gray">
+/* V100 — Previdência em cinza-claro com contraste escuro */
+#previdencia{
+  background:#eef1f5!important;
+  color:#1d2939!important;
+  border-radius:24px!important;
+  padding:14px!important;
+}
+#previdencia .rgps-hero-v51{
+  background:linear-gradient(145deg,#e7ebf0 0%,#f2f4f7 100%)!important;
+  color:#1d2939!important;
+  border:1px solid #d8dee7!important;
+  box-shadow:0 12px 30px rgba(15,23,42,.055)!important;
+}
+#previdencia .rgps-hero-v51:after{
+  border-color:rgba(36,50,70,.08)!important;
+}
+#previdencia .rgps-badge-v51{
+  background:#dbe5f2!important;
+  border-color:#c9d6e7!important;
+  color:#23466f!important;
+}
+#previdencia .rgps-hero-v51 h1,
+#previdencia .rgps-source-v51 b{
+  color:#172033!important;
+}
+#previdencia .rgps-hero-v51 p,
+#previdencia .rgps-source-v51 span{
+  color:#667085!important;
+}
+#previdencia .rgps-kpi-v51{
+  background:#e1e6ed!important;
+  border-color:#d2d9e3!important;
+  backdrop-filter:none!important;
+}
+#previdencia .rgps-kpi-v51 span,
+#previdencia .rgps-kpi-v51 small{
+  color:#667085!important;
+}
+#previdencia .rgps-kpi-v51 strong{
+  color:#172033!important;
+}
+#previdencia .rgps-progress-meta-v51{
+  color:#667085!important;
+}
+#previdencia .rgps-progress-bar-v51{
+  background:#d5dce5!important;
+}
+
+/* Cards e áreas */
+#previdencia .rgps-card-v51,
+#previdencia .rgps-benefit-v51,
+#previdencia .rgps-rule-v51,
+#previdencia .rgps-tablewrap-v51{
+  background:#e9edf2!important;
+  border-color:#d7dde6!important;
+  color:#1d2939!important;
+  box-shadow:none!important;
+}
+#previdencia .rgps-rule-v51.best{
+  background:#e3f2ea!important;
+  border-color:#bcdcca!important;
+}
+#previdencia .rgps-card-head-v51 h3,
+#previdencia .rgps-benefit-v51 b,
+#previdencia .rgps-rule-v51 b{
+  color:#1d2939!important;
+}
+#previdencia .rgps-card-head-v51 p,
+#previdencia .rgps-benefit-v51 span,
+#previdencia .rgps-benefit-v51 small,
+#previdencia .rgps-rule-v51 small,
+#previdencia .rgps-rule-name-v51{
+  color:#5f6b7a!important;
+}
+
+/* Simulador "Salário de contribuição futuro" */
+#previdencia .rgps-sim-v51{
+  background:#dde3ea!important;
+  border:1px solid #cfd7e1!important;
+  color:#1d2939!important;
+}
+#previdencia .rgps-sim-v51 label,
+#previdencia .rgps-sim-out-v51 span{
+  color:#5f6b7a!important;
+}
+#previdencia .rgps-sim-v51 input{
+  background:#cfd6df!important;
+  border:1px solid #bdc7d3!important;
+  color:#172033!important;
+  box-shadow:none!important;
+}
+#previdencia .rgps-sim-v51 input::placeholder{
+  color:#7a8695!important;
+}
+#previdencia .rgps-sim-out-v51 b{
+  color:#172033!important;
+}
+
+/* Filtros, tabela e chips */
+#previdencia .rgps-toolbar-v51 select,
+#previdencia .rgps-toolbar-v51 input,
+#previdencia .rgps-field-v51 input,
+#previdencia .rgps-field-v51 select{
+  background:#e1e5eb!important;
+  border-color:#cfd6df!important;
+  color:#27364a!important;
+}
+#previdencia .rgps-table-v51 th{
+  background:#dde2e8!important;
+  color:#526070!important;
+  border-color:#cfd6df!important;
+}
+#previdencia .rgps-table-v51 td{
+  background:#edf0f4!important;
+  color:#344054!important;
+  border-color:#d8dee6!important;
+}
+#previdencia .rgps-table-v51 tr:hover td{
+  background:#e3e8ef!important;
+}
+#previdencia .rgps-year-chip-v51{
+  background:#e1e5eb!important;
+  border-color:#d0d7e0!important;
+  color:#344054!important;
+}
+#previdencia .rgps-year-chip-v51.active{
+  background:#244b78!important;
+  border-color:#244b78!important;
+  color:#fff!important;
+}
+#previdencia .rgps-note-v51{
+  background:#eee8d9!important;
+  border-color:#ded2b1!important;
+  color:#654f1d!important;
+}
+#previdencia .rgps-sources-v51{
+  color:#667085!important;
+  border-color:#d4dae3!important;
+}
+#previdencia .rgps-sources-v51 a{
+  color:#245b91!important;
+}
+
+/* Categorias: agora apenas informativas */
+#dashboard .v99-cat{
+  cursor:default!important;
+}
+#dashboard .v99-cat:hover{
+  transform:none!important;
+  border-color:#e0e6ee!important;
+  box-shadow:none!important;
+}
+</style>
 
