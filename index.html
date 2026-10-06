@@ -1484,7 +1484,7 @@ body.v86-ready #dashboard{visibility:visible!important}
 
 </head>
 <body><div class="app">
-<header class="topbar"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button data-view="dashboard" class="active">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="projecao">Projeção</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx>+ Lançamento</button></div></div></header>
+<header class="topbar"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button data-view="dashboard" class="active">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="veiculos">Veículos</button><button data-view="projecao">Projeção</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx>+ Lançamento</button></div></div></header>
 <main class="main">
 <section class="view active" id="dashboard">
 <div class="hero"><div><div class="eyebrow">seu planejamento financeiro</div><h1>Olá, Marcos.</h1><p id="periodText">Receitas e despesas realizadas, sem misturar projeções futuras.</p></div><div class="filterbar"><select id="yearFilter"></select><select id="monthFilter"></select></div></div>
@@ -1536,6 +1536,22 @@ body.v86-ready #dashboard{visibility:visible!important}
 <div class="section-tools"><div><div class="eyebrow">bens e posição geral</div><h2>Patrimônio</h2></div><div class="filterbar"><select id="assetYear"></select><select id="assetType"><option value="all">Todos os tipos</option><option>Investimento</option><option>Carro</option><option>Moto</option><option>Casa</option><option>Imóvel</option><option>Outro</option></select><button class="primary" id="addAsset">+ Novo patrimônio</button></div></div>
 <div class="summary-strip" id="assetSummary"></div>
 <div class="asset-grid" id="assetGrid"></div>
+</section>
+
+
+<section class="view" id="veiculos">
+  <div class="garage-hero-v101">
+    <div>
+      <div class="garage-eyebrow-v101">garagem financeira</div>
+      <h2>Oficina virtual</h2>
+      <p>Manutenção, quilometragem, óleo e valor de mercado em um único lugar.</p>
+    </div>
+    <div class="garage-hero-badge-v101">
+      <span>2 veículos</span>
+      <b id="vehicleGarageStatusV101">Garagem monitorada</b>
+    </div>
+  </div>
+  <div class="vehicle-grid-v101" id="vehicleGridV101"></div>
 </section>
 
 <section class="view" id="projecao">
@@ -24271,4 +24287,462 @@ window.ppDashboardV99={render:render99};
   box-shadow:none!important;
 }
 </style>
+
+<style id="pp-v101-vehicles-style">
+.nav button[data-view="veiculos"]:before,
+#v76FloatNav button[data-view="veiculos"]:before{content:"⚙"!important}
+
+/* garagem */
+#veiculos{
+  background:#edf0f4!important;
+  border-radius:26px;
+  padding:14px;
+}
+.garage-hero-v101{
+  position:relative;
+  overflow:hidden;
+  min-height:145px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:20px;
+  padding:22px;
+  margin-bottom:12px;
+  border-radius:26px;
+  color:#fff;
+  background:
+    radial-gradient(circle at 82% 18%,rgba(80,213,255,.18),transparent 26%),
+    linear-gradient(135deg,#111a27 0%,#152a45 58%,#0f4d7c 100%);
+  box-shadow:0 18px 44px rgba(15,30,50,.18);
+}
+.garage-hero-v101:before{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+  background-size:42px 42px;
+  opacity:.45;pointer-events:none
+}
+.garage-hero-v101>*{position:relative;z-index:1}
+.garage-eyebrow-v101{
+  font-size:9px;letter-spacing:.15em;text-transform:uppercase;font-weight:900;color:#72ddff
+}
+.garage-hero-v101 h2{margin:8px 0 4px;font-size:32px;letter-spacing:-.045em}
+.garage-hero-v101 p{margin:0;color:rgba(255,255,255,.72);font-size:11.5px}
+.garage-hero-badge-v101{
+  min-width:210px;padding:13px 15px;border-radius:17px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);
+  text-align:right
+}
+.garage-hero-badge-v101 span{display:block;font-size:9px;color:rgba(255,255,255,.58)}
+.garage-hero-badge-v101 b{display:block;margin-top:4px;font-size:13px;color:#fff}
+
+.vehicle-grid-v101{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.vehicle-card-v101{
+  position:relative;
+  overflow:hidden;
+  border-radius:24px;
+  background:#f8fafc;
+  border:1px solid #d9e0e8;
+  box-shadow:0 12px 30px rgba(15,23,42,.055);
+}
+.vehicle-top-v101{
+  padding:18px 18px 15px;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+  background:linear-gradient(145deg,#172231,#24384d);
+  color:#fff;
+}
+.vehicle-card-v101.moto .vehicle-top-v101{
+  background:linear-gradient(145deg,#25191b,#4a2821);
+}
+.vehicle-title-v101{display:flex;gap:12px;align-items:center}
+.vehicle-icon-v101{
+  width:52px;height:52px;border-radius:17px;display:grid;place-items:center;
+  background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.11)
+}
+.vehicle-icon-v101 svg{width:31px;height:31px;fill:none;stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.vehicle-title-v101 small{display:block;font-size:9px;color:rgba(255,255,255,.56);text-transform:uppercase;letter-spacing:.08em}
+.vehicle-title-v101 h3{margin:4px 0 0;font-size:22px;letter-spacing:-.04em}
+.vehicle-mileage-v101{text-align:right}
+.vehicle-mileage-v101 span{display:block;font-size:8.5px;color:rgba(255,255,255,.54)}
+.vehicle-mileage-v101 b{display:block;margin-top:3px;font-size:19px;color:#fff}
+.vehicle-body-v101{padding:14px}
+.vehicle-health-v101{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px
+}
+.vehicle-mini-v101{
+  padding:10px;border-radius:14px;background:#eef2f6;border:1px solid #e0e5ec;min-width:0
+}
+.vehicle-mini-v101 span{display:block;font-size:8px;color:#778294}
+.vehicle-mini-v101 b{
+  display:block;margin-top:5px;font-size:11.5px;color:#1e293b;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+.oil-panel-v101{
+  padding:13px;border-radius:17px;background:linear-gradient(145deg,#122b46,#174d73);color:#fff
+}
+.vehicle-card-v101.moto .oil-panel-v101{background:linear-gradient(145deg,#38211d,#704230)}
+.oil-head-v101{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.oil-head-v101 span{display:block;font-size:9px;color:rgba(255,255,255,.60)}
+.oil-head-v101 b{display:block;margin-top:4px;font-size:16px;color:#fff}
+.oil-status-v101{text-align:right}
+.oil-status-v101 strong{display:block;font-size:12px;color:#fff}
+.oil-status-v101 small{display:block;margin-top:3px;font-size:8.5px;color:rgba(255,255,255,.62)}
+.oil-track-v101{
+  height:8px;margin-top:13px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.12)
+}
+.oil-track-v101 i{
+  display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#61e4ff,#68f1c9,#ffbd56)
+}
+.oil-data-v101{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px
+}
+.oil-data-v101 div{padding:8px;border-radius:11px;background:rgba(255,255,255,.07)}
+.oil-data-v101 span{display:block;font-size:7.5px;color:rgba(255,255,255,.55)}
+.oil-data-v101 b{display:block;margin-top:3px;font-size:10px;color:#fff}
+
+.fipe-v101{
+  margin-top:10px;padding:12px;border-radius:17px;background:#fff;border:1px solid #dfe5ed
+}
+.fipe-head-v101{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.fipe-head-v101 div>span{display:block;font-size:8px;color:#778294;text-transform:uppercase;letter-spacing:.08em;font-weight:900}
+.fipe-head-v101 div>b{display:block;margin-top:4px;font-size:20px;color:#172033;letter-spacing:-.03em}
+.fipe-v101 small{display:block;margin-top:4px;font-size:8.5px;color:#7b8697}
+.vehicle-actions-v101{
+  display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px
+}
+.vehicle-actions-v101 button{
+  min-height:39px;border-radius:12px;border:1px solid #d8e0ea;background:#fff;color:#344054;
+  font-size:10px;font-weight:850;cursor:pointer
+}
+.vehicle-actions-v101 button.primary-v101{
+  background:#172d49;border-color:#172d49;color:#fff
+}
+.vehicle-card-v101.moto .vehicle-actions-v101 button.primary-v101{
+  background:#633a2d;border-color:#633a2d
+}
+.maintenance-history-v101{
+  margin-top:10px;border-top:1px solid #e2e7ee;padding-top:10px
+}
+.maintenance-history-v101 h4{margin:0 0 7px;font-size:11px;color:#344054}
+.maintenance-row-v101{
+  display:grid;grid-template-columns:1.1fr .8fr .8fr 1.3fr;gap:7px;
+  padding:8px 0;border-top:1px solid #edf0f4;font-size:8.8px;color:#5f6b7b
+}
+.maintenance-row-v101:first-of-type{border-top:0}
+.maintenance-row-v101 b{color:#27364a}
+.vehicle-empty-v101{padding:10px;border-radius:12px;background:#f0f3f7;color:#7a8697;font-size:9px}
+
+/* modal veículos */
+#vehicleModalV101,#fipeModalV101{
+  position:fixed;inset:0;z-index:130000;background:rgba(7,15,28,.62);backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;padding:16px
+}
+#vehicleModalV101.open,#fipeModalV101.open{display:flex}
+.vehicle-modal-card-v101{
+  width:min(560px,96vw);max-height:90vh;overflow:auto;background:#f8fafc;border-radius:24px;padding:18px;
+  box-shadow:0 34px 90px rgba(0,0,0,.32)
+}
+.vehicle-modal-card-v101 h3{margin:0;font-size:21px;letter-spacing:-.035em;color:#172033}
+.vehicle-modal-card-v101>p{margin:5px 0 15px;color:#7b8697;font-size:10.5px}
+.vehicle-form-v101{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.vehicle-form-v101 label{font-size:9px;font-weight:850;color:#5f6b7b}
+.vehicle-form-v101 label.full{grid-column:1/-1}
+.vehicle-form-v101 input,.vehicle-form-v101 select,.vehicle-form-v101 textarea{
+  width:100%;margin-top:4px;min-height:39px;border-radius:11px;border:1px solid #d9e0e8;background:#fff;color:#27364a;padding:9px
+}
+.vehicle-form-v101 textarea{min-height:68px;resize:vertical}
+.vehicle-modal-actions-v101{display:flex;justify-content:flex-end;gap:7px;margin-top:14px}
+.vehicle-modal-actions-v101 button{border:0;border-radius:11px;padding:10px 14px;font-weight:850;cursor:pointer}
+.vehicle-modal-actions-v101 .save{background:#17385e;color:#fff}
+.fipe-status-v101{margin-top:10px;min-height:17px;font-size:9px;color:#657285}
+.fipe-status-v101.error{color:#b42318}
+
+@media(max-width:980px){.vehicle-grid-v101{grid-template-columns:1fr}}
+@media(max-width:580px){
+  .garage-hero-v101{align-items:flex-start;flex-direction:column}
+  .garage-hero-badge-v101{width:100%;text-align:left}
+  .vehicle-health-v101,.oil-data-v101{grid-template-columns:1fr 1fr}
+  .vehicle-actions-v101{grid-template-columns:1fr}
+  .vehicle-form-v101{grid-template-columns:1fr}
+  .vehicle-form-v101 label.full{grid-column:auto}
+  .maintenance-row-v101{grid-template-columns:1fr 1fr}
+}
+</style>
+
+<script id="pp-v101-vehicles">
+(()=>{
+'use strict';
+
+const KEY='planejador_vehicles_v101';
+const API='https://brasilapi.com.br/api/fipe';
+
+const defaults={
+  cobalt:{
+    id:'cobalt',kind:'carro',type:'carros',name:'Chevrolet Cobalt',brandHint:'CHEVROLET',modelHint:'Cobalt',
+    currentKm:0,lastMaintenanceDate:'',lastMaintenanceValue:0,lastOilDate:'',lastOilKm:0,oilInterval:7000,
+    history:[],fipe:null
+  },
+  fazer:{
+    id:'fazer',kind:'moto',type:'motos',name:'Yamaha Fazer',brandHint:'YAMAHA',modelHint:'Fazer',
+    currentKm:0,lastMaintenanceDate:'',lastMaintenanceValue:0,lastOilDate:'',lastOilKm:0,oilInterval:1500,
+    history:[],fipe:null
+  }
+};
+
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function n(v){const x=Number(String(v??'').replace(/\./g,'').replace(',','.').replace(/[^0-9.-]/g,''));return Number.isFinite(x)?x:0}
+function br(v){try{return brl(v)}catch(e){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}
+function km(v){return Math.round(n(v)).toLocaleString('pt-BR')+' km'}
+function escV(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m])}
+function dateBR(v){if(!v)return 'Não informado';const [y,m,d]=String(v).split('-');return d&&m&&y?`${d}/${m}/${y}`:v}
+function profile(){return localStorage.getItem('planejador_active_profile')||'Marcos'}
+
+function load(){
+  let x={};
+  try{x=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){}
+  const out={};
+  for(const id of ['cobalt','fazer']){
+    out[id]=Object.assign(clone(defaults[id]),x[id]||{});
+    out[id].history=Array.isArray(out[id].history)?out[id].history:[];
+  }
+  return out;
+}
+let data=load();
+
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(data));
+  try{
+    const PM=window.__ppV41Profile;
+    if(PM?.saveState&&PM?.captureShared)PM.saveState(profile(),PM.captureShared());
+  }catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+}
+function icon(kind){
+  return kind==='moto'
+    ? `<svg viewBox="0 0 64 64"><circle cx="15" cy="45" r="9"/><circle cx="50" cy="45" r="9"/><path d="M15 45l11-15h12l12 15M26 30l-5-8h8m8 8l6-12h7M30 45h10M42 25h-8"/></svg>`
+    : `<svg viewBox="0 0 64 64"><path d="M12 39l5-14h29l6 14v10H12z"/><path d="M19 25l5-9h16l6 9"/><circle cx="21" cy="49" r="5"/><circle cx="45" cy="49" r="5"/><path d="M16 38h32"/></svg>`;
+}
+function oilState(v){
+  const last=n(v.lastOilKm),cur=n(v.currentKm),interval=Math.max(1,n(v.oilInterval));
+  const next=last+interval;
+  const used=Math.max(0,cur-last);
+  const remaining=next-cur;
+  const pct=Math.max(0,Math.min(100,used/interval*100));
+  return {last,cur,interval,next,remaining,pct};
+}
+function latestMaintenance(v){
+  const h=[...(v.history||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date)))[0];
+  if(h)return h;
+  if(v.lastMaintenanceDate||v.lastMaintenanceValue)return {date:v.lastMaintenanceDate,value:v.lastMaintenanceValue,km:v.currentKm,service:'Última manutenção'};
+  return null;
+}
+function totalMaintenance(v){
+  return (v.history||[]).reduce((a,x)=>a+n(x.value),0);
+}
+function card(v){
+  const o=oilState(v),last=latestMaintenance(v);
+  const oilText=o.remaining<0?`Vencida há ${km(Math.abs(o.remaining))}`:o.remaining===0?'Troca agora':`Faltam ${km(o.remaining)}`;
+  const f=v.fipe;
+  return `<article class="vehicle-card-v101 ${v.kind==='moto'?'moto':''}">
+    <div class="vehicle-top-v101">
+      <div class="vehicle-title-v101">
+        <div class="vehicle-icon-v101">${icon(v.kind)}</div>
+        <div><small>${v.kind==='moto'?'motocicleta':'automóvel'}</small><h3>${escV(v.name)}</h3></div>
+      </div>
+      <div class="vehicle-mileage-v101"><span>Quilometragem atual</span><b>${km(v.currentKm)}</b></div>
+    </div>
+    <div class="vehicle-body-v101">
+      <div class="vehicle-health-v101">
+        <div class="vehicle-mini-v101"><span>Última manutenção</span><b>${last?dateBR(last.date):'Não informada'}</b></div>
+        <div class="vehicle-mini-v101"><span>Valor da manutenção</span><b>${last?br(last.value):br(0)}</b></div>
+        <div class="vehicle-mini-v101"><span>Investido em manutenção</span><b>${br(totalMaintenance(v))}</b></div>
+      </div>
+
+      <div class="oil-panel-v101">
+        <div class="oil-head-v101">
+          <div><span>Próxima troca de óleo</span><b>${km(o.next)}</b></div>
+          <div class="oil-status-v101"><strong>${oilText}</strong><small>${o.interval.toLocaleString('pt-BR')} km por troca</small></div>
+        </div>
+        <div class="oil-track-v101"><i style="width:${o.pct}%"></i></div>
+        <div class="oil-data-v101">
+          <div><span>Última troca</span><b>${dateBR(v.lastOilDate)}</b></div>
+          <div><span>Km da última troca</span><b>${km(v.lastOilKm)}</b></div>
+          <div><span>Intervalo configurado</span><b>${km(v.oilInterval)}</b></div>
+        </div>
+      </div>
+
+      <div class="fipe-v101">
+        <div class="fipe-head-v101">
+          <div><span>Tabela FIPE</span><b>${f?.value||'Configure a versão'}</b></div>
+          <button type="button" class="btn" onclick="window.ppVehicleV101.openFipe('${v.id}')">${f?'Atualizar / configurar':'Configurar FIPE'}</button>
+        </div>
+        <small>${f?`${escV(f.model||'')} · ${escV(f.yearName||'')} · ${escV(f.reference||'referência atual')}`:'Selecione a versão e o ano uma única vez. Depois o valor pode ser atualizado automaticamente.'}</small>
+      </div>
+
+      <div class="vehicle-actions-v101">
+        <button type="button" class="primary-v101" onclick="window.ppVehicleV101.openMaintenance('${v.id}')">+ Registrar manutenção</button>
+        <button type="button" onclick="window.ppVehicleV101.openVehicle('${v.id}')">Atualizar km e óleo</button>
+      </div>
+
+      <div class="maintenance-history-v101">
+        <h4>Histórico recente</h4>
+        ${(v.history||[]).length
+          ? [...v.history].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,4).map(x=>`
+            <div class="maintenance-row-v101">
+              <span>${dateBR(x.date)}</span><span>${km(x.km)}</span><b>${br(x.value)}</b><span>${escV(x.service||'Manutenção')}</span>
+            </div>`).join('')
+          : '<div class="vehicle-empty-v101">Nenhuma manutenção registrada ainda.</div>'}
+      </div>
+    </div>
+  </article>`;
+}
+function render(){
+  const grid=document.getElementById('vehicleGridV101');
+  if(!grid)return;
+  grid.innerHTML=card(data.cobalt)+card(data.fazer);
+  const overdue=['cobalt','fazer'].filter(id=>oilState(data[id]).remaining<=0).length;
+  const status=document.getElementById('vehicleGarageStatusV101');
+  if(status)status.textContent=overdue?`${overdue} troca${overdue>1?'s':''} de óleo requer atenção`:'Garagem monitorada';
+}
+function modalBase(id,title,sub,content){
+  document.getElementById(id)?.remove();
+  const ov=document.createElement('div');ov.id=id;
+  ov.innerHTML=`<div class="vehicle-modal-card-v101"><h3>${title}</h3><p>${sub}</p>${content}</div>`;
+  document.body.appendChild(ov);
+  ov.classList.add('open');
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
+  return ov;
+}
+function openVehicle(id){
+  const v=data[id];if(!v)return;
+  const ov=modalBase('vehicleModalV101',v.name,'Atualize a quilometragem e os dados da troca de óleo.',
+  `<div class="vehicle-form-v101">
+    <label>Quilometragem atual<input id="vvKm" inputmode="numeric" value="${Math.round(n(v.currentKm))}"></label>
+    <label>Data da última troca de óleo<input id="vvOilDate" type="date" value="${escV(v.lastOilDate)}"></label>
+    <label>Km considerado na última troca<input id="vvOilKm" inputmode="numeric" value="${Math.round(n(v.lastOilKm))}"></label>
+    <label>Intervalo para próxima troca (km)<input id="vvInterval" inputmode="numeric" value="${Math.round(n(v.oilInterval))}"></label>
+  </div>
+  <div class="vehicle-modal-actions-v101"><button type="button" onclick="document.getElementById('vehicleModalV101').remove()">Cancelar</button><button type="button" class="save" id="vvSave">Salvar</button></div>`);
+  ov.querySelector('#vvSave').onclick=()=>{
+    v.currentKm=Math.max(0,n(ov.querySelector('#vvKm').value));
+    v.lastOilDate=ov.querySelector('#vvOilDate').value;
+    v.lastOilKm=Math.max(0,n(ov.querySelector('#vvOilKm').value));
+    v.oilInterval=Math.max(1,n(ov.querySelector('#vvInterval').value));
+    save();render();ov.remove();
+    try{toast('Dados do veículo atualizados.')}catch(e){}
+  };
+}
+function openMaintenance(id){
+  const v=data[id];if(!v)return;
+  const today=new Date().toISOString().slice(0,10);
+  const ov=modalBase('vehicleModalV101','Registrar manutenção · '+v.name,'Inclua o serviço realizado. O registro entra no histórico do veículo.',
+  `<div class="vehicle-form-v101">
+    <label>Data<input id="vmDate" type="date" value="${today}"></label>
+    <label>Quilometragem<input id="vmKm" inputmode="numeric" value="${Math.round(n(v.currentKm))}"></label>
+    <label>Valor da manutenção<input id="vmValue" inputmode="decimal" placeholder="0,00"></label>
+    <label>Serviço<input id="vmService" placeholder="Ex.: suspensão, revisão, freios"></label>
+    <label class="full">Observações<textarea id="vmNotes" placeholder="Detalhes opcionais"></textarea></label>
+  </div>
+  <div class="vehicle-modal-actions-v101"><button type="button" onclick="document.getElementById('vehicleModalV101').remove()">Cancelar</button><button type="button" class="save" id="vmSave">Registrar</button></div>`);
+  ov.querySelector('#vmSave').onclick=()=>{
+    const item={
+      id:'M'+Date.now(),date:ov.querySelector('#vmDate').value,
+      km:Math.max(0,n(ov.querySelector('#vmKm').value)),
+      value:Math.max(0,n(ov.querySelector('#vmValue').value)),
+      service:ov.querySelector('#vmService').value.trim()||'Manutenção',
+      notes:ov.querySelector('#vmNotes').value.trim()
+    };
+    v.history.push(item);
+    v.currentKm=Math.max(n(v.currentKm),item.km);
+    v.lastMaintenanceDate=item.date;
+    v.lastMaintenanceValue=item.value;
+    save();render();ov.remove();
+    try{toast('Manutenção registrada.')}catch(e){}
+  };
+}
+async function fetchJSON(url){
+  const r=await fetch(url,{headers:{accept:'application/json'}});
+  if(!r.ok)throw new Error('Não foi possível consultar a FIPE agora.');
+  return r.json();
+}
+async function openFipe(id){
+  const v=data[id];if(!v)return;
+  const ov=modalBase('fipeModalV101','Tabela FIPE · '+v.name,'Escolha a versão exata e o ano. Depois o site mantém essa configuração para novas atualizações.',
+  `<div class="vehicle-form-v101">
+    <label>Marca<select id="vfBrand"><option>Carregando…</option></select></label>
+    <label>Modelo / versão<select id="vfModel"><option>Selecione a marca</option></select></label>
+    <label class="full">Ano / combustível<select id="vfYear"><option>Selecione o modelo</option></select></label>
+  </div>
+  <div class="fipe-status-v101" id="vfStatus">Conectando à tabela FIPE…</div>
+  <div class="vehicle-modal-actions-v101"><button type="button" onclick="document.getElementById('fipeModalV101').remove()">Cancelar</button><button type="button" class="save" id="vfSave" disabled>Salvar e atualizar FIPE</button></div>`);
+  const brand=ov.querySelector('#vfBrand'),model=ov.querySelector('#vfModel'),yr=ov.querySelector('#vfYear'),status=ov.querySelector('#vfStatus'),saveBtn=ov.querySelector('#vfSave');
+  try{
+    const brands=await fetchJSON(`${API}/marcas/v1/${v.type}`);
+    const preferred=brands.find(x=>String(x.nome).toUpperCase().includes(v.brandHint));
+    brand.innerHTML=brands.map(x=>`<option value="${escV(x.valor)}" ${preferred&&String(x.valor)===String(preferred.valor)?'selected':''}>${escV(x.nome)}</option>`).join('');
+    status.textContent='Escolha a versão do veículo.';
+    async function loadModels(){
+      status.textContent='Carregando versões…';saveBtn.disabled=true;
+      const models=await fetchJSON(`${API}/veiculos/v1/${v.type}/${brand.value}`);
+      const filtered=models.filter(x=>String(x.modelo).toLowerCase().includes(v.modelHint.toLowerCase()));
+      const use=filtered.length?filtered:models;
+      model.innerHTML=use.map(x=>`<option value="${escV(x.valor)}">${escV(x.modelo)}</option>`).join('');
+      await loadYears();
+    }
+    async function loadYears(){
+      status.textContent='Carregando anos…';saveBtn.disabled=true;
+      const years=await fetchJSON(`${API}/anos/v1/${v.type}/${brand.value}/${model.value}`);
+      yr.innerHTML=years.map(x=>`<option value="${escV(x.valor)}">${escV(x.nome)}</option>`).join('');
+      status.textContent='Pronto para consultar o valor.';
+      saveBtn.disabled=!years.length;
+    }
+    brand.onchange=()=>loadModels().catch(showErr);
+    model.onchange=()=>loadYears().catch(showErr);
+    function showErr(e){status.textContent=e.message||'Erro na consulta FIPE.';status.classList.add('error')}
+    await loadModels();
+    saveBtn.onclick=async()=>{
+      try{
+        saveBtn.disabled=true;status.classList.remove('error');status.textContent='Consultando valor atual…';
+        const d=await fetchJSON(`${API}/detalhes/v1/${v.type}/${brand.value}/${model.value}/${encodeURIComponent(yr.value)}`);
+        v.fipe={
+          makerCode:brand.value,modelCode:model.value,yearCode:yr.value,
+          value:d.valor||'',model:d.modelo||model.options[model.selectedIndex]?.text||'',
+          yearName:yr.options[yr.selectedIndex]?.text||'',codigoFipe:d.codigoFipe||'',
+          reference:d.mesReferencia||'',checkedAt:new Date().toISOString()
+        };
+        save();render();ov.remove();
+        try{toast('FIPE atualizada.')}catch(e){}
+      }catch(e){showErr(e);saveBtn.disabled=false}
+    };
+  }catch(e){
+    status.textContent='Não foi possível acessar a FIPE agora. Verifique a internet e tente novamente.';
+    status.classList.add('error');
+  }
+}
+async function refreshFipe(id,force=false){
+  const v=data[id],f=v?.fipe;if(!f?.makerCode||!f?.modelCode||!f?.yearCode)return;
+  const age=f.checkedAt?Date.now()-new Date(f.checkedAt).getTime():Infinity;
+  if(!force&&age<24*60*60*1000)return;
+  try{
+    const d=await fetchJSON(`${API}/detalhes/v1/${v.type}/${f.makerCode}/${f.modelCode}/${encodeURIComponent(f.yearCode)}`);
+    Object.assign(f,{value:d.valor||f.value,model:d.modelo||f.model,codigoFipe:d.codigoFipe||f.codigoFipe,reference:d.mesReferencia||f.reference,checkedAt:new Date().toISOString()});
+    save();render();
+  }catch(e){}
+}
+function init(){
+  render();
+  setTimeout(()=>{refreshFipe('cobalt');refreshFipe('fazer')},1200);
+}
+window.ppVehicleV101={render,openVehicle,openMaintenance,openFipe,refreshFipe};
+
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});
+else init();
+})();
+</script>
 
