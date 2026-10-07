@@ -1584,6 +1584,94 @@ body.v86-ready #dashboard{visibility:visible!important}
 
 <div class="modalback" id="investmentModal"><div class="modal"><h2 id="investmentModalTitle">Novo investimento</h2><p>Organize por tipo: CDB, LCI/LCA, previdência, tesouro, ações e mais.</p><input type="hidden" id="iId"><div class="formgrid"><div class="field full"><label>Produto / nome</label><input id="iProduct"></div><div class="field"><label>Tipo</label><select id="iType"><option>CDB</option><option>LCI/LCA</option><option>Previdência privada</option><option>Tesouro Direto</option><option>Ações</option><option>Fundos</option><option>Caixinha / Reserva</option><option>A classificar</option></select></div><div class="field"><label>Instituição / banco</label><input id="iInstitution"></div><div class="field"><label>Ano</label><input id="iYear" type="number"></div><div class="field"><label>Capital aplicado</label><input id="iPrincipal" inputmode="decimal"></div><div class="field"><label>Valor atual</label><input id="iCurrent" inputmode="decimal"></div><div class="field"><label>Rendimento acumulado</label><input id="iYield" inputmode="decimal"></div><div class="field"><label>Status</label><select id="iStatus"><option>Ativo</option><option>Resgatado</option></select></div><div class="field full"><label>Observação</label><input id="iNote"></div></div><div class="modalfoot"><button class="ghost" data-close="investmentModal">Cancelar</button><button class="primary" id="saveInvestment">Salvar investimento</button></div></div></div>
 
+
+<section class="view v115-life-view" id="edu-overview" data-v115-site-view="educacao">
+  <div class="v115-site-hero">
+    <div><div class="v115-site-kicker">educação</div><h1>Aprender também é patrimônio.</h1><p>Organize sua trajetória acadêmica, formações e produção intelectual em um único espaço.</p></div>
+    <div class="v115-hero-symbol">⌁</div>
+  </div>
+  <div class="v115-overview-grid">
+    <button class="v115-overview-card" data-v115-open="edu-curriculo"><span>01</span><h3>Currículo</h3><p>Formação, experiência e competências.</p></button>
+    <button class="v115-overview-card" data-v115-open="edu-formacoes"><span>02</span><h3>Formações</h3><p>Graduações, especializações e cursos.</p></button>
+    <button class="v115-overview-card" data-v115-open="edu-publicacoes"><span>03</span><h3>Publicações</h3><p>Artigos, trabalhos e materiais produzidos.</p></button>
+  </div>
+  <div class="v115-wide-panel"><div><small>VISÃO DA SUA TRAJETÓRIA</small><h2>Seu desenvolvimento em perspectiva</h2></div><p>Este espaço será o painel central da sua evolução acadêmica e profissional.</p></div>
+</section>
+
+<section class="view v115-life-view" id="edu-curriculo" data-v115-site-view="educacao">
+  <div class="v115-page-head"><div><div class="v115-site-kicker">educação · currículo</div><h1>Currículo</h1><p>Sua trajetória reunida de forma clara e atualizável.</p></div></div>
+  <div class="v115-content-grid">
+    <article class="v115-panel"><span class="v115-num">01</span><h3>Formação acadêmica</h3><p>Organize graduações, pós-graduações e outras formações formais.</p><div class="v115-empty-state">Seus registros acadêmicos aparecerão aqui.</div></article>
+    <article class="v115-panel"><span class="v115-num">02</span><h3>Experiência profissional</h3><p>Consolide cargos, organizações, responsabilidades e resultados.</p><div class="v115-empty-state">Sua experiência profissional aparecerá aqui.</div></article>
+    <article class="v115-panel"><span class="v115-num">03</span><h3>Competências</h3><p>Conhecimentos, ferramentas, idiomas e competências desenvolvidas.</p><div class="v115-empty-state">Suas competências aparecerão aqui.</div></article>
+  </div>
+</section>
+
+<section class="view v115-life-view" id="edu-formacoes" data-v115-site-view="educacao">
+  <div class="v115-page-head"><div><div class="v115-site-kicker">educação · formações</div><h1>Formações</h1><p>Uma linha do tempo para cursos, certificados e desenvolvimento contínuo.</p></div></div>
+  <div class="v115-timeline-shell">
+    <div class="v115-timeline-empty"><span>⌁</span><h3>Sua jornada de aprendizagem</h3><p>Graduações, especializações, cursos livres e certificações poderão ser organizados aqui.</p></div>
+  </div>
+</section>
+
+<section class="view v115-life-view" id="edu-publicacoes" data-v115-site-view="educacao">
+  <div class="v115-page-head"><div><div class="v115-site-kicker">educação · publicações</div><h1>Publicações</h1><p>Seu acervo de produção intelectual e materiais publicados.</p></div></div>
+  <div class="v115-library-empty"><span>▤</span><h3>Biblioteca pessoal</h3><p>Artigos, capítulos, trabalhos acadêmicos e outras publicações poderão ser reunidos neste espaço.</p></div>
+</section>
+
+<section class="view v115-life-view" id="health-overview" data-v115-site-view="saude">
+  <div class="v115-site-hero">
+    <div><div class="v115-site-kicker">saúde</div><h1>Informação para cuidar melhor de você.</h1><p>Centralize seus exames e acompanhe sua saúde com organização e contexto.</p></div>
+    <div class="v115-hero-symbol">♡</div>
+  </div>
+  <div class="v115-health-strip">
+    <div><span>Exames cadastrados</span><b>0</b></div>
+    <div><span>Último exame</span><b>—</b></div>
+    <div><span>Próximo acompanhamento</span><b>—</b></div>
+  </div>
+  <button class="v115-wide-action" data-v115-open="health-exams"><span>Exames clínicos</span><b>Abrir histórico →</b></button>
+</section>
+
+<section class="view v115-life-view" id="health-exams" data-v115-site-view="saude">
+  <div class="v115-page-head"><div><div class="v115-site-kicker">saúde · exames clínicos</div><h1>Exames Clínicos</h1><p>Um histórico organizado para consultar resultados e acompanhar sua evolução.</p></div></div>
+  <div class="v115-library-empty"><span>＋</span><h3>Histórico de exames</h3><p>Seus exames clínicos poderão ser organizados por data, tipo e resultado neste espaço.</p></div>
+</section>
+
+<section class="view v115-life-view" id="ent-overview" data-v115-site-view="entretenimento">
+  <div class="v115-site-hero">
+    <div><div class="v115-site-kicker">entretenimento</div><h1>O que você vive também merece memória.</h1><p>Filmes, séries, livros e viagens em uma curadoria pessoal.</p></div>
+    <div class="v115-hero-symbol">▶</div>
+  </div>
+  <div class="v115-ent-grid">
+    <button data-v115-open="ent-filmes"><span>01</span><h3>Filmes</h3></button>
+    <button data-v115-open="ent-docs"><span>02</span><h3>Documentários</h3></button>
+    <button data-v115-open="ent-series"><span>03</span><h3>Séries</h3></button>
+    <button data-v115-open="ent-livros"><span>04</span><h3>Livros</h3></button>
+    <button data-v115-open="ent-viagens"><span>05</span><h3>Viagens</h3></button>
+  </div>
+</section>
+
+<section class="view v115-life-view" id="ent-filmes" data-v115-site-view="entretenimento">
+  <div class="v115-page-head"><div><div class="v115-site-kicker">entretenimento · filmes</div><h1>Filmes</h1><p>O que você assistiu, quer assistir e recomenda.</p></div></div>
+  <div class="v115-media-empty"><span>▶</span><h3>Sua coleção de filmes</h3><p>Favoritos, avaliações e lista para assistir poderão ficar aqui.</p></div>
+</section>
+<section class="view v115-life-view" id="ent-docs" data-v115-site-view="entretenimento">
+  <div class="v115-page-head"><div><div class="v115-site-kicker">entretenimento · documentários</div><h1>Documentários</h1><p>Histórias reais e conteúdos que você quer guardar.</p></div></div>
+  <div class="v115-media-empty"><span>▣</span><h3>Sua coleção de documentários</h3><p>Organize títulos assistidos e sua lista de interesse.</p></div>
+</section>
+<section class="view v115-life-view" id="ent-series" data-v115-site-view="entretenimento">
+  <div class="v115-page-head"><div><div class="v115-site-kicker">entretenimento · séries</div><h1>Séries</h1><p>Temporadas, episódios e o que ainda falta assistir.</p></div></div>
+  <div class="v115-media-empty"><span>▤</span><h3>Suas séries</h3><p>Seu acompanhamento de séries poderá ficar concentrado aqui.</p></div>
+</section>
+<section class="view v115-life-view" id="ent-livros" data-v115-site-view="entretenimento">
+  <div class="v115-page-head"><div><div class="v115-site-kicker">entretenimento · livros</div><h1>Livros</h1><p>Leituras concluídas, atuais e futuras.</p></div></div>
+  <div class="v115-media-empty"><span>▥</span><h3>Sua estante pessoal</h3><p>Organize leituras, notas e avaliações.</p></div>
+</section>
+<section class="view v115-life-view" id="ent-viagens" data-v115-site-view="entretenimento">
+  <div class="v115-page-head"><div><div class="v115-site-kicker">entretenimento · viagens</div><h1>Viagens</h1><p>Lugares vividos, planejados e desejados.</p></div></div>
+  <div class="v115-media-empty"><span>⌖</span><h3>Seu mapa de experiências</h3><p>Destinos, roteiros e memórias de viagem poderão ser organizados aqui.</p></div>
+</section>
+
 <div class="toast" id="toast"></div>
 
 <script id="pp-profile-data-bootstrap-v41">
@@ -2228,14 +2316,25 @@ function installLogin(){if(document.getElementById('loginOverlay'))return;let d=
 
 <div class="v98-login-side">
   <div class="v98-kicker">planejador pessoal</div>
-  <h2>Seu dinheiro.<br>Seu ritmo.<br>Seu próximo passo.</h2>
-  <p>Entre para continuar com uma visão clara do que você tem, do que compromete sua renda e do que vem pela frente.</p>
-  <div class="v98-impact">
-    <span>controle</span><span>clareza</span><span>futuro</span>
+  <h2>Seu dinheiro.<br>Sua vida.<br>Seu controle.</h2>
+  <p>Escolha como você quer entrar hoje e continue cuidando das diferentes áreas da sua vida em um só lugar.</p>
+  <div class="v115-login-sites" role="group" aria-label="Escolha a área">
+    <button type="button" class="v115-site-choice active" data-v115-login-site="financas">
+      <span class="v115-site-icon">R$</span><b>FINANÇAS</b>
+    </button>
+    <button type="button" class="v115-site-choice" data-v115-login-site="educacao">
+      <span class="v115-site-icon">⌁</span><b>EDUCAÇÃO</b>
+    </button>
+    <button type="button" class="v115-site-choice" data-v115-login-site="saude">
+      <span class="v115-site-icon">♡</span><b>SAÚDE</b>
+    </button>
+    <button type="button" class="v115-site-choice" data-v115-login-site="entretenimento">
+      <span class="v115-site-icon">▶</span><b>ENTRETENIMENTO</b>
+    </button>
   </div>
   <div class="v98-quote">
-    <b>Menos ruído. Mais direção.</b>
-    <small>Seu planejamento começa daqui.</small>
+    <b>Um lugar para organizar sua vida.</b>
+    <small>Finanças, educação, saúde e entretenimento.</small>
   </div>
 </div>
 
@@ -2248,11 +2347,11 @@ function installLogin(){if(document.getElementById('loginOverlay'))return;let d=
         <div class="v98-core">✦</div>
       </div>
       <div class="v98-load-kicker">planejador pessoal</div>
-      <h2>Preparando seu ambiente financeiro</h2>
+      <h2 class="v115-welcome-loading">Bem-vindo!</h2>
       <div class="v98-status-cycle" aria-live="polite">
-        <span>Sincronizando seus dados com segurança…</span>
-        <span>Organizando lançamentos e recorrências…</span>
-        <span>Quase pronto para o seu próximo passo…</span>
+        <span>Sincronizando seu ambiente com segurança…</span>
+        <span>Organizando suas informações pessoais…</span>
+        <span>Quase pronto para continuar…</span>
       </div>
       <div class="v98-progress"><i></i></div>
       <div class="login-success" id="loginSuccess"></div>
@@ -2737,14 +2836,25 @@ function reopenLogin(){
 
 <div class="v98-login-side">
   <div class="v98-kicker">planejador pessoal</div>
-  <h2>Seu dinheiro.<br>Seu ritmo.<br>Seu próximo passo.</h2>
-  <p>Entre para continuar com uma visão clara do que você tem, do que compromete sua renda e do que vem pela frente.</p>
-  <div class="v98-impact">
-    <span>controle</span><span>clareza</span><span>futuro</span>
+  <h2>Seu dinheiro.<br>Sua vida.<br>Seu controle.</h2>
+  <p>Escolha como você quer entrar hoje e continue cuidando das diferentes áreas da sua vida em um só lugar.</p>
+  <div class="v115-login-sites" role="group" aria-label="Escolha a área">
+    <button type="button" class="v115-site-choice active" data-v115-login-site="financas">
+      <span class="v115-site-icon">R$</span><b>FINANÇAS</b>
+    </button>
+    <button type="button" class="v115-site-choice" data-v115-login-site="educacao">
+      <span class="v115-site-icon">⌁</span><b>EDUCAÇÃO</b>
+    </button>
+    <button type="button" class="v115-site-choice" data-v115-login-site="saude">
+      <span class="v115-site-icon">♡</span><b>SAÚDE</b>
+    </button>
+    <button type="button" class="v115-site-choice" data-v115-login-site="entretenimento">
+      <span class="v115-site-icon">▶</span><b>ENTRETENIMENTO</b>
+    </button>
   </div>
   <div class="v98-quote">
-    <b>Menos ruído. Mais direção.</b>
-    <small>Seu planejamento começa daqui.</small>
+    <b>Um lugar para organizar sua vida.</b>
+    <small>Finanças, educação, saúde e entretenimento.</small>
   </div>
 </div>
 
@@ -2757,11 +2867,11 @@ function reopenLogin(){
         <div class="v98-core">✦</div>
       </div>
       <div class="v98-load-kicker">planejador pessoal</div>
-      <h2>Preparando seu ambiente financeiro</h2>
+      <h2 class="v115-welcome-loading">Bem-vindo!</h2>
       <div class="v98-status-cycle" aria-live="polite">
-        <span>Sincronizando seus dados com segurança…</span>
-        <span>Organizando lançamentos e recorrências…</span>
-        <span>Quase pronto para o seu próximo passo…</span>
+        <span>Sincronizando seu ambiente com segurança…</span>
+        <span>Organizando suas informações pessoais…</span>
+        <span>Quase pronto para continuar…</span>
       </div>
       <div class="v98-progress"><i></i></div>
       <div class="login-success" id="loginSuccess"></div>
@@ -26534,4 +26644,461 @@ window.ppCardGroupsV106={refresh:ensureGroups106};
   }
 }
 </style>
+
+<style id="pp-v115-life-hub-style">
+:root{
+  --v115-fin:#0b63f6;
+  --v115-edu:#7456e8;
+  --v115-health:#0d9b7a;
+  --v115-ent:#f07a28;
+  --v115-accent:#0b63f6;
+}
+
+/* LOGIN: quatro áreas maiores */
+#loginOverlay .v115-login-sites{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin-top:24px;
+}
+#loginOverlay .v115-site-choice{
+  min-height:72px;
+  border-radius:17px;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.055);
+  color:rgba(255,255,255,.70);
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:6px;
+  padding:11px 13px;
+  transition:.18s ease;
+}
+#loginOverlay .v115-site-choice:hover{
+  transform:translateY(-1px);
+  background:rgba(255,255,255,.08);
+}
+#loginOverlay .v115-site-choice .v115-site-icon{
+  width:31px;height:31px;
+  display:grid;place-items:center;
+  border-radius:11px;
+  font-size:13px;
+  font-weight:950;
+  background:rgba(255,255,255,.08);
+}
+#loginOverlay .v115-site-choice b{
+  font-size:9px;
+  letter-spacing:.07em;
+}
+#loginOverlay .v115-site-choice.active[data-v115-login-site="financas"]{
+  border-color:#29a8ff;background:rgba(11,99,246,.20);color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(41,168,255,.25);
+}
+#loginOverlay .v115-site-choice.active[data-v115-login-site="educacao"]{
+  border-color:#9d88ff;background:rgba(116,86,232,.22);color:#fff;
+}
+#loginOverlay .v115-site-choice.active[data-v115-login-site="saude"]{
+  border-color:#45dfbc;background:rgba(13,155,122,.22);color:#fff;
+}
+#loginOverlay .v115-site-choice.active[data-v115-login-site="entretenimento"]{
+  border-color:#ffaf72;background:rgba(240,122,40,.22);color:#fff;
+}
+#loginOverlay .v98-impact{display:none!important}
+
+/* seletor global de site */
+#v115TopSiteButton,
+#v115SitePod{
+  border:1px solid rgba(255,255,255,.13);
+  font-weight:900;
+  cursor:pointer;
+}
+#v115TopSiteButton{
+  min-height:36px;
+  border-radius:12px;
+  background:#eef4fb;
+  color:#21405f;
+  padding:7px 11px;
+  font-size:9px;
+  letter-spacing:.04em;
+  white-space:nowrap;
+}
+#v115SitePod{
+  position:fixed;
+  right:70px;
+  top:18px;
+  z-index:96;
+  height:48px;
+  min-width:112px;
+  padding:0 13px;
+  border-radius:16px;
+  background:linear-gradient(145deg,#123d7b,#0a2858);
+  color:#fff;
+  box-shadow:0 16px 44px rgba(8,31,70,.26);
+  transform:translateY(-90px);
+  opacity:0;
+  pointer-events:none;
+  transition:transform .28s cubic-bezier(.2,.8,.2,1),opacity .22s ease;
+  font-size:9px;
+  letter-spacing:.05em;
+}
+body.v76-split-header #v115SitePod{
+  transform:translateY(0);
+  opacity:1;
+  pointer-events:auto;
+}
+#v115SiteMenu{
+  position:fixed;
+  z-index:210000;
+  right:14px;
+  top:74px;
+  width:250px;
+  padding:8px;
+  border-radius:18px;
+  background:#fff;
+  border:1px solid #dfe6ee;
+  box-shadow:0 24px 64px rgba(15,23,42,.20);
+  display:none;
+}
+#v115SiteMenu.open{display:grid;gap:5px}
+#v115SiteMenu button{
+  display:grid;
+  grid-template-columns:36px 1fr;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  padding:10px;
+  border:0;
+  border-radius:12px;
+  background:transparent;
+  text-align:left;
+  color:#344054;
+}
+#v115SiteMenu button:hover{background:#f4f7fb}
+#v115SiteMenu button.active{background:#edf4ff;color:var(--v115-accent)}
+#v115SiteMenu .ico{
+  width:34px;height:34px;border-radius:11px;background:#eef2f7;
+  display:grid;place-items:center;font-weight:950;
+}
+#v115SiteMenu b{display:block;font-size:10px}
+#v115SiteMenu small{display:block;margin-top:2px;font-size:8px;color:#8a94a3}
+
+/* cores por site */
+body[data-v115-site="financas"]{--v115-accent:var(--v115-fin)}
+body[data-v115-site="educacao"]{--v115-accent:var(--v115-edu)}
+body[data-v115-site="saude"]{--v115-accent:var(--v115-health)}
+body[data-v115-site="entretenimento"]{--v115-accent:var(--v115-ent)}
+body[data-v115-site="educacao"] #v76FloatNav,
+body[data-v115-site="educacao"] #v76ProfilePod,
+body[data-v115-site="educacao"] #v115SitePod{background:linear-gradient(180deg,#4e3aaa,#2f256f)}
+body[data-v115-site="saude"] #v76FloatNav,
+body[data-v115-site="saude"] #v76ProfilePod,
+body[data-v115-site="saude"] #v115SitePod{background:linear-gradient(180deg,#087c64,#075746)}
+body[data-v115-site="entretenimento"] #v76FloatNav,
+body[data-v115-site="entretenimento"] #v76ProfilePod,
+body[data-v115-site="entretenimento"] #v115SitePod{background:linear-gradient(180deg,#c95d16,#8c3b0e)}
+
+/* novas páginas */
+.v115-life-view{
+  min-height:calc(100vh - 150px);
+}
+.v115-site-hero{
+  min-height:210px;
+  margin:8px 0 14px;
+  padding:25px 27px;
+  border-radius:28px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:24px;
+  overflow:hidden;
+  position:relative;
+  color:#fff;
+  background:
+    radial-gradient(circle at 84% 20%,rgba(255,255,255,.18),transparent 24%),
+    linear-gradient(135deg,color-mix(in srgb,var(--v115-accent) 75%,#10223d),var(--v115-accent));
+  box-shadow:0 20px 46px color-mix(in srgb,var(--v115-accent) 18%,transparent);
+}
+.v115-site-hero:after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),
+             linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:38px 38px;pointer-events:none;
+}
+.v115-site-hero>*{position:relative;z-index:1}
+.v115-site-kicker{
+  color:var(--v115-accent);
+  font-size:9px;font-weight:950;letter-spacing:.14em;text-transform:uppercase
+}
+.v115-site-hero .v115-site-kicker{color:rgba(255,255,255,.72)}
+.v115-site-hero h1,.v115-page-head h1{
+  margin:8px 0 5px;
+  font-size:34px;
+  letter-spacing:-.045em;
+}
+.v115-site-hero p,.v115-page-head p{margin:0;max-width:620px;color:rgba(255,255,255,.72);font-size:11px;line-height:1.55}
+.v115-page-head p{color:#7a8697}
+.v115-hero-symbol{
+  width:92px;height:92px;border-radius:28px;
+  background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.13);
+  display:grid;place-items:center;font-size:34px;font-weight:900;
+}
+.v115-overview-grid,.v115-content-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px
+}
+.v115-overview-card,.v115-ent-grid button{
+  text-align:left;border:1px solid #e0e6ee;background:linear-gradient(180deg,#fff,#f7f9fc);
+  padding:17px;border-radius:20px;min-height:138px;color:#172033;
+  box-shadow:0 9px 22px rgba(15,23,42,.045);transition:.18s ease
+}
+.v115-overview-card:hover,.v115-ent-grid button:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--v115-accent) 35%,#dfe6ee)}
+.v115-overview-card span,.v115-ent-grid button span,.v115-num{
+  color:var(--v115-accent);font-size:9px;font-weight:950;letter-spacing:.09em
+}
+.v115-overview-card h3,.v115-ent-grid h3{margin:22px 0 5px;font-size:17px}
+.v115-overview-card p{margin:0;color:#7a8697;font-size:10px}
+.v115-wide-panel{
+  margin-top:10px;padding:18px 20px;border-radius:20px;background:#eef2f7;
+  display:flex;justify-content:space-between;align-items:center;gap:20px
+}
+.v115-wide-panel small{font-size:8px;color:var(--v115-accent);font-weight:950;letter-spacing:.09em}
+.v115-wide-panel h2{margin:5px 0 0;font-size:18px}
+.v115-wide-panel p{margin:0;max-width:430px;color:#758193;font-size:10px}
+.v115-page-head{margin:8px 0 14px;padding:8px 2px}
+.v115-page-head h1{color:#172033}
+.v115-panel{
+  min-height:220px;padding:18px;border-radius:20px;background:#fff;border:1px solid #e1e7ef;
+  box-shadow:0 9px 22px rgba(15,23,42,.045)
+}
+.v115-panel h3{margin:22px 0 6px;font-size:16px}.v115-panel p{margin:0;color:#7b8797;font-size:10px;line-height:1.5}
+.v115-empty-state{
+  margin-top:22px;padding:13px;border-radius:14px;background:#f3f6fa;color:#8791a1;font-size:9px
+}
+.v115-timeline-shell,.v115-library-empty,.v115-media-empty{
+  min-height:330px;border-radius:24px;background:linear-gradient(180deg,#fff,#f7f9fc);
+  border:1px solid #e0e6ee;display:grid;place-items:center;padding:30px;text-align:center;
+  box-shadow:0 10px 26px rgba(15,23,42,.045)
+}
+.v115-timeline-empty span,.v115-library-empty>span,.v115-media-empty>span{
+  width:62px;height:62px;border-radius:20px;background:color-mix(in srgb,var(--v115-accent) 10%,#fff);
+  color:var(--v115-accent);display:grid;place-items:center;margin:0 auto 14px;font-size:24px
+}
+.v115-timeline-empty h3,.v115-library-empty h3,.v115-media-empty h3{margin:0;font-size:18px}
+.v115-timeline-empty p,.v115-library-empty p,.v115-media-empty p{margin:7px auto 0;max-width:460px;color:#7c8798;font-size:10px;line-height:1.5}
+.v115-health-strip{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:10px
+}
+.v115-health-strip>div{
+  padding:16px;border-radius:18px;background:#fff;border:1px solid #e0e7ee
+}
+.v115-health-strip span{display:block;font-size:8px;color:#7b8797}.v115-health-strip b{display:block;margin-top:5px;font-size:20px;color:#173047}
+.v115-wide-action{
+  width:100%;min-height:72px;padding:14px 17px;border-radius:20px;border:0;
+  background:linear-gradient(135deg,#0e775f,#0da67d);color:#fff;display:flex;justify-content:space-between;align-items:center
+}
+.v115-wide-action span{font-size:14px;font-weight:900}.v115-wide-action b{font-size:10px}
+.v115-ent-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+.v115-ent-grid button{min-height:120px}
+.v115-ent-grid h3{margin-top:35px}
+
+/* novos ícones de navegação */
+#v76FloatNav button[data-view^="edu-"]:before{content:"⌁"}
+#v76FloatNav button[data-view^="health-"]:before{content:"♡"}
+#v76FloatNav button[data-view="ent-overview"]:before{content:"▶"}
+#v76FloatNav button[data-view="ent-filmes"]:before{content:"▷"}
+#v76FloatNav button[data-view="ent-docs"]:before{content:"▣"}
+#v76FloatNav button[data-view="ent-series"]:before{content:"▤"}
+#v76FloatNav button[data-view="ent-livros"]:before{content:"▥"}
+#v76FloatNav button[data-view="ent-viagens"]:before{content:"⌖"}
+
+@media(max-width:900px){
+  .v115-overview-grid,.v115-content-grid{grid-template-columns:1fr}
+  .v115-ent-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  #loginOverlay .v115-login-sites{grid-template-columns:1fr 1fr}
+  #loginOverlay .v115-site-choice{min-height:62px;padding:9px}
+  #v115SitePod{display:none!important}
+  #v115TopSiteButton{font-size:0;width:38px;padding:0}
+  #v115TopSiteButton:before{content:"◆";font-size:13px}
+  .v115-site-hero{min-height:190px;padding:20px;align-items:flex-start}
+  .v115-site-hero h1,.v115-page-head h1{font-size:28px}
+  .v115-hero-symbol{width:58px;height:58px;border-radius:18px;font-size:22px}
+  .v115-health-strip{grid-template-columns:1fr}
+  .v115-ent-grid{grid-template-columns:1fr}
+}
+</style>
+
+
+<script id="pp-v115-life-hub">
+(()=>{
+'use strict';
+
+const SITE_KEY='pp_active_site_v115';
+const sites={
+  financas:{label:'FINANÇAS',icon:'R$',home:'dashboard',sub:'Planejamento financeiro'},
+  educacao:{label:'EDUCAÇÃO',icon:'⌁',home:'edu-overview',sub:'Trajetória e aprendizagem'},
+  saude:{label:'SAÚDE',icon:'♡',home:'health-overview',sub:'Exames e acompanhamento'},
+  entretenimento:{label:'ENTRETENIMENTO',icon:'▶',home:'ent-overview',sub:'Cultura, leitura e viagens'}
+};
+const siteNav={
+  educacao:[['edu-overview','Visão Geral'],['edu-curriculo','Currículo'],['edu-formacoes','Formações'],['edu-publicacoes','Publicações']],
+  saude:[['health-overview','Visão Geral'],['health-exams','Exames Clínicos']],
+  entretenimento:[['ent-overview','Visão Geral'],['ent-filmes','Filmes'],['ent-docs','Documentários'],['ent-series','Séries'],['ent-livros','Livros'],['ent-viagens','Viagens']]
+};
+function activeProfile115(){
+  return localStorage.getItem('planejador_active_profile')||'Marcos';
+}
+function profileSiteKey115(profile){return `${SITE_KEY}_${String(profile||'Marcos').toLowerCase()}`}
+function safeSite115(v){return sites[v]?v:'financas'}
+function savedSite115(profile){
+  return safeSite115(localStorage.getItem(profileSiteKey115(profile))||localStorage.getItem(SITE_KEY)||'financas');
+}
+function setSavedSite115(site,profile){
+  site=safeSite115(site);
+  localStorage.setItem(SITE_KEY,site);
+  localStorage.setItem(profileSiteKey115(profile||activeProfile115()),site);
+}
+function ensureNav115(){
+  const nav=document.getElementById('nav');
+  if(!nav)return;
+  [...nav.querySelectorAll('button[data-view]')].forEach(b=>{
+    if(!b.dataset.v115Site)b.dataset.v115Site='financas';
+  });
+  Object.entries(siteNav).forEach(([site,items])=>{
+    items.forEach(([id,label])=>{
+      if(nav.querySelector(`button[data-view="${id}"]`))return;
+      const b=document.createElement('button');
+      b.type='button';b.dataset.view=id;b.dataset.v115Site=site;b.textContent=label;
+      nav.appendChild(b);
+    });
+  });
+}
+function openView115(id){
+  try{
+    if(window.ppNavV87?.open){window.ppNavV87.open(id);return}
+    if(typeof window.showView==='function'){window.showView(id);return}
+  }catch(e){}
+  document.querySelectorAll('.main > .view').forEach(v=>{
+    const on=v.id===id;
+    v.classList.toggle('active',on);
+    v.style.setProperty('display',on?'block':'none','important');
+    v.style.setProperty('visibility',on?'visible':'hidden','important');
+  });
+  document.querySelectorAll('#nav button[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
+}
+function rebuildFloatNav115(site){
+  const rail=document.getElementById('v76FloatNav');
+  if(!rail)return;
+  rail.innerHTML='';
+  document.querySelectorAll(`#nav button[data-view][data-v115-site="${site}"]`).forEach(src=>{
+    const b=document.createElement('button');
+    b.type='button';b.dataset.view=src.dataset.view;b.title=src.textContent.trim();b.setAttribute('aria-label',src.textContent.trim());
+    if(src.classList.contains('active'))b.classList.add('active');
+    b.onclick=()=>{openView115(b.dataset.view);setTimeout(()=>rebuildFloatNav115(site),20)};
+    rail.appendChild(b);
+  });
+}
+function updateSwitchers115(site){
+  const meta=sites[site];
+  const top=document.getElementById('v115TopSiteButton');
+  const pod=document.getElementById('v115SitePod');
+  if(top)top.textContent=`${meta.icon} ${meta.label}`;
+  if(pod)pod.textContent=`${meta.icon}  ${meta.label}`;
+  document.querySelectorAll('#v115SiteMenu button[data-v115-site]').forEach(b=>b.classList.toggle('active',b.dataset.v115Site===site));
+}
+function applySite115(site,openHome=true){
+  site=safeSite115(site);
+  setSavedSite115(site);
+  document.body.dataset.v115Site=site;
+  ensureNav115();
+  document.querySelectorAll('#nav button[data-view]').forEach(b=>{
+    b.style.display=b.dataset.v115Site===site?'':'none';
+  });
+  const finance=site==='financas';
+  document.querySelectorAll('.topbar .actions #backupBtn,.topbar .actions [data-addtx]').forEach(el=>el.style.display=finance?'':'none');
+  updateSwitchers115(site);
+  setTimeout(()=>rebuildFloatNav115(site),0);
+  if(openHome)openView115(sites[site].home);
+  document.getElementById('v115SiteMenu')?.classList.remove('open');
+}
+function ensureSwitchers115(){
+  const topinner=document.querySelector('.topinner');
+  if(topinner && !document.getElementById('v115TopSiteButton')){
+    const b=document.createElement('button');
+    b.id='v115TopSiteButton';b.type='button';
+    const actions=topinner.querySelector('.actions');
+    topinner.insertBefore(b,actions||null);
+    b.onclick=toggleSiteMenu115;
+  }
+  if(!document.getElementById('v115SitePod')){
+    const b=document.createElement('button');b.id='v115SitePod';b.type='button';b.onclick=toggleSiteMenu115;document.body.appendChild(b);
+  }
+  if(!document.getElementById('v115SiteMenu')){
+    const m=document.createElement('div');m.id='v115SiteMenu';
+    m.innerHTML=Object.entries(sites).map(([id,x])=>`<button type="button" data-v115-site="${id}"><span class="ico">${x.icon}</span><span><b>${x.label}</b><small>${x.sub}</small></span></button>`).join('');
+    document.body.appendChild(m);
+    m.querySelectorAll('[data-v115-site]').forEach(b=>b.onclick=()=>applySite115(b.dataset.v115Site,true));
+  }
+}
+function toggleSiteMenu115(e){
+  e?.stopPropagation();
+  document.getElementById('v115SiteMenu')?.classList.toggle('open');
+}
+function chosenLoginProfile115(overlay){
+  return overlay?.querySelector('.profile-choice.active')?.dataset.profile||activeProfile115();
+}
+function syncLogin115(overlay){
+  if(!overlay)return;
+  const profile=chosenLoginProfile115(overlay);
+  const selected=savedSite115(profile);
+  overlay.dataset.v115Site=selected;
+  overlay.querySelectorAll('[data-v115-login-site]').forEach(b=>b.classList.toggle('active',b.dataset.v115LoginSite===selected));
+  const h=overlay.querySelector('.v115-welcome-loading');
+  if(h)h.textContent=`Bem-vindo, ${profile}!`;
+}
+document.addEventListener('click',e=>{
+  const siteChoice=e.target.closest?.('[data-v115-login-site]');
+  if(siteChoice){
+    const overlay=siteChoice.closest('#loginOverlay');
+    const site=safeSite115(siteChoice.dataset.v115LoginSite);
+    const profile=chosenLoginProfile115(overlay);
+    setSavedSite115(site,profile);
+    overlay.dataset.v115Site=site;
+    overlay.querySelectorAll('[data-v115-login-site]').forEach(b=>b.classList.toggle('active',b===siteChoice));
+    applySite115(site,true);
+    return;
+  }
+  const profileChoice=e.target.closest?.('#loginOverlay .profile-choice');
+  if(profileChoice){
+    setTimeout(()=>syncLogin115(profileChoice.closest('#loginOverlay')),0);
+    return;
+  }
+  const opener=e.target.closest?.('[data-v115-open]');
+  if(opener){openView115(opener.dataset.v115Open);return}
+  if(!e.target.closest?.('#v115SiteMenu,#v115SitePod,#v115TopSiteButton'))document.getElementById('v115SiteMenu')?.classList.remove('open');
+},false);
+
+/* Observa apenas a criação do overlay de login, sem observar a aplicação inteira. */
+const loginHostObserver=new MutationObserver(records=>{
+  for(const r of records){
+    for(const n of r.addedNodes){
+      if(n?.nodeType===1 && (n.id==='loginOverlay'||n.querySelector?.('#loginOverlay'))){
+        const overlay=n.id==='loginOverlay'?n:n.querySelector('#loginOverlay');
+        syncLogin115(overlay);
+      }
+    }
+  }
+});
+loginHostObserver.observe(document.body,{childList:true});
+
+ensureNav115();
+ensureSwitchers115();
+const initial=savedSite115(activeProfile115());
+applySite115(initial,true);
+setTimeout(()=>syncLogin115(document.getElementById('loginOverlay')),40);
+
+window.ppSiteV115={apply:applySite115,current:()=>safeSite115(document.body.dataset.v115Site||savedSite115(activeProfile115()))};
+})();
+</script>
 
