@@ -25319,30 +25319,27 @@ function cardChipMarkup105(c,selectedId){
   const available=Number(stat.available||0)||0;
   const limit=Number(c?.limit||0)||0;
   const used=Math.max(0,limit-available);
-  const usedPct=limit>0?Math.max(0,Math.min(100,(used/limit)*100)):0;
+  const pct=limit>0?Math.max(0,Math.min(100,(used/limit)*100)):0;
   const isSelected=String(c.id)===String(selectedId);
-  const meta=(category105(c)==='bandeirado'?(c.brand||c.cardType||'Cartão'):(c.cardType||'Cartão'));
-  return `<div class="v111-card-item ${isSelected?'active':''}">
-    <button type="button" class="v105-card-chip v109-line-chip v111-card-main ${isSelected?'active':''}" data-v105-card="${String(c.id).replace(/"/g,'&quot;')}">
-      <span class="v109-line-left">
-        <span class="v109-line-name">${String(c.name||'Cartão').replace(/[<>&]/g,'')}</span>
-        <span class="v109-line-meta">${String(meta||'').replace(/[<>&]/g,'')}</span>
+  const cat=category105(c);
+  const catLabel=cat==='bandeirado'?'Bandeirado':cat==='loja'?'Loja':'Crediário';
+  const meta=cat==='bandeirado'?(c.brand||c.cardType||'Cartão'):(c.cardType||'Cartão');
+  return `<article class="v112-carousel-card ${isSelected?'active':''} v112-${cat}" data-v112-id="${String(c.id).replace(/"/g,'&quot;')}">
+    <button type="button" class="v112-card-select" data-v105-card="${String(c.id).replace(/"/g,'&quot;')}">
+      <span class="v112-card-top">
+        <span class="v112-card-category">${catLabel}</span>
+        <span class="v112-card-limit">${money105(limit)}</span>
       </span>
-      <span class="v111-credit-row">
-        <span class="v109-line-track">
-          <i style="width:${usedPct}%"></i>
-        </span>
-        <span class="v111-card-menu-wrap">
-          <button type="button" class="v111-card-more" data-v111-menu="${String(c.id).replace(/"/g,'&quot;')}" aria-label="Ações do cartão">⋯</button>
-        </span>
-      </span>
-      <span class="v111-card-values">
-        <span><small>Utilizado</small><b>${money105(used)}</b></span>
-        <span><small>Disponível</small><b class="${available<0?'negative':''}">${money105(available)}</b></span>
-        <span class="v111-limit-total"><small>Limite</small><b>${money105(limit)}</b></span>
+      <span class="v112-card-name">${String(c.name||'Cartão').replace(/[<>&]/g,'')}</span>
+      <span class="v112-card-meta">${String(meta||'').replace(/[<>&]/g,'')}</span>
+      <span class="v112-card-track"><i style="width:${pct}%"></i></span>
+      <span class="v112-card-foot">
+        <small>Utilizado <b>${money105(used)}</b></small>
+        <small>Disponível <b class="${available<0?'negative':''}">${money105(available)}</b></small>
       </span>
     </button>
-  </div>`;
+    <button type="button" class="v112-more" data-v111-menu="${String(c.id).replace(/"/g,'&quot;')}" aria-label="Ações do cartão">⋯</button>
+  </article>`;
 }
 
 function renderGroups105(){
@@ -25366,30 +25363,44 @@ function renderGroups105(){
     return true;
   });
 
-  const groups=[
-    ['bandeirado','Bandeirados'],
-    ['loja','Lojas'],
-    ['crediario','Crediário']
-  ];
+  let selected=(cards||[]).find(c=>String(c.id)===String(selectedId));
+  if(!selected && visible.length) selected=visible[0];
 
-  host.innerHTML=`<article class="v111-master-card">
-    ${groups.map(([cat])=>{
-      const list=visible.filter(c=>category105(c)===cat);
-      const stats=groupStats105(list);
-      return `<section class="v111-category-section" data-v111-category="${cat}">
-        <div class="v111-category-head">
-          <div>${groupHeader105(cat)}</div>
-          <div class="v107-group-credit">
-            <span>Limite total <b>${typeof brl==='function'?brl(stats.total):stats.total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</b></span>
-            <span>Disponível <b class="${stats.available<0?'negative':''}">${typeof brl==='function'?brl(stats.available):stats.available.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</b></span>
-          </div>
-        </div>
-        <div class="v105-group-list v111-three-grid">
-          ${list.length?list.map(c=>cardChipMarkup105(c,selectedId)).join(''):'<span class="v105-empty">Nenhum cartão nesta categoria.</span>'}
-        </div>
-      </section>`;
-    }).join('')}
-  </article>`;
+  let selectedStats={pending:0,available:Number(selected?.limit||0)||0};
+  try{if(selected)selectedStats=getCardStats(selected)||selectedStats}catch(e){}
+  const selectedLimit=Number(selected?.limit||0)||0;
+  const selectedAvailable=Number(selectedStats.available||0)||0;
+  const selectedUsed=Math.max(0,selectedLimit-selectedAvailable);
+  const selectedPct=selectedLimit>0?Math.max(0,Math.min(100,(selectedUsed/selectedLimit)*100)):0;
+
+  host.innerHTML=`<section class="v112-carousel-shell">
+    <button type="button" class="v112-arrow v112-prev" aria-label="Cartões anteriores">‹</button>
+    <div class="v112-carousel-track" id="v112CardTrack">
+      ${visible.length?visible.map(c=>cardChipMarkup105(c,selected?.id)).join(''):'<div class="v112-empty">Nenhum cartão disponível.</div>'}
+    </div>
+    <button type="button" class="v112-arrow v112-next" aria-label="Próximos cartões">›</button>
+  </section>
+  ${selected?`<section class="v112-selected-summary">
+    <div class="v112-summary-head">
+      <div>
+        <span>Cartão selecionado</span>
+        <h3>${String(selected.name||'Cartão').replace(/[<>&]/g,'')}</h3>
+      </div>
+      <div class="v112-summary-category">${category105(selected)==='bandeirado'?'Bandeirado':category105(selected)==='loja'?'Loja':'Crediário'}</div>
+    </div>
+    <div class="v112-summary-body">
+      <div class="v112-summary-track"><i style="width:${selectedPct}%"></i></div>
+      <div class="v112-summary-values">
+        <div><span>Limite utilizado</span><b>${money105(selectedUsed)}</b></div>
+        <div><span>Limite disponível</span><b class="${selectedAvailable<0?'negative':''}">${money105(selectedAvailable)}</b></div>
+        <div><span>Limite total</span><b>${money105(selectedLimit)}</b></div>
+      </div>
+    </div>
+  </section>`:''}`;
+
+  const track=host.querySelector('#v112CardTrack');
+  host.querySelector('.v112-prev')?.addEventListener('click',()=>track?.scrollBy({left:-Math.max(260,track.clientWidth*.78),behavior:'smooth'}));
+  host.querySelector('.v112-next')?.addEventListener('click',()=>track?.scrollBy({left:Math.max(260,track.clientWidth*.78),behavior:'smooth'}));
 
   host.querySelectorAll('[data-v105-card]').forEach(btn=>{
     btn.onclick=e=>{
@@ -25413,10 +25424,16 @@ function renderGroups105(){
           return;
         }
       }catch(_){}
-      const c=(cards||[]).find(x=>String(x.id)===String(id));
-      if(c)window.openCard?.(id);
+      try{window.openCard?.(id)}catch(_){}
     };
   });
+
+  if(selected){
+    setTimeout(()=>{
+      const active=host.querySelector(`.v112-carousel-card[data-v112-id="${CSS.escape(String(selected.id))}"]`);
+      active?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    },0);
+  }
 }
 function decorateCardArt105(){
   const selectedId=currentSelected105();
@@ -26131,6 +26148,279 @@ window.ppCardGroupsV106={refresh:ensureGroups106};
   #cartoes .v111-category-head .v107-group-credit{
     text-align:left!important;
   }
+}
+</style>
+
+<style id="pp-v112-horizontal-card-carousel">
+/* mantém escondidos os blocos antigos; as faturas abaixo permanecem intactas */
+#cartoes #cardSummary,
+#cartoes #cardsCleanRoot .clean-detail,
+#cartoes #cardsCleanRoot .clean-main-card,
+#cartoes #cardsCleanRoot .clean-side,
+#cartoes .clean-cards-grid-wrap{display:none!important}
+
+#cartoes #v105CardGroups{
+  display:block!important;
+  width:100%!important;
+  margin:0 0 12px!important;
+}
+
+/* carrossel principal, horizontal e compacto */
+#cartoes .v112-carousel-shell{
+  position:relative;
+  width:100%;
+  padding:12px 42px;
+  border-radius:23px;
+  background:
+    radial-gradient(circle at 8% 0%,rgba(15,99,246,.08),transparent 26%),
+    linear-gradient(180deg,#ffffff 0%,#f6f8fb 100%);
+  border:1px solid #dce4ed;
+  box-shadow:0 12px 30px rgba(15,23,42,.06);
+  overflow:hidden;
+}
+#cartoes .v112-carousel-track{
+  display:flex;
+  gap:9px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  padding:2px;
+}
+#cartoes .v112-carousel-track::-webkit-scrollbar{display:none}
+
+#cartoes .v112-arrow{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  z-index:5;
+  width:31px;height:48px;
+  border:1px solid #d9e2ec;
+  border-radius:12px;
+  background:rgba(255,255,255,.94);
+  color:#344054;
+  font-size:25px;
+  line-height:1;
+  display:grid;
+  place-items:center;
+  box-shadow:0 8px 20px rgba(15,23,42,.08);
+}
+#cartoes .v112-prev{left:7px}
+#cartoes .v112-next{right:7px}
+#cartoes .v112-arrow:hover{background:#eef4fb;color:#0b63f6}
+
+/* cartão do carrossel */
+#cartoes .v112-carousel-card{
+  position:relative;
+  flex:0 0 235px;
+  min-width:235px;
+  height:126px;
+  scroll-snap-align:center;
+  border-radius:18px;
+  overflow:hidden;
+  background:linear-gradient(145deg,#ffffff,#f1f4f8);
+  border:1px solid #dbe3ec;
+  box-shadow:0 5px 16px rgba(15,23,42,.055);
+  transition:.18s ease;
+}
+#cartoes .v112-carousel-card.v112-bandeirado{
+  background:linear-gradient(145deg,#f8fbff,#eef5ff);
+}
+#cartoes .v112-carousel-card.v112-loja{
+  background:linear-gradient(145deg,#fffaf5,#fff1e5);
+}
+#cartoes .v112-carousel-card.v112-crediario{
+  background:linear-gradient(145deg,#faf8ff,#f1edff);
+}
+#cartoes .v112-carousel-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 12px 24px rgba(15,23,42,.09);
+}
+#cartoes .v112-carousel-card.active{
+  border:1.5px solid #0b63f6;
+  box-shadow:0 13px 28px rgba(11,99,246,.16);
+}
+
+#cartoes .v112-card-select{
+  width:100%;
+  height:100%;
+  padding:11px 12px 10px;
+  border:0;
+  background:transparent;
+  text-align:left;
+  color:#172033;
+  display:flex;
+  flex-direction:column;
+}
+#cartoes .v112-card-top{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+#cartoes .v112-card-category{
+  padding:3px 7px;
+  border-radius:999px;
+  background:rgba(23,48,82,.06);
+  font-size:7px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#5d6b7b;
+}
+#cartoes .v112-card-limit{
+  font-size:9px;
+  font-weight:900;
+  color:#26364a;
+}
+#cartoes .v112-card-name{
+  display:block;
+  margin-top:8px;
+  padding-right:24px;
+  font-size:13px;
+  font-weight:950;
+  color:#172033;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#cartoes .v112-card-meta{
+  display:block;
+  margin-top:2px;
+  padding-right:24px;
+  font-size:8px;
+  color:#7b8797;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#cartoes .v112-card-track{
+  display:block;
+  height:7px;
+  margin-top:auto;
+  border-radius:999px;
+  background:#dfe6ee;
+  overflow:hidden;
+}
+#cartoes .v112-card-track i{
+  display:block;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#20b875,#24a8ec 62%,#0b63f6);
+}
+#cartoes .v112-card-foot{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:6px;
+}
+#cartoes .v112-card-foot small{
+  font-size:6.8px;
+  color:#7e8998;
+  font-weight:800;
+}
+#cartoes .v112-card-foot b{
+  margin-left:2px;
+  font-size:8px;
+  color:#26364a;
+}
+#cartoes .v112-card-foot b.negative{color:#b42318!important}
+
+#cartoes .v112-more{
+  position:absolute;
+  right:8px;
+  top:38px;
+  width:26px;height:26px;
+  padding:0;
+  display:grid;place-items:center;
+  border:1px solid rgba(120,137,158,.22);
+  border-radius:9px;
+  background:rgba(255,255,255,.84);
+  color:#475467;
+  font-size:17px;
+  line-height:1;
+}
+#cartoes .v112-more:hover{background:#fff;color:#0b63f6}
+
+/* resumo horizontal do cartão selecionado */
+#cartoes .v112-selected-summary{
+  display:grid;
+  grid-template-columns:minmax(170px,.65fr) minmax(0,1.35fr);
+  gap:18px;
+  align-items:center;
+  margin-top:9px;
+  padding:11px 14px;
+  border-radius:18px;
+  background:linear-gradient(100deg,#132a47 0%,#174b79 50%,#0b63f6 100%);
+  color:#fff;
+  box-shadow:0 10px 24px rgba(17,55,98,.14);
+}
+#cartoes .v112-summary-head span{
+  display:block;
+  font-size:7px;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  color:rgba(255,255,255,.62);
+  font-weight:900;
+}
+#cartoes .v112-summary-head h3{
+  margin:3px 0 0;
+  font-size:15px;
+  color:#fff;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#cartoes .v112-summary-category{
+  display:inline-flex;
+  margin-top:5px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:rgba(255,255,255,.13);
+  font-size:7px;
+  font-weight:900;
+}
+#cartoes .v112-summary-body{min-width:0}
+#cartoes .v112-summary-track{
+  height:7px;
+  border-radius:999px;
+  overflow:hidden;
+  background:rgba(255,255,255,.17);
+}
+#cartoes .v112-summary-track i{
+  display:block;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#7ff4ce,#7ed8ff,#fff);
+}
+#cartoes .v112-summary-values{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:8px;
+}
+#cartoes .v112-summary-values span{
+  display:block;
+  font-size:7px;
+  color:rgba(255,255,255,.62);
+}
+#cartoes .v112-summary-values b{
+  display:block;
+  margin-top:2px;
+  font-size:11px;
+  color:#fff;
+}
+#cartoes .v112-summary-values b.negative{color:#ffd1d8!important}
+#cartoes .v112-empty{
+  padding:22px;
+  color:#7b8797;
+  font-size:10px;
+}
+
+@media(max-width:760px){
+  #cartoes .v112-carousel-shell{padding-left:36px;padding-right:36px}
+  #cartoes .v112-carousel-card{flex-basis:210px;min-width:210px}
+  #cartoes .v112-selected-summary{grid-template-columns:1fr;gap:9px}
+}
+@media(max-width:480px){
+  #cartoes .v112-carousel-card{flex-basis:190px;min-width:190px}
+  #cartoes .v112-summary-values{grid-template-columns:1fr 1fr 1fr}
 }
 </style>
 
