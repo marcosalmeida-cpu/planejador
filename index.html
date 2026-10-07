@@ -27036,14 +27036,49 @@ function ensureSwitchers115(){
   }
   if(!document.getElementById('v115SiteMenu')){
     const m=document.createElement('div');m.id='v115SiteMenu';
-    m.innerHTML=Object.entries(sites).map(([id,x])=>`<button type="button" data-v115-site="${id}"><span class="ico">${x.icon}</span><span><b>${x.label}</b><small>${x.sub}</small></span></button>`).join('');
+    m.innerHTML=`<div class="v116-site-modal-backdrop">
+      <div class="v116-site-modal" role="dialog" aria-modal="true" aria-label="Escolher ambiente">
+        <div class="v116-site-modal-head">
+          <div>
+            <span class="v116-site-kicker">seu espaço pessoal</span>
+            <h2>Onde você quer entrar agora?</h2>
+            <p>Escolha uma área para continuar. Você pode trocar quando quiser.</p>
+          </div>
+          <button type="button" class="v116-site-close" aria-label="Fechar">×</button>
+        </div>
+        <div class="v116-site-grid">
+          ${Object.entries(sites).map(([id,x])=>`
+            <button type="button" class="v116-site-card v116-${id}" data-v115-site="${id}">
+              <span class="v116-site-icon">${x.icon}</span>
+              <span class="v116-site-copy">
+                <small>${id==='financas'?'planejamento e patrimônio':id==='educacao'?'trajetória e aprendizagem':id==='saude'?'exames e acompanhamento':'cultura, leitura e viagens'}</small>
+                <b>${x.label}</b>
+                <em>${x.sub}</em>
+              </span>
+              <span class="v116-site-arrow">→</span>
+            </button>`).join('')}
+        </div>
+        <div class="v116-site-modal-foot">Seu ambiente atual fica destacado. A troca é imediata e não encerra sua sessão.</div>
+      </div>
+    </div>`;
     document.body.appendChild(m);
     m.querySelectorAll('[data-v115-site]').forEach(b=>b.onclick=()=>applySite115(b.dataset.v115Site,true));
+    m.querySelector('.v116-site-close')?.addEventListener('click',()=>m.classList.remove('open'));
+    m.querySelector('.v116-site-modal-backdrop')?.addEventListener('click',e=>{
+      if(e.target.classList.contains('v116-site-modal-backdrop'))m.classList.remove('open');
+    });
   }
 }
 function toggleSiteMenu115(e){
   e?.stopPropagation();
-  document.getElementById('v115SiteMenu')?.classList.toggle('open');
+  const menu=document.getElementById('v115SiteMenu');
+  if(!menu)return;
+  menu.classList.toggle('open');
+  if(menu.classList.contains('open')){
+    const current=safeSite115(document.body.dataset.v115Site||savedSite115(activeProfile115()));
+    updateSwitchers115(current);
+    setTimeout(()=>menu.querySelector(`button[data-v115-site="${current}"]`)?.focus(),30);
+  }
 }
 function chosenLoginProfile115(overlay){
   return overlay?.querySelector('.profile-choice.active')?.dataset.profile||activeProfile115();
@@ -27101,4 +27136,200 @@ setTimeout(()=>syncLogin115(document.getElementById('loginOverlay')),40);
 window.ppSiteV115={apply:applySite115,current:()=>safeSite115(document.body.dataset.v115Site||savedSite115(activeProfile115()))};
 })();
 </script>
+
+<style id="pp-v116-site-modal">
+/* o seletor ao lado do perfil agora abre um modal, não um menu pequeno */
+#v115SiteMenu{
+  position:fixed!important;
+  inset:0!important;
+  width:auto!important;
+  height:auto!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  display:none!important;
+  z-index:250000!important;
+}
+#v115SiteMenu.open{display:block!important}
+
+#v115SiteMenu .v116-site-modal-backdrop{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:rgba(5,14,28,.68);
+  backdrop-filter:blur(14px);
+}
+#v115SiteMenu .v116-site-modal{
+  width:min(920px,96vw);
+  max-height:min(720px,92vh);
+  overflow:auto;
+  padding:24px;
+  border-radius:30px;
+  background:
+    radial-gradient(circle at 80% 0%,rgba(34,141,255,.08),transparent 28%),
+    linear-gradient(180deg,#ffffff 0%,#f5f8fb 100%);
+  border:1px solid rgba(215,224,234,.95);
+  box-shadow:0 40px 100px rgba(4,18,38,.34);
+}
+#v115SiteMenu .v116-site-modal-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:20px;
+}
+#v115SiteMenu .v116-site-kicker{
+  display:block;
+  font-size:8px;
+  font-weight:950;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:#0b63f6;
+}
+#v115SiteMenu .v116-site-modal-head h2{
+  margin:7px 0 5px;
+  font-size:28px;
+  letter-spacing:-.04em;
+  color:#142033;
+}
+#v115SiteMenu .v116-site-modal-head p{
+  margin:0;
+  max-width:560px;
+  font-size:10.5px;
+  line-height:1.5;
+  color:#778395;
+}
+#v115SiteMenu .v116-site-close{
+  width:40px;
+  height:40px;
+  flex:0 0 40px;
+  border-radius:14px;
+  border:1px solid #dbe3ec;
+  background:#fff;
+  color:#556174;
+  font-size:23px;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+}
+#v115SiteMenu .v116-site-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+#v115SiteMenu .v116-site-card{
+  min-height:178px;
+  position:relative;
+  overflow:hidden;
+  display:grid;
+  grid-template-columns:56px 1fr 30px;
+  align-items:end;
+  gap:14px;
+  padding:18px;
+  border-radius:23px;
+  border:1px solid #dfe6ee;
+  text-align:left;
+  cursor:pointer;
+  transition:.2s ease;
+  box-shadow:0 10px 24px rgba(15,23,42,.05);
+}
+#v115SiteMenu .v116-site-card:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  opacity:.92;
+  pointer-events:none;
+}
+#v115SiteMenu .v116-site-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 18px 34px rgba(15,23,42,.10);
+}
+#v115SiteMenu .v116-site-card.v116-financas{
+  background:linear-gradient(145deg,#eef6ff,#dbeafe);
+}
+#v115SiteMenu .v116-site-card.v116-educacao{
+  background:linear-gradient(145deg,#f3efff,#e9e1ff);
+}
+#v115SiteMenu .v116-site-card.v116-saude{
+  background:linear-gradient(145deg,#eafaf4,#daf5eb);
+}
+#v115SiteMenu .v116-site-card.v116-entretenimento{
+  background:linear-gradient(145deg,#fff4ea,#ffe6d2);
+}
+#v115SiteMenu .v116-site-card.active{
+  outline:3px solid color-mix(in srgb,var(--v115-accent) 48%,transparent);
+  outline-offset:1px;
+}
+#v115SiteMenu .v116-site-icon{
+  width:56px;
+  height:56px;
+  border-radius:18px;
+  display:grid;
+  place-items:center;
+  font-size:18px;
+  font-weight:950;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(255,255,255,.85);
+  color:#173251;
+  position:relative;
+  z-index:1;
+}
+#v115SiteMenu .v116-site-copy{
+  min-width:0;
+  position:relative;
+  z-index:1;
+}
+#v115SiteMenu .v116-site-copy small{
+  display:block;
+  margin:0 0 8px;
+  font-size:7.5px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#6f7d8f;
+  font-weight:900;
+}
+#v115SiteMenu .v116-site-copy b{
+  display:block;
+  font-size:20px;
+  line-height:1;
+  letter-spacing:-.03em;
+  color:#172033;
+}
+#v115SiteMenu .v116-site-copy em{
+  display:block;
+  margin-top:7px;
+  font-style:normal;
+  font-size:9px;
+  color:#6f7d8f;
+}
+#v115SiteMenu .v116-site-arrow{
+  width:30px;
+  height:30px;
+  border-radius:10px;
+  background:rgba(255,255,255,.68);
+  display:grid;
+  place-items:center;
+  color:#344054;
+  font-size:15px;
+  position:relative;
+  z-index:1;
+}
+#v115SiteMenu .v116-site-modal-foot{
+  margin-top:15px;
+  padding-top:13px;
+  border-top:1px solid #e2e7ee;
+  text-align:center;
+  font-size:8.5px;
+  color:#8993a2;
+}
+@media(max-width:700px){
+  #v115SiteMenu .v116-site-modal{padding:18px;border-radius:24px}
+  #v115SiteMenu .v116-site-grid{grid-template-columns:1fr}
+  #v115SiteMenu .v116-site-card{min-height:135px}
+}
+</style>
 
