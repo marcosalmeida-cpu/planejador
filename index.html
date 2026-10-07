@@ -4597,6 +4597,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       color:document.getElementById('cColor')?.value||'#1434cb',
       last4,
       cardType:document.getElementById('cCardType')?.value||'Físico',
+      cardCategory:document.getElementById('cCardCategory')?.value||existing?.cardCategory||'bandeirado',
       limit:sane(document.getElementById('cLimit')?.value),
       closeDay:+document.getElementById('cCloseDay')?.value||10,
       dueDay:+document.getElementById('cDueDay')?.value||18,
@@ -16462,6 +16463,7 @@ try{getCardSchedules=window.getCardSchedules;cardAggregatedTx=window.cardAggrega
       color:byId('cColor')?.value||existing?.color||'#1434cb',
       last4,
       cardType:byId('cCardType')?.value||existing?.cardType||'Físico',
+      cardCategory:byId('cCardCategory')?.value||existing?.cardCategory||'bandeirado',
       limit:Number(money(byId('cLimit')?.value).toFixed(2)),
       closeDay:Math.min(31,Math.max(1,+byId('cCloseDay')?.value||10)),
       dueDay:Math.min(31,Math.max(1,+byId('cDueDay')?.value||18)),
@@ -25077,4 +25079,409 @@ else init();
 }
 #dashboard .v104-limit-foot strong{color:#bd2f46;font-size:8.5px}
 </style>
+
+<style id="pp-v105-card-categories">
+/* três áreas de cartões */
+#cartoes #v105CardGroups{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-bottom:14px;
+}
+#cartoes .v105-group{
+  min-height:118px;
+  padding:13px;
+  border-radius:18px;
+  background:linear-gradient(180deg,#ffffff,#f6f8fb);
+  border:1px solid #dce3ec;
+  box-shadow:0 8px 22px rgba(15,23,42,.045);
+}
+#cartoes .v105-group-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:10px;
+}
+#cartoes .v105-group-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+#cartoes .v105-group-icon{
+  width:30px;height:30px;border-radius:10px;
+  background:#edf3fb;color:#315b87;
+  display:grid;place-items:center;
+  font-size:14px;font-weight:900;
+}
+#cartoes .v105-group-title h4{
+  margin:0;font-size:12px;color:#172033
+}
+#cartoes .v105-group-title small{
+  display:block;margin-top:2px;font-size:8px;color:#7b8797
+}
+#cartoes .v105-brand-mini{
+  display:flex;align-items:center;gap:5px;opacity:.92
+}
+#cartoes .v105-brand-mini .v105-mc{display:inline-flex;align-items:center}
+#cartoes .v105-brand-mini .v105-mc i{
+  width:12px;height:12px;border-radius:50%;display:block
+}
+#cartoes .v105-brand-mini .v105-mc i:first-child{background:#eb001b}
+#cartoes .v105-brand-mini .v105-mc i:last-child{background:#f79e1b;margin-left:-4px}
+#cartoes .v105-visa{
+  font-size:11px;font-weight:1000;font-style:italic;letter-spacing:-.05em;color:#1434cb
+}
+#cartoes .v105-elo{
+  font-size:10px;font-weight:1000;color:#222
+}
+#cartoes .v105-group-list{
+  display:flex;gap:6px;flex-wrap:wrap
+}
+#cartoes .v105-card-chip{
+  border:1px solid #cfd7e2;
+  background:#89919d;
+  color:#fff;
+  border-radius:9px;
+  min-height:30px;
+  padding:6px 10px;
+  font-size:9px;
+  font-weight:900;
+  cursor:pointer;
+  transition:.15s ease
+}
+#cartoes .v105-card-chip:hover{transform:translateY(-1px)}
+#cartoes .v105-card-chip.active{
+  background:#000cff;
+  border-color:#000cff;
+  box-shadow:0 5px 12px rgba(0,12,255,.18)
+}
+#cartoes .v105-empty{
+  color:#8a94a3;font-size:9px;padding:5px 2px
+}
+/* mantém o render antigo invisível como motor de seleção */
+#cartoes .clean-cards-grid-wrap{display:none!important}
+
+/* seleção no modal */
+#cardModal .v105-category-field{margin-bottom:2px}
+#cardModal .v105-category-picker{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  margin-top:5px
+}
+#cardModal .v105-category-choice{
+  border:1px solid #dfe6ef;
+  background:#fff;
+  min-height:48px;
+  border-radius:13px;
+  color:#445166;
+  font-size:10px;
+  font-weight:900;
+  cursor:pointer
+}
+#cardModal .v105-category-choice.selected{
+  background:#eef4ff;
+  border:2px solid #0b63f6;
+  color:#0b63f6
+}
+#cardModal.v105-not-banded .brand-picker,
+#cardModal.v105-not-banded #cOtherBrandRow{
+  display:none!important
+}
+#cardModal.v105-not-banded .v105-brand-field label:after{
+  content:" (não se aplica)";
+  color:#9aa4b2;
+  font-weight:600
+}
+
+/* bandeira no cartão-arte */
+#cartoes .v105-art-brand{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:34px;min-height:20px
+}
+#cartoes .v105-art-brand .v105-mc{display:inline-flex;align-items:center}
+#cartoes .v105-art-brand .v105-mc i{
+  width:18px;height:18px;border-radius:50%;display:block
+}
+#cartoes .v105-art-brand .v105-mc i:first-child{background:#eb001b}
+#cartoes .v105-art-brand .v105-mc i:last-child{background:#f79e1b;margin-left:-6px}
+#cartoes .v105-art-brand .v105-visa{
+  color:#fff;font-size:14px;text-shadow:0 1px 1px rgba(0,0,0,.15)
+}
+#cartoes .v105-art-brand .v105-elo{
+  color:#fff;font-size:12px;text-shadow:0 1px 1px rgba(0,0,0,.15)
+}
+
+@media(max-width:900px){
+  #cartoes #v105CardGroups{grid-template-columns:1fr 1fr}
+}
+@media(max-width:620px){
+  #cartoes #v105CardGroups{grid-template-columns:1fr}
+  #cardModal .v105-category-picker{grid-template-columns:1fr}
+}
+</style>
+
+<script id="pp-v105-card-categories-final">
+(()=>{
+'use strict';
+
+function inferCategory105(c){
+  const name=String(c?.name||'').toLowerCase();
+  if(name.includes('credi'))return 'crediario';
+  if(
+    name.includes('c&a')||name.includes('cea')||
+    name.includes('renner')||name.includes('riachuelo')||
+    name.includes('marisa')||name.includes('pernambucanas')||
+    name.includes('loja')
+  )return 'loja';
+  return 'bandeirado';
+}
+function category105(c){
+  return c?.cardCategory||inferCategory105(c);
+}
+function brandMarkup105(brand,small=false){
+  const b=String(brand||'').toLowerCase();
+  if(b.includes('master')){
+    return `<span class="v105-art-brand"><span class="v105-mc"><i></i><i></i></span></span>`;
+  }
+  if(b.includes('visa')){
+    return `<span class="v105-art-brand"><span class="v105-visa">VISA</span></span>`;
+  }
+  if(b.includes('elo')){
+    return `<span class="v105-art-brand"><span class="v105-elo">ELO</span></span>`;
+  }
+  return small?'':`<span class="v105-art-brand">${String(brand||'').replace(/[<>&]/g,'')}</span>`;
+}
+function migrate105(){
+  let changed=false;
+  (cards||[]).forEach(c=>{
+    if(!c.cardCategory){
+      c.cardCategory=inferCategory105(c);
+      changed=true;
+    }
+  });
+  if(changed){
+    try{persist()}catch(e){}
+    try{window.ppCloudV66?.save?.()}catch(e){}
+  }
+}
+function currentSelected105(){
+  const selected=document.querySelector('#cardsCleanRoot .clean-card.selected,[data-clean-card].selected');
+  if(selected?.dataset.cleanCard)return selected.dataset.cleanCard;
+  const main=document.querySelector('#cardsCleanRoot .clean-main-card');
+  if(main){
+    const name=main.querySelector('h3')?.textContent?.trim();
+    const c=(cards||[]).find(x=>String(x.name)===String(name));
+    if(c)return c.id;
+  }
+  return null;
+}
+function groupHeader105(cat){
+  if(cat==='bandeirado'){
+    return `<div class="v105-group-title"><span class="v105-group-icon">◫</span><div><h4>Bandeirados</h4><small>Bancos e cartões de crédito</small></div></div>
+    <div class="v105-brand-mini"><span class="v105-mc"><i></i><i></i></span><span class="v105-visa">VISA</span><span class="v105-elo">ELO</span></div>`;
+  }
+  if(cat==='loja'){
+    return `<div class="v105-group-title"><span class="v105-group-icon">◇</span><div><h4>Lojas</h4><small>Cartões próprios de varejo</small></div></div>`;
+  }
+  return `<div class="v105-group-title"><span class="v105-group-icon">▤</span><div><h4>Crediário</h4><small>Crédito parcelado direto</small></div></div>`;
+}
+function renderGroups105(){
+  const root=document.getElementById('cardsCleanRoot')||document.getElementById('bankCardsHub');
+  if(!root)return;
+
+  const wrap=root.querySelector('.clean-cards-grid-wrap')||root.querySelector('.bank-grid-wrap');
+  if(!wrap)return;
+
+  let host=document.getElementById('v105CardGroups');
+  if(!host){
+    host=document.createElement('section');
+    host.id='v105CardGroups';
+    wrap.insertAdjacentElement('beforebegin',host);
+  }
+
+  const selectedId=currentSelected105();
+  const visible=(cards||[]).filter(c=>{
+    if(c.status==='Arquivado' && localStorage.getItem('planejador_cartoes_arquivados_visiveis')!=='1')return false;
+    if(c.status==='Cancelado' && localStorage.getItem('planejador_cartoes_cancelados_visiveis')!=='1')return false;
+    return true;
+  });
+
+  const groups=[
+    ['bandeirado','Bandeirados'],
+    ['loja','Lojas'],
+    ['crediario','Crediário']
+  ];
+
+  host.innerHTML=groups.map(([cat])=>{
+    const list=visible.filter(c=>category105(c)===cat);
+    return `<article class="v105-group">
+      <div class="v105-group-head">${groupHeader105(cat)}</div>
+      <div class="v105-group-list">
+        ${list.length?list.map(c=>`<button type="button" class="v105-card-chip ${String(c.id)===String(selectedId)?'active':''}" data-v105-card="${String(c.id).replace(/"/g,'&quot;')}">${String(c.name||'Cartão').replace(/[<>&]/g,'')}</button>`).join(''):'<span class="v105-empty">Nenhum cartão nesta categoria.</span>'}
+      </div>
+    </article>`;
+  }).join('');
+
+  host.querySelectorAll('[data-v105-card]').forEach(btn=>{
+    btn.onclick=()=>{
+      const id=btn.dataset.v105Card;
+      const hidden=root.querySelector(`[data-clean-card="${CSS.escape(id)}"]`)||
+                   root.querySelector(`[data-real-card="${CSS.escape(id)}"]`);
+      if(hidden){hidden.click();return}
+      try{window.openCardDetail?.(id)}catch(e){}
+    };
+  });
+}
+function decorateCardArt105(){
+  const selectedId=currentSelected105();
+  const selected=(cards||[]).find(c=>String(c.id)===String(selectedId));
+
+  document.querySelectorAll('#cardsCleanRoot [data-clean-card]').forEach(el=>{
+    const c=(cards||[]).find(x=>String(x.id)===String(el.dataset.cleanCard));
+    const brand=el.querySelector('.clean-card-brand');
+    if(brand)brand.innerHTML=category105(c)==='bandeirado'?brandMarkup105(c?.brand):'';
+  });
+
+  const mainBrand=document.querySelector('#cardsCleanRoot .clean-main-card .clean-card-brand');
+  if(mainBrand&&selected){
+    mainBrand.innerHTML=category105(selected)==='bandeirado'?brandMarkup105(selected.brand):'';
+  }
+
+  // compatibility with older/current renderers if one of them is active
+  document.querySelectorAll('#bankCardsHub [data-real-card]').forEach(el=>{
+    const c=(cards||[]).find(x=>String(x.id)===String(el.dataset.realCard));
+    const b=el.querySelector('.bank-network');
+    if(b)b.innerHTML=category105(c)==='bandeirado'?brandMarkup105(c?.brand):'';
+  });
+}
+function ensureCategoryField105(){
+  const modal=document.getElementById('cardModal');
+  const form=modal?.querySelector('.card-form-stack');
+  if(!modal||!form)return;
+
+  let hidden=document.getElementById('cCardCategory');
+  if(!hidden){
+    hidden=document.createElement('input');
+    hidden.type='hidden';
+    hidden.id='cCardCategory';
+    hidden.value='bandeirado';
+    form.prepend(hidden);
+  }
+
+  if(!form.querySelector('.v105-category-field')){
+    const field=document.createElement('div');
+    field.className='field v105-category-field';
+    field.innerHTML=`<label>Categoria do cartão</label>
+      <div class="v105-category-picker">
+        <button type="button" class="v105-category-choice" data-cat="bandeirado">Bandeirado</button>
+        <button type="button" class="v105-category-choice" data-cat="loja">Loja</button>
+        <button type="button" class="v105-category-choice" data-cat="crediario">Crediário</button>
+      </div>`;
+    hidden.insertAdjacentElement('afterend',field);
+
+    field.querySelectorAll('[data-cat]').forEach(b=>{
+      b.onclick=()=>{
+        hidden.value=b.dataset.cat;
+        applyCategoryModal105();
+      };
+    });
+  }
+
+  const brandPicker=form.querySelector('.brand-picker');
+  const brandField=brandPicker?.closest('.field');
+  if(brandField)brandField.classList.add('v105-brand-field');
+}
+function applyCategoryModal105(){
+  const modal=document.getElementById('cardModal');
+  const val=document.getElementById('cCardCategory')?.value||'bandeirado';
+  modal?.classList.toggle('v105-not-banded',val!=='bandeirado');
+  modal?.querySelectorAll('.v105-category-choice').forEach(b=>b.classList.toggle('selected',b.dataset.cat===val));
+
+  const preview=document.getElementById('paramCardPreview');
+  const network=preview?.querySelector('.network');
+  if(network){
+    if(val==='bandeirado'){
+      const cBrand=document.getElementById('cBrand')?.value||'Mastercard';
+      network.innerHTML=brandMarkup105(cBrand);
+      network.style.display='';
+    }else{
+      network.innerHTML='';
+      network.style.display='none';
+    }
+  }
+}
+function patchModalOpen105(){
+  ensureCategoryField105();
+  const id=document.getElementById('cId')?.value;
+  const c=(cards||[]).find(x=>String(x.id)===String(id));
+  const cat=category105(c||{name:document.getElementById('cName')?.value});
+  const hidden=document.getElementById('cCardCategory');
+  if(hidden)hidden.value=cat;
+  applyCategoryModal105();
+}
+function patchAll105(){
+  migrate105();
+  renderGroups105();
+  decorateCardArt105();
+}
+
+const previousRender105=window.renderCards;
+if(typeof previousRender105==='function'){
+  const wrapped=function(){
+    const r=previousRender105.apply(this,arguments);
+    patchAll105();
+    return r;
+  };
+  window.renderCards=wrapped;
+  try{renderCards=wrapped}catch(e){}
+}
+
+const previousOpen105=window.openCard;
+if(typeof previousOpen105==='function'){
+  const wrappedOpen=function(){
+    ensureCategoryField105();
+    const r=previousOpen105.apply(this,arguments);
+    patchModalOpen105();
+    return r;
+  };
+  window.openCard=wrappedOpen;
+  try{openCard=wrappedOpen}catch(e){}
+}
+
+/* Rebind save after the definitive save controller has created the object. */
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('#saveCard');
+  if(!b)return;
+  const id=document.getElementById('cId')?.value;
+  const cat=document.getElementById('cCardCategory')?.value||'bandeirado';
+  setTimeout(()=>{
+    const c=(cards||[]).find(x=>String(x.id)===String(id)) || (cards||[]).at(-1);
+    if(c && !c.cardCategory){
+      c.cardCategory=cat;
+      try{persist()}catch(_){}
+      try{window.ppCloudV66?.save?.()}catch(_){}
+    }
+    patchAll105();
+  },30);
+},false);
+
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('.brand-choice,#cOtherBrand,#cCustomColor,.color-dot,.type-choice')){
+    setTimeout(applyCategoryModal105,0);
+  }
+},false);
+
+ensureCategoryField105();
+migrate105();
+setTimeout(patchAll105,120);
+
+window.ppCardCategoryV105={
+  render:patchAll105,
+  infer:inferCategory105,
+  category:category105
+};
+})();
+</script>
 
