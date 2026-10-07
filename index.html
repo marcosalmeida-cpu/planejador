@@ -23950,6 +23950,27 @@ function wealth99(){
   try{debt=(getDebts(false)||[]).reduce((a,x)=>a+n99(x.pendente),0)}catch(e){}
   return {pat,inv,debt,fgts:n99(fgtsSummary?.saldoDisponivel)};
 }
+function cardLimits99(){
+  const active=(cards||[]).filter(c=>String(c.status||'Ativo').toLowerCase()!=='cancelado');
+  let total=0,used=0,available=0,negativeCount=0;
+  active.forEach(c=>{
+    const limit=n99(c.limit);
+    let stat={pending:0,available:limit};
+    try{stat=getCardStats(c)||stat}catch(e){}
+    const pending=Math.max(0,n99(stat.pending));
+    const avail=n99(stat.available);
+    total+=limit;
+    used+=pending;
+    available+=avail;
+    if(avail<0)negativeCount++;
+  });
+  return {
+    total,used,available,
+    count:active.length,
+    negativeCount,
+    pct:total>0?(used/total*100):0
+  };
+}
 function categories99(rows){
   const map={};
   rows.filter(x=>x.tipo==='saida').forEach(x=>{
@@ -23980,7 +24001,7 @@ function render99(){
   const status=result>0?'Superávit':result<0?'Déficit':'Equilíbrio';
   const statusClass=result>0?'positive':result<0?'negative':'neutral';
 
-  const invoices=invoiceGroups99();
+  const cardLimits=cardLimits99();
   const cats=categories99(rows);
   const maxCat=Math.max(1,...cats.map(x=>x.value));
   const w=wealth99();
@@ -24020,27 +24041,36 @@ function render99(){
         <div class="v99-balance-line"><span>Receitas − despesas</span><b class="${statusClass}">${m99(result)}</b></div>
       </div>
 
-      <div class="v86-focus-section v86-next">
-        <div class="v86-focus-title"><h2>Próximas faturas</h2><span>${invoices.length?invoices.length+' previstas':'cartões'}</span></div>
-        ${invoices.length?`
-          <div class="v99-invoice-wrap">
-            <div class="v99-invoice-track" id="v99InvoiceTrack">
-              ${invoices.map(x=>{
-                const c=(cards||[]).find(c=>String(c.id)===String(x.cardId))||{name:'Cartão'};
-                return `<article class="v99-invoice-card">
-                  <span class="period">${monthNames[x.month-1]} de ${x.year}</span>
-                  <strong>${String(c.name||'Cartão').replace(/[<>&]/g,'')}</strong>
-                  <b>${m99(x.total)}</b>
-                  <small>${x.count} lançamento${x.count===1?'':'s'} na fatura</small>
-                </article>`;
-              }).join('')}
-            </div>
-            <div class="v99-invoice-controls">
-              <button type="button" onclick="window.ppV99ShiftInvoices(-1)">‹</button>
-              <button type="button" onclick="window.ppV99ShiftInvoices(1)">›</button>
-            </div>
-          </div>`:
-          `<div class="v86-next-empty">Nenhuma fatura futura cadastrada.</div>`}
+      <div class="v86-focus-section v86-next v104-card-limits">
+        <div class="v86-focus-title">
+          <h2>Limites dos cartões</h2>
+          <span>${cardLimits.count} cartão${cardLimits.count===1?'':'ões'} ativo${cardLimits.count===1?'':'s'}</span>
+        </div>
+
+        <div class="v104-limit-main">
+          <span>Limite total</span>
+          <b>${m99(cardLimits.total)}</b>
+        </div>
+
+        <div class="v104-limit-track">
+          <i style="width:${Math.min(100,Math.max(0,cardLimits.pct))}%"></i>
+        </div>
+
+        <div class="v104-limit-grid">
+          <div>
+            <span>Utilizado</span>
+            <b>${m99(cardLimits.used)}</b>
+          </div>
+          <div>
+            <span>Disponível</span>
+            <b class="${cardLimits.available<0?'negative':'positive'}">${m99(cardLimits.available)}</b>
+          </div>
+        </div>
+
+        <div class="v104-limit-foot">
+          <span>${cardLimits.pct.toFixed(1).replace('.',',')}% do limite utilizado</span>
+          ${cardLimits.negativeCount?`<strong>${cardLimits.negativeCount} cartão${cardLimits.negativeCount===1?'':'ões'} acima do limite</strong>`:''}
+        </div>
       </div>
     </section>
 
@@ -25009,5 +25039,42 @@ else init();
 @media(max-width:580px){
   .maintenance-main-v103{grid-template-columns:1fr 1fr!important}
 }
+</style>
+
+<style id="pp-v104-card-limit-summary">
+#dashboard .v104-card-limits{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+}
+#dashboard .v104-limit-main{margin-top:15px}
+#dashboard .v104-limit-main span{display:block;font-size:9px;color:#788395}
+#dashboard .v104-limit-main b{
+  display:block;margin-top:5px;font-size:28px;line-height:1;
+  letter-spacing:-.045em;color:#172033
+}
+#dashboard .v104-limit-track{
+  height:9px;margin-top:16px;border-radius:999px;
+  background:#e2e8f0;overflow:hidden
+}
+#dashboard .v104-limit-track i{
+  display:block;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,#0b63f6,#3ca0ff,#70c7ff)
+}
+#dashboard .v104-limit-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px
+}
+#dashboard .v104-limit-grid>div{
+  padding:10px 11px;border-radius:13px;background:#eef2f6;border:1px solid #e0e6ed
+}
+#dashboard .v104-limit-grid span{display:block;font-size:8px;color:#788395}
+#dashboard .v104-limit-grid b{display:block;margin-top:5px;font-size:14px;color:#172033}
+#dashboard .v104-limit-grid b.positive{color:#0b8a61!important}
+#dashboard .v104-limit-grid b.negative{color:#bd2f46!important}
+#dashboard .v104-limit-foot{
+  display:flex;justify-content:space-between;gap:10px;align-items:center;
+  margin-top:11px;font-size:8.5px;color:#788395
+}
+#dashboard .v104-limit-foot strong{color:#bd2f46;font-size:8.5px}
 </style>
 
