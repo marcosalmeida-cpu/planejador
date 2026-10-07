@@ -25279,14 +25279,26 @@ function currentSelected105(){
 }
 function groupHeader105(cat){
   if(cat==='bandeirado'){
-    return `<div class="v105-group-title"><span class="v105-group-icon">◫</span><div><h4>Bandeirados</h4><small>Bancos e cartões de crédito</small></div></div>
-    <div class="v105-brand-mini"><span class="v105-mc"><i></i><i></i></span><span class="v105-visa">VISA</span><span class="v105-elo">ELO</span></div>`;
+    return `<div class="v105-group-title"><span class="v105-group-icon">◫</span><div><h4>Bandeirados</h4><small>Bancos e cartões de crédito</small></div></div>`;
   }
   if(cat==='loja'){
     return `<div class="v105-group-title"><span class="v105-group-icon">◇</span><div><h4>Lojas</h4><small>Cartões próprios de varejo</small></div></div>`;
   }
   return `<div class="v105-group-title"><span class="v105-group-icon">▤</span><div><h4>Crediário</h4><small>Crédito parcelado direto</small></div></div>`;
 }
+
+function groupStats105(list){
+  let total=0,available=0;
+  list.forEach(c=>{
+    const limit=Number(c.limit||0)||0;
+    let stat={available:limit};
+    try{stat=getCardStats(c)||stat}catch(e){}
+    total+=limit;
+    available+=Number(stat.available||0)||0;
+  });
+  return {total,available};
+}
+
 function renderGroups105(){
   const root=document.getElementById('cardsCleanRoot')||document.getElementById('bankCardsHub');
   if(!root)return;
@@ -25316,8 +25328,15 @@ function renderGroups105(){
 
   host.innerHTML=groups.map(([cat])=>{
     const list=visible.filter(c=>category105(c)===cat);
+    const stats=groupStats105(list);
     return `<article class="v105-group">
-      <div class="v105-group-head">${groupHeader105(cat)}</div>
+      <div class="v105-group-head">
+        ${groupHeader105(cat)}
+        <div class="v107-group-credit">
+          <span>Limite total <b>${typeof brl==='function'?brl(stats.total):stats.total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</b></span>
+          <span>Disponível <b class="${stats.available<0?'negative':''}">${typeof brl==='function'?brl(stats.available):stats.available.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</b></span>
+        </div>
+      </div>
       <div class="v105-group-list">
         ${list.length?list.map(c=>`<button type="button" class="v105-card-chip ${String(c.id)===String(selectedId)?'active':''}" data-v105-card="${String(c.id).replace(/"/g,'&quot;')}">${String(c.name||'Cartão').replace(/[<>&]/g,'')}</button>`).join(''):'<span class="v105-empty">Nenhum cartão nesta categoria.</span>'}
       </div>
@@ -25539,4 +25558,40 @@ setTimeout(ensureGroups106,150);
 window.ppCardGroupsV106={refresh:ensureGroups106};
 })();
 </script>
+
+<style id="pp-v107-card-category-limits">
+#cartoes .v105-brand-mini{display:none!important}
+#cartoes .v105-group-head{
+  align-items:flex-start!important;
+}
+#cartoes .v107-group-credit{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+  text-align:right;
+  min-width:112px;
+}
+#cartoes .v107-group-credit span{
+  display:block;
+  font-size:7.8px;
+  color:#7b8797;
+  line-height:1.25;
+}
+#cartoes .v107-group-credit b{
+  display:block;
+  margin-top:1px;
+  font-size:10.5px;
+  color:#1f2d3d;
+  white-space:nowrap;
+}
+#cartoes .v107-group-credit b.negative{
+  color:#b42318!important;
+}
+@media(max-width:620px){
+  #cartoes .v107-group-credit{
+    text-align:left;
+    min-width:0;
+  }
+}
+</style>
 
