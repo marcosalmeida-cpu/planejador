@@ -25299,6 +25299,30 @@ function groupStats105(list){
   return {total,available};
 }
 
+function money105(v){
+  return typeof brl==='function' ? brl(v) : Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+function cardChipMarkup105(c,selectedId){
+  let stat={available:Number(c?.limit||0)||0};
+  try{stat=getCardStats(c)||stat}catch(e){}
+  const available=Number(stat.available||0)||0;
+  const limit=Number(c?.limit||0)||0;
+  const isSelected=String(c.id)===String(selectedId);
+  const meta=(category105(c)==='bandeirado' ? (c.brand||c.cardType||'Cartão') : (c.cardType||'Cartão'));
+  const status=(c.status||'Ativo');
+  return `<button type="button" class="v105-card-chip ${isSelected?'active':''}" data-v105-card="${String(c.id).replace(/"/g,'&quot;')}">
+    <span class="v108-chip-top">
+      <span class="v108-chip-name">${String(c.name||'Cartão').replace(/[<>&]/g,'')}</span>
+      <span class="v108-chip-status ${String(status).toLowerCase()}">${String(status).replace(/[<>&]/g,'')}</span>
+    </span>
+    <span class="v108-chip-sub">${String(meta||'').replace(/[<>&]/g,'')}</span>
+    <span class="v108-chip-bottom">
+      <span><small>Limite</small><b>${money105(limit)}</b></span>
+      <span><small>Disponível</small><b class="${available<0?'negative':''}">${money105(available)}</b></span>
+    </span>
+  </button>`;
+}
+
 function renderGroups105(){
   const root=document.getElementById('cardsCleanRoot')||document.getElementById('bankCardsHub');
   if(!root)return;
@@ -25338,7 +25362,7 @@ function renderGroups105(){
         </div>
       </div>
       <div class="v105-group-list">
-        ${list.length?list.map(c=>`<button type="button" class="v105-card-chip ${String(c.id)===String(selectedId)?'active':''}" data-v105-card="${String(c.id).replace(/"/g,'&quot;')}">${String(c.name||'Cartão').replace(/[<>&]/g,'')}</button>`).join(''):'<span class="v105-empty">Nenhum cartão nesta categoria.</span>'}
+        ${list.length?list.map(c=>cardChipMarkup105(c,selectedId)).join(''):'<span class="v105-empty">Nenhum cartão nesta categoria.</span>'}
       </div>
     </article>`;
   }).join('');
@@ -25592,6 +25616,119 @@ window.ppCardGroupsV106={refresh:ensureGroups106};
     text-align:left;
     min-width:0;
   }
+}
+</style>
+
+<style id="pp-v108-premium-card-chips">
+#cartoes .v105-group-list{
+  display:grid!important;
+  grid-template-columns:1fr;
+  gap:10px!important;
+}
+#cartoes .v105-card-chip{
+  position:relative;
+  overflow:hidden;
+  min-height:88px!important;
+  padding:12px 13px!important;
+  border-radius:18px!important;
+  border:1px solid #d8e1ec!important;
+  background:linear-gradient(180deg,#ffffff 0%,#f4f7fb 100%)!important;
+  color:#172033!important;
+  box-shadow:0 8px 18px rgba(15,23,42,.06), inset 0 1px 0 rgba(255,255,255,.85)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:space-between!important;
+  align-items:stretch!important;
+  text-align:left!important;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease!important;
+}
+#cartoes .v105-card-chip:hover{
+  transform:translateY(-2px)!important;
+  border-color:#c3d4ea!important;
+  box-shadow:0 14px 28px rgba(15,23,42,.10), inset 0 1px 0 rgba(255,255,255,.92)!important;
+}
+#cartoes .v105-card-chip.active{
+  background:linear-gradient(135deg,#0e3d8f 0%,#0c5ef2 55%,#34a1ff 100%)!important;
+  border-color:#0d62f4!important;
+  box-shadow:0 16px 34px rgba(12,94,242,.28)!important;
+  transform:translateY(-2px)!important;
+}
+#cartoes .v105-card-chip.active .v108-chip-name,
+#cartoes .v105-card-chip.active .v108-chip-sub,
+#cartoes .v105-card-chip.active .v108-chip-bottom small,
+#cartoes .v105-card-chip.active .v108-chip-bottom b{color:#fff!important}
+#cartoes .v108-chip-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:8px;
+}
+#cartoes .v108-chip-name{
+  display:block;
+  font-size:12px;
+  font-weight:900;
+  line-height:1.2;
+  color:#172033;
+}
+#cartoes .v108-chip-status{
+  flex:0 0 auto;
+  padding:4px 7px;
+  border-radius:999px;
+  background:#eef2f7;
+  color:#5d6b7b;
+  font-size:7px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  border:1px solid #dde5ee;
+}
+#cartoes .v108-chip-status.ativo{background:#e8f6ef;color:#127a48;border-color:#cde9db}
+#cartoes .v108-chip-status.cancelado{background:#fff1f2;color:#b42318;border-color:#f2ced3}
+#cartoes .v108-chip-status.arquivado{background:#f3f4f6;color:#667085;border-color:#e4e7ec}
+#cartoes .v108-chip-sub{
+  display:block;
+  margin-top:6px;
+  font-size:9px;
+  color:#718096;
+  font-weight:700;
+  letter-spacing:.02em;
+}
+#cartoes .v108-chip-bottom{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+#cartoes .v108-chip-bottom > span{
+  padding:8px 9px;
+  border-radius:12px;
+  background:rgba(255,255,255,.72);
+  border:1px solid rgba(216,225,236,.95);
+}
+#cartoes .v105-card-chip.active .v108-chip-bottom > span{
+  background:rgba(255,255,255,.13);
+  border-color:rgba(255,255,255,.18);
+}
+#cartoes .v108-chip-bottom small{
+  display:block;
+  font-size:7px;
+  color:#7a8797;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-weight:900;
+}
+#cartoes .v108-chip-bottom b{
+  display:block;
+  margin-top:4px;
+  font-size:10.5px;
+  line-height:1.15;
+  color:#172033;
+  font-weight:900;
+}
+#cartoes .v108-chip-bottom b.negative{color:#b42318!important}
+#cartoes .v105-card-chip.active .v108-chip-bottom b.negative{color:#ffd0d6!important}
+@media(max-width:900px){
+  #cartoes .v105-group-list{grid-template-columns:1fr!important}
 }
 </style>
 
