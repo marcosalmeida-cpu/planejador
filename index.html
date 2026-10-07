@@ -25485,3 +25485,58 @@ window.ppCardCategoryV105={
 })();
 </script>
 
+<script id="pp-v106-card-groups-persistent">
+(()=>{
+'use strict';
+
+function ensureGroups106(){
+  try{
+    window.ppCardCategoryV105?.render?.();
+  }catch(e){}
+}
+
+/* Ao clicar em qualquer cartão, o render antigo redesenha a seção.
+   Reaplica o seletor de grupos logo em seguida. */
+document.addEventListener('click',e=>{
+  const card=e.target.closest?.('[data-v105-card],[data-clean-card],[data-real-card]');
+  if(!card)return;
+  setTimeout(ensureGroups106,0);
+  setTimeout(ensureGroups106,60);
+},false);
+
+/* Também reaplica após ações que normalmente redesenham a página de cartões. */
+document.addEventListener('click',e=>{
+  if(
+    e.target.closest?.('#saveCard,#addCardBtn,[data-clean-card],.card-dot,.dots,.menu-pop button') ||
+    e.target.closest?.('#cardsCleanRoot button')
+  ){
+    setTimeout(ensureGroups106,80);
+  }
+},false);
+
+/* E quando a aba Cartões é aberta pelo menu. */
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('#nav button[data-view="cartoes"],#v76FloatNav button[data-view="cartoes"]');
+  if(!b)return;
+  setTimeout(ensureGroups106,80);
+},false);
+
+/* Reforça o wrapper atual de renderCards, sem alterar sua lógica. */
+const prev=window.renderCards;
+if(typeof prev==='function' && !prev.__v106){
+  const wrapped=function(){
+    const r=prev.apply(this,arguments);
+    ensureGroups106();
+    return r;
+  };
+  wrapped.__v106=true;
+  window.renderCards=wrapped;
+  try{renderCards=wrapped}catch(e){}
+}
+
+setTimeout(ensureGroups106,150);
+
+window.ppCardGroupsV106={refresh:ensureGroups106};
+})();
+</script>
+
