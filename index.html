@@ -4546,7 +4546,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
         </div>
       </section>
 
-      <section class="clean-detail">
+      <section class="clean-detail v110-right-column">
         <article class="clean-main-card" style="background:${gradient(sel.color)}">
           <div class="clean-main-top"><div><small>${ex(sel.cardType||'Cartão')}</small><h3>${ex(sel.name)}</h3></div><div class="clean-card-brand">${ex(sel.brand||'Crédito')}</div></div>
           <div class="clean-main-number">${sel.last4?'•••• '+ex(sel.last4):'•••• ••••'}</div>
@@ -4556,17 +4556,19 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
           </div>
         </article>
         <aside class="clean-side">
-          <div class="clean-box"><h4>Resumo</h4><div class="clean-stats">
-            <div class="clean-stat"><span>Limite total</span><b>${money(sel.limit)}</b></div>
-            <div class="clean-stat"><span>Disponível</span><b>${money(st.available)}</b></div>
-            <div class="clean-stat"><span>Fatura atual</span><b>${money(st.currentInv)}</b></div>
-            <div class="clean-stat"><span>Status</span><b>${status(sel)}</b></div>
-          </div></div>
-          <div class="clean-box"><h4>Ações</h4><div class="clean-actions">
-            <button class="btn" id="cleanEdit">Editar</button>
-            <button class="btn" id="cleanStatus">${sel.status==='Cancelado'?'Reativar':'Cancelar'}</button>
-            <button class="primary" id="cleanInvoice">Ver fatura</button>
-          </div></div>
+          <div class="clean-box v110-summary-box">
+            <div class="v110-summary-head"><h4>Resumo</h4><div class="v110-summary-menu-wrap"><button type="button" class="v110-summary-more" aria-label="Ações do cartão">⋯</button><div class="v110-summary-menu" hidden>
+              <button class="btn" id="cleanEdit">Editar</button>
+              <button class="btn" id="cleanStatus">${sel.status==='Cancelado'?'Reativar':'Cancelar'}</button>
+              <button class="primary" id="cleanInvoice">Ver fatura</button>
+            </div></div></div>
+            <div class="clean-stats">
+              <div class="clean-stat"><span>Limite total</span><b>${money(sel.limit)}</b></div>
+              <div class="clean-stat"><span>Disponível</span><b>${money(st.available)}</b></div>
+              <div class="clean-stat"><span>Fatura atual</span><b>${money(st.currentInv)}</b></div>
+              <div class="clean-stat"><span>Status</span><b>${status(sel)}</b></div>
+            </div>
+          </div>
         </aside>
       </section>
     </div>`;
@@ -4579,6 +4581,15 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     document.getElementById('cleanEdit').onclick=()=>window.openCard?.(sel.id);
     document.getElementById('cleanStatus').onclick=()=>setStatus(sel.id,sel.status==='Cancelado'?'Ativo':'Cancelado');
     document.getElementById('cleanInvoice').onclick=()=>window.openInvoiceEssence?.(sel.id,currentYear,currentMonth,false);
+    const moreBtn=root.querySelector('.v110-summary-more');
+    const moreMenu=root.querySelector('.v110-summary-menu');
+    if(moreBtn&&moreMenu){
+      moreBtn.onclick=e=>{
+        e.stopPropagation();
+        moreMenu.hidden=!moreMenu.hidden;
+      };
+      moreMenu.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{moreMenu.hidden=true}));
+    }
     renderRows(sel);
   }
 
@@ -25817,51 +25828,88 @@ window.ppCardGroupsV106={refresh:ensureGroups106};
   #cartoes .v109-line-values{flex-direction:column;align-items:flex-start}
 }
 </style>
-<script id="pp-v109-actions-menu">
-(()=>{
-function enhanceActionMenusV109(){
-  const root=document.getElementById('cardsCleanRoot');
-  if(!root)return;
-  root.querySelectorAll('.clean-side').forEach(side=>{
-    if(side.querySelector('.v109-actions-shell'))return;
-    const actions=side.querySelector('.clean-actions');
-    if(!actions)return;
-    const box=document.createElement('div');
-    box.className='clean-box v109-actions-box';
-    box.innerHTML='<h4>Ações</h4><div class="v109-actions-shell"><button type="button" class="v109-actions-toggle" aria-label="Mais ações">…</button></div>';
-    const shell=box.querySelector('.v109-actions-shell');
-    const toggle=box.querySelector('.v109-actions-toggle');
-    const buttons=[...actions.querySelectorAll('button')];
-    function close(){box.querySelector('.v109-actions-menu')?.remove()}
-    toggle.onclick=(e)=>{
-      e.stopPropagation();
-      const existing=box.querySelector('.v109-actions-menu');
-      if(existing){existing.remove();return;}
-      const menu=document.createElement('div');
-      menu.className='v109-actions-menu';
-      buttons.forEach(btn=>{
-        const clone=document.createElement('button');
-        clone.type='button';
-        clone.textContent=(btn.textContent||'Ação').trim();
-        clone.onclick=()=>{btn.click(); close();};
-        menu.appendChild(clone);
-      });
-      shell.appendChild(menu);
-    };
-    setTimeout(()=>{document.addEventListener('click',e=>{if(!box.contains(e.target))close();});},0);
-    side.appendChild(box);
-  });
+
+<style id="pp-v110-two-column-cards-layout">
+/* Layout principal: esquerda = categorias/lista, direita = cartão + resumo */
+#cartoes #cardsCleanRoot .clean-cards-shell{
+  display:grid!important;
+  grid-template-columns:minmax(440px,1.35fr) minmax(310px,.65fr)!important;
+  gap:14px!important;
+  align-items:start!important;
 }
-const prev=(window.ppCardGroupsV106&&window.ppCardGroupsV106.refresh)||window.renderCards;
-function run(){enhanceActionMenusV109()}
-document.addEventListener('click',e=>{if(e.target.closest?.('[data-v105-card],[data-clean-card],[data-real-card],#saveCard,#addCardBtn,#nav button[data-view="cartoes"],#v76FloatNav button[data-view="cartoes"]')){setTimeout(run,90);setTimeout(run,220);}},false);
-if(typeof window.renderCards==='function' && !window.renderCards.__v109menu){
-  const orig=window.renderCards;
-  const wrapped=function(){const r=orig.apply(this,arguments); setTimeout(run,60); return r;};
-  wrapped.__v109menu=true;
-  window.renderCards=wrapped;
-  try{renderCards=wrapped}catch(e){}
+#cartoes #v105CardGroups{
+  grid-column:1!important;
+  grid-row:1!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:10px!important;
+  margin:0!important;
+  padding:0!important;
 }
-setTimeout(run,160);
-})();
-</script>
+#cartoes #v105CardGroups .v105-group{
+  width:100%!important;
+  min-height:0!important;
+}
+#cartoes #cardsCleanRoot .clean-cards-grid-wrap{display:none!important}
+#cartoes #cardsCleanRoot .clean-detail.v110-right-column{
+  grid-column:2!important;
+  grid-row:1!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:10px!important;
+  width:100%!important;
+}
+#cartoes #cardsCleanRoot .clean-main-card{
+  width:100%!important;
+  max-width:none!important;
+  height:190px!important;
+  margin:0!important;
+  border-radius:22px!important;
+}
+#cartoes #cardsCleanRoot .clean-side{display:block!important;width:100%!important}
+#cartoes #cardsCleanRoot .v110-summary-box{
+  width:100%!important;
+  padding:14px!important;
+  border-radius:20px!important;
+  background:linear-gradient(180deg,#ffffff 0%,#f6f9fc 100%)!important;
+  border:1px solid #dfe6ee!important;
+  box-shadow:0 10px 24px rgba(15,23,42,.055)!important;
+  position:relative!important;
+}
+#cartoes #cardsCleanRoot .v110-summary-head{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+  margin-bottom:10px!important;
+}
+#cartoes #cardsCleanRoot .v110-summary-head h4{margin:0!important;font-size:13px!important;color:#172033!important}
+#cartoes #cardsCleanRoot .v110-summary-menu-wrap{position:relative!important}
+#cartoes #cardsCleanRoot .v110-summary-more{
+  width:34px!important;height:34px!important;border-radius:11px!important;
+  border:1px solid #d7e0ea!important;background:#fff!important;color:#344054!important;
+  font-size:20px!important;line-height:1!important;cursor:pointer!important;display:grid!important;place-items:center!important;
+  box-shadow:0 5px 12px rgba(15,23,42,.05)!important;
+}
+#cartoes #cardsCleanRoot .v110-summary-menu{
+  position:absolute!important;right:0!important;top:40px!important;z-index:120!important;
+  min-width:165px!important;padding:6px!important;border-radius:13px!important;background:#fff!important;
+  border:1px solid #dce4ed!important;box-shadow:0 18px 40px rgba(15,23,42,.18)!important;
+}
+#cartoes #cardsCleanRoot .v110-summary-menu[hidden]{display:none!important}
+#cartoes #cardsCleanRoot .v110-summary-menu button{
+  display:block!important;width:100%!important;min-height:0!important;text-align:left!important;
+  border:0!important;background:transparent!important;color:#344054!important;padding:9px 10px!important;
+  border-radius:9px!important;font-size:10px!important;font-weight:800!important;cursor:pointer!important;
+}
+#cartoes #cardsCleanRoot .v110-summary-menu button:hover{background:#f2f5f9!important}
+#cartoes #cardsCleanRoot .clean-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+/* zera qualquer card de ações residual das versões anteriores */
+#cartoes #cardsCleanRoot .v109-actions-box{display:none!important}
+@media(max-width:980px){
+  #cartoes #cardsCleanRoot .clean-cards-shell{grid-template-columns:1fr!important}
+  #cartoes #v105CardGroups{grid-column:1!important;grid-row:1!important}
+  #cartoes #cardsCleanRoot .clean-detail.v110-right-column{grid-column:1!important;grid-row:2!important}
+}
+</style>
+
