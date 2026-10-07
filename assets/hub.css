@@ -17,3 +17,28 @@ body.v76-split-header .hub-finance-launcher{left:72px;right:auto;top:21px}
 .hub-finance-launcher .hub-launch{height:42px;min-width:86px;justify-content:center;box-shadow:0 12px 30px rgba(11,47,107,.26)}
 @media(max-width:760px){body.v76-split-header .hub-finance-launcher{left:60px;top:12px}.hub-finance-launcher .hub-launch{height:40px;min-width:76px;padding:0 10px}}
 @media(max-width:520px){.hub-finance-launcher,body.v76-split-header .hub-finance-launcher{left:auto;right:58px;top:8px}.hub-finance-launcher .hub-launch{height:36px;min-width:42px;padding:0 9px;border-radius:12px}.hub-finance-launcher .hub-word{display:none}}
+
+
+/* v3 — integração robusta com o cabeçalho financeiro legado */
+.hub-finance-launcher{
+  position:fixed!important;
+  z-index:2147483000!important;
+  display:block!important;
+  pointer-events:auto!important;
+  transform:none!important;
+  opacity:1!important;
+}
+.hub-finance-launcher .hub-launch{
+  height:40px!important;
+  min-width:88px!important;
+  padding:0 12px!important;
+  border-radius:14px!important;
+  white-space:nowrap!important;
+  font-size:11px!important;
+}
+.hub-finance-launcher .mini-mark{flex:0 0 auto!important}
+html.hub-login-lock,body.hub-login-lock{overflow:hidden!important;height:100%!important}
+@media(max-width:520px){
+  .hub-finance-launcher .hub-launch{min-width:40px!important;width:40px!important;height:40px!important;padding:0!important}
+  .hub-finance-launcher .hub-word{display:none!important}
+}

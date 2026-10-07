@@ -10747,7 +10747,7 @@ const oldRC=window.renderCards;if(typeof oldRC==='function'){window.renderCards=
  applyHubBrand();setTimeout(applyHubBrand,120);
 })();
 </script>
-</div><script src="assets/hub.js"></script>
+</div>
 </body></html>
 <style id="recurring-card-style">
 .recurring-note{margin-top:8px;padding:10px 12px;border-radius:12px;background:#fff8ee;border:1px solid #ffd6a7;color:#8a4b00;font-size:11px;line-height:1.45}
@@ -26325,4 +26325,31 @@ setTimeout(()=>{const current=document.querySelector('.main > .view.active')?.id
 })();
 </script>
 
+<style id="hub-finance-final-ui-fixes-v3">
+/* Perfil: existe apenas um botão de fechar. A rotina antiga de modais adicionava outro X. */
+#profilePanelModal>.modal>.pp-modal-close{display:none!important}
+#profilePanelModal .profile-panel-head #profilePanelClose{
+  position:relative!important;top:auto!important;right:auto!important;
+  margin:0!important;flex:0 0 36px!important;z-index:30!important;
+}
+/* Login ocupa a viewport sem provocar a barra de rolagem da página. */
+html.hub-login-lock,body.hub-login-lock{overflow:hidden!important;height:100%!important}
+#loginOverlay.login-overlay{
+  position:fixed!important;inset:0!important;
+  width:100vw!important;height:100dvh!important;max-height:100dvh!important;
+  overflow:hidden!important;padding:12px!important;
+}
+#loginOverlay .v98-login-card{
+  max-height:calc(100dvh - 24px)!important;
+  min-height:min(500px,calc(100dvh - 24px))!important;
+}
+@media(max-height:570px){
+ #loginOverlay .v98-login-card{min-height:calc(100dvh - 16px)!important;max-height:calc(100dvh - 16px)!important}
+ #loginOverlay.login-overlay{padding:8px!important}
+ #loginOverlay .v98-login-card #loginForm{padding:20px 24px!important}
+ #loginOverlay .v98-login-side{padding:24px 30px!important}
+ #loginOverlay .v98-login-side h2{font-size:32px!important}
+}
+</style>
+<script src="assets/hub.js"></script>
 
