@@ -26424,3 +26424,65 @@ window.ppCardGroupsV106={refresh:ensureGroups106};
 }
 </style>
 
+<style id="pp-v113-cards-full-width">
+/* Faz a área premium de cartões usar toda a largura disponível da página */
+#cartoes{
+  width:100%!important;
+  max-width:none!important;
+}
+#cartoes #v105CardGroups{
+  width:100%!important;
+  max-width:none!important;
+  margin-left:0!important;
+  margin-right:0!important;
+}
+#cartoes .v112-carousel-shell,
+#cartoes .v112-selected-summary{
+  width:100%!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+}
+
+/* Remove limitações herdadas de wrappers internos */
+#cartoes #cardsCleanRoot,
+#cartoes #cardsCleanRoot .clean-cards-shell{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+}
+#cartoes #cardsCleanRoot{
+  display:block!important;
+}
+
+/* Mantém o carrossel visualmente amplo, quase de ponta a ponta */
+#cartoes .v112-carousel-shell{
+  padding-left:46px!important;
+  padding-right:46px!important;
+}
+
+/* aproveita melhor telas largas */
+@media(min-width:1200px){
+  #cartoes .v112-carousel-card{
+    flex-basis:260px!important;
+    min-width:260px!important;
+  }
+}
+@media(min-width:1500px){
+  #cartoes .v112-carousel-card{
+    flex-basis:275px!important;
+    min-width:275px!important;
+  }
+}
+
+/* responsividade preservada */
+@media(max-width:760px){
+  #cartoes .v112-carousel-shell{
+    padding-left:38px!important;
+    padding-right:38px!important;
+  }
+  #cartoes .v112-selected-summary{
+    width:100%!important;
+  }
+}
+</style>
+
