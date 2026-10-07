@@ -1898,7 +1898,12 @@ document.addEventListener('click',()=>$('#rowMenu').classList.remove('open'));
 function showView(id){ $$('.view').forEach(v=>v.classList.toggle('active',v.id===id)); $$('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===id)); if(id==='lancamentos')renderLancamentos(); if(id==='cartoes')renderCards(); if(id==='dividas')renderDebts(); if(id==='fgts')renderFgts(); if(id==='investimentos')renderInvestments(); if(id==='patrimonio')renderAssets(); if(id==='projecao')renderProjection(); if(id==='nuvem')renderNuvem(); window.scrollTo({top:0,behavior:'smooth'}) }
 function openTx(){ $('#fYear').value=year||currentYear; $('#fMonth').value=month||currentMonth; $('#fValue').value=''; $('#fDesc').value=''; $('#fOrigin').value=''; $('#txModal').classList.add('open') }
 function saveTx(){ let tipo=$('#fType').value,val=num($('#fValue').value),desc=$('#fDesc').value.trim(); if(!val||!desc)return toast('Informe descrição e valor.'); custom.push({id:'U'+Date.now(),tipo,ano:+$('#fYear').value,mesNum:+$('#fMonth').value,descricao:desc,valor:val,categoria:tipo==='entrada'?'Receita':$('#fCategory').value,classificacao:tipo==='entrada'?'Entrada':$('#fClass').value,origem:$('#fOrigin').value.trim(),status:$('#fStatus').value,origemDados:'Site',createdAt:new Date().toISOString()}); persist(); $('#txModal').classList.remove('open'); saveSelectOptions(); renderAll(); toast('Lançamento salvo.'); }
-function renderAll(){ renderDashboard(); renderLancamentos(); renderCards(); renderDebts(); renderFgts(); renderInvestments(); renderAssets(); renderProjection(); renderNuvem(); }
+function renderAll(){
+  // V133 performance: páginas fora da tela são atualizadas quando abertas pelo roteador final.
+  const active=document.querySelector('.main > .view.active')?.id||'dashboard';
+  const map={dashboard:()=>renderDashboard(),lancamentos:()=>renderLancamentos(),cartoes:()=>renderCards(),dividas:()=>renderDebts(),fgts:()=>renderFgts(),investimentos:()=>renderInvestments(),patrimonio:()=>renderAssets(),projecao:()=>renderProjection(),nuvem:()=>renderNuvem()};
+  try{(map[active]||map.dashboard)()}catch(e){console.warn('Render da página ativa',e)}
+}
 $('#yearFilter').onchange=e=>{ year=+e.target.value; renderDashboard() }; $('#monthFilter').onchange=e=>{ month=+e.target.value; renderDashboard() }; $('#txYear').onchange=renderLancamentos; $('#txSearch').oninput=renderLancamentos; $('#txType').onchange=renderLancamentos; $('#debtSearch').oninput=renderDebts; $('#debtFilter').onchange=renderDebts; $('#fgtsYear').onchange=renderFgts; $('#fgtsSearch').oninput=renderFgts; $('#fgtsStatus').onchange=renderFgts; $('#assetYear').onchange=renderAssets; $('#assetType').onchange=renderAssets; $('#invYear').onchange=renderInvestments; $('#invType').onchange=renderInvestments; $('#invSearch').oninput=renderInvestments; $('#cardFilter').onchange=renderCards; $('#cardPurchaseStatus').onchange=renderCards; $('#cardSearch').oninput=renderCards; $('#projHorizon').onchange=renderProjection;
 $('#addAsset').onclick=()=>openAsset(); $('#editFgtsSummary').onclick=openFgtsEdit; $('#saveFgts').onclick=saveFgts; $('#saveAsset').onclick=saveAsset; $('#saveDebt').onclick=saveDebt; $('#saveTx').onclick=saveTx; $('#addCardBtn').onclick=()=>openCard(); $('#saveCard').onclick=saveCard; $('#addCardPurchaseBtn').onclick=()=>openCardPurchase(); $('#saveCardPurchase').onclick=saveCardPurchase; $('#addInvestmentBtn').onclick=()=>openInvestment(); $('#saveInvestment').onclick=saveInvestment; $$('[data-addtx]').forEach(b=>b.onclick=openTx); $$('[data-close]').forEach(b=>b.onclick=()=>$('#'+b.dataset.close).classList.remove('open')); $$('.modalback').forEach(m=>m.onclick=e=>{ if(e.target===m)m.classList.remove('open') }); $$('#nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view)); $('#backupBtn').onclick=()=>{ let payload={version:3,exportedAt:new Date().toISOString(),custom,debtEdits,debtArchived,debtDeleted,assets,fgtsSummary,cards,cardPurchases,investments}; let blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`financeiro-marcos-backup-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href); };
 saveSelectOptions(); renderAll();
@@ -2503,7 +2508,7 @@ const NEW_FGTS_LOGO='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAqYAAAHECAMAA
 function parseSortVal(v){let s=String(v||'').trim();let br=s.replace(/[^0-9,.-]/g,'').replace(/\./g,'').replace(',','.');let n=Number(br);if(s && Number.isFinite(n) && /\d/.test(s)) return {t:'n',v:n};let d=Date.parse(s.split('/').reverse().join('-'));if(!Number.isNaN(d)&&/\d{2}\/\d{2}\/\d{4}/.test(s))return {t:'n',v:d};return {t:'s',v:s.toLocaleLowerCase('pt-BR')}}
 function sortTable(table,col,dir){let body=table.tBodies[0];if(!body)return;let rows=[...body.rows];rows.sort((a,b)=>{let A=parseSortVal(a.cells[col]?.innerText),B=parseSortVal(b.cells[col]?.innerText);let c=A.t==='n'&&B.t==='n'?A.v-B.v:String(A.v).localeCompare(String(B.v),'pt-BR',{numeric:true,sensitivity:'base'});return dir==='asc'?c:-c});rows.forEach(r=>body.appendChild(r))}
 function installSorters(root=document){root.querySelectorAll('.tablewrap table').forEach(table=>{[...table.tHead?.rows?.[0]?.cells||[]].forEach((th,i)=>{if(th.dataset.sortBound==='1'||/a[cç][aã]o/i.test(th.textContent))return;th.dataset.sortBound='1';th.classList.add('sortable');th.addEventListener('click',()=>{let dir=th.dataset.sortDir==='asc'?'desc':'asc';[...th.parentElement.cells].forEach(x=>delete x.dataset.sortDir);th.dataset.sortDir=dir;sortTable(table,i,dir)})})})}
-const mo=new MutationObserver(()=>installSorters());mo.observe(document.body,{childList:true,subtree:true});installSorters();
+const mo=new MutationObserver(records=>{for(const rec of records){for(const n of rec.addedNodes||[]){if(n.nodeType!==1)continue;if(n.matches?.('.tablewrap,.tablewrap table')||n.querySelector?.('.tablewrap table')){installSorters(n.matches?.('.tablewrap table')?(n.closest('.tablewrap')||document):n);}}}});mo.observe(document.body,{childList:true,subtree:true});installSorters();
 function replaceFgtsLogo(){let fgts=document.getElementById('fgts');if(!fgts)return;fgts.querySelectorAll('.fgts-logo-only img,.fgts-logo-under-title img,.fgts-seal img,.fgts-hero img').forEach(img=>img.src=NEW_FGTS_LOGO);let only=fgts.querySelector('.fgts-logo-only');if(!only){let tools=fgts.querySelector('.section-tools');if(tools)tools.insertAdjacentHTML('afterend',`<div class="fgts-logo-only"><img src="${NEW_FGTS_LOGO}" alt="FGTS"></div>`)}else{only.innerHTML=`<img src="${NEW_FGTS_LOGO}" alt="FGTS">`}}
 function ensureDebtPayModal(){if(document.getElementById('debtPayModal'))return;let m=document.createElement('div');m.className='modalback';m.id='debtPayModal';m.innerHTML=`<div class="modal"><h2>Registrar pagamento</h2><p>Marque a parcela do mês como paga ou adiante parcelas futuras.</p><input type="hidden" id="dpId"><div class="debt-pay-hero"><span id="dpDebtName">Dívida</span><b id="dpPending">—</b><small>saldo pendente antes do pagamento</small></div><div class="pay-choice-grid"><button type="button" class="pay-choice active" data-paymode="current">Pagar parcela do mês<small>Registra 1 parcela pelo valor mensal.</small></button><button type="button" class="pay-choice" data-paymode="advance">Adiantar parcelas<small>Escolha quantas parcelas deseja antecipar.</small></button></div><div class="advance-box"><div class="field"><label>Quantidade de parcelas</label><input id="dpQty" type="number" min="1" value="1"></div><div class="field"><label>Valor total deste pagamento</label><input id="dpAmount" inputmode="decimal"></div></div><div class="modalfoot"><button class="ghost" id="dpCancel">Cancelar</button><button class="primary" id="dpSave">Confirmar pagamento</button></div></div>`;document.body.appendChild(m);m.onclick=e=>{if(e.target===m)m.classList.remove('open')};document.getElementById('dpCancel').onclick=()=>m.classList.remove('open');m.querySelectorAll('[data-paymode]').forEach(b=>b.onclick=()=>{m.querySelectorAll('[data-paymode]').forEach(x=>x.classList.remove('active'));b.classList.add('active');let adv=b.dataset.paymode==='advance';document.getElementById('dpQty').disabled=!adv;if(!adv)document.getElementById('dpQty').value=1;updateDebtPayAmount()});document.getElementById('dpQty').oninput=updateDebtPayAmount;document.getElementById('dpSave').onclick=saveDebtPayment}
 function updateDebtPayAmount(){let id=document.getElementById('dpId')?.value,x=getDebts(true).find(d=>d.id===id);if(!x)return;let qty=Math.max(1,+document.getElementById('dpQty').value||1),amt=Math.min(num(x.pendente),num(x.parcela)*qty);document.getElementById('dpAmount').value=String(amt.toFixed(2)).replace('.',',')}
@@ -8285,10 +8290,10 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     }
   }
   function startLoops(){
-    if(!monitorTimer)monitorTimer=setInterval(scan,150);
+    if(!monitorTimer)monitorTimer=setInterval(scan,900);
     if(!pollTimer)pollTimer=setInterval(()=>{
       if(!document.hidden&&currentUser&&initialized)syncCycle({reload:true});
-    },2500);
+    },12000);
     if(!presenceTimer)presenceTimer=setInterval(touchPresence,30000);
   }
   function subscribeRealtime(){
@@ -11303,7 +11308,29 @@ function openApiSearch(kind){let d=defs[kind];let b=modal(`<div class="v130-moda
 async function importTMDB(kind,id){let type=defs[kind].api;let det=await tmdb('/'+type+'/'+id,{append_to_response:'credits,external_ids,keywords'});let obj={id:uid(kind),kind,title:det.title||det.name||'',originalTitle:det.original_title||det.original_name||'',releaseDate:det.release_date||det.first_air_date||'',endDate:det.last_air_date||'',overview:det.overview||'',poster:det.poster_path?IMG+det.poster_path:'',backdrop:det.backdrop_path?BACK+det.backdrop_path:'',genres:(det.genres||[]).map(g=>g.name),runtime:type==='movie'?(det.runtime||0):((det.episode_run_time||[])[0]||0),countries:(det.production_countries||det.origin_country||[]).map?.(c=>c.name||c)||[],languages:(det.spoken_languages||[]).map(l=>l.name||l.english_name),companies:(det.production_companies||[]).map(c=>c.name),cast:(det.credits?.cast||[]).slice(0,12).map(c=>c.name),director:type==='movie'?(det.credits?.crew||[]).filter(c=>c.job==='Director').map(c=>c.name).join(', '):(det.created_by||[]).map(c=>c.name).join(', '),networks:(det.networks||[]).map(n=>n.name),tmdbRating:det.vote_average||0,tmdbVotes:det.vote_count||0,imdbId:det.external_ids?.imdb_id||'',homepage:det.homepage||'',apiId:id,status:'Quero ver',personalRating:0,watchedDate:'',favorite:false,notes:'',seasons:[]};if(type==='tv'){let seasons=(det.seasons||[]).filter(s=>s.season_number>=0);obj.seasons=await Promise.all(seasons.map(async s=>{try{let sd=await tmdb('/tv/'+id+'/season/'+s.season_number);return{number:s.season_number,name:s.name,airDate:s.air_date||'',poster:s.poster_path?IMG+s.poster_path:'',episodes:(sd.episodes||[]).map(e=>({number:e.episode_number,name:e.name,airDate:e.air_date||'',runtime:e.runtime||0,overview:e.overview||'',watched:false}))}}catch(e){return{number:s.season_number,name:s.name,airDate:s.air_date||'',poster:'',episodes:[]}}}))}setSharing(kind,obj,askShareOnImport(kind));db[kind].unshift(obj);save(kind,obj);renderAllEnt(defs[kind].view);toast(obj.sharedExperience?`Importado e compartilhado com ${otherProfile()}.`:'Importado com sucesso.')}
 function importBook(it){let v=it.volumeInfo||{},obj={id:uid('books'),kind:'books',title:v.title||'',authors:v.authors||[],publisher:v.publisher||'',releaseDate:v.publishedDate||'',overview:v.description||'',image:v.imageLinks?.thumbnail?.replace('http:','https:')||'',genres:v.categories||[],pages:v.pageCount||0,isbn:(v.industryIdentifiers||[]).map(x=>x.identifier).join(', '),language:v.language||'',status:'Quero ler',personalRating:0,favorite:false,notes:''};db.books.unshift(obj);save();renderAllEnt(defs.books.view);toast('Livro importado.')}
 function openEdit(kind,id){let x=id?(db[kind]||[]).find(y=>y.id===id):null;if(kind==='trips')return openTrip(x);let isBook=kind==='books';let b=modal(`<div class="v130-modal-head"><div><h2>${x?'Editar':'Cadastrar'} ${defs[kind].singular}</h2><p>Todos os campos podem ser alterados depois.</p></div><button class="v130-close" data-v130-close>×</button></div><div class="v130-formgrid"><div class="v130-field full"><label>Título</label><input id="eTitle" value="${esc(x?.title||'')}"></div>${isBook?`<div class="v130-field full"><label>Autores</label><input id="eAuthors" value="${esc((x?.authors||[]).join(', '))}"></div>`:`<div class="v130-field"><label>Título original</label><input id="eOriginal" value="${esc(x?.originalTitle||'')}"></div><div class="v130-field"><label>Direção / criação</label><input id="eDirector" value="${esc(x?.director||'')}"></div>`}<div class="v130-field"><label>Data / ano</label><input id="eDate" value="${esc(x?.releaseDate||'')}"></div><div class="v130-field"><label>Status</label><select id="eStatus">${(isBook?['Quero ler','Lendo','Lido']:['Quero ver','Assistindo','Assistido']).map(s=>`<option ${x?.status===s?'selected':''}>${s}</option>`).join('')}</select></div><div class="v130-field"><label>Avaliação pessoal</label><select id="eRating">${[0,1,2,3,4,5].map(n=>`<option value="${n}" ${+x?.personalRating===n?'selected':''}>${n?`${n} estrela${n>1?'s':''}`:'Sem avaliação'}</option>`).join('')}</select></div><div class="v130-field"><label>Favorito</label><select id="eFav"><option value="false">Não</option><option value="true" ${x?.favorite?'selected':''}>Sim</option></select></div>${shareField(kind,x,'eShareProfile')}<div class="v130-field full"><label>Imagem / pôster (URL)</label><input id="eImage" value="${esc(x?.poster||x?.image||'')}"></div><div class="v130-field full"><label>Gêneros / categorias</label><input id="eGenres" value="${esc((x?.genres||[]).join(', '))}"></div><div class="v130-field full"><label>Sinopse / descrição</label><textarea id="eOverview">${esc(x?.overview||'')}</textarea></div><div class="v130-field full"><label>Observações pessoais</label><textarea id="eNotes">${esc(x?.notes||'')}</textarea></div></div><div class="v130-modal-foot">${x?`<button class="v130-btn danger" id="eDelete">Excluir</button>`:''}<button class="v130-btn" data-v130-close>Cancelar</button><button class="v130-btn primary" id="eSave">Salvar</button></div>`);b.querySelector('#eSave').onclick=()=>{let obj=x?x:{id:uid(kind),kind};obj.title=b.querySelector('#eTitle').value.trim();if(!obj.title)return alert('Informe o título.');obj.releaseDate=b.querySelector('#eDate').value.trim();obj.status=b.querySelector('#eStatus').value;obj.personalRating=+b.querySelector('#eRating').value;obj.favorite=b.querySelector('#eFav').value==='true';obj.genres=b.querySelector('#eGenres').value.split(',').map(s=>s.trim()).filter(Boolean);obj.overview=b.querySelector('#eOverview').value.trim();obj.notes=b.querySelector('#eNotes').value.trim();if(isBook){obj.authors=b.querySelector('#eAuthors').value.split(',').map(s=>s.trim()).filter(Boolean);obj.image=b.querySelector('#eImage').value.trim()}else{obj.originalTitle=b.querySelector('#eOriginal').value.trim();obj.director=b.querySelector('#eDirector').value.trim();obj.poster=b.querySelector('#eImage').value.trim();setSharing(kind,obj,!!b.querySelector('#eShareProfile')?.checked)}if(!x)db[kind].unshift(obj);save(kind,obj);b.remove();renderAllEnt(defs[kind].view);toast(obj.sharedExperience?`Salvo nos perfis de Marcos e Christian.`:'Salvo.');};if(x)b.querySelector('#eDelete').onclick=()=>{if(confirm('Excluir este item?')){deleteEntItem(kind,x.id);b.remove()}}}
-function openDetails(kind,id){let x=(db[kind]||[]).find(y=>y.id===id);if(!x)return;let isBook=kind==='books';let extra=isBook?[['Autores',(x.authors||[]).join(', ')],['Editora',x.publisher],['Páginas',x.pages],['ISBN',x.isbn],['Idioma',x.language]]:[['Título original',x.originalTitle],['Lançamento',date(x.releaseDate)],['Duração',x.runtime?x.runtime+' min':'—'],['Direção / criação',x.director],['País',(x.countries||[]).join(', ')],['Idiomas',(x.languages||[]).join(', ')],['Produção',(x.companies||[]).join(', ')],['TMDB',x.tmdbRating?Number(x.tmdbRating).toFixed(1)+' / 10':'—'],['IMDb',x.imdbId||'—']];if(x.sharedExperience)extra.push(['Experiência compartilhada','Com '+sharedWithLabel(x)]);let seriesHtml='';if(kind==='series')seriesHtml=`<div class="v130-seasons">${(x.seasons||[]).map(s=>`<details class="v130-season"><summary>Temporada ${s.number} · ${esc(s.name||'')} · ${(s.episodes||[]).filter(e=>e.watched).length}/${(s.episodes||[]).length}</summary><div class="v130-episodes">${(s.episodes||[]).map(e=>`<label class="v130-episode"><input type="checkbox" data-ep-s="${s.number}" data-ep-n="${e.number}" ${e.watched?'checked':''}><b>${e.number}</b><span>${esc(e.name||'Episódio')}</span><small>${date(e.airDate)}</small></label>`).join('')}</div></details>`).join('')}</div>`;let b=modal(`<div class="v130-modal-head"><div><h2>${esc(x.title)}</h2><p>${esc((x.genres||[]).join(' · '))}</p>${x.sharedExperience?`<div class="v132-shared-pill detail"><span>◎</span> Experiência com ${esc(sharedWithLabel(x))}</div>`:''}</div><button class="v130-close" data-v130-close>×</button></div><div class="v130-details-grid"><div>${x.poster||x.image?`<img class="v130-detail-poster" src="${esc(x.poster||x.image)}">`:`<div class="v130-upload-preview">Sem imagem</div>`}<div style="margin-top:10px">${stars(x.personalRating)}</div></div><div><p style="color:#64717a;line-height:1.65;margin-top:0">${esc(x.overview||'Sem descrição.')}</p><div class="v130-detail-list">${extra.map(a=>`<div><b>${esc(a[0])}</b>${esc(a[1]||'—')}</div>`).join('')}</div>${x.cast?.length?`<div class="v130-cast">${x.cast.map(n=>`<span>${esc(n)}</span>`).join('')}</div>`:''}<p style="margin-top:14px;color:#735d4d"><b>Suas notas:</b> ${esc(x.notes||'—')}</p></div></div>${seriesHtml}<div class="v130-modal-foot"><button class="v130-btn" data-v130-close>Fechar</button><button class="v130-btn primary" id="v130DetailEdit">Editar</button></div>`);if(kind==='series')b.querySelectorAll('[data-ep-s]').forEach(cb=>cb.onchange=()=>{let s=(x.seasons||[]).find(y=>y.number==cb.dataset.epS),e=s?.episodes?.find(y=>y.number==cb.dataset.epN);if(e){e.watched=cb.checked;save(kind,x);renderAllEnt(defs[kind].view)}});b.querySelector('#v130DetailEdit').onclick=()=>{b.remove();openEdit(kind,id)}}
+function openDetails(kind,id){
+  let x=(db[kind]||[]).find(y=>y.id===id);if(!x)return;
+  let isBook=kind==='books';
+  let extra=isBook?[['Autores',(x.authors||[]).join(', ')],['Editora',x.publisher],['Páginas',x.pages],['ISBN',x.isbn],['Idioma',x.language]]:[['Título original',x.originalTitle],['Lançamento',date(x.releaseDate)],['Duração',x.runtime?x.runtime+' min':'—'],['Direção / criação',x.director],['País',(x.countries||[]).join(', ')],['Idiomas',(x.languages||[]).join(', ')],['Produção',(x.companies||[]).join(', ')],['TMDB',x.tmdbRating?Number(x.tmdbRating).toFixed(1)+' / 10':'—'],['IMDb',x.imdbId||'—']];
+  if(x.sharedExperience)extra.push(['Experiência compartilhada','Com '+sharedWithLabel(x)]);
+  const seasonMarkup=()=>{
+    const seasons=x.seasons||[],all=seasons.flatMap(s=>s.episodes||[]),done=all.filter(e=>e.watched).length;
+    return `<div class="v133-series-master"><div><b>Progresso da série</b><span>${done}/${all.length} episódios assistidos</span></div><div class="v133-bulk-actions"><button type="button" data-v133-all="1">✓ Marcar todos</button><button type="button" data-v133-all="0">↶ Desmarcar todos</button></div></div><div class="v130-seasons">${seasons.map(s=>{let eps=s.episodes||[],sd=eps.filter(e=>e.watched).length,allSeason=eps.length>0&&sd===eps.length;return `<details class="v130-season" data-v133-season-block="${s.number}"><summary><span>Temporada ${s.number} · ${esc(s.name||'')} · <b class="v133-season-count">${sd}/${eps.length}</b></span><button type="button" class="v133-season-toggle" data-v133-season="${s.number}">${allSeason?'↶ Desmarcar temporada':'✓ Marcar temporada'}</button></summary><div class="v130-episodes">${eps.map(e=>`<label class="v130-episode"><input type="checkbox" data-ep-s="${s.number}" data-ep-n="${e.number}" ${e.watched?'checked':''}><b>${e.number}</b><span>${esc(e.name||'Episódio')}</span><small>${date(e.airDate)}</small></label>`).join('')}</div></details>`}).join('')}</div>`;
+  };
+  let seriesHtml=kind==='series'?`<div id="v133SeriesProgress">${seasonMarkup()}</div>`:'';
+  let b=modal(`<div class="v130-modal-head"><div><h2>${esc(x.title)}</h2><p>${esc((x.genres||[]).join(' · '))}</p>${x.sharedExperience?`<div class="v132-shared-pill detail"><span>◎</span> Experiência com ${esc(sharedWithLabel(x))}</div>`:''}</div><button class="v130-close" data-v130-close>×</button></div><div class="v130-details-grid"><div>${x.poster||x.image?`<img class="v130-detail-poster" src="${esc(x.poster||x.image)}" loading="lazy" decoding="async">`:`<div class="v130-upload-preview">Sem imagem</div>`}<div style="margin-top:10px">${stars(x.personalRating)}</div></div><div><p style="color:#64717a;line-height:1.65;margin-top:0">${esc(x.overview||'Sem descrição.')}</p><div class="v130-detail-list">${extra.map(a=>`<div><b>${esc(a[0])}</b>${esc(a[1]||'—')}</div>`).join('')}</div>${x.cast?.length?`<div class="v130-cast">${x.cast.map(n=>`<span>${esc(n)}</span>`).join('')}</div>`:''}<p style="margin-top:14px;color:#735d4d"><b>Suas notas:</b> ${esc(x.notes||'—')}</p></div></div>${seriesHtml}<div class="v130-modal-foot"><button class="v130-btn" data-v130-close>Fechar</button><button class="v130-btn primary" id="v130DetailEdit">Editar</button></div>`);
+  if(kind==='series'){
+    const refreshSeriesUI=()=>{const holder=b.querySelector('#v133SeriesProgress');if(!holder)return;holder.innerHTML=seasonMarkup();bindSeriesControls();renderMediaPage('series');};
+    const persistSeries=()=>{save('series',x);refreshSeriesUI();};
+    function bindSeriesControls(){
+      b.querySelectorAll('[data-ep-s]').forEach(cb=>cb.onchange=()=>{let s=(x.seasons||[]).find(y=>String(y.number)===String(cb.dataset.epS));let e=s?.episodes?.find(y=>String(y.number)===String(cb.dataset.epN));if(e){e.watched=cb.checked;persistSeries();}});
+      b.querySelectorAll('[data-v133-season]').forEach(btn=>btn.onclick=ev=>{ev.preventDefault();ev.stopPropagation();let s=(x.seasons||[]).find(y=>String(y.number)===String(btn.dataset.v133Season));if(!s)return;let eps=s.episodes||[],mark=eps.some(e=>!e.watched);eps.forEach(e=>e.watched=mark);save('series',x);toast(mark?'Temporada marcada como assistida.':'Temporada desmarcada.');refreshSeriesUI();});
+      b.querySelectorAll('[data-v133-all]').forEach(btn=>btn.onclick=()=>{const mark=btn.dataset.v133All==='1';(x.seasons||[]).forEach(s=>(s.episodes||[]).forEach(e=>e.watched=mark));save('series',x);toast(mark?'Todos os episódios foram marcados como assistidos.':'Todos os episódios foram desmarcados.');refreshSeriesUI();});
+    }
+    bindSeriesControls();
+  }
+  b.querySelector('#v130DetailEdit').onclick=()=>{b.remove();openEdit(kind,id)};
+}
 function renderTrips(){let r=document.getElementById('ent-viagens');if(!r)return;let items=db.trips||[];r.innerHTML=`<div class="v130-ent-shell">${pageHead('trips')}<section class="v130-section"><div class="v130-section-head"><div><h2>Seu mapa de experiências</h2><p>Fotos, período, custos, estrelas e lembranças salvas no próprio navegador.</p></div></div><div class="v130-trip-grid">${items.length?items.map(t=>`<article class="v130-trip-card"><div class="v130-trip-photo">${t.image?`<img src="${esc(t.image)}" loading="lazy" decoding="async">`:`<div class="fallback">✈</div>`}</div><div class="v130-trip-body"><h3>${esc(t.destination)}</h3>${t.sharedExperience?`<div class="v132-shared-pill"><span>◎</span> Com ${esc(sharedWithLabel(t))}</div>`:''}<div>${stars(t.rating)}</div><div class="v130-trip-meta"><div>Período<b>${date(t.start)} → ${date(t.end)}</b></div><div>Custo total<b>${money(t.cost)}</b></div><div>Status<b>${esc(t.status||'Concluída')}</b></div><div>Companhia<b>${esc(t.company||'—')}</b></div></div><div class="v130-trip-notes">${esc(t.notes||'')}</div><div class="v130-card-actions" style="margin-top:12px"><button data-trip-edit="${t.id}">Editar</button><button data-trip-del="${t.id}">Excluir</button></div></div></article>`).join(''):`<div class="v130-empty" style="grid-column:1/-1"><b>Nenhuma viagem cadastrada.</b><span>Cadastre uma viagem e anexe uma imagem para montar sua galeria.</span></div>`}</div></section></div>`;bindCommon(r);r.querySelectorAll('[data-trip-edit]').forEach(b=>b.onclick=()=>openTrip(items.find(x=>x.id===b.dataset.tripEdit)));r.querySelectorAll('[data-trip-del]').forEach(b=>b.onclick=()=>{if(confirm('Excluir esta viagem?'))deleteEntItem('trips',b.dataset.tripDel)})}
 async function compressImage(file){return new Promise((resolve,reject)=>{let rd=new FileReader();rd.onload=()=>{let im=new Image();im.onload=()=>{let max=720,sc=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);let ctx=c.getContext('2d',{alpha:false});ctx.drawImage(im,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.66))};im.onerror=reject;im.src=rd.result};rd.onerror=reject;rd.readAsDataURL(file)})}
 function openTrip(x){let b=modal(`<div class="v130-modal-head"><div><h2>${x?'Editar':'Cadastrar'} viagem</h2><p>Crie uma memória completa da viagem.</p></div><button class="v130-close" data-v130-close>×</button></div><div class="v130-formgrid"><div class="v130-field full"><label>Destino</label><input id="tDest" value="${esc(x?.destination||'')}"></div><div class="v130-field"><label>Início</label><input id="tStart" type="date" value="${esc(x?.start||'')}"></div><div class="v130-field"><label>Término</label><input id="tEnd" type="date" value="${esc(x?.end||'')}"></div><div class="v130-field"><label>Custo total</label><input id="tCost" inputmode="decimal" value="${esc(x?.cost||'')}"></div><div class="v130-field"><label>Avaliação</label><select id="tRating">${[1,2,3,4,5].map(n=>`<option value="${n}" ${+x?.rating===n?'selected':''}>${n} estrela${n>1?'s':''}</option>`).join('')}</select></div><div class="v130-field"><label>Status</label><select id="tStatus">${['Planejada','Em andamento','Concluída'].map(s=>`<option ${x?.status===s?'selected':''}>${s}</option>`).join('')}</select></div><div class="v130-field"><label>Com quem / companhia</label><input id="tCompany" value="${esc(x?.company||'')}"></div>${shareField('trips',x,'tShareProfile')}<div class="v130-field full"><label>Imagem</label><input id="tImage" type="file" accept="image/*"><div class="v130-upload-preview" id="tPreview">${x?.image?`<img src="${esc(x.image)}">`:'Clique acima para escolher uma foto'}</div></div><div class="v130-field full"><label>Notas e memórias</label><textarea id="tNotes">${esc(x?.notes||'')}</textarea></div></div><div class="v130-modal-foot"><button class="v130-btn" data-v130-close>Cancelar</button><button class="v130-btn primary" id="tSave">Salvar viagem</button></div>`);let img=x?.image||'';b.querySelector('#tImage').onchange=async e=>{let f=e.target.files?.[0];if(!f)return;try{img=await compressImage(f);b.querySelector('#tPreview').innerHTML=`<img src="${img}">`}catch(err){alert('Não consegui processar a imagem.')}};b.querySelector('#tSave').onclick=()=>{let dest=b.querySelector('#tDest').value.trim();if(!dest)return alert('Informe o destino.');let val=String(b.querySelector('#tCost').value).replace(/\./g,'').replace(',','.');let o=x||{id:uid('trip')};Object.assign(o,{destination:dest,start:b.querySelector('#tStart').value,end:b.querySelector('#tEnd').value,cost:parseFloat(val)||0,rating:+b.querySelector('#tRating').value,status:b.querySelector('#tStatus').value,company:b.querySelector('#tCompany').value.trim(),notes:b.querySelector('#tNotes').value.trim(),image:img});setSharing('trips',o,!!b.querySelector('#tShareProfile')?.checked);if(!x)db.trips.unshift(o);save('trips',o);b.remove();renderAllEnt('ent-viagens');toast(o.sharedExperience?'Viagem salva nos dois perfis.':'Viagem salva.')}}
@@ -11355,7 +11382,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
-</body></html>
+
 <style id="recurring-card-style">
 .recurring-note{margin-top:8px;padding:10px 12px;border-radius:12px;background:#fff8ee;border:1px solid #ffd6a7;color:#8a4b00;font-size:11px;line-height:1.45}
 .recurring-tag{background:#fff2df!important;color:#c96c00!important}
@@ -11429,7 +11456,7 @@ input[inputmode="decimal"].money-br{text-align:right;font-variant-numeric:tabula
   }
 
   install();
-  const obs=new MutationObserver(()=>install());
+  const obs=new MutationObserver(records=>{for(const rec of records){for(const node of rec.addedNodes||[]){if(!(node instanceof HTMLElement))continue;if(node.matches?.('input[inputmode="decimal"]'))install(node.parentElement||document);else if(node.querySelector?.('input[inputmode="decimal"]'))install(node);}}});
   obs.observe(document.body,{childList:true,subtree:true});
 
   // Após renderizações, normaliza textos monetários conhecidos que já usam brl().
@@ -14097,7 +14124,7 @@ setTimeout(initEssence,0);
     if(!box||!document.getElementById('dashboard')?.classList.contains('active'))return;
     const txt=box.textContent||'';
     if(/dívida|parcela prevista|obrigação futura/i.test(txt))repaint();
-  },1000);
+  },10000);
   setTimeout(repaint,100);
 })();
 </script>
@@ -14598,7 +14625,7 @@ setTimeout(initEssence,0);
     if(!debtModalOpen())return;
     bind();
     restoreDraft();
-  },100);
+  },800);
 
   // Override save click at capture phase so old handlers cannot reduce installments to 1.
   document.addEventListener('click',e=>{
@@ -15591,7 +15618,7 @@ setTimeout(initEssence,0);
   window.renderDebts=render75;
   try{renderDebts=render75}catch(e){}
 
-  const obs=new MutationObserver(()=>removeBank75());
+  const obs=new MutationObserver(records=>{for(const rec of records){for(const n of rec.addedNodes||[]){if(n.nodeType!==1)continue;if(n.id==='dividas'||n.id==='debtModal'||n.closest?.('#dividas,#debtModal')||n.querySelector?.('#dividas,#debtModal')){removeBank75();return;}}}});
   obs.observe(document.body,{childList:true,subtree:true});
   removeBank75();render75();
   setTimeout(()=>{ensureFilters75();removeBank75();render75()},150);
@@ -16925,8 +16952,8 @@ try{getCardSchedules=window.getCardSchedules;cardAggregatedTx=window.cardAggrega
     b.addEventListener('click',saveCardFinal,true);
   }
   bind();
-  const mo=new MutationObserver(()=>bind());
-  mo.observe(document.documentElement,{childList:true,subtree:true});
+  const mo=new MutationObserver(records=>{for(const rec of records){for(const n of rec.addedNodes||[]){if(n.nodeType!==1)continue;if(n.id==='saveCard'||n.querySelector?.('#saveCard')){bind();return;}}}});
+  mo.observe(document.body||document.documentElement,{childList:true,subtree:true});
   document.addEventListener('click',e=>{
     const t=e.target.closest?.('#saveCard');if(!t)return;
     if(t.dataset.v46==='1')return;
@@ -17284,7 +17311,7 @@ mirror();
 window.addEventListener('pagehide',mirror,{capture:true});
 window.addEventListener('beforeunload',mirror,{capture:true});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)mirror()});
-const timer=setInterval(mirror,1200);
+const timer=setInterval(mirror,8000);
 // Single verified switch function for explicit profile UI paths.
 const switchProfile=window.ppV46SwitchProfile||window.ppV41SwitchProfile;
 if(typeof switchProfile==='function'){
@@ -18219,7 +18246,7 @@ if(document.body)obs.observe(document.body,{childList:true,subtree:true});
 else document.addEventListener('DOMContentLoaded',()=>obs.observe(document.body,{childList:true,subtree:true}),{once:true});
 
 /* Fallback leve: só confere a existência dos botões; não redesenha nada. */
-setInterval(patchAll61,1500);
+setTimeout(patchAll61,1500);
 
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',()=>setTimeout(patchAll61,250),{once:true});
@@ -21148,7 +21175,7 @@ document.addEventListener('input',e=>{
 
 /* Alguns scripts antigos usam timeouts maiores depois de abrir a página/modal.
    Esta verificação é apenas estrutural e não redesenha quando tudo está certo. */
-setInterval(()=>{
+setTimeout(()=>{
   const section=document.getElementById('dividas');
   if(!section)return;
   if(!finalIsVisible73())forceFinal73();
@@ -21161,15 +21188,7 @@ if(document.readyState==='loading'){
 }
 
 /* Se a página for reconstruída por navegação, reconecta o observador. */
-const pageObserver73=new MutationObserver(()=>{
-  const section=document.getElementById('dividas');
-  if(section && (!observer73 || !finalIsVisible73())){
-    setTimeout(()=>{
-      attachDebtLock73();
-      scheduleFinal73(0);
-    },30);
-  }
-});
+const pageObserver73=new MutationObserver(records=>{let debtRecreated=false;for(const rec of records){for(const n of rec.addedNodes||[]){if(n.nodeType===1&&(n.id==='dividas'||n.querySelector?.('#dividas'))){debtRecreated=true;break;}}if(debtRecreated)break;}if(debtRecreated)setTimeout(()=>{attachDebtLock73();scheduleFinal73(0);},30);});
 if(document.body)pageObserver73.observe(document.body,{childList:true,subtree:true});
 
 window.ppDebtV73={
@@ -28599,3 +28618,14 @@ window.ppMenuAuditV123=()=>{
 <script id="pp-v133-performance-note">
 (()=>{try{document.documentElement.dataset.ppPerformance='v133'}catch(e){}})();
 </script>
+
+<style id="pp-v133-performance-series-style">
+.v133-series-master{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:18px 0 10px;padding:12px 14px;border:1px solid rgba(255,122,26,.18);border-radius:16px;background:linear-gradient(135deg,#fff8f1,#fff)}
+.v133-series-master>div:first-child{display:grid;gap:3px}.v133-series-master b{font-size:13px;color:#493727}.v133-series-master span{font-size:11px;color:#7b6858}.v133-bulk-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.v133-bulk-actions button,.v133-season-toggle{border:1px solid #dce8f4;background:#f5f9fd;color:#174f88;border-radius:999px;padding:7px 10px;font-size:10.5px;font-weight:850;cursor:pointer;white-space:nowrap}.v133-bulk-actions button:hover,.v133-season-toggle:hover{background:#e9f3ff;border-color:#bcd5ef}
+.v130-season summary{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important}.v130-season summary>span{min-width:0}.v133-season-toggle{margin-left:auto;flex:0 0 auto}
+@media(max-width:640px){.v133-series-master{align-items:flex-start;flex-direction:column}.v133-bulk-actions{justify-content:flex-start}.v130-season summary{align-items:flex-start!important;flex-direction:column!important}.v133-season-toggle{margin-left:0}}
+</style>
+
+</body>
+</html>
