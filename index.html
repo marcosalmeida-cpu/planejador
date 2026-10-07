@@ -1567,25 +1567,6 @@ body.v86-ready #dashboard{visibility:visible!important}
 2. Salvar lançamentos, cartões, investimentos e patrimônio em tabelas próprias
 3. Aplicar login por usuário
 4. Sincronizar automaticamente entre Android e computador</div><p class="footnote">Nesta etapa, o objetivo foi reorganizar o site, separar o realizado da projeção e criar as abas de cartões e investimentos como você pediu.</p></div><div><div class="summary-strip" style="grid-template-columns:1fr"><div class="card mini"><span>Base importada</span><b id="cloudImported">—</b></div><div class="card mini"><span>Lançamentos criados no site</span><b id="cloudCustom">—</b></div><div class="card mini"><span>Compras em cartões</span><b id="cloudCardPurchases">—</b></div><div class="card mini"><span>Investimentos cadastrados</span><b id="cloudInvestments">—</b></div></div></div></article></section>
-</main>
-
-<div class="menu-pop" id="rowMenu"></div>
-
-<div class="modalback" id="txModal"><div class="modal"><h2>Novo lançamento</h2><p>Use também para projeções futuras: se escolher um mês/ano à frente, ele entra na aba de projeção e não no realizado.</p><div class="formgrid"><div class="field"><label>Tipo</label><select id="fType"><option value="entrada">Entrada</option><option value="saida">Saída</option></select></div><div class="field"><label>Status</label><select id="fStatus"><option>Quitado</option><option>Pendente</option></select></div><div class="field"><label>Ano</label><input id="fYear" type="number"></div><div class="field"><label>Mês</label><select id="fMonth"></select></div><div class="field full"><label>Descrição</label><input id="fDesc"></div><div class="field"><label>Categoria</label><select id="fCategory"></select></div><div class="field"><label>Classificação</label><select id="fClass"><option>Fixo</option><option>Variável</option><option>Extra</option></select></div><div class="field"><label>Origem / conta</label><input id="fOrigin"></div><div class="field"><label>Valor</label><input id="fValue" inputmode="decimal"></div></div><div class="modalfoot"><button class="ghost" data-close="txModal">Cancelar</button><button class="primary" id="saveTx">Salvar lançamento</button></div></div></div>
-
-<div class="modalback" id="debtModal"><div class="modal"><h2>Editar dívida</h2><p>Ajuste os dados visíveis no site. A planilha original não será alterada.</p><input type="hidden" id="dId"><div class="formgrid"><div class="field full"><label>Descrição</label><input id="dDesc"></div><div class="field"><label>Credor</label><input id="dCreditor"></div><div class="field"><label>Banco</label><input id="dBank"></div><div class="field"><label>Parcela</label><input id="dInstallment" inputmode="decimal"></div><div class="field"><label>Total contratado</label><input id="dTotal" inputmode="decimal"></div><div class="field"><label>Já quitado</label><input id="dPaid" inputmode="decimal"></div><div class="field"><label>Total de parcelas</label><input id="dInstallments" type="number"></div><div class="field"><label>Parcelas quitadas</label><input id="dInstallmentsPaid" type="number"></div><div class="field"><label>Negociado</label><select id="dNegotiated"><option>Sim</option><option>Não</option></select></div></div><div class="modalfoot"><button class="ghost" data-close="debtModal">Cancelar</button><button class="primary" id="saveDebt">Salvar alterações</button></div></div></div>
-
-<div class="modalback" id="assetModal"><div class="modal"><h2 id="assetModalTitle">Novo patrimônio</h2><p>Cadastre investimentos, veículos, imóveis ou outros bens por ano.</p><input type="hidden" id="aId"><div class="formgrid"><div class="field full"><label>Nome / descrição</label><input id="aName"></div><div class="field"><label>Tipo</label><select id="aType"><option>Investimento</option><option>Carro</option><option>Moto</option><option>Casa</option><option>Imóvel</option><option>Outro</option></select></div><div class="field"><label>Ano</label><input id="aYear" type="number"></div><div class="field"><label>Valor registrado</label><input id="aValue" inputmode="decimal"></div><div class="field"><label>Banco / instituição</label><input id="aBank"></div><div class="field full"><label>Observação</label><input id="aNote"></div></div><div class="modalfoot"><button class="ghost" data-close="assetModal">Cancelar</button><button class="primary" id="saveAsset">Salvar</button></div></div></div>
-
-<div class="modalback" id="fgtsModal"><div class="modal"><h2>Editar saldos do FGTS</h2><p>Atualize a posição atual quando houver mudança.</p><div class="formgrid"><div class="field"><label>Saldo atual</label><input id="gCurrent" inputmode="decimal"></div><div class="field"><label>Saldo bloqueado</label><input id="gBlocked" inputmode="decimal"></div><div class="field"><label>Saldo rescisão</label><input id="gRescission" inputmode="decimal"></div><div class="field"><label>Saldo disponível</label><input id="gFree" inputmode="decimal"></div></div><div class="modalfoot"><button class="ghost" data-close="fgtsModal">Cancelar</button><button class="primary" id="saveFgts">Salvar</button></div></div></div>
-
-<div class="modalback" id="cardModal"><div class="modal"><h2 id="cardModalTitle">Novo cartão</h2><p>Cadastre o limite total e os dados da fatura.</p><input type="hidden" id="cId"><div class="formgrid"><div class="field full"><label>Nome do cartão</label><input id="cName"></div><div class="field"><label>Bandeira</label><input id="cBrand"></div><div class="field"><label>Tema</label><select id="cTheme"><option value="inter">Inter</option><option value="nubank">Nubank</option><option value="picpay">PicPay</option><option value="xp">XP</option><option value="itaulatam">Itaú / LATAM</option><option value="redvelvet">Vermelho</option><option value="sunset">Laranja</option></select></div><div class="field"><label>Limite total</label><input id="cLimit" inputmode="decimal"></div><div class="field"><label>Dia de fechamento</label><input id="cCloseDay" type="number"></div><div class="field"><label>Dia de vencimento</label><input id="cDueDay" type="number"></div></div><div class="modalfoot"><button class="ghost" data-close="cardModal">Cancelar</button><button class="primary" id="saveCard">Salvar cartão</button></div></div></div>
-
-<div class="modalback" id="cardPurchaseModal"><div class="modal"><h2 id="cardPurchaseModalTitle">Nova compra no cartão</h2><p>Ao salvar aqui, o valor passa a compor as faturas agregadas na aba de lançamentos.</p><input type="hidden" id="cpId"><div class="formgrid"><div class="field"><label>Cartão</label><select id="cpCard"></select></div><div class="field"><label>Data da compra</label><input id="cpDate" type="date"></div><div class="field full"><label>Descrição</label><input id="cpDesc"></div><div class="field"><label>Categoria</label><select id="cpCategory"></select></div><div class="field"><label>Tipo</label><select id="cpMode"><option value="avista">À vista</option><option value="parcelado">Parcelado</option></select></div><div class="field"><label>Valor total</label><input id="cpTotal" inputmode="decimal"></div><div class="field"><label>Qtd. de parcelas</label><input id="cpInstallments" type="number" min="1"></div><div class="field"><label>Parcelas já pagas</label><input id="cpPaid" type="number" min="0"></div><div class="field"><label>1ª fatura - ano</label><input id="cpStartYear" type="number"></div><div class="field"><label>1ª fatura - mês</label><select id="cpStartMonth"></select></div><div class="field"><label>Status</label><select id="cpStatus"><option>Ativo</option><option>Quitado</option><option>Arquivado</option></select></div></div><div class="modalfoot"><button class="ghost" data-close="cardPurchaseModal">Cancelar</button><button class="primary" id="saveCardPurchase">Salvar compra</button></div></div></div>
-
-<div class="modalback" id="investmentModal"><div class="modal"><h2 id="investmentModalTitle">Novo investimento</h2><p>Organize por tipo: CDB, LCI/LCA, previdência, tesouro, ações e mais.</p><input type="hidden" id="iId"><div class="formgrid"><div class="field full"><label>Produto / nome</label><input id="iProduct"></div><div class="field"><label>Tipo</label><select id="iType"><option>CDB</option><option>LCI/LCA</option><option>Previdência privada</option><option>Tesouro Direto</option><option>Ações</option><option>Fundos</option><option>Caixinha / Reserva</option><option>A classificar</option></select></div><div class="field"><label>Instituição / banco</label><input id="iInstitution"></div><div class="field"><label>Ano</label><input id="iYear" type="number"></div><div class="field"><label>Capital aplicado</label><input id="iPrincipal" inputmode="decimal"></div><div class="field"><label>Valor atual</label><input id="iCurrent" inputmode="decimal"></div><div class="field"><label>Rendimento acumulado</label><input id="iYield" inputmode="decimal"></div><div class="field"><label>Status</label><select id="iStatus"><option>Ativo</option><option>Resgatado</option></select></div><div class="field full"><label>Observação</label><input id="iNote"></div></div><div class="modalfoot"><button class="ghost" data-close="investmentModal">Cancelar</button><button class="primary" id="saveInvestment">Salvar investimento</button></div></div></div>
-
-
 <section class="view v115-life-view" id="edu-overview" data-v115-site-view="educacao">
   <div class="v115-site-hero">
     <div><div class="v115-site-kicker">educação</div><h1>Aprender também é patrimônio.</h1><p>Organize sua trajetória acadêmica, formações e produção intelectual em um único espaço.</p></div>
@@ -1677,6 +1658,24 @@ body.v86-ready #dashboard{visibility:visible!important}
   <div class="v115-page-head"><div><div class="v115-site-kicker">entretenimento · viagens</div><h1>Viagens</h1><p>Lugares vividos, planejados e desejados.</p></div></div>
   <div class="v115-media-empty"><span>⌖</span><h3>Seu mapa de experiências</h3><p>Destinos, roteiros e memórias de viagem poderão ser organizados aqui.</p></div>
 </section>
+</main>
+
+<div class="menu-pop" id="rowMenu"></div>
+
+<div class="modalback" id="txModal"><div class="modal"><h2>Novo lançamento</h2><p>Use também para projeções futuras: se escolher um mês/ano à frente, ele entra na aba de projeção e não no realizado.</p><div class="formgrid"><div class="field"><label>Tipo</label><select id="fType"><option value="entrada">Entrada</option><option value="saida">Saída</option></select></div><div class="field"><label>Status</label><select id="fStatus"><option>Quitado</option><option>Pendente</option></select></div><div class="field"><label>Ano</label><input id="fYear" type="number"></div><div class="field"><label>Mês</label><select id="fMonth"></select></div><div class="field full"><label>Descrição</label><input id="fDesc"></div><div class="field"><label>Categoria</label><select id="fCategory"></select></div><div class="field"><label>Classificação</label><select id="fClass"><option>Fixo</option><option>Variável</option><option>Extra</option></select></div><div class="field"><label>Origem / conta</label><input id="fOrigin"></div><div class="field"><label>Valor</label><input id="fValue" inputmode="decimal"></div></div><div class="modalfoot"><button class="ghost" data-close="txModal">Cancelar</button><button class="primary" id="saveTx">Salvar lançamento</button></div></div></div>
+
+<div class="modalback" id="debtModal"><div class="modal"><h2>Editar dívida</h2><p>Ajuste os dados visíveis no site. A planilha original não será alterada.</p><input type="hidden" id="dId"><div class="formgrid"><div class="field full"><label>Descrição</label><input id="dDesc"></div><div class="field"><label>Credor</label><input id="dCreditor"></div><div class="field"><label>Banco</label><input id="dBank"></div><div class="field"><label>Parcela</label><input id="dInstallment" inputmode="decimal"></div><div class="field"><label>Total contratado</label><input id="dTotal" inputmode="decimal"></div><div class="field"><label>Já quitado</label><input id="dPaid" inputmode="decimal"></div><div class="field"><label>Total de parcelas</label><input id="dInstallments" type="number"></div><div class="field"><label>Parcelas quitadas</label><input id="dInstallmentsPaid" type="number"></div><div class="field"><label>Negociado</label><select id="dNegotiated"><option>Sim</option><option>Não</option></select></div></div><div class="modalfoot"><button class="ghost" data-close="debtModal">Cancelar</button><button class="primary" id="saveDebt">Salvar alterações</button></div></div></div>
+
+<div class="modalback" id="assetModal"><div class="modal"><h2 id="assetModalTitle">Novo patrimônio</h2><p>Cadastre investimentos, veículos, imóveis ou outros bens por ano.</p><input type="hidden" id="aId"><div class="formgrid"><div class="field full"><label>Nome / descrição</label><input id="aName"></div><div class="field"><label>Tipo</label><select id="aType"><option>Investimento</option><option>Carro</option><option>Moto</option><option>Casa</option><option>Imóvel</option><option>Outro</option></select></div><div class="field"><label>Ano</label><input id="aYear" type="number"></div><div class="field"><label>Valor registrado</label><input id="aValue" inputmode="decimal"></div><div class="field"><label>Banco / instituição</label><input id="aBank"></div><div class="field full"><label>Observação</label><input id="aNote"></div></div><div class="modalfoot"><button class="ghost" data-close="assetModal">Cancelar</button><button class="primary" id="saveAsset">Salvar</button></div></div></div>
+
+<div class="modalback" id="fgtsModal"><div class="modal"><h2>Editar saldos do FGTS</h2><p>Atualize a posição atual quando houver mudança.</p><div class="formgrid"><div class="field"><label>Saldo atual</label><input id="gCurrent" inputmode="decimal"></div><div class="field"><label>Saldo bloqueado</label><input id="gBlocked" inputmode="decimal"></div><div class="field"><label>Saldo rescisão</label><input id="gRescission" inputmode="decimal"></div><div class="field"><label>Saldo disponível</label><input id="gFree" inputmode="decimal"></div></div><div class="modalfoot"><button class="ghost" data-close="fgtsModal">Cancelar</button><button class="primary" id="saveFgts">Salvar</button></div></div></div>
+
+<div class="modalback" id="cardModal"><div class="modal"><h2 id="cardModalTitle">Novo cartão</h2><p>Cadastre o limite total e os dados da fatura.</p><input type="hidden" id="cId"><div class="formgrid"><div class="field full"><label>Nome do cartão</label><input id="cName"></div><div class="field"><label>Bandeira</label><input id="cBrand"></div><div class="field"><label>Tema</label><select id="cTheme"><option value="inter">Inter</option><option value="nubank">Nubank</option><option value="picpay">PicPay</option><option value="xp">XP</option><option value="itaulatam">Itaú / LATAM</option><option value="redvelvet">Vermelho</option><option value="sunset">Laranja</option></select></div><div class="field"><label>Limite total</label><input id="cLimit" inputmode="decimal"></div><div class="field"><label>Dia de fechamento</label><input id="cCloseDay" type="number"></div><div class="field"><label>Dia de vencimento</label><input id="cDueDay" type="number"></div></div><div class="modalfoot"><button class="ghost" data-close="cardModal">Cancelar</button><button class="primary" id="saveCard">Salvar cartão</button></div></div></div>
+
+<div class="modalback" id="cardPurchaseModal"><div class="modal"><h2 id="cardPurchaseModalTitle">Nova compra no cartão</h2><p>Ao salvar aqui, o valor passa a compor as faturas agregadas na aba de lançamentos.</p><input type="hidden" id="cpId"><div class="formgrid"><div class="field"><label>Cartão</label><select id="cpCard"></select></div><div class="field"><label>Data da compra</label><input id="cpDate" type="date"></div><div class="field full"><label>Descrição</label><input id="cpDesc"></div><div class="field"><label>Categoria</label><select id="cpCategory"></select></div><div class="field"><label>Tipo</label><select id="cpMode"><option value="avista">À vista</option><option value="parcelado">Parcelado</option></select></div><div class="field"><label>Valor total</label><input id="cpTotal" inputmode="decimal"></div><div class="field"><label>Qtd. de parcelas</label><input id="cpInstallments" type="number" min="1"></div><div class="field"><label>Parcelas já pagas</label><input id="cpPaid" type="number" min="0"></div><div class="field"><label>1ª fatura - ano</label><input id="cpStartYear" type="number"></div><div class="field"><label>1ª fatura - mês</label><select id="cpStartMonth"></select></div><div class="field"><label>Status</label><select id="cpStatus"><option>Ativo</option><option>Quitado</option><option>Arquivado</option></select></div></div><div class="modalfoot"><button class="ghost" data-close="cardPurchaseModal">Cancelar</button><button class="primary" id="saveCardPurchase">Salvar compra</button></div></div></div>
+
+<div class="modalback" id="investmentModal"><div class="modal"><h2 id="investmentModalTitle">Novo investimento</h2><p>Organize por tipo: CDB, LCI/LCA, previdência, tesouro, ações e mais.</p><input type="hidden" id="iId"><div class="formgrid"><div class="field full"><label>Produto / nome</label><input id="iProduct"></div><div class="field"><label>Tipo</label><select id="iType"><option>CDB</option><option>LCI/LCA</option><option>Previdência privada</option><option>Tesouro Direto</option><option>Ações</option><option>Fundos</option><option>Caixinha / Reserva</option><option>A classificar</option></select></div><div class="field"><label>Instituição / banco</label><input id="iInstitution"></div><div class="field"><label>Ano</label><input id="iYear" type="number"></div><div class="field"><label>Capital aplicado</label><input id="iPrincipal" inputmode="decimal"></div><div class="field"><label>Valor atual</label><input id="iCurrent" inputmode="decimal"></div><div class="field"><label>Rendimento acumulado</label><input id="iYield" inputmode="decimal"></div><div class="field"><label>Status</label><select id="iStatus"><option>Ativo</option><option>Resgatado</option></select></div><div class="field full"><label>Observação</label><input id="iNote"></div></div><div class="modalfoot"><button class="ghost" data-close="investmentModal">Cancelar</button><button class="primary" id="saveInvestment">Salvar investimento</button></div></div></div>
+
 
 <div class="toast" id="toast"></div>
 
@@ -28055,6 +28054,187 @@ window.ppMenuAuditV122=()=>{
     if(!document.getElementById('credores') && typeof ensureCredorSection==='function')ensureCredorSection();
   }catch(e){}
   return expected.map(id=>({id,ok:!!document.getElementById(id)}));
+};
+})();
+</script>
+
+<style id="pp-v123-life-hub-structure-fix">
+/* Todas as views agora obedecem a uma única regra de visibilidade. */
+.main > .view{
+  display:none!important;
+  visibility:hidden!important;
+}
+.main > .view.active{
+  display:block!important;
+  visibility:visible!important;
+}
+
+/* Margens reais das páginas do hub, alinhadas ao cabeçalho. */
+body[data-v115-site="educacao"] .main,
+body[data-v115-site="saude"] .main,
+body[data-v115-site="entretenimento"] .main{
+  width:100%!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+  padding-left:28px!important;
+  padding-right:28px!important;
+}
+body[data-v115-site="educacao"] #edu-overview,
+body[data-v115-site="educacao"] #edu-curriculo,
+body[data-v115-site="educacao"] #edu-formacoes,
+body[data-v115-site="educacao"] #edu-publicacoes,
+body[data-v115-site="saude"] #health-overview,
+body[data-v115-site="saude"] #health-exams,
+body[data-v115-site="entretenimento"] #ent-overview,
+body[data-v115-site="entretenimento"] #ent-filmes,
+body[data-v115-site="entretenimento"] #ent-docs,
+body[data-v115-site="entretenimento"] #ent-series,
+body[data-v115-site="entretenimento"] #ent-livros,
+body[data-v115-site="entretenimento"] #ent-viagens{
+  width:100%!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+  margin-left:0!important;
+  margin-right:0!important;
+}
+
+/* Formação: garante respiro lateral interno mesmo em telas grandes. */
+#edu-formacoes #v117FormationRoot,
+#edu-formacoes .v121-formation-deck,
+#edu-formacoes .v121-detail{
+  width:100%!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+}
+#edu-formacoes .v121-formation-deck{
+  margin-left:0!important;
+  margin-right:0!important;
+}
+#edu-formacoes .v121-detail{
+  margin-left:0!important;
+  margin-right:0!important;
+}
+
+/* Reduz o espaço excessivo entre o topo e o conteúdo do hub. */
+body[data-v115-site="educacao"] .main,
+body[data-v115-site="saude"] .main,
+body[data-v115-site="entretenimento"] .main{
+  padding-top:82px!important;
+}
+body.v76-split-header[data-v115-site="educacao"] .main,
+body.v76-split-header[data-v115-site="saude"] .main,
+body.v76-split-header[data-v115-site="entretenimento"] .main{
+  padding-top:76px!important;
+}
+
+@media(max-width:900px){
+  body[data-v115-site="educacao"] .main,
+  body[data-v115-site="saude"] .main,
+  body[data-v115-site="entretenimento"] .main{
+    padding-left:18px!important;
+    padding-right:18px!important;
+  }
+}
+@media(max-width:600px){
+  body[data-v115-site="educacao"] .main,
+  body[data-v115-site="saude"] .main,
+  body[data-v115-site="entretenimento"] .main{
+    padding-left:12px!important;
+    padding-right:12px!important;
+  }
+}
+</style>
+
+
+<script id="pp-v123-final-router">
+(()=>{
+'use strict';
+
+const dynamicRender123={
+  dashboard:()=>window.renderDashboard?.(),
+  lancamentos:()=>window.renderLancamentos?.(),
+  cartoes:()=>window.renderCards?.(),
+  credores:()=>window.renderCreditors?.(),
+  dividas:()=>window.renderDebts?.(),
+  fgts:()=>window.renderFgts?.(),
+  previdencia:()=>window.renderPrevidencia?.(),
+  investimentos:()=>window.renderInvestments?.(),
+  patrimonio:()=>{window.renderAssets?.();window.ppPropertiesV120?.render?.()},
+  veiculos:()=>window.ppVehicleV101?.render?.(),
+  projecao:()=>window.renderProjection?.(),
+  nuvem:()=>window.renderNuvem?.(),
+  'edu-formacoes':()=>window.ppEduFormationsV117?.render?.()
+};
+
+function target123(id){
+  if(id==='credores'&&!document.getElementById('credores')){
+    try{window.ensureCredorSection?.()}catch(e){}
+    try{if(typeof ensureCredorSection==='function')ensureCredorSection()}catch(e){}
+  }
+  return document.getElementById(id);
+}
+function show123(id,doRender=true){
+  const t=target123(id);
+  if(!t||!t.classList.contains('view'))return false;
+
+  document.querySelectorAll('.main > .view').forEach(v=>{
+    const on=v===t;
+    v.classList.toggle('active',on);
+    v.style.setProperty('display',on?'block':'none','important');
+    v.style.setProperty('visibility',on?'visible':'hidden','important');
+  });
+
+  document.querySelectorAll('#nav button[data-view],#v76FloatNav button[data-view]').forEach(b=>{
+    b.classList.toggle('active',b.dataset.view===id);
+  });
+
+  document.getElementById('nav')?.classList.remove('open');
+
+  if(doRender){
+    try{dynamicRender123[id]?.()}catch(e){}
+  }
+  try{window.scrollTo({top:0,behavior:'auto'})}catch(e){}
+  return true;
+}
+
+/* Captura final: todos os menus, inclusive os recriados dinamicamente. */
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('#nav button[data-view],#v76FloatNav button[data-view],[data-v86-view],[data-v115-open]');
+  if(!b)return;
+  const id=b.dataset.view||b.dataset.v86View||b.dataset.v115Open;
+  if(!id)return;
+  if(!target123(id))return;
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  show123(id,true);
+},true);
+
+window.showView=show123;
+try{showView=show123}catch(e){}
+window.ppNavV87={open:show123,apply:show123};
+window.ppNavV122={open:show123,apply:show123};
+window.ppNavV123={open:show123,apply:show123};
+
+/* Garante que somente a view ativa permaneça visível após boot/site switch. */
+setTimeout(()=>{
+  const current=document.querySelector('.main > .view.active')?.id;
+  if(current)show123(current,false);
+},0);
+setTimeout(()=>{
+  const current=document.querySelector('.main > .view.active')?.id;
+  if(current)show123(current,false);
+},150);
+
+/* Auditoria disponível no console/runtime. */
+window.ppMenuAuditV123=()=>{
+  const buttons=[...document.querySelectorAll('#nav button[data-view]')];
+  return buttons.map(b=>({
+    label:(b.textContent||'').trim(),
+    view:b.dataset.view,
+    exists:!!document.getElementById(b.dataset.view),
+    insideMain:document.getElementById(b.dataset.view)?.parentElement?.classList?.contains('main')||false
+  }));
 };
 })();
 </script>
