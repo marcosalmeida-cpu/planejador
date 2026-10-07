@@ -1608,10 +1608,15 @@ body.v86-ready #dashboard{visibility:visible!important}
 </section>
 
 <section class="view v115-life-view" id="edu-formacoes" data-v115-site-view="educacao">
-  <div class="v115-page-head"><div><div class="v115-site-kicker">educação · formações</div><h1>Formações</h1><p>Uma linha do tempo para cursos, certificados e desenvolvimento contínuo.</p></div></div>
-  <div class="v115-timeline-shell">
-    <div class="v115-timeline-empty"><span>⌁</span><h3>Sua jornada de aprendizagem</h3><p>Graduações, especializações, cursos livres e certificações poderão ser organizados aqui.</p></div>
+  <div class="v117-form-head">
+    <div>
+      <div class="v115-site-kicker">educação · formações</div>
+      <h1>Formações</h1>
+      <p>Sua trajetória acadêmica organizada por grau, com histórico e dados de cada formação.</p>
+    </div>
+    <button type="button" class="v117-add-btn" id="v117AddFormation">+ Nova formação</button>
   </div>
+  <div id="v117FormationRoot"></div>
 </section>
 
 <section class="view v115-life-view" id="edu-publicacoes" data-v115-site-view="educacao">
@@ -27332,4 +27337,334 @@ window.ppSiteV115={apply:applySite115,current:()=>safeSite115(document.body.data
   #v115SiteMenu .v116-site-card{min-height:135px}
 }
 </style>
+
+<style id="pp-v117-education-formations">
+#edu-formacoes{--edu:#7456e8}
+.v117-form-head{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:18px;
+  margin:8px 0 15px;padding:8px 2px
+}
+.v117-form-head h1{margin:7px 0 4px;font-size:34px;letter-spacing:-.045em;color:#172033}
+.v117-form-head p{margin:0;color:#788496;font-size:10.5px}
+.v117-add-btn{
+  min-height:42px;padding:10px 15px;border:0;border-radius:13px;
+  background:linear-gradient(135deg,#6448dc,#876cf1);color:#fff;font-size:10px;font-weight:900;
+  box-shadow:0 10px 24px rgba(116,86,232,.22);cursor:pointer
+}
+.v117-degree-section{margin-bottom:14px}
+.v117-degree-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-bottom:8px;padding:0 3px
+}
+.v117-degree-head h2{margin:0;font-size:13px;color:#344054}
+.v117-degree-head span{font-size:8px;color:#8792a2}
+.v117-formation-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px
+}
+.v117-formation-card{
+  position:relative;min-height:192px;padding:16px;border-radius:21px;
+  border:1px solid #dfe5ed;background:linear-gradient(180deg,#fff,#f7f9fc);
+  box-shadow:0 9px 22px rgba(15,23,42,.045);cursor:pointer;text-align:left;color:#172033;
+  overflow:hidden;transition:.18s ease
+}
+.v117-formation-card:hover{transform:translateY(-2px);border-color:#cfc4ff;box-shadow:0 16px 30px rgba(64,46,126,.10)}
+.v117-formation-card:before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(#7456e8,#9b85ff)
+}
+.v117-formation-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.v117-degree-chip{
+  display:inline-flex;padding:4px 7px;border-radius:999px;background:#f0ecff;color:#684fd5;
+  font-size:7px;font-weight:950;text-transform:uppercase;letter-spacing:.07em
+}
+.v117-status{font-size:7px;font-weight:900;color:#647184;background:#edf1f5;padding:4px 6px;border-radius:999px}
+.v117-formation-card h3{margin:20px 0 5px;font-size:17px;letter-spacing:-.03em}
+.v117-inst{display:block;font-size:9px;color:#738093;line-height:1.35;min-height:25px}
+.v117-meta-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:16px}
+.v117-meta-row div{padding:8px;border-radius:11px;background:#eef2f6}
+.v117-meta-row span{display:block;font-size:6.8px;color:#8792a2;text-transform:uppercase;font-weight:900;letter-spacing:.05em}
+.v117-meta-row b{display:block;margin-top:3px;font-size:9px;color:#26364a}
+.v117-open-note{display:block;margin-top:11px;font-size:8px;color:#7456e8;font-weight:900}
+.v117-empty{
+  min-height:260px;display:grid;place-items:center;text-align:center;padding:30px;
+  border:1px dashed #cfd7e3;border-radius:22px;background:#f8fafc;color:#7d8999
+}
+.v117-empty span{font-size:34px}.v117-empty h3{margin:8px 0 5px;color:#344054}.v117-empty p{margin:0;font-size:10px}
+
+/* modal */
+#v117EduModal{
+  position:fixed;inset:0;z-index:260000;display:none;place-items:center;padding:18px;
+  background:rgba(7,14,29,.68);backdrop-filter:blur(12px)
+}
+#v117EduModal.open{display:grid}
+.v117-modal{
+  width:min(1080px,96vw);max-height:92vh;overflow:auto;padding:21px;border-radius:28px;
+  background:linear-gradient(180deg,#fff,#f7f9fc);border:1px solid #dfe6ef;box-shadow:0 38px 100px rgba(8,20,43,.32)
+}
+.v117-modal-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:15px}
+.v117-modal-kicker{font-size:8px;font-weight:950;letter-spacing:.11em;text-transform:uppercase;color:#7456e8}
+.v117-modal-head h2{margin:5px 0 3px;font-size:25px;letter-spacing:-.04em;color:#172033}
+.v117-modal-head p{margin:0;font-size:10px;color:#788496}
+.v117-close{
+  width:38px;height:38px;border-radius:13px;border:1px solid #dae2eb;background:#fff;color:#566275;font-size:22px;cursor:pointer
+}
+.v117-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.v117-summary-grid div{padding:10px;border-radius:13px;background:#eef2f6}
+.v117-summary-grid span{display:block;font-size:7px;color:#7d8999;text-transform:uppercase;font-weight:900;letter-spacing:.05em}
+.v117-summary-grid b{display:block;margin-top:4px;font-size:10px;color:#27364a}
+.v117-notes{margin-bottom:14px;padding:12px 13px;border-radius:14px;background:#f5f2ff;color:#574a88;font-size:9.5px;line-height:1.5}
+.v117-history-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 0 8px}
+.v117-history-title h3{margin:0;font-size:14px;color:#344054}
+.v117-history-title span{font-size:8px;color:#8792a2}
+.v117-history-wrap{border:1px solid #e0e6ee;border-radius:16px;overflow:auto;background:#fff}
+.v117-history-table{width:100%;border-collapse:collapse;min-width:780px}
+.v117-history-table th{
+  padding:8px 9px;text-align:left;background:#f2f5f8;color:#657285;
+  font-size:7px;text-transform:uppercase;letter-spacing:.05em
+}
+.v117-history-table td{padding:9px;border-top:1px solid #edf0f4;font-size:8.5px;color:#344054;vertical-align:top}
+.v117-history-table td.name{font-weight:800;color:#233247}
+.v117-detail-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:14px}
+.v117-detail-actions button{border:0;border-radius:11px;padding:9px 13px;font-size:9px;font-weight:900;cursor:pointer}
+.v117-detail-actions .edit{background:#7456e8;color:#fff}.v117-detail-actions .delete{background:#fff0f1;color:#b42318}.v117-detail-actions .close{background:#e9eef4;color:#4b586a}
+
+/* form */
+.v117-form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.v117-field{font-size:8px;font-weight:900;color:#677486}
+.v117-field.full{grid-column:1/-1}.v117-field.span2{grid-column:span 2}
+.v117-field input,.v117-field select,.v117-field textarea{
+  width:100%;margin-top:4px;min-height:39px;padding:9px;border-radius:11px;border:1px solid #d9e1ea;background:#fff;color:#27364a;font-size:10px
+}
+.v117-field textarea{min-height:74px;resize:vertical}
+.v117-subjects-editor{margin-top:15px;padding-top:14px;border-top:1px solid #e1e7ef}
+.v117-subjects-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.v117-subjects-head h3{margin:0;font-size:13px}.v117-subjects-head button{border:0;border-radius:10px;background:#eee9ff;color:#664ccf;padding:8px 10px;font-size:8px;font-weight:900}
+.v117-subject-row{
+  display:grid;grid-template-columns:.7fr 2fr .55fr .65fr .75fr 28px;gap:6px;margin-bottom:6px;align-items:center
+}
+.v117-subject-row input{
+  width:100%;min-height:34px;padding:7px;border-radius:9px;border:1px solid #dde4ed;background:#fff;font-size:8.5px
+}
+.v117-subject-row button{width:28px;height:28px;border:0;border-radius:8px;background:#fff0f0;color:#b42318}
+.v117-save-row{display:flex;justify-content:flex-end;gap:7px;margin-top:15px}
+.v117-save-row button{border:0;border-radius:11px;padding:10px 14px;font-size:9px;font-weight:900}
+.v117-save-row .save{background:#7456e8;color:#fff}.v117-save-row .cancel{background:#e9eef4;color:#4b586a}
+
+@media(max-width:980px){
+ .v117-formation-grid{grid-template-columns:1fr 1fr}
+ .v117-summary-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:680px){
+ .v117-form-head{align-items:flex-start;flex-direction:column}
+ .v117-formation-grid{grid-template-columns:1fr}
+ .v117-form-grid{grid-template-columns:1fr}.v117-field.full,.v117-field.span2{grid-column:auto}
+ .v117-subject-row{grid-template-columns:1fr 1fr}.v117-subject-row button{grid-column:2;justify-self:end}
+}
+</style>
+
+
+<script id="pp-v117-education-formations-script">
+(()=>{
+'use strict';
+const KEY='planejador_education_formations_v117';
+const MARCOS_SEED=[{"id":"edu-marcos-em","course":"Ensino Médio","level":"Educação Básica","degree":"Ensino Médio","institution":"Escola Estadual Afonsino Altivo Diniz","status":"Concluído","start":"2009","end":"2011","completionDate":"21/01/2012","graduationDate":"","diplomaDate":"08/03/2012","workload":"2.433h20","registration":"","admission":"","modality":"Presencial","city":"Santa Luzia/MG","notes":"Histórico escolar do Ensino Médio. Certificado de conclusão da Educação Básica expedido em 2012.","sourceName":"Histórico Escolar - Ensino Médio","history":[{"period":"2009","name":"1º ano do Ensino Médio","hours":"800h","grade":"Aprovado","result":"Aprovado","notes":"Faltas registradas: 36h40."},{"period":"2010","name":"2º ano do Ensino Médio","hours":"800h","grade":"Aprovado","result":"Aprovado","notes":"Faltas registradas: 33h20."},{"period":"2011","name":"3º ano do Ensino Médio","hours":"833h20","grade":"Aprovado","result":"Aprovado","notes":"Faltas registradas: 60h40."}]},{"id":"edu-marcos-ss","course":"Serviço Social","level":"Graduação","degree":"Bacharelado","institution":"Pontifícia Universidade Católica de Minas Gerais (PUC Minas)","status":"Concluído","start":"1/2016","end":"14/12/2019","completionDate":"14/12/2019","graduationDate":"31/01/2020","diplomaDate":"06/02/2020","workload":"3.614 h/a","registration":"0566816","admission":"PROUNI 1/2016","modality":"","city":"Belo Horizonte/MG","notes":"Carga horária total integralizada indicada no histórico: 3.121h40, incluindo 110h de atividades complementares.","sourceName":"Histórico Escolar Final - Serviço Social","history":[{"period":"1/2016","name":"ANTROPOLOGIA SOCIAL","hours":36,"grade":"78","result":"Aprovado","teacher":"Denise Pirani","teacherTitle":"Doutor"},{"period":"1/2016","name":"FORMAÇÃO SÓCIO-HISTÓRICA DO BRASIL","hours":68,"grade":"85","result":"Aprovado","teacher":"Heloisa Guaracy Machado","teacherTitle":"Doutor"},{"period":"1/2016","name":"FUNDAMENTOS HISTÓRICOS TEÓRICOS E METODOLÓGICOS DO SERVIÇO SOCIAL: O SERVIÇO SOCIAL E SUAS ORIGENS","hours":68,"grade":"82","result":"Aprovado","teacher":"Simone Soares Viegas","teacherTitle":"Mestre"},{"period":"1/2016","name":"OFICINA DE TEXTOS EM SERVIÇO SOCIAL","hours":70,"grade":"74","result":"Aprovado","teacher":"Francirene Gripp de Oliveira","teacherTitle":"Mestre"},{"period":"1/2016","name":"SEMINARIO","hours":36,"grade":"A","result":"Aprovado","teacher":"","teacherTitle":""},{"period":"1/2016","name":"SOCIOLOGIA CLÁSSICA","hours":72,"grade":"69","result":"Aprovado","teacher":"Eliana Fonseca Stefani","teacherTitle":"Mestre"},{"period":"2/2016","name":"ANTROPOLOGIA BRASILEIRA","hours":68,"grade":"94","result":"Aprovado","teacher":"Candice Vidal e Souza","teacherTitle":"Doutor"},{"period":"2/2016","name":"CULTURA RELIGIOSA: FENÔMENO RELIGIOSO","hours":68,"grade":"92","result":"Aprovado","teacher":"César Azevedo Carneiro","teacherTitle":"Mestre"},{"period":"2/2016","name":"FILOSOFIA: RAZÃO E MODERNIDADE","hours":68,"grade":"75","result":"Aprovado","teacher":"Clovis Alves Caldas Filho","teacherTitle":"Mestre"},{"period":"2/2016","name":"FUNDAMENTOS HISTÓRICOS, TEÓRICOS E METODOLÓGICOS DO SERVIÇO SOCIAL - A INSTITUCIONALIZAÇÃO DO SERVIÇO SOCIAL NO BRASIL","hours":68,"grade":"91","result":"Aprovado","teacher":"Simone Soares Viegas","teacherTitle":"Mestre"},{"period":"2/2016","name":"SOCIOLOGIA CONTEMPORÃNEA","hours":68,"grade":"83","result":"Aprovado","teacher":"Véra Lúcia Alves Batista Martins","teacherTitle":"Mestre"},{"period":"2/2016","name":"TEORIA POLÍTICA","hours":68,"grade":"89","result":"Aprovado","teacher":"Karina Junqueira Barbosa","teacherTitle":"Doutor"},{"period":"1/2017","name":"DIREITO E LEGISLAÇÃO SOCIAL","hours":72,"grade":"91","result":"Aprovado","teacher":"Carlos Antonio de Souza Alves","teacherTitle":"Mestre"},{"period":"1/2017","name":"ESTRATÉGIAS E TÉCNICAS EM SERVIÇO SOCIAL - AÇÃO COM INDIVÍDUOS","hours":68,"grade":"79","result":"Aprovado","teacher":"Regina Coeli de Oliveira","teacherTitle":"Mestre"},{"period":"1/2017","name":"FILOSOFIA: ANTROPOLOGIA E ÉTICA","hours":68,"grade":"93","result":"Aprovado","teacher":"Maria Lucia Rocha Costa","teacherTitle":"Especialista"},{"period":"1/2017","name":"FUNDAMENTOS HISTÓRICOS, TEÓRICOS E METODOLÓGICOS DO SERVIÇO SOCIAL - FENOMENOLOGIA E SISTÊMICA","hours":68,"grade":"99","result":"Aprovado","teacher":"Maria Cristina Soares Magalhães","teacherTitle":"Doutor"},{"period":"1/2017","name":"POLÍTICA SOCIAL E SERVIÇO SOCIAL","hours":68,"grade":"92","result":"Aprovado","teacher":"Maria Raquel Lino de Freitas","teacherTitle":"Doutor"},{"period":"1/2017","name":"PSICOLOGIA","hours":68,"grade":"86","result":"Aprovado","teacher":"Anna Cristina Pegoraro de Freitas","teacherTitle":"Mestre"},{"period":"2/2017","name":"ESTÁGIO SUPERVISIONADO - A PRÁTICA DO ASSISTENTE SOCIAL","hours":104,"grade":"98","result":"Aprovado","teacher":"Maria Eulalia Moreira","teacherTitle":"Mestre"},{"period":"2/2017","name":"ESTRATÉGIAS E TÉCNICAS EM SERVIÇO SOCIAL - AÇÃO GRUPAL","hours":68,"grade":"97","result":"Aprovado","teacher":"Maria da Consolação Gomes de Castro","teacherTitle":"Doutor"},{"period":"2/2017","name":"ÉTICA E SERVIÇO SOCIAL - FUNDAMENTOS FILOSÓFICOS","hours":68,"grade":"90","result":"Aprovado","teacher":"Maria Christina da Nobrega Cesarino Soares","teacherTitle":"Mestre"},{"period":"2/2017","name":"FUNDAMENTOS HISTÓRICOS, TEÓRICOS E METODOLÓGICOS DO SERVIÇO SOCIAL RECONCEITUAÇÃO E ATUALIDADE","hours":68,"grade":"69","result":"Aprovado","teacher":"Monica Hallak Martins da Costa","teacherTitle":"Doutor"},{"period":"2/2017","name":"MOVIMENTOS SOCIAIS E CIDADANIA EM SERVIÇO SOCIAL","hours":92,"grade":"95","result":"Aprovado","teacher":"Robson Savio Reis Souza","teacherTitle":"Doutor"},{"period":"2/2017","name":"SEGURIDADE SOCIAL - PREVIDÊNCIA SOCIAL E SERVIÇO SOCIAL","hours":92,"grade":"85","result":"Aprovado","teacher":"Regina Coeli de Oliveira","teacherTitle":"Mestre"},{"period":"1/2018","name":"DIAGNÓSTICO SOCIOESPACIAL EM SERVIÇO SOCIAL","hours":34,"grade":"92","result":"Aprovado","teacher":"Monica Abranches Fernandes","teacherTitle":"Doutor"},{"period":"1/2018","name":"ESTÁGIO SUPERVISIONADO - RECONHECIMENTO INSTITUCIONAL","hours":214,"grade":"93","result":"Aprovado","teacher":"Monica Hallak Martins da Costa","teacherTitle":"Doutor"},{"period":"1/2018","name":"ESTRATÉGIAS E TÉCNICAS EM SERVIÇO SOCIAL - INSTITUIÇÃO","hours":70,"grade":"92","result":"Aprovado","teacher":"Maria Raquel Lino de Freitas","teacherTitle":"Doutor"},{"period":"1/2018","name":"GESTÃO SOCIAL - PLANEJAMENTO E SERVIÇO SOCIAL","hours":70,"grade":"76","result":"Aprovado","teacher":"Regina Coeli de Oliveira","teacherTitle":"Mestre"},{"period":"1/2018","name":"PESQUISA EM SERVIÇO SOCIAL","hours":72,"grade":"93","result":"Aprovado","teacher":"Maria da Consolação Gomes de Castro","teacherTitle":"Doutor"},{"period":"1/2018","name":"SEGURIDADE SOCIAL - SAÚDE E SERVIÇO SOCIAL","hours":68,"grade":"84","result":"Aprovado","teacher":"Andrea Gontijo Alvares","teacherTitle":"Mestre"},{"period":"2/2018","name":"ESTÁGIO SUPERVISIONADO - PRÁTICAS INTERVENTIVAS","hours":214,"grade":"94","result":"Aprovado","teacher":"Monica Hallak Martins da Costa","teacherTitle":"Doutor"},{"period":"2/2018","name":"ESTATÍSTICA APLICADA AO SERVIÇO SOCIAL","hours":34,"grade":"85","result":"Aprovado","teacher":"Maria Lourdes Granha Nogueira","teacherTitle":"Mestre"},{"period":"2/2018","name":"GESTÃO SOCIAL - ADMINISTRAÇÃO","hours":70,"grade":"92","result":"Aprovado","teacher":"Andréa Branco Simão","teacherTitle":"Doutor"},{"period":"2/2018","name":"OFICINA DE PESQUISA EM SERVIÇO SOCIAL: PRÁTICAS INVESTIGATIVAS","hours":68,"grade":"97","result":"Aprovado","teacher":"Véra Lúcia Alves Batista Martins","teacherTitle":"Mestre"},{"period":"2/2018","name":"POLÍTICA SOCIAL DA CRIANÇA E DO ADOLESCENTE E SERVIÇO SOCIAL","hours":36,"grade":"91","result":"Aprovado","teacher":"Simone Soares Viegas","teacherTitle":"Mestre"},{"period":"2/2018","name":"SEGURIDADE SOCIAL - ASSISTÊNCIA SOCIAL E SERVIÇO SOCIAL","hours":68,"grade":"89","result":"Aprovado","teacher":"Maria Raquel Lino de Freitas","teacherTitle":"Doutor"},{"period":"2/2018","name":"SEGURIDADE SOCIAL - SAÚDE MENTAL E SERVIÇO SOCIAL","hours":36,"grade":"81","result":"Aprovado","teacher":"Andrea Gontijo Alvares","teacherTitle":"Mestre"},{"period":"1/2019","name":"ÉTICA E SERVIÇO SOCIAL - EXERCÍCIO PROFISSIONAL","hours":36,"grade":"88","result":"Aprovado","teacher":"Andrea Gontijo Alvares","teacherTitle":"Mestre"},{"period":"1/2019","name":"OFICINA DE PESQUISA E SERVIÇO SOCIAL PONTIFÍCIA UNIVERSIDADE CATÓLICA DE MINAS GERAIS","hours":128,"grade":"97","result":"Aprovado","teacher":"Andréa Branco Simão","teacherTitle":"Doutor"},{"period":"1/2019","name":"POLÍTICA SOCIAL DE EDUCAÇÃO E SERVIÇO SOCIAL","hours":34,"grade":"D","result":"Dispensado","teacher":"","teacherTitle":""},{"period":"1/2019","name":"RELAÇÕES DE GÊNERO, RACIAIS, ÉTNICAS E SERVIÇO SOCIAL","hours":70,"grade":"85","result":"Aprovado","teacher":"Andréa Branco Simão","teacherTitle":"Doutor"},{"period":"1/2019","name":"TRABALHO, SOCIABILIDADE E SERVIÇO SOCIAL","hours":68,"grade":"75","result":"Aprovado","teacher":"Monica Hallak Martins da Costa","teacherTitle":"Doutor"},{"period":"2/2019","name":"CULTURA RELIGIOSA: PESSOA E SOCIEDADE","hours":34,"grade":"98","result":"Aprovado","teacher":"Carlos Ribeiro Caldas Filho","teacherTitle":"Doutor"},{"period":"2/2019","name":"ECONOMIA","hours":68,"grade":"79","result":"Aprovado","teacher":"Marcos de Azevedo Reis","teacherTitle":"Mestre"},{"period":"2/2019","name":"FAMÍLIA E SERVIÇO SOCIAL","hours":68,"grade":"94","result":"Aprovado","teacher":"Andréa Branco Simão","teacherTitle":"Doutor"},{"period":"2/2019","name":"OPTATIVA I","hours":68,"grade":"94","result":"Aprovado","teacher":"Maria da Consolação Gomes de Castro","teacherTitle":"Doutor"},{"period":"2/2019","name":"ORIENTAÇÃO DE TRABALHO DE CONCLUSÃO DE CURSO","hours":128,"grade":"97","result":"Aprovado","teacher":"Andréa Branco Simão","teacherTitle":"Doutor"},{"period":"2/2019","name":"POLÍTICA SOCIAL DO IDOSO, QUESTÕES DO ENVELHECIMENTO E SERVIÇO SOCIAL","hours":36,"grade":"89","result":"Aprovado","teacher":"Simone Soares Viegas","teacherTitle":"Mestre"},{"period":"2/2019","name":"SUBJETIVIDADE E SERVIÇO SOCIAL","hours":92,"grade":"87","result":"Aprovado","teacher":"Andrea Gontijo Alvares","teacherTitle":"Mestre"},{"period":"2/2019","name":"TEMAS DE DIREITO DO TRABALHO","hours":68,"grade":"86","result":"Aprovado","teacher":"Maria Cecília Máximo Teodoro","teacherTitle":"Doutor"}]},{"id":"edu-marcos-ped","course":"Pedagogia","level":"Graduação","degree":"Licenciatura","institution":"Universidade Metodista de São Paulo","status":"Concluído","start":"2016/2","end":"28/06/2023","completionDate":"28/06/2023","graduationDate":"08/08/2023","diplomaDate":"08/08/2023","workload":"3.200 h/a","registration":"269494","admission":"Processo seletivo","modality":"","city":"São Bernardo do Campo/SP","notes":"Título: Licenciado. O histórico registra trancamento no segundo semestre de 2020 e no ano de 2022.","sourceName":"Histórico Escolar - Pedagogia","history":[{"period":"2016/2","name":"A CONSTR DO PENSAMENTO EDUC. BRASILEIRO E AÇAO PED","hours":70,"grade":"8.5","result":"Aprovado","code":"9454","absence":0},{"period":"2016/2","name":"ED. BRASILEIRA: LEITURAS HIST, SOCIOL. E FILOSÓF.","hours":80,"grade":"9.5","result":"Aprovado","code":"9455","absence":0},{"period":"2016/2","name":"PESQUISA EM EDUC:ASPECTOS EPISTEM, METOD E DA PROD","hours":90,"grade":"9.5","result":"Aprovado","code":"9456","absence":0},{"period":"2017/1","name":"CORPOREIDADE,TECNOL E CIDADANIA:DESAF ÉTICOS E PED","hours":160,"grade":"10.0","result":"Aprovado","code":"8156","absence":0},{"period":"2017/1","name":"EDUCAÇÃO BRASILEIRA: CONSTR OLHARES A PARTIR FUND","hours":180,"grade":"9.0","result":"Aprovado","code":"8157","absence":0},{"period":"2017/1","name":"SABERES DOCENTES, IDENT.PROF. E O SUJEITO COLETIVO","hours":140,"grade":"10.0","result":"Aprovado","code":"8158","absence":0},{"period":"2017/2","name":"LEITURA E ESCRITA:PARA A CONSTR. DE APREND. SIGNIF","hours":90,"grade":"8.0","result":"Aprovado","code":"9458","absence":0},{"period":"2017/2","name":"OS SABERES DOCENTES E O PROCESSO EDUCATIVO","hours":150,"grade":"10.0","result":"Aprovado","code":"9457","absence":0},{"period":"2017/2","name":"TEORIAS DO CURRÍCULO E PRÁTICAS PEDAGÓGICAS","hours":60,"grade":"10.0","result":"Aprovado","code":"9459","absence":0},{"period":"2018/1","name":"CONHECIMENTO, TECNOLOGIA E FORMAÇÃO DO PROFESSOR","hours":200,"grade":"9.5","result":"Aprovado","code":"8162","absence":0},{"period":"2018/1","name":"DIFERENTES CONTEXTOS EDUC E DIFS. SUJ. EM FORMAÇÃO","hours":120,"grade":"9.5","result":"Aprovado","code":"8163","absence":0},{"period":"2018/1","name":"DIFERENTES LEITURAS DO MUNDO E CIDADANIA","hours":180,"grade":"9.5","result":"Aprovado","code":"8164","absence":0},{"period":"2018/2","name":"ENS DE MATEMÁTICA, CIÊNC. E ED. FÍSICA:TEND ATUAIS","hours":90,"grade":"7.0","result":"Aprovado","code":"9460","absence":0},{"period":"2023/1","name":"ESTÁGIO SUPERVISIONADO I","hours":100,"grade":"Estágio","result":"Cumpriu","code":"8165","absence":0},{"period":"2018/2","name":"PESQUISA E LEITURA CRÍTICA DO MUNDO NA ESCOLA","hours":120,"grade":"8.5","result":"Aprovado","code":"9461","absence":0},{"period":"2018/2","name":"PROJ. POLÍTICO-PEDAG. E AVAL:DESAF. PARA O SUJ COL","hours":60,"grade":"8.5","result":"Aprovado","code":"9462","absence":0},{"period":"2019/1","name":"A REFLEXÃO SOBRE AS PRÁTICAS EDUC PELA VIA DA PESQ","hours":100,"grade":"9.5","result":"Aprovado","code":"9463","absence":0},{"period":"2019/1","name":"PLANEJAMENTO PARTICIPATIVO E OS PROCS PEDAG NA ESC","hours":180,"grade":"7.5","result":"Aprovado","code":"8173","absence":0},{"period":"2019/1","name":"PROBLEMAS CONTEMPORÂNEOS: DESAFIOS PARA A ESCOLA","hours":200,"grade":"8.5","result":"Aprovado","code":"8174","absence":0},{"period":"2019/2","name":"ED. E INTERDISCIPLINARIDADE:PROPOSTAS DE INTERV.","hours":90,"grade":"7.0","result":"Aprovado","code":"9466","absence":0},{"period":"2019/2","name":"EDUCAÇÃO, INCLUSÃO E LIBRAS","hours":90,"grade":"8.0","result":"Aprovado","code":"9464","absence":0},{"period":"2023/1","name":"ESTÁGIO SUPERVISIONADO III","hours":100,"grade":"10.0","result":"Cumpriu","code":"8172","absence":0},{"period":"2019/2","name":"PRÁTICA DOC. E LEG. EDUCACIONAL:CONTR. EDUC. COMP.","hours":90,"grade":"7.5","result":"Aprovado","code":"9465","absence":0},{"period":"2020/1","name":"A CONSTRUÇÃO DA PESQ. E O TRABALHO DE CONCL. CURSO","hours":90,"grade":"9","result":"Aprovado","code":"9469","absence":1},{"period":"2021/2","name":"ATIVIDADES TEÓRICO-PRÁTICAS DE APROFUNDAMENTO","hours":100,"grade":"Estágio","result":"Cumpriu","code":"8171","absence":0},{"period":"2020/1","name":"CONTEMPORANEIDADE: NOVAS NARRATIVAS E EDUCAÇÃO","hours":90,"grade":"10","result":"Aprovado","code":"9467","absence":0},{"period":"2023/1","name":"ESTÁGIO SUPERVISIONADO II","hours":100,"grade":"Estágio","result":"Cumpriu","code":"8167","absence":0},{"period":"2020/1","name":"LINGUAGENS E FILOSOFIA","hours":80,"grade":"6.0","result":"Aprovado","code":"9468","absence":0}]},{"id":"edu-marcos-mba","course":"MBA em Gestão Pública e Inovação","level":"Pós-graduação","degree":"Especialização - Lato Sensu","institution":"Universidade Estadual do Centro-Oeste (UNICENTRO)","status":"Histórico parcial","start":"15/05/2023","end":"13/12/2024","completionDate":"13/12/2024","graduationDate":"","diplomaDate":"","workload":"360 h","registration":"23147235475","admission":"","modality":"","city":"Guarapuava/PR","notes":"O documento está identificado como Histórico Escolar Parcial. Carga horária cursada e total informadas: 360 horas.","sourceName":"Histórico Escolar Parcial - MBA em Gestão Pública e Inovação","history":[{"period":"2023","name":"Introdução ao E-Learning","hours":30,"grade":"A","attendance":"100%","teacher":"Marcel Luciano Klozovski","result":"Aprovado"},{"period":"2023","name":"Transformação Digital no Setor Público","hours":30,"grade":"A","attendance":"100%","teacher":"Rita de Cássia Fonseca","result":"Aprovado"},{"period":"2023","name":"Cadeias de Inovação – Sinergia e Modelos","hours":30,"grade":"A","attendance":"100%","teacher":"Álvaro J. Argemiro da Silva","result":"Aprovado"},{"period":"2024","name":"Internet of Things, Inteligência Artificial e Gaming","hours":30,"grade":"A","attendance":"100%","teacher":"Carla Santos","result":"Aprovado"},{"period":"2024","name":"Comunicação efetiva em hubs de inovação","hours":30,"grade":"A","attendance":"100%","teacher":"Tatiana de Carvalho Duarte","result":"Aprovado"},{"period":"2024","name":"Liderança em Ambientes Tecnológicos","hours":30,"grade":"A","attendance":"100%","teacher":"Jéssica Cristina Ceni","result":"Aprovado"},{"period":"2024","name":"Empresas, emprego e trabalho no mundo VUCA","hours":30,"grade":"B","attendance":"100%","teacher":"Jerônimo Gadens do Rosário","result":"Aprovado"},{"period":"2024","name":"Design Thinking","hours":30,"grade":"A","attendance":"100%","teacher":"Mauro Fonseca Rodrigues","result":"Aprovado"},{"period":"2024","name":"Gestão de Projetos e Project Charter","hours":30,"grade":"A","attendance":"100%","teacher":"Carla Santos","result":"Aprovado"},{"period":"2024","name":"Governança e transparência","hours":30,"grade":"A","attendance":"100%","teacher":"Leandra de Castro Gonzaga Figueiró","result":"Aprovado"},{"period":"2024","name":"Startups e Govtech – Fomento e viabilidade","hours":30,"grade":"A","attendance":"100%","teacher":"Tatiana de Carvalho Duarte","result":"Aprovado"},{"period":"2024","name":"Metodologia de Pesquisa","hours":30,"grade":"A","attendance":"100%","teacher":"Juliane Sachser Angnes","result":"Aprovado"}]}];
+
+function esc117(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[m])}
+function activeProfile117(){return localStorage.getItem('planejador_active_profile')||'Marcos'}
+function load117(){
+  let d=null;
+  try{d=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
+  if(!Array.isArray(d)){
+    d=activeProfile117()==='Marcos'?JSON.parse(JSON.stringify(MARCOS_SEED)):[];
+    localStorage.setItem(KEY,JSON.stringify(d));
+    saveProfile117();
+  }
+  return d;
+}
+let formations117=load117();
+
+function saveProfile117(){
+  try{
+    const PM=window.__ppV41Profile;
+    if(PM?.captureShared&&PM?.saveState)PM.saveState(activeProfile117(),PM.captureShared());
+  }catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+}
+function persist117(){
+  localStorage.setItem(KEY,JSON.stringify(formations117));
+  saveProfile117();
+}
+function fmtDate117(v){
+  if(!v)return '—';
+  if(/^\d{4}$/.test(v)||/^\d{1,2}\/\d{4}$/.test(v)||/^\d{4}\/[12]$/.test(v))return v;
+  const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m?`${m[3]}/${m[2]}/${m[1]}`:v;
+}
+function levelOrder117(x){
+  const m={'Educação Básica':1,'Graduação':2,'Pós-graduação':3,'Curso Livre':4,'Certificação':5};
+  return m[x]||99;
+}
+function groupLabel117(level){
+  if(level==='Educação Básica')return 'Educação Básica';
+  if(level==='Graduação')return 'Graduação';
+  if(level==='Pós-graduação')return 'Pós-graduação';
+  return level||'Outras formações';
+}
+function render117(){
+  const root=document.getElementById('v117FormationRoot');if(!root)return;
+  if(!formations117.length){
+    root.innerHTML=`<div class="v117-empty"><div><span>⌁</span><h3>Nenhuma formação cadastrada</h3><p>Use “Nova formação” para começar sua trajetória acadêmica neste perfil.</p></div></div>`;
+    return;
+  }
+  const levels=[...new Set(formations117.map(x=>x.level||'Outras formações'))].sort((a,b)=>levelOrder117(a)-levelOrder117(b));
+  root.innerHTML=levels.map(level=>{
+    const list=formations117.filter(x=>(x.level||'Outras formações')===level);
+    return `<section class="v117-degree-section">
+      <div class="v117-degree-head"><h2>${esc117(groupLabel117(level))}</h2><span>${list.length} formação${list.length===1?'':'ões'}</span></div>
+      <div class="v117-formation-grid">
+        ${list.map(f=>`<button type="button" class="v117-formation-card" data-v117-open="${esc117(f.id)}">
+          <div class="v117-formation-top"><span class="v117-degree-chip">${esc117(f.degree||f.level||'Formação')}</span><span class="v117-status">${esc117(f.status||'Cadastrada')}</span></div>
+          <h3>${esc117(f.course||'Formação')}</h3>
+          <span class="v117-inst">${esc117(f.institution||'Instituição não informada')}</span>
+          <div class="v117-meta-row">
+            <div><span>Período</span><b>${esc117(f.start||'—')} → ${esc117(f.end||f.completionDate||'—')}</b></div>
+            <div><span>Carga horária</span><b>${esc117(f.workload||'—')}</b></div>
+          </div>
+          <span class="v117-open-note">Abrir histórico →</span>
+        </button>`).join('')}
+      </div>
+    </section>`;
+  }).join('');
+  root.querySelectorAll('[data-v117-open]').forEach(b=>b.onclick=()=>openDetail117(b.dataset.v117Open));
+}
+function modal117(html){
+  document.getElementById('v117EduModal')?.remove();
+  const ov=document.createElement('div');ov.id='v117EduModal';ov.innerHTML=html;document.body.appendChild(ov);ov.classList.add('open');
+  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
+  return ov;
+}
+function historyRows117(f){
+  const h=Array.isArray(f.history)?f.history:[];
+  if(!h.length)return `<tr><td colspan="7">Nenhum item de histórico cadastrado.</td></tr>`;
+  return h.map(x=>`<tr>
+    <td>${esc117(x.period||'—')}</td>
+    <td class="name">${esc117(x.name||'—')}</td>
+    <td>${esc117(x.hours??'—')}</td>
+    <td>${esc117(x.grade||x.concept||'—')}</td>
+    <td>${esc117(x.result||'—')}</td>
+    <td>${esc117(x.teacher||'—')}</td>
+    <td>${esc117(x.notes||x.attendance||'—')}</td>
+  </tr>`).join('');
+}
+function openDetail117(id){
+  const f=formations117.find(x=>String(x.id)===String(id));if(!f)return;
+  const ov=modal117(`<div class="v117-modal">
+    <div class="v117-modal-head">
+      <div><span class="v117-modal-kicker">${esc117(f.level||'Formação')} · ${esc117(f.degree||'')}</span><h2>${esc117(f.course)}</h2><p>${esc117(f.institution||'')}</p></div>
+      <button type="button" class="v117-close">×</button>
+    </div>
+    <div class="v117-summary-grid">
+      <div><span>Status</span><b>${esc117(f.status||'—')}</b></div>
+      <div><span>Período</span><b>${esc117(f.start||'—')} → ${esc117(f.end||'—')}</b></div>
+      <div><span>Carga horária</span><b>${esc117(f.workload||'—')}</b></div>
+      <div><span>Matrícula / registro</span><b>${esc117(f.registration||'—')}</b></div>
+      <div><span>Conclusão</span><b>${esc117(fmtDate117(f.completionDate))}</b></div>
+      <div><span>Colação</span><b>${esc117(fmtDate117(f.graduationDate))}</b></div>
+      <div><span>Diploma / certificado</span><b>${esc117(fmtDate117(f.diplomaDate))}</b></div>
+      <div><span>Local / modalidade</span><b>${esc117([f.city,f.modality].filter(Boolean).join(' · ')||'—')}</b></div>
+    </div>
+    ${f.notes?`<div class="v117-notes">${esc117(f.notes)}</div>`:''}
+    <div class="v117-history-title"><h3>Histórico acadêmico</h3><span>${(f.history||[]).length} registro${(f.history||[]).length===1?'':'s'}</span></div>
+    <div class="v117-history-wrap"><table class="v117-history-table">
+      <thead><tr><th>Período</th><th>Disciplina / etapa</th><th>CH</th><th>Nota / conceito</th><th>Resultado</th><th>Docente</th><th>Observações</th></tr></thead>
+      <tbody>${historyRows117(f)}</tbody>
+    </table></div>
+    <div class="v117-detail-actions">
+      <button type="button" class="delete">Excluir</button>
+      <button type="button" class="edit">Editar formação</button>
+      <button type="button" class="close">Fechar</button>
+    </div>
+  </div>`);
+  ov.querySelector('.v117-close').onclick=()=>ov.remove();
+  ov.querySelector('.v117-detail-actions .close').onclick=()=>ov.remove();
+  ov.querySelector('.v117-detail-actions .edit').onclick=()=>{ov.remove();openForm117(f.id)};
+  ov.querySelector('.v117-detail-actions .delete').onclick=()=>{
+    if(!confirm(`Excluir a formação "${f.course}"?`))return;
+    formations117=formations117.filter(x=>String(x.id)!==String(f.id));persist117();render117();ov.remove();
+  };
+}
+function subjectRow117(x={}){
+  return `<div class="v117-subject-row">
+    <input data-k="period" placeholder="Período" value="${esc117(x.period||'')}">
+    <input data-k="name" placeholder="Disciplina / etapa" value="${esc117(x.name||'')}">
+    <input data-k="hours" placeholder="CH" value="${esc117(x.hours??'')}">
+    <input data-k="grade" placeholder="Nota" value="${esc117(x.grade||'')}">
+    <input data-k="result" placeholder="Resultado" value="${esc117(x.result||'')}">
+    <button type="button" title="Remover">×</button>
+  </div>`;
+}
+function openForm117(id=null){
+  const existing=id?formations117.find(x=>String(x.id)===String(id)):null;
+  const f=existing?JSON.parse(JSON.stringify(existing)):{history:[]};
+  const ov=modal117(`<div class="v117-modal">
+    <div class="v117-modal-head">
+      <div><span class="v117-modal-kicker">educação · cadastro</span><h2>${existing?'Editar formação':'Nova formação'}</h2><p>Cadastre os dados acadêmicos e, se desejar, o histórico de disciplinas.</p></div>
+      <button type="button" class="v117-close">×</button>
+    </div>
+    <div class="v117-form-grid">
+      <label class="v117-field span2">Nome da formação / curso<input id="efCourse" value="${esc117(f.course||'')}"></label>
+      <label class="v117-field">Grau<input id="efDegree" placeholder="Ex.: Bacharelado" value="${esc117(f.degree||'')}"></label>
+      <label class="v117-field">Nível<select id="efLevel">
+        ${['Educação Básica','Graduação','Pós-graduação','Curso Livre','Certificação','Outra'].map(x=>`<option ${f.level===x?'selected':''}>${x}</option>`).join('')}
+      </select></label>
+      <label class="v117-field span2">Instituição<input id="efInstitution" value="${esc117(f.institution||'')}"></label>
+      <label class="v117-field">Status<input id="efStatus" placeholder="Concluído / Em curso" value="${esc117(f.status||'')}"></label>
+      <label class="v117-field">Início<input id="efStart" placeholder="Ex.: 2026/1" value="${esc117(f.start||'')}"></label>
+      <label class="v117-field">Fim<input id="efEnd" placeholder="Ex.: 2029/2" value="${esc117(f.end||'')}"></label>
+      <label class="v117-field">Carga horária<input id="efWorkload" placeholder="Ex.: 3.200 h" value="${esc117(f.workload||'')}"></label>
+      <label class="v117-field">Data de conclusão<input id="efCompletion" value="${esc117(f.completionDate||'')}"></label>
+      <label class="v117-field">Colação de grau<input id="efGraduation" value="${esc117(f.graduationDate||'')}"></label>
+      <label class="v117-field">Diploma / certificado<input id="efDiploma" value="${esc117(f.diplomaDate||'')}"></label>
+      <label class="v117-field">Matrícula / registro<input id="efRegistration" value="${esc117(f.registration||'')}"></label>
+      <label class="v117-field">Forma de ingresso<input id="efAdmission" value="${esc117(f.admission||'')}"></label>
+      <label class="v117-field">Modalidade<input id="efModality" placeholder="Presencial / EAD" value="${esc117(f.modality||'')}"></label>
+      <label class="v117-field span2">Cidade / UF<input id="efCity" value="${esc117(f.city||'')}"></label>
+      <label class="v117-field full">Observações<textarea id="efNotes">${esc117(f.notes||'')}</textarea></label>
+    </div>
+    <div class="v117-subjects-editor">
+      <div class="v117-subjects-head"><h3>Histórico / disciplinas</h3><button type="button" id="efAddSubject">+ Adicionar item</button></div>
+      <div id="efSubjects">${(f.history||[]).map(subjectRow117).join('')}</div>
+    </div>
+    <div class="v117-save-row"><button type="button" class="cancel">Cancelar</button><button type="button" class="save">Salvar formação</button></div>
+  </div>`);
+  const subj=ov.querySelector('#efSubjects');
+  function bindRemove(){subj.querySelectorAll('.v117-subject-row button').forEach(b=>b.onclick=()=>b.closest('.v117-subject-row').remove())}
+  bindRemove();
+  ov.querySelector('#efAddSubject').onclick=()=>{subj.insertAdjacentHTML('beforeend',subjectRow117());bindRemove()};
+  ov.querySelector('.v117-close').onclick=()=>ov.remove();ov.querySelector('.cancel').onclick=()=>ov.remove();
+  ov.querySelector('.save').onclick=()=>{
+    const course=ov.querySelector('#efCourse').value.trim(),institution=ov.querySelector('#efInstitution').value.trim();
+    if(!course||!institution){alert('Informe pelo menos o nome da formação e a instituição.');return}
+    const history=[...subj.querySelectorAll('.v117-subject-row')].map(r=>{
+      const o={};r.querySelectorAll('input[data-k]').forEach(i=>o[i.dataset.k]=i.value.trim());return o;
+    }).filter(x=>x.name||x.period);
+    const obj={
+      id:existing?.id||('edu-'+Date.now()),
+      course,level:ov.querySelector('#efLevel').value,degree:ov.querySelector('#efDegree').value.trim(),
+      institution,status:ov.querySelector('#efStatus').value.trim(),start:ov.querySelector('#efStart').value.trim(),
+      end:ov.querySelector('#efEnd').value.trim(),workload:ov.querySelector('#efWorkload').value.trim(),
+      completionDate:ov.querySelector('#efCompletion').value.trim(),graduationDate:ov.querySelector('#efGraduation').value.trim(),
+      diplomaDate:ov.querySelector('#efDiploma').value.trim(),registration:ov.querySelector('#efRegistration').value.trim(),
+      admission:ov.querySelector('#efAdmission').value.trim(),modality:ov.querySelector('#efModality').value.trim(),
+      city:ov.querySelector('#efCity').value.trim(),notes:ov.querySelector('#efNotes').value.trim(),history
+    };
+    if(existing)formations117=formations117.map(x=>String(x.id)===String(existing.id)?obj:x);else formations117.push(obj);
+    persist117();render117();ov.remove();
+    try{toast(existing?'Formação atualizada.':'Formação adicionada.')}catch(e){}
+  };
+}
+document.addEventListener('click',e=>{if(e.target.closest?.('#v117AddFormation'))openForm117()},false);
+render117();
+window.ppEduFormationsV117={render:render117,add:()=>openForm117(),open:openDetail117};
+})();
+</script>
 
