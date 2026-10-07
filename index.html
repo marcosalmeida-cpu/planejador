@@ -26486,3 +26486,52 @@ window.ppCardGroupsV106={refresh:ensureGroups106};
 }
 </style>
 
+<style id="pp-v114-cards-real-full-width">
+/* Correção estrutural: a V110 ainda reservava uma segunda coluna invisível */
+#cartoes #cardsCleanRoot .clean-cards-shell{
+  display:block!important;
+  grid-template-columns:none!important;
+  grid-template-rows:none!important;
+  gap:0!important;
+  width:100%!important;
+  max-width:none!important;
+}
+#cartoes #v105CardGroups{
+  display:block!important;
+  grid-column:auto!important;
+  grid-row:auto!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0 0 12px!important;
+}
+
+/* carrossel e resumo ocupam toda a largura real do shell */
+#cartoes .v112-carousel-shell,
+#cartoes .v112-selected-summary{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+
+/* impede qualquer largura antiga do deck/root de limitar o bloco */
+#cartoes #cardsCleanRoot,
+#cartoes #cardDeck,
+#cartoes #cardsCleanRoot .clean-cards-shell{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+}
+
+/* em desktop aproveita mais a tela sem criar grandes áreas vazias */
+@media(min-width:1100px){
+  #cartoes .v112-carousel-track{
+    width:100%!important;
+  }
+  #cartoes .v112-carousel-card{
+    flex:0 0 clamp(235px,21vw,285px)!important;
+    min-width:clamp(235px,21vw,285px)!important;
+  }
+}
+</style>
+
