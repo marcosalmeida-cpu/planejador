@@ -25303,22 +25303,29 @@ function money105(v){
   return typeof brl==='function' ? brl(v) : Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 }
 function cardChipMarkup105(c,selectedId){
-  let stat={available:Number(c?.limit||0)||0};
+  let stat={pending:0,available:Number(c?.limit||0)||0};
   try{stat=getCardStats(c)||stat}catch(e){}
   const available=Number(stat.available||0)||0;
   const limit=Number(c?.limit||0)||0;
+  const used=Math.max(0, limit-available);
+  const usedPct=limit>0 ? Math.max(0,Math.min(100,(used/limit)*100)) : 0;
   const isSelected=String(c.id)===String(selectedId);
   const meta=(category105(c)==='bandeirado' ? (c.brand||c.cardType||'Cartão') : (c.cardType||'Cartão'));
   const status=(c.status||'Ativo');
-  return `<button type="button" class="v105-card-chip ${isSelected?'active':''}" data-v105-card="${String(c.id).replace(/"/g,'&quot;')}">
-    <span class="v108-chip-top">
-      <span class="v108-chip-name">${String(c.name||'Cartão').replace(/[<>&]/g,'')}</span>
-      <span class="v108-chip-status ${String(status).toLowerCase()}">${String(status).replace(/[<>&]/g,'')}</span>
+  return `<button type="button" class="v105-card-chip v109-line-chip ${isSelected?'active':''}" data-v105-card="${String(c.id).replace(/"/g,'&quot;')}">
+    <span class="v109-line-left">
+      <span class="v109-line-name">${String(c.name||'Cartão').replace(/[<>&]/g,'')}</span>
+      <span class="v109-line-meta">${String(meta||'').replace(/[<>&]/g,'')} · ${String(status).replace(/[<>&]/g,'')}</span>
     </span>
-    <span class="v108-chip-sub">${String(meta||'').replace(/[<>&]/g,'')}</span>
-    <span class="v108-chip-bottom">
-      <span><small>Limite</small><b>${money105(limit)}</b></span>
-      <span><small>Disponível</small><b class="${available<0?'negative':''}">${money105(available)}</b></span>
+    <span class="v109-line-middle">
+      <span class="v109-line-track">
+        <i style="width:${usedPct}%"></i>
+        <em class="v109-line-total">${money105(limit)}</em>
+      </span>
+      <span class="v109-line-values">
+        <small>Utilizado <b>${money105(used)}</b></small>
+        <small>Disponível <b class="${available<0?'negative':''}">${money105(available)}</b></small>
+      </span>
     </span>
   </button>`;
 }
@@ -25732,3 +25739,129 @@ window.ppCardGroupsV106={refresh:ensureGroups106};
 }
 </style>
 
+<style id="pp-v109-card-lines">
+#cartoes .v105-group{
+  padding:14px!important;
+  border-radius:22px!important;
+  background:linear-gradient(180deg,#fbfcfe 0%,#f4f7fb 100%)!important;
+  border:1px solid #dde5ee!important;
+  box-shadow:0 12px 26px rgba(15,23,42,.05)!important;
+}
+#cartoes .v105-group-list{display:flex!important;flex-direction:column!important;gap:8px!important}
+#cartoes .v105-card-chip.v109-line-chip{
+  min-height:0!important;
+  padding:11px 12px!important;
+  border-radius:16px!important;
+  border:1px solid #d9e2ec!important;
+  background:linear-gradient(180deg,#ffffff 0%,#f6f8fb 100%)!important;
+  box-shadow:0 4px 12px rgba(15,23,42,.035)!important;
+  display:grid!important;
+  grid-template-columns:minmax(120px,.95fr) minmax(180px,1.45fr)!important;
+  gap:14px!important;
+  align-items:center!important;
+  text-align:left!important;
+}
+#cartoes .v105-card-chip.v109-line-chip:hover{transform:translateY(-1px)!important;box-shadow:0 10px 18px rgba(15,23,42,.07)!important}
+#cartoes .v105-card-chip.v109-line-chip.active{
+  background:linear-gradient(135deg,#0c2d5f 0%,#0d5ff1 58%,#2aa8ff 100%)!important;
+  border-color:#0b63f6!important;
+  box-shadow:0 15px 28px rgba(13,95,241,.22)!important;
+}
+#cartoes .v109-line-left{display:flex;flex-direction:column;gap:4px;min-width:0}
+#cartoes .v109-line-name{font-size:12.5px;font-weight:900;color:#142132;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cartoes .v109-line-meta{font-size:8.5px;font-weight:700;color:#728093;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#cartoes .v109-line-middle{display:flex;flex-direction:column;gap:6px;min-width:0}
+#cartoes .v109-line-track{position:relative;display:block;height:12px;border-radius:999px;background:#e5ebf2;overflow:hidden}
+#cartoes .v109-line-track i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#00b96b 0%,#2bc0ff 62%,#0b63f6 100%)}
+#cartoes .v109-line-total{position:absolute;right:8px;top:-18px;font-style:normal;font-size:8px;font-weight:900;color:#526173}
+#cartoes .v109-line-values{display:flex;justify-content:space-between;gap:10px;align-items:center}
+#cartoes .v109-line-values small{display:block;font-size:7.5px;color:#6f7d8f;font-weight:800}
+#cartoes .v109-line-values b{display:block;margin-top:2px;font-size:10px;color:#142132;font-weight:900}
+#cartoes .v109-line-values b.negative{color:#b42318!important}
+#cartoes .v105-card-chip.v109-line-chip.active .v109-line-name,
+#cartoes .v105-card-chip.v109-line-chip.active .v109-line-meta,
+#cartoes .v105-card-chip.v109-line-chip.active .v109-line-total,
+#cartoes .v105-card-chip.v109-line-chip.active .v109-line-values small,
+#cartoes .v105-card-chip.v109-line-chip.active .v109-line-values b{color:#fff!important}
+#cartoes .v105-card-chip.v109-line-chip.active .v109-line-track{background:rgba(255,255,255,.22)!important}
+#cartoes .v105-card-chip.v109-line-chip.active .v109-line-track i{background:linear-gradient(90deg,#82ffd2 0%,#b8f0ff 58%,#ffffff 100%)!important}
+
+/* detalhe do cartão selecionado mais elegante */
+#cartoes #cardsCleanRoot .clean-detail{
+  display:grid!important;
+  grid-template-columns:minmax(250px,.95fr) minmax(260px,1.05fr)!important;
+  gap:12px!important;
+  align-items:start!important;
+}
+#cartoes #cardsCleanRoot .clean-main-card{margin:0!important;max-width:none!important;width:100%!important;height:190px!important}
+#cartoes #cardsCleanRoot .clean-side{gap:10px!important}
+#cartoes #cardsCleanRoot .clean-box{border-radius:18px!important;padding:12px!important;background:linear-gradient(180deg,#ffffff 0%,#f7f9fc 100%)!important;border:1px solid #e0e7ef!important;box-shadow:0 8px 18px rgba(15,23,42,.045)!important}
+#cartoes #cardsCleanRoot .clean-box h4{font-size:13px!important;color:#162133!important}
+
+/* ações via menu de três pontos */
+#cartoes #cardsCleanRoot .v109-actions-shell{display:flex;justify-content:flex-end}
+#cartoes #cardsCleanRoot .v109-actions-toggle{
+  width:40px;height:40px;border-radius:14px;border:1px solid #d7e0ea;background:#fff;color:#344054;cursor:pointer;
+  font-size:22px;line-height:1;display:grid;place-items:center;box-shadow:0 8px 18px rgba(15,23,42,.05)
+}
+#cartoes #cardsCleanRoot .v109-actions-menu{position:absolute;right:0;top:46px;z-index:50;min-width:190px;padding:6px;border-radius:14px;background:#fff;border:1px solid #dce4ed;box-shadow:0 18px 40px rgba(15,23,42,.18)}
+#cartoes #cardsCleanRoot .v109-actions-menu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:10px 11px;border-radius:10px;font-size:10.5px;font-weight:800;color:#344054;cursor:pointer}
+#cartoes #cardsCleanRoot .v109-actions-menu button:hover{background:#f3f6fa}
+#cartoes #cardsCleanRoot .clean-actions{display:none!important}
+#cartoes #cardsCleanRoot .v109-actions-box{position:relative}
+@media(max-width:920px){
+  #cartoes #cardsCleanRoot .clean-detail{grid-template-columns:1fr!important}
+  #cartoes .v105-card-chip.v109-line-chip{grid-template-columns:1fr!important;gap:8px!important}
+}
+@media(max-width:520px){
+  #cartoes .v109-line-values{flex-direction:column;align-items:flex-start}
+}
+</style>
+<script id="pp-v109-actions-menu">
+(()=>{
+function enhanceActionMenusV109(){
+  const root=document.getElementById('cardsCleanRoot');
+  if(!root)return;
+  root.querySelectorAll('.clean-side').forEach(side=>{
+    if(side.querySelector('.v109-actions-shell'))return;
+    const actions=side.querySelector('.clean-actions');
+    if(!actions)return;
+    const box=document.createElement('div');
+    box.className='clean-box v109-actions-box';
+    box.innerHTML='<h4>Ações</h4><div class="v109-actions-shell"><button type="button" class="v109-actions-toggle" aria-label="Mais ações">…</button></div>';
+    const shell=box.querySelector('.v109-actions-shell');
+    const toggle=box.querySelector('.v109-actions-toggle');
+    const buttons=[...actions.querySelectorAll('button')];
+    function close(){box.querySelector('.v109-actions-menu')?.remove()}
+    toggle.onclick=(e)=>{
+      e.stopPropagation();
+      const existing=box.querySelector('.v109-actions-menu');
+      if(existing){existing.remove();return;}
+      const menu=document.createElement('div');
+      menu.className='v109-actions-menu';
+      buttons.forEach(btn=>{
+        const clone=document.createElement('button');
+        clone.type='button';
+        clone.textContent=(btn.textContent||'Ação').trim();
+        clone.onclick=()=>{btn.click(); close();};
+        menu.appendChild(clone);
+      });
+      shell.appendChild(menu);
+    };
+    setTimeout(()=>{document.addEventListener('click',e=>{if(!box.contains(e.target))close();});},0);
+    side.appendChild(box);
+  });
+}
+const prev=(window.ppCardGroupsV106&&window.ppCardGroupsV106.refresh)||window.renderCards;
+function run(){enhanceActionMenusV109()}
+document.addEventListener('click',e=>{if(e.target.closest?.('[data-v105-card],[data-clean-card],[data-real-card],#saveCard,#addCardBtn,#nav button[data-view="cartoes"],#v76FloatNav button[data-view="cartoes"]')){setTimeout(run,90);setTimeout(run,220);}},false);
+if(typeof window.renderCards==='function' && !window.renderCards.__v109menu){
+  const orig=window.renderCards;
+  const wrapped=function(){const r=orig.apply(this,arguments); setTimeout(run,60); return r;};
+  wrapped.__v109menu=true;
+  window.renderCards=wrapped;
+  try{renderCards=wrapped}catch(e){}
+}
+setTimeout(run,160);
+})();
+</script>
