@@ -1535,6 +1535,7 @@ body.v86-ready #dashboard{visibility:visible!important}
 <section class="view" id="patrimonio">
 <div class="section-tools"><div><div class="eyebrow">bens e posição geral</div><h2>Patrimônio</h2></div><div class="filterbar"><select id="assetYear"></select><select id="assetType"><option value="all">Todos os tipos</option><option>Investimento</option><option>Carro</option><option>Moto</option><option>Casa</option><option>Imóvel</option><option>Outro</option></select><button class="primary" id="addAsset">+ Novo patrimônio</button></div></div>
 <div class="summary-strip" id="assetSummary"></div>
+<div id="propertyHubV120"></div>
 <div class="asset-grid" id="assetGrid"></div>
 </section>
 
@@ -3454,7 +3455,7 @@ setTimeout(init,50);
   function ensureProfilePanel(){
     if(document.getElementById('profilePanelModal'))return;
     const m=document.createElement('div');m.className='modalback';m.id='profilePanelModal';
-    m.innerHTML=`<div class="modal"><div class="profile-panel-head"><div><h2>Perfil</h2><p>Gerencie o acesso deste perfil.</p></div><button type="button" id="profilePanelClose">Fechar</button></div><div class="profile-panel-body"><div class="profile-current" id="profileCurrent"></div><div class="profile-actions"><button class="btn" id="switchProfileBtn">Trocar perfil</button><button class="primary" id="togglePasswordBtn">Alterar senha</button></div><div class="password-box" id="passwordBox"><h3>Alterar senha</h3><p>A nova senha será usada neste navegador para o perfil selecionado.</p><div class="password-grid"><label>Senha atual<input type="password" id="oldProfilePass" inputmode="numeric" maxlength="20"></label><label>Nova senha<input type="password" id="newProfilePass" inputmode="numeric" maxlength="20"></label><label>Confirmar nova senha<input type="password" id="confirmProfilePass" inputmode="numeric" maxlength="20"></label></div><div class="password-hint">Use pelo menos 6 caracteres.</div><div class="password-error" id="profilePasswordMessage"></div><div class="modalfoot"><button class="primary" id="saveProfilePass">Salvar nova senha</button></div></div></div></div>`;
+    m.innerHTML=`<div class="modal"><div class="profile-panel-head"><div><h2>Perfil</h2><p>Gerencie o acesso deste perfil.</p></div><button type="button" id="profilePanelClose" aria-label="Fechar">×</button></div><div class="profile-panel-body"><div class="profile-current" id="profileCurrent"></div><div class="profile-actions"><button class="btn" id="switchProfileBtn">Trocar perfil</button><button class="primary" id="togglePasswordBtn">Alterar senha</button></div><div class="password-box" id="passwordBox"><h3>Alterar senha</h3><p>A nova senha será usada neste navegador para o perfil selecionado.</p><div class="password-grid"><label>Senha atual<input type="password" id="oldProfilePass" inputmode="numeric" maxlength="20"></label><label>Nova senha<input type="password" id="newProfilePass" inputmode="numeric" maxlength="20"></label><label>Confirmar nova senha<input type="password" id="confirmProfilePass" inputmode="numeric" maxlength="20"></label></div><div class="password-hint">Use pelo menos 6 caracteres.</div><div class="password-error" id="profilePasswordMessage"></div><div class="modalfoot"><button class="primary" id="saveProfilePass">Salvar nova senha</button></div></div></div></div>`;
     document.body.appendChild(m);
     m.onclick=e=>{if(e.target===m)m.classList.remove('open')};
     document.getElementById('profilePanelClose').onclick=()=>m.classList.remove('open');
@@ -23194,26 +23195,43 @@ window.ppV86={render:renderHome86,open:openView86,rebuildMenus:rebuildMenus86};
 (()=>{
 'use strict';
 
-function renderer87(id){
-  const map={
-    dashboard:'renderDashboard',
-    lancamentos:'renderLancamentos',
-    cartoes:'renderCards',
-    credores:'renderCreditors',
-    dividas:'renderDebts',
-    fgts:'renderFgts',
-    previdencia:'renderPrevidencia',
-    investimentos:'renderInvestments',
-    patrimonio:'renderAssets',
-    projecao:'renderProjection',
-    nuvem:'renderNuvem'
-  };
-  return map[id]&&window[map[id]];
-}
+const renderers122={
+  dashboard:'renderDashboard',
+  lancamentos:'renderLancamentos',
+  cartoes:'renderCards',
+  credores:'renderCreditors',
+  dividas:'renderDebts',
+  fgts:'renderFgts',
+  previdencia:'renderPrevidencia',
+  investimentos:'renderInvestments',
+  patrimonio:'renderAssets',
+  veiculos:null,
+  projecao:'renderProjection',
+  nuvem:'renderNuvem'
+};
 
-function applyView87(id,render=true){
-  const target=document.getElementById(id);
-  if(!target || !target.classList.contains('view'))return;
+function ensureTarget122(id){
+  if(id==='credores' && !document.getElementById('credores')){
+    try{
+      if(typeof ensureCredorSection==='function')ensureCredorSection();
+      else if(typeof window.ensureCredorSection==='function')window.ensureCredorSection();
+    }catch(e){}
+  }
+  return document.getElementById(id);
+}
+function runRenderer122(id){
+  try{
+    if(id==='veiculos'){window.ppVehicleV101?.render?.();return}
+    if(id==='edu-formacoes'){window.ppEduFormationsV117?.render?.();return}
+    if(id==='patrimonio'){window.ppPropertiesV120?.render?.()}
+    const name=renderers122[id];
+    const fn=name&&window[name];
+    if(typeof fn==='function')fn();
+  }catch(e){}
+}
+function applyView122(id,render=true){
+  const target=ensureTarget122(id);
+  if(!target || !target.classList.contains('view'))return false;
 
   document.querySelectorAll('.main > .view').forEach(v=>{
     const on=v===target;
@@ -23227,53 +23245,45 @@ function applyView87(id,render=true){
   });
 
   document.getElementById('nav')?.classList.remove('open');
-  document.body.classList.remove('v76-split-header');
+  /* Não remove v76-split-header: o menu lateral deve permanecer utilizável. */
 
-  if(render){
-    try{
-      const fn=renderer87(id);
-      if(typeof fn==='function')fn();
-    }catch(e){}
-  }
+  if(render)runRenderer122(id);
+  return true;
 }
-
-function navigate87(id){
-  applyView87(id,true);
-
-  /* alguns scripts antigos reagem ao mesmo clique em seguida;
-     reafirma apenas a visibilidade, sem renderizar novamente */
-  setTimeout(()=>applyView87(id,false),0);
-  setTimeout(()=>applyView87(id,false),80);
-
+function navigate122(id){
+  if(!applyView122(id,true))return false;
+  setTimeout(()=>applyView122(id,false),0);
+  setTimeout(()=>applyView122(id,false),80);
   try{window.scrollTo({top:0,behavior:'auto'})}catch(e){}
+  return true;
 }
 
-/* Handler final em CAPTURA: elimina conflito com onclicks antigos. */
 document.addEventListener('click',e=>{
   const b=e.target.closest?.('#nav button[data-view],#v76FloatNav button[data-view]');
   if(!b)return;
   e.preventDefault();
   e.stopPropagation();
   e.stopImmediatePropagation();
-  navigate87(b.dataset.view);
+  navigate122(b.dataset.view);
 },true);
 
-/* Também corrige atalhos internos da home V86. */
 document.addEventListener('click',e=>{
-  const b=e.target.closest?.('[data-v86-view]');
+  const b=e.target.closest?.('[data-v86-view],[data-v115-open]');
   if(!b)return;
+  const id=b.dataset.v86View||b.dataset.v115Open;
+  if(!id)return;
   e.preventDefault();
   e.stopPropagation();
-  navigate87(b.dataset.v86View);
+  navigate122(id);
 },true);
 
-window.showView=navigate87;
-try{showView=navigate87}catch(e){}
-window.ppNavV87={open:navigate87,apply:applyView87};
+window.showView=navigate122;
+try{showView=navigate122}catch(e){}
+window.ppNavV87={open:navigate122,apply:applyView122};
+window.ppNavV122={open:navigate122,apply:applyView122};
 
-/* Respeita a tela já ativa no carregamento. */
 const initial=document.querySelector('.main > .view.active')?.id||'dashboard';
-applyView87(initial,false);
+applyView122(initial,false);
 })();
 </script>
 
@@ -27389,7 +27399,97 @@ function groupAccent117(level){if(level==='Educação Básica')return '#7b61ff';
 function progress117(f){const h=(f.history||[]).length||1;const end=String(f.end||f.completionDate||'');if((f.status||'').toLowerCase().includes('concl'))return 100;if(/\d{4}/.test(end))return Math.min(92,40+h*2);return Math.min(85,28+h*3)}
 function historyRows117(f){const h=Array.isArray(f.history)?f.history:[];if(!h.length)return `<tr><td colspan="7">Nenhum item de histórico cadastrado.</td></tr>`;return h.map(x=>`<tr><td>${esc117(x.period||'—')}</td><td class="name">${esc117(x.name||'—')}</td><td>${esc117(x.hours??'—')}</td><td>${esc117(x.grade||x.concept||'—')}</td><td>${esc117(x.result||'—')}</td><td>${esc117(x.teacher||'—')}</td><td>${esc117(x.notes||x.attendance||'—')}</td></tr>`).join('')}
 function detailHTML117(f){if(!f)return `<div class="v119-detail empty"><div><span>⌁</span><h3>Selecione uma formação</h3><p>Clique em um dos cards à esquerda para visualizar o histórico e os dados completos logo abaixo.</p></div></div>`;return `<div class="v119-detail-kicker"><div class="left"><small>${esc117(f.level||'Formação')} · ${esc117(f.degree||'')}</small><h2>${esc117(f.course)}</h2><p>${esc117(f.institution||'')}</p></div><div class="v119-detail-actions"><button type="button" class="edit" data-v119-edit>Editar</button><button type="button" class="delete" data-v119-delete>Excluir</button></div></div><div class="v119-summary-grid"><div><span>Status</span><b>${esc117(f.status||'—')}</b></div><div><span>Período</span><b>${esc117(f.start||'—')} → ${esc117(f.end||'—')}</b></div><div><span>Carga horária</span><b>${esc117(f.workload||'—')}</b></div><div><span>Matrícula / registro</span><b>${esc117(f.registration||'—')}</b></div><div><span>Conclusão</span><b>${esc117(fmtDate117(f.completionDate))}</b></div><div><span>Colação</span><b>${esc117(fmtDate117(f.graduationDate))}</b></div><div><span>Diploma / certificado</span><b>${esc117(fmtDate117(f.diplomaDate))}</b></div><div><span>Local / modalidade</span><b>${esc117([f.city,f.modality].filter(Boolean).join(' · ')||'—')}</b></div></div>${f.notes?`<div class="v119-notes">${esc117(f.notes)}</div>`:''}<div class="v119-history-title"><h3>Histórico acadêmico</h3><span>${(f.history||[]).length} registro${(f.history||[]).length===1?'':'s'}</span></div><div class="v119-history-wrap"><table class="v119-history-table"><thead><tr><th>Período</th><th>Disciplina / etapa</th><th>CH</th><th>Nota / conceito</th><th>Resultado</th><th>Docente</th><th>Observações</th></tr></thead><tbody>${historyRows117(f)}</tbody></table></div>`}
-function render117(){reload117();const root=document.getElementById('v117FormationRoot');if(!root)return;if(!formations117.length){root.innerHTML=`<div class="v119-detail empty"><div><span>⌁</span><h3>Nenhuma formação cadastrada</h3><p>Use “Nova formação” para começar sua trajetória acadêmica neste perfil.</p></div></div>`;return}if(!selectedFormationId)selectedFormationId=formations117[0].id;const levels=[...new Set(formations117.map(x=>x.level||'Outras formações'))].sort((a,b)=>levelOrder117(a)-levelOrder117(b));const selected=formations117.find(x=>String(x.id)===String(selectedFormationId))||formations117[0];selectedFormationId=selected.id;root.innerHTML=`<div class="v119-form-layout"><div class="v119-board"><div class="v119-board-head"><div><h2>Mapa das formações</h2><p>Todas as formações ficam reunidas em um único painel, separadas por cor e categoria.</p></div><span class="v119-board-count">${formations117.length} formação${formations117.length===1?'':'ões'}</span></div>${levels.map(level=>{const list=formations117.filter(x=>(x.level||'Outras formações')===level);const cls=groupClass117(level);const accent=groupAccent117(level);return `<section class="v119-group ${cls}"><div class="v119-group-head"><b>${esc117(groupLabel117(level))}</b><span>${list.length} item${list.length===1?'':'ns'}</span></div><div class="v119-cards">${list.map(f=>`<button type="button" class="v119-card ${String(f.id)===String(selectedFormationId)?'active':''}" data-v119-open="${esc117(f.id)}" style="--v119-accent:${accent}"><div class="v119-card-top"><span class="v119-chip">${esc117(f.degree||f.level||'Formação')}</span><span class="v119-status">${esc117(f.status||'Cadastrada')}</span></div><h3>${esc117(f.course||'Formação')}</h3><span class="v119-inst">${esc117(f.institution||'Instituição não informada')}</span><div class="v119-track"><div class="v119-trackbar"><i style="width:${progress117(f)}%"></i></div><span>${progress117(f)}%</span></div><div class="v119-card-meta"><span>${esc117(f.start||'—')} → ${esc117(f.end||f.completionDate||'—')}</span><span>${esc117(f.workload||'—')}</span></div></button>`).join('')}</div></section>`}).join('')}</div><div class="v119-detail" id="v119FormationDetail">${detailHTML117(selected)}</div></div>`;root.querySelectorAll('[data-v119-open]').forEach(b=>b.onclick=()=>{selectedFormationId=b.dataset.v119Open;render117();document.getElementById('v119FormationDetail')?.scrollIntoView({behavior:'smooth',block:'nearest'})});root.querySelector('[data-v119-edit]')?.addEventListener('click',()=>openForm117(selectedFormationId));root.querySelector('[data-v119-delete]')?.addEventListener('click',()=>delete117(selectedFormationId))}
+function render117(){
+  reload117();
+  const root=document.getElementById('v117FormationRoot');
+  if(!root)return;
+
+  if(!formations117.length){
+    root.innerHTML=`<div class="v121-detail-empty"><span>⌁</span><h3>Nenhuma formação cadastrada</h3><p>Use “Nova formação” para começar sua trajetória acadêmica neste perfil.</p></div>`;
+    return;
+  }
+
+  if(!selectedFormationId)selectedFormationId=formations117[0].id;
+  const selected=formations117.find(x=>String(x.id)===String(selectedFormationId))||formations117[0];
+  selectedFormationId=selected.id;
+
+  const ordered=[...formations117].sort((a,b)=>{
+    const oa=levelOrder117(a.level||''),ob=levelOrder117(b.level||'');
+    if(oa!==ob)return oa-ob;
+    return String(a.start||'').localeCompare(String(b.start||''));
+  });
+
+  root.innerHTML=`
+    <section class="v121-formation-deck">
+      <div class="v121-deck-head">
+        <div>
+          <h2>Mapa das formações</h2>
+          <p>Sua trajetória em uma única linha. Clique em uma formação para abrir os detalhes abaixo.</p>
+        </div>
+        <div class="v121-deck-tools">
+          <span>${formations117.length} formação${formations117.length===1?'':'ões'}</span>
+          <button type="button" class="v121-arrow" data-v121-dir="-1">‹</button>
+          <button type="button" class="v121-arrow" data-v121-dir="1">›</button>
+        </div>
+      </div>
+
+      <div class="v121-formation-track" id="v121FormationTrack">
+        ${ordered.map(f=>{
+          const accent=groupAccent117(f.level);
+          const selectedClass=String(f.id)===String(selectedFormationId)?'active':'';
+          return `<button type="button" class="v121-formation-card ${selectedClass}" data-v121-open="${esc117(f.id)}" style="--v121-accent:${accent}">
+            <div class="v121-card-head">
+              <span class="v121-level">${esc117(f.level||'Formação')}</span>
+              <span class="v121-status">${esc117(f.status||'Cadastrada')}</span>
+            </div>
+            <span class="v121-degree">${esc117(f.degree||'')}</span>
+            <h3>${esc117(f.course||'Formação')}</h3>
+            <p>${esc117(f.institution||'Instituição não informada')}</p>
+            <div class="v121-card-bottom">
+              <span>${esc117(f.start||'—')} → ${esc117(f.end||f.completionDate||'—')}</span>
+              <b>${esc117(f.workload||'—')}</b>
+            </div>
+            <div class="v121-card-line"><i></i></div>
+          </button>`;
+        }).join('')}
+      </div>
+
+      <div class="v121-legend">
+        <span><i class="basic"></i>Educação Básica</span>
+        <span><i class="grad"></i>Graduação</span>
+        <span><i class="post"></i>Pós-graduação</span>
+        <span><i class="other"></i>Outras</span>
+      </div>
+    </section>
+
+    <section class="v121-detail" id="v119FormationDetail">
+      ${detailHTML117(selected)}
+    </section>`;
+
+  root.querySelectorAll('[data-v121-open]').forEach(b=>{
+    b.onclick=()=>{
+      selectedFormationId=b.dataset.v121Open;
+      render117();
+      setTimeout(()=>{
+        document.getElementById('v119FormationDetail')?.scrollIntoView({behavior:'smooth',block:'start'});
+      },20);
+    };
+  });
+
+  const track=root.querySelector('#v121FormationTrack');
+  root.querySelectorAll('[data-v121-dir]').forEach(b=>{
+    b.onclick=()=>{
+      const dir=Number(b.dataset.v121Dir)||1;
+      track?.scrollBy({left:dir*Math.max(320,track.clientWidth*.72),behavior:'smooth'});
+    };
+  });
+
+  const active=root.querySelector('.v121-formation-card.active');
+  setTimeout(()=>active?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}),0);
+
+  root.querySelector('[data-v119-edit]')?.addEventListener('click',()=>openForm117(selectedFormationId));
+  root.querySelector('[data-v119-delete]')?.addEventListener('click',()=>delete117(selectedFormationId));
+}
 function delete117(id){const f=formations117.find(x=>String(x.id)===String(id));if(!f)return;if(!confirm(`Excluir a formação "${f.course}"?`))return;formations117=formations117.filter(x=>String(x.id)!==String(id));if(String(selectedFormationId)===String(id))selectedFormationId=formations117[0]?.id||null;persist117();render117();try{toast('Formação excluída.')}catch(e){}}
 function modal117(html){document.getElementById('v117EduModal')?.remove();const ov=document.createElement('div');ov.id='v117EduModal';ov.innerHTML=html;document.body.appendChild(ov);ov.classList.add('open');ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});return ov}
 function subjectRow117(x={}){return `<div class="v117-subject-row"><input data-k="period" placeholder="Período" value="${esc117(x.period||'')}"><input data-k="name" placeholder="Disciplina / etapa" value="${esc117(x.name||'')}"><input data-k="hours" placeholder="CH" value="${esc117(x.hours??'')}"><input data-k="grade" placeholder="Nota" value="${esc117(x.grade||'')}"><input data-k="result" placeholder="Resultado" value="${esc117(x.result||'')}"><button type="button" title="Remover">×</button></div>`}
@@ -27405,4 +27505,557 @@ window.ppEduFormationsV117={render:render117,add:()=>openForm117(),edit:openForm
 #v117EduModal .v117-detail-actions .close{display:none!important}
 #v115SiteMenu .v116-site-modal .v116-site-close ~ * button[data-close-label="Fechar"]{display:none!important}
 </style>
+
+<style id="pp-v120-real-estate">
+#propertyHubV120{margin:14px 0 16px}
+.v120-prop-shell{border:1px solid #dfe6ee;border-radius:26px;background:linear-gradient(180deg,#fff,#f6f8fb);padding:16px;box-shadow:0 14px 34px rgba(15,23,42,.05)}
+.v120-prop-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:12px}
+.v120-prop-head .eyebrow{font-size:8px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;color:#0b63f6}.v120-prop-head h3{margin:5px 0 3px;font-size:21px;letter-spacing:-.035em;color:#172033}.v120-prop-head p{margin:0;font-size:9.5px;color:#7b8797}.v120-total-box{text-align:right;padding:10px 13px;border-radius:15px;background:#eef4fb}.v120-total-box span{display:block;font-size:7px;color:#748196;text-transform:uppercase;font-weight:900}.v120-total-box b{display:block;margin-top:3px;font-size:17px;color:#153b67}
+.v120-prop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.v120-prop-card{border:1px solid #dde5ee;border-radius:22px;background:#fff;padding:15px;box-shadow:0 8px 20px rgba(15,23,42,.045)}.v120-prop-card.house{background:linear-gradient(145deg,#fff,#f3f8ff)}.v120-prop-card.lot{background:linear-gradient(145deg,#fff,#f5fbf5)}
+.v120-prop-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.v120-prop-type{font-size:7px;font-weight:950;letter-spacing:.09em;text-transform:uppercase;color:#6c788a}.v120-prop-card h4{margin:5px 0 3px;font-size:17px;color:#172033}.v120-address{font-size:8.5px;color:#7b8797;line-height:1.4}.v120-confidence{padding:5px 8px;border-radius:999px;font-size:7px;font-weight:900;background:#fff4d8;color:#9a6700;white-space:nowrap}.v120-estimate{margin-top:14px;padding:12px;border-radius:15px;background:#eef3f8}.v120-estimate span{display:block;font-size:7px;color:#7b8797;text-transform:uppercase;font-weight:900}.v120-estimate b{display:block;margin-top:4px;font-size:22px;color:#153b67;letter-spacing:-.035em}.v120-prop-card.lot .v120-estimate b{color:#24613e}
+.v120-prop-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}.v120-prop-metrics div{padding:8px;border-radius:12px;background:#f4f6f9}.v120-prop-metrics span{display:block;font-size:6.5px;color:#8792a2;text-transform:uppercase;font-weight:900}.v120-prop-metrics b{display:block;margin-top:3px;font-size:9px;color:#27364a}.v120-variation{margin-top:9px;font-size:8.5px;color:#586577}.v120-variation strong{color:#0b8a61}.v120-prop-actions{display:flex;gap:7px;margin-top:12px}.v120-prop-actions button{flex:1;min-height:36px;border-radius:11px;border:1px solid #d9e2ec;background:#fff;color:#344054;font-size:8.5px;font-weight:900;cursor:pointer}.v120-prop-actions .primary{background:#173e69;color:#fff;border-color:#173e69}
+.v120-calc{display:none;margin-top:10px;padding:12px;border-radius:15px;background:#f5f7fa;border:1px solid #e0e6ed}.v120-calc.open{display:block}.v120-calc h5{margin:0 0 8px;font-size:10px;color:#344054}.v120-calc-row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid #e5e9ef;font-size:8px;color:#697586}.v120-calc-row:first-of-type{border-top:0}.v120-calc-row b{color:#27364a;text-align:right}.v120-history{margin-top:10px}.v120-history h5{margin:0 0 6px;font-size:9px;color:#344054}.v120-history-item{display:grid;grid-template-columns:80px 1fr 1fr;gap:8px;padding:6px 0;border-top:1px solid #e8ecf1;font-size:7.5px;color:#697586}.v120-history-item b{color:#27364a}
+#propertyModalV120{position:fixed;inset:0;z-index:260000;display:none;place-items:center;padding:18px;background:rgba(7,14,29,.68);backdrop-filter:blur(12px)}#propertyModalV120.open{display:grid}.v120-modal{width:min(650px,96vw);max-height:90vh;overflow:auto;padding:19px;border-radius:25px;background:#f8fafc;box-shadow:0 36px 90px rgba(8,20,43,.32)}.v120-modal-head{display:flex;justify-content:space-between;gap:14px}.v120-modal h3{margin:0;font-size:22px;color:#172033}.v120-modal p{margin:4px 0 14px;font-size:9.5px;color:#7c8797}.v120-close{width:36px;height:36px;border:1px solid #dae2eb;border-radius:12px;background:#fff;font-size:20px}.v120-form{display:grid;grid-template-columns:1fr 1fr;gap:9px}.v120-form label{font-size:8px;font-weight:900;color:#697586}.v120-form label.full{grid-column:1/-1}.v120-form input,.v120-form textarea,.v120-form select{width:100%;margin-top:4px;min-height:38px;border:1px solid #d9e1ea;border-radius:10px;background:#fff;padding:8px;color:#27364a}.v120-form textarea{min-height:70px;resize:vertical}.v120-save{display:flex;justify-content:flex-end;gap:7px;margin-top:13px}.v120-save button{border:0;border-radius:10px;padding:9px 13px;font-size:8.5px;font-weight:900}.v120-save .save{background:#173e69;color:#fff}.v120-save .cancel{background:#e9eef4;color:#475467}
+@media(max-width:900px){.v120-prop-grid{grid-template-columns:1fr}.v120-prop-head{align-items:flex-start;flex-direction:column}.v120-total-box{text-align:left}.v120-prop-metrics{grid-template-columns:1fr 1fr 1fr}}@media(max-width:520px){.v120-form{grid-template-columns:1fr}.v120-form label.full{grid-column:auto}.v120-prop-metrics{grid-template-columns:1fr}}
+</style>
+<script id="pp-v120-real-estate">
+(()=>{
+'use strict';
+const KEY='planejador_real_estate_v120';
+const defaults=[
+ {id:'urca-house',kind:'house',name:'Casa — Urca',address:'Rua Leblon, 134 — Urca',city:'Belo Horizonte/MG',acquisitionValue:0,currentEstimate:300000,rangeMin:260000,rangeMax:350000,confidence:'Média',status:'Em regularização',landArea:40,builtArea:120,floors:3,standard:'Médio/alto',pricePerM2:2500,calcNote:'Estimativa patrimonial provisória considerando área construída, padrão informado e faixa de mercado definida para acompanhamento pessoal.',references:['Estimativa interna cadastrada pelo usuário'],history:[{date:'2026-10-07',value:300000,rangeMin:260000,rangeMax:350000,pricePerM2:2500,confidence:'Média',note:'Estimativa inicial'}]},
+ {id:'porto-seguro-lot',kind:'lot',name:'Lote — Residencial Porto Seguro',address:'Rua Trinta e Cinco — Residencial Porto Seguro',city:'Ribeirão das Neves/MG',cep:'33863-006',acquisitionValue:0,currentEstimate:145000,rangeMin:120000,rangeMax:180000,confidence:'Média',status:'Em regularização',landArea:360,builtArea:0,floors:0,standard:'Terreno',pricePerM2:400,calcNote:'Referência central adotada: aproximadamente R$ 400/m² × 360 m² = R$ 144.000, arredondada para R$ 145.000 para o acompanhamento patrimonial.',references:['Faixa observada informada: R$ 120 mil a R$ 180 mil','Referência central informada: aproximadamente R$ 400/m²'],history:[{date:'2026-10-07',value:145000,rangeMin:120000,rangeMax:180000,pricePerM2:400,confidence:'Média',note:'Estimativa inicial'}]}
+];
+function n(v){if(typeof v==='number')return Number.isFinite(v)?v:0;let x=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');if(x.includes(',')&&x.includes('.'))x=x.replace(/\./g,'').replace(',','.');else if(x.includes(','))x=x.replace(',','.');x=x.replace(/[^0-9.-]/g,'');return Number(x)||0}
+function load(){let d=null;try{d=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}if(!Array.isArray(d)){d=JSON.parse(JSON.stringify(defaults));localStorage.setItem(KEY,JSON.stringify(d))}return d}
+let props=load();
+function save(){localStorage.setItem(KEY,JSON.stringify(props));try{const PM=window.__ppV41Profile;if(PM?.captureShared&&PM?.saveState)PM.saveState(localStorage.getItem('planejador_active_profile')||'Marcos',PM.captureShared())}catch(e){}try{window.ppCloudV66?.save?.()}catch(e){}}
+function esc2(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+function br(v){try{return brl(n(v))}catch(e){return n(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}
+function dateBR(v){if(!v)return '—';const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:v}
+function variance(p){if(!n(p.acquisitionValue))return null;const diff=n(p.currentEstimate)-n(p.acquisitionValue);const pct=n(p.acquisitionValue)>0?diff/n(p.acquisitionValue)*100:0;return {diff,pct}}
+function render(){const root=document.getElementById('propertyHubV120');if(!root)return;const total=props.reduce((a,p)=>a+n(p.currentEstimate),0);root.innerHTML=`<section class="v120-prop-shell"><div class="v120-prop-head"><div><div class="eyebrow">patrimônio imobiliário</div><h3>Imóveis</h3><p>Estimativas de mercado para acompanhamento patrimonial pessoal — não substituem avaliação formal.</p></div><div class="v120-total-box"><span>Patrimônio imobiliário estimado</span><b>${br(total)}</b></div></div><div class="v120-prop-grid">${props.map(card).join('')}</div></section>`;root.querySelectorAll('[data-v120-calc]').forEach(b=>b.onclick=()=>document.getElementById('v120calc-'+b.dataset.v120Calc)?.classList.toggle('open'));root.querySelectorAll('[data-v120-update]').forEach(b=>b.onclick=()=>openUpdate(b.dataset.v120Update))}
+function card(p){const v=variance(p);return `<article class="v120-prop-card ${p.kind==='lot'?'lot':'house'}"><div class="v120-prop-top"><div><span class="v120-prop-type">${p.kind==='lot'?'Terreno':'Imóvel residencial'}</span><h4>${esc2(p.name)}</h4><div class="v120-address">${esc2(p.address)}${p.cep?` · CEP ${esc2(p.cep)}`:''}</div></div><span class="v120-confidence">Confiança: ${esc2(p.confidence||'Média')}</span></div><div class="v120-estimate"><span>Estimativa de mercado atual</span><b>${br(p.currentEstimate)}</b></div><div class="v120-prop-metrics"><div><span>Faixa estimada</span><b>${br(p.rangeMin)}–${br(p.rangeMax)}</b></div><div><span>Área terreno</span><b>${n(p.landArea).toLocaleString('pt-BR')} m²</b></div><div><span>Referência</span><b>${p.pricePerM2?br(p.pricePerM2)+'/m²':'—'}</b></div></div>${v?`<div class="v120-variation">Valorização estimada: <strong>${br(v.diff)} (${v.pct.toFixed(1).replace('.',',')}%)</strong></div>`:''}<div class="v120-variation">Situação: <strong>${esc2(p.status||'Não informada')}</strong>${p.builtArea?` · Área construída: ${n(p.builtArea)} m² · ${n(p.floors)} pavimentos`:''}</div><div class="v120-prop-actions"><button type="button" class="primary" data-v120-update="${esc2(p.id)}">Atualizar estimativa</button><button type="button" data-v120-calc="${esc2(p.id)}">Ver cálculo</button></div><div class="v120-calc" id="v120calc-${esc2(p.id)}"><h5>Memória da estimativa</h5><div class="v120-calc-row"><span>Valor adotado</span><b>${br(p.currentEstimate)}</b></div><div class="v120-calc-row"><span>Faixa observada</span><b>${br(p.rangeMin)} a ${br(p.rangeMax)}</b></div><div class="v120-calc-row"><span>Referência por m²</span><b>${p.pricePerM2?br(p.pricePerM2)+'/m²':'Não utilizada'}</b></div><div class="v120-calc-row"><span>Metodologia</span><b>${esc2(p.calcNote||'Estimativa cadastrada manualmente.')}</b></div><div class="v120-calc-row"><span>Referências</span><b>${(p.references||[]).map(esc2).join('<br>')||'Sem referência registrada'}</b></div><div class="v120-history"><h5>Histórico das estimativas</h5>${[...(p.history||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(h=>`<div class="v120-history-item"><span>${dateBR(h.date)}</span><b>${br(h.value)}</b><span>${esc2(h.note||'Atualização')}</span></div>`).join('')}</div></div></article>`}
+function openUpdate(id){const p=props.find(x=>x.id===id);if(!p)return;document.getElementById('propertyModalV120')?.remove();const ov=document.createElement('div');ov.id='propertyModalV120';ov.innerHTML=`<div class="v120-modal"><div class="v120-modal-head"><div><h3>Atualizar estimativa</h3><p>${esc2(p.name)}</p></div><button type="button" class="v120-close">×</button></div><div class="v120-form"><label>Valor de aquisição<input id="pvAcq" inputmode="decimal" value="${n(p.acquisitionValue)||''}"></label><label>Estimativa atual<input id="pvEst" inputmode="decimal" value="${n(p.currentEstimate)}"></label><label>Faixa mínima<input id="pvMin" inputmode="decimal" value="${n(p.rangeMin)}"></label><label>Faixa máxima<input id="pvMax" inputmode="decimal" value="${n(p.rangeMax)}"></label><label>Referência R$/m²<input id="pvM2" inputmode="decimal" value="${n(p.pricePerM2)||''}"></label><label>Confiança<select id="pvConf"><option ${p.confidence==='Baixa'?'selected':''}>Baixa</option><option ${p.confidence==='Média'?'selected':''}>Média</option><option ${p.confidence==='Alta'?'selected':''}>Alta</option></select></label><label>Situação documental<input id="pvStatus" value="${esc2(p.status||'')}"></label><label>Data da estimativa<input id="pvDate" type="date" value="${new Date().toISOString().slice(0,10)}"></label><label class="full">Observação da atualização<textarea id="pvNote" placeholder="Ex.: revisão com novos anúncios da região"></textarea></label></div><div class="v120-save"><button type="button" class="cancel">Cancelar</button><button type="button" class="save">Salvar estimativa</button></div></div>`;document.body.appendChild(ov);ov.classList.add('open');const close=()=>ov.remove();ov.querySelector('.v120-close').onclick=close;ov.querySelector('.cancel').onclick=close;ov.onclick=e=>{if(e.target===ov)close()};ov.querySelector('.save').onclick=()=>{p.acquisitionValue=n(ov.querySelector('#pvAcq').value);p.currentEstimate=n(ov.querySelector('#pvEst').value);p.rangeMin=n(ov.querySelector('#pvMin').value);p.rangeMax=n(ov.querySelector('#pvMax').value);p.pricePerM2=n(ov.querySelector('#pvM2').value);p.confidence=ov.querySelector('#pvConf').value;p.status=ov.querySelector('#pvStatus').value.trim();p.history=p.history||[];p.history.push({date:ov.querySelector('#pvDate').value,value:p.currentEstimate,rangeMin:p.rangeMin,rangeMax:p.rangeMax,pricePerM2:p.pricePerM2,confidence:p.confidence,note:ov.querySelector('#pvNote').value.trim()||'Atualização manual'});save();syncAssets();render();try{renderAssets()}catch(e){}try{renderDashboard()}catch(e){}close();try{toast('Estimativa do imóvel atualizada.')}catch(e){}}}
+function syncAssets(){if(!Array.isArray(window.assets)&&typeof assets==='undefined')return;const arr=typeof assets!=='undefined'?assets:window.assets;props.forEach(p=>{let a=arr.find(x=>x.propertyEstimateId===p.id || String(x.name||'').toLowerCase()===String(p.name).toLowerCase());if(!a){a={id:'PROP::'+p.id,name:p.name,type:p.kind==='lot'?'Imóvel':'Casa',year:new Date().getFullYear(),value:n(p.currentEstimate),institution:p.city||'',note:'Estimativa de mercado',propertyEstimateId:p.id};arr.push(a)}else{a.value=n(p.currentEstimate);a.propertyEstimateId=p.id;a.note='Estimativa de mercado'}});try{persist()}catch(e){}}
+function estimatedAssetValue(x){if(x?.propertyEstimateId){const p=props.find(z=>z.id===x.propertyEstimateId);if(p)return n(p.currentEstimate)}return n(x?.value)}
+window.ppPropertyV120={render,estimatedAssetValue,total:()=>props.reduce((a,p)=>a+n(p.currentEstimate),0),data:()=>props};syncAssets();render();
+const oldRenderAssets=window.renderAssets;window.renderAssets=function(){const r=oldRenderAssets?.apply(this,arguments);try{render()}catch(e){}try{const y=document.getElementById('assetYear')?.value||'all',t=document.getElementById('assetType')?.value||'all';const list=(assets||[]).filter(x=>(y==='all'||+x.year===+y)&&(t==='all'||x.type===t));const total=list.reduce((a,x)=>a+estimatedAssetValue(x),0);const box=document.querySelector('#assetSummary .mini:first-child b');if(box)box.textContent=br(total)}catch(e){}return r};
+const oldDashboard=window.renderDashboard;window.renderDashboard=function(){const r=oldDashboard?.apply(this,arguments);setTimeout(()=>{try{const el=document.getElementById('assetSnapshot');if(!el)return;const row=[...el.querySelectorAll('.row3')].find(x=>x.textContent.includes('Patrimônio cadastrado'));if(row){const val=(assets||[]).reduce((a,x)=>a+estimatedAssetValue(x),0);const b=row.querySelector('b');if(b)b.textContent=br(val)}}catch(e){}},0);return r};
+})();
+</script>
+
+<style id="pp-v121-education-layout-fix">
+/* Alinha a página às mesmas margens visuais do menu e reduz o grande vazio superior */
+body:has(#edu-formacoes.active) .main{
+  width:100%!important;
+  max-width:none!important;
+  padding-left:28px!important;
+  padding-right:28px!important;
+  padding-top:76px!important;
+}
+#edu-formacoes{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
+}
+#edu-formacoes .v117-form-head{
+  margin:0 0 14px!important;
+  padding:0!important;
+  align-items:center!important;
+}
+#edu-formacoes .v117-form-head h1{
+  font-size:31px!important;
+  margin:5px 0 3px!important;
+}
+#edu-formacoes .v117-form-head p{
+  max-width:820px!important;
+}
+
+/* Um único card horizontal de formações */
+#edu-formacoes .v121-formation-deck{
+  width:100%;
+  box-sizing:border-box;
+  padding:15px 48px 12px;
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 92% 0%,rgba(116,86,232,.08),transparent 28%),
+    linear-gradient(180deg,#ffffff 0%,#f6f8fb 100%);
+  border:1px solid #dde4ed;
+  box-shadow:0 12px 30px rgba(15,23,42,.055);
+  position:relative;
+}
+#edu-formacoes .v121-deck-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:11px;
+}
+#edu-formacoes .v121-deck-head h2{
+  margin:0;
+  font-size:15px;
+  color:#1d2939;
+}
+#edu-formacoes .v121-deck-head p{
+  margin:3px 0 0;
+  font-size:9px;
+  color:#7a8697;
+}
+#edu-formacoes .v121-deck-tools{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+#edu-formacoes .v121-deck-tools>span{
+  padding:7px 9px;
+  border-radius:999px;
+  background:#edf2f7;
+  color:#59667a;
+  font-size:8px;
+  font-weight:900;
+  white-space:nowrap;
+}
+#edu-formacoes .v121-arrow{
+  width:30px;height:30px;
+  border-radius:10px;
+  border:1px solid #d9e1eb;
+  background:#fff;
+  color:#4e5b6e;
+  font-size:19px;
+  display:grid;
+  place-items:center;
+  cursor:pointer;
+}
+#edu-formacoes .v121-arrow:hover{
+  color:#7456e8;
+  border-color:#cabfff;
+  background:#f5f1ff;
+}
+#edu-formacoes .v121-formation-track{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  padding:2px 1px 8px;
+}
+#edu-formacoes .v121-formation-track::-webkit-scrollbar{display:none}
+#edu-formacoes .v121-formation-card{
+  flex:0 0 clamp(245px,23vw,315px);
+  min-width:245px;
+  min-height:148px;
+  scroll-snap-align:center;
+  position:relative;
+  overflow:hidden;
+  padding:13px 14px 14px;
+  border-radius:20px;
+  border:1px solid #dee5ed;
+  background:linear-gradient(180deg,#fff,#f7f9fc);
+  box-shadow:0 7px 18px rgba(15,23,42,.045);
+  color:#172033;
+  text-align:left;
+  cursor:pointer;
+  transition:.18s ease;
+}
+#edu-formacoes .v121-formation-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 26px rgba(15,23,42,.085);
+}
+#edu-formacoes .v121-formation-card.active{
+  border-color:color-mix(in srgb,var(--v121-accent) 72%,#fff);
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--v121-accent) 20%,transparent),0 14px 28px rgba(15,23,42,.08);
+}
+#edu-formacoes .v121-card-head{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  align-items:center;
+}
+#edu-formacoes .v121-level{
+  padding:4px 7px;
+  border-radius:999px;
+  background:color-mix(in srgb,var(--v121-accent) 12%,#fff);
+  color:var(--v121-accent);
+  font-size:7px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+#edu-formacoes .v121-status{
+  font-size:7px;
+  color:#697688;
+  background:#eef2f6;
+  padding:4px 7px;
+  border-radius:999px;
+  font-weight:900;
+}
+#edu-formacoes .v121-degree{
+  display:block;
+  margin-top:12px;
+  font-size:7.5px;
+  color:var(--v121-accent);
+  text-transform:uppercase;
+  font-weight:950;
+  letter-spacing:.08em;
+}
+#edu-formacoes .v121-formation-card h3{
+  margin:4px 0 4px;
+  font-size:16px;
+  letter-spacing:-.035em;
+  line-height:1.1;
+}
+#edu-formacoes .v121-formation-card p{
+  margin:0;
+  min-height:26px;
+  font-size:8.5px;
+  line-height:1.35;
+  color:#758194;
+}
+#edu-formacoes .v121-card-bottom{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:end;
+  margin-top:12px;
+  font-size:7.5px;
+  color:#667085;
+}
+#edu-formacoes .v121-card-bottom b{
+  color:#344054;
+  white-space:nowrap;
+}
+#edu-formacoes .v121-card-line{
+  height:5px;
+  border-radius:999px;
+  background:#e7ebf0;
+  overflow:hidden;
+  margin-top:9px;
+}
+#edu-formacoes .v121-card-line i{
+  display:block;
+  width:100%;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,var(--v121-accent),color-mix(in srgb,var(--v121-accent) 50%,#fff));
+}
+#edu-formacoes .v121-legend{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  padding-top:3px;
+  font-size:7.5px;
+  color:#7a8697;
+}
+#edu-formacoes .v121-legend span{
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+#edu-formacoes .v121-legend i{
+  width:7px;height:7px;border-radius:50%;
+}
+#edu-formacoes .v121-legend i.basic{background:#7b61ff}
+#edu-formacoes .v121-legend i.grad{background:#2f6df6}
+#edu-formacoes .v121-legend i.post{background:#1f9b72}
+#edu-formacoes .v121-legend i.other{background:#f07a28}
+
+/* Dados embaixo, ocupando largura total */
+#edu-formacoes .v121-detail{
+  width:100%;
+  margin-top:13px;
+  box-sizing:border-box;
+  border:1px solid #dfe6ef;
+  background:linear-gradient(180deg,#fff,#f7f9fc);
+  border-radius:28px;
+  padding:20px;
+  box-shadow:0 12px 30px rgba(15,23,42,.05);
+}
+#edu-formacoes .v121-detail .v119-detail-kicker{
+  align-items:center!important;
+}
+#edu-formacoes .v121-detail .v119-summary-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+}
+#edu-formacoes .v121-detail .v119-history-wrap{
+  max-height:none!important;
+}
+#edu-formacoes .v121-detail .v119-history-table{
+  min-width:900px!important;
+}
+
+/* antigos blocos da v119 não participam mais do layout */
+#edu-formacoes .v119-form-layout,
+#edu-formacoes .v119-board{display:none!important}
+
+@media(max-width:900px){
+  body:has(#edu-formacoes.active) .main{
+    padding-left:16px!important;
+    padding-right:16px!important;
+    padding-top:72px!important;
+  }
+  #edu-formacoes .v121-formation-deck{
+    padding-left:38px;
+    padding-right:38px;
+  }
+  #edu-formacoes .v121-detail .v119-summary-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+@media(max-width:600px){
+  body:has(#edu-formacoes.active) .main{
+    padding-left:10px!important;
+    padding-right:10px!important;
+    padding-top:66px!important;
+  }
+  #edu-formacoes .v117-form-head{
+    align-items:flex-start!important;
+    flex-direction:column!important;
+  }
+  #edu-formacoes .v121-formation-deck{
+    padding:13px 34px 11px;
+  }
+  #edu-formacoes .v121-deck-head{
+    flex-direction:column;
+  }
+  #edu-formacoes .v121-formation-card{
+    flex-basis:84vw;
+    min-width:84vw;
+  }
+  #edu-formacoes .v121-detail .v119-summary-grid{
+    grid-template-columns:1fr!important;
+  }
+}
+</style>
+
+<style id="pp-v122-navigation-profile-polish">
+/* Troca de área: botão ao lado do perfil vira apenas um ícone universal. */
+#v115TopSiteButton{
+  width:40px!important;height:40px!important;min-height:40px!important;
+  padding:0!important;border-radius:13px!important;font-size:0!important;
+  display:grid!important;place-items:center!important;
+}
+#v115TopSiteButton:before{
+  content:"◈";font-size:17px!important;line-height:1!important;color:#21405f!important;
+}
+#v115SitePod{display:none!important}
+
+/* Modal das áreas menor e com menos espaço vazio. */
+#v115SiteMenu .v116-site-modal{
+  width:min(760px,94vw)!important;
+  padding:20px!important;
+  border-radius:26px!important;
+}
+#v115SiteMenu .v116-site-modal-head{margin-bottom:14px!important}
+#v115SiteMenu .v116-site-modal-head h2{font-size:25px!important;margin-top:5px!important}
+#v115SiteMenu .v116-site-grid{gap:9px!important}
+#v115SiteMenu .v116-site-card{
+  min-height:112px!important;
+  grid-template-columns:48px 1fr 28px!important;
+  gap:12px!important;
+  padding:14px!important;
+  border-radius:19px!important;
+  align-items:center!important;
+}
+#v115SiteMenu .v116-site-icon{
+  width:48px!important;height:48px!important;border-radius:15px!important;font-size:15px!important;
+}
+#v115SiteMenu .v116-site-copy small{margin-bottom:5px!important}
+#v115SiteMenu .v116-site-copy b{font-size:17px!important}
+#v115SiteMenu .v116-site-copy em{margin-top:4px!important}
+#v115SiteMenu .v116-site-close{
+  width:36px!important;height:36px!important;min-width:36px!important;
+  padding:0!important;display:grid!important;place-items:center!important;
+  line-height:1!important;font-size:20px!important;
+  text-align:center!important;
+}
+#v115SiteMenu .v116-site-close{transform:none!important}
+#v115SiteMenu .v116-site-close::first-letter{line-height:1!important}
+#v115SiteMenu .v116-site-modal-foot{margin-top:11px!important;padding-top:10px!important}
+
+/* Ícones únicos em todas as páginas. */
+#v76FloatNav button[data-view="dashboard"]:before,.nav button[data-view="dashboard"]:before{content:"⌂"!important}
+#v76FloatNav button[data-view="lancamentos"]:before,.nav button[data-view="lancamentos"]:before{content:"⇅"!important}
+#v76FloatNav button[data-view="cartoes"]:before,.nav button[data-view="cartoes"]:before{content:"▱"!important}
+#v76FloatNav button[data-view="credores"]:before,.nav button[data-view="credores"]:before{content:"♙"!important}
+#v76FloatNav button[data-view="dividas"]:before,.nav button[data-view="dividas"]:before{content:"◴"!important}
+#v76FloatNav button[data-view="fgts"]:before,.nav button[data-view="fgts"]:before{content:"◇"!important}
+#v76FloatNav button[data-view="previdencia"]:before,.nav button[data-view="previdencia"]:before{content:"◎"!important}
+#v76FloatNav button[data-view="investimentos"]:before,.nav button[data-view="investimentos"]:before{content:"↗"!important}
+#v76FloatNav button[data-view="patrimonio"]:before,.nav button[data-view="patrimonio"]:before{content:"⬡"!important}
+#v76FloatNav button[data-view="veiculos"]:before,.nav button[data-view="veiculos"]:before{content:"⚙"!important}
+#v76FloatNav button[data-view="projecao"]:before,.nav button[data-view="projecao"]:before{content:"≋"!important}
+#v76FloatNav button[data-view="nuvem"]:before,.nav button[data-view="nuvem"]:before{content:"☁"!important}
+
+#v76FloatNav button[data-view="edu-overview"]:before,.nav button[data-view="edu-overview"]:before{content:"◈"!important}
+#v76FloatNav button[data-view="edu-curriculo"]:before,.nav button[data-view="edu-curriculo"]:before{content:"≡"!important}
+#v76FloatNav button[data-view="edu-formacoes"]:before,.nav button[data-view="edu-formacoes"]:before{content:"⌘"!important}
+#v76FloatNav button[data-view="edu-publicacoes"]:before,.nav button[data-view="edu-publicacoes"]:before{content:"▤"!important}
+
+#v76FloatNav button[data-view="health-overview"]:before,.nav button[data-view="health-overview"]:before{content:"♥"!important}
+#v76FloatNav button[data-view="health-exams"]:before,.nav button[data-view="health-exams"]:before{content:"✚"!important}
+
+#v76FloatNav button[data-view="ent-overview"]:before,.nav button[data-view="ent-overview"]:before{content:"★"!important}
+#v76FloatNav button[data-view="ent-filmes"]:before,.nav button[data-view="ent-filmes"]:before{content:"▷"!important}
+#v76FloatNav button[data-view="ent-docs"]:before,.nav button[data-view="ent-docs"]:before{content:"◉"!important}
+#v76FloatNav button[data-view="ent-series"]:before,.nav button[data-view="ent-series"]:before{content:"▦"!important}
+#v76FloatNav button[data-view="ent-livros"]:before,.nav button[data-view="ent-livros"]:before{content:"▥"!important}
+#v76FloatNav button[data-view="ent-viagens"]:before,.nav button[data-view="ent-viagens"]:before{content:"✈"!important}
+
+/* Perfil: linguagem visual do hub pessoal. */
+#profilePanelModal{
+  background:rgba(5,14,28,.68)!important;
+  backdrop-filter:blur(14px)!important;
+}
+#profilePanelModal .modal{
+  width:min(560px,calc(100vw - 28px))!important;
+  border-radius:28px!important;
+  overflow:hidden!important;
+  padding:0!important;
+  background:
+    radial-gradient(circle at 92% 0%,rgba(31,137,255,.10),transparent 28%),
+    linear-gradient(180deg,#fff,#f6f8fb)!important;
+  border:1px solid #dbe4ed!important;
+  box-shadow:0 40px 100px rgba(5,18,39,.34)!important;
+}
+#profilePanelModal .profile-panel-head{
+  padding:20px 21px 17px!important;
+  background:linear-gradient(135deg,#102f5f 0%,#0b63f6 100%)!important;
+  align-items:center!important;
+}
+#profilePanelModal .profile-panel-head h2{font-size:22px!important}
+#profilePanelModal .profile-panel-head p{font-size:10.5px!important}
+#profilePanelClose{
+  width:36px!important;height:36px!important;padding:0!important;
+  display:grid!important;place-items:center!important;
+  border-radius:12px!important;font-size:20px!important;line-height:1!important;
+}
+#profilePanelModal .profile-panel-body{padding:18px 20px 20px!important}
+#profilePanelModal .profile-current{
+  padding:14px!important;border-radius:17px!important;
+  background:linear-gradient(180deg,#fff,#f6f9fd)!important;
+  border-color:#dfe6ef!important;
+}
+#profilePanelModal .profile-current .avatar{
+  background:linear-gradient(135deg,#0b63f6,#42a8ff)!important;
+}
+#profilePanelModal .profile-actions{
+  margin-top:12px!important;gap:8px!important;
+}
+#profilePanelModal .profile-actions button{
+  min-height:42px!important;border-radius:12px!important;
+}
+#profilePanelModal #switchProfileBtn{
+  background:#173f72!important;color:#fff!important;border:0!important;
+}
+#profilePanelModal #togglePasswordBtn{
+  background:#eef4fb!important;color:#173f72!important;border:1px solid #d7e3f0!important;
+}
+
+/* Troca de perfil propriamente dita. */
+#profileSwitchOverlay{
+  background:rgba(5,14,28,.68)!important;
+  backdrop-filter:blur(14px)!important;
+}
+#profileSwitchOverlay .switch-card{
+  width:min(560px,96vw)!important;
+  border-radius:28px!important;
+  padding:20px!important;
+  background:
+    radial-gradient(circle at 92% 0%,rgba(31,137,255,.09),transparent 28%),
+    linear-gradient(180deg,#fff,#f6f8fb)!important;
+  border:1px solid #dbe4ed!important;
+  box-shadow:0 40px 100px rgba(5,18,39,.34)!important;
+}
+#profileSwitchOverlay .switch-head h2{font-size:22px!important;color:#172033!important}
+#profileSwitchOverlay .switch-head p{font-size:10.5px!important}
+#profileSwitchOverlay .switch-close{
+  width:36px!important;height:36px!important;padding:0!important;
+  display:grid!important;place-items:center!important;
+  line-height:1!important;border-radius:12px!important;font-size:20px!important;
+}
+#profileSwitchOverlay .switch-profiles{gap:8px!important;margin-top:4px!important}
+#profileSwitchOverlay .switch-profile{
+  min-height:72px!important;border-radius:16px!important;
+  background:linear-gradient(180deg,#fff,#f7f9fc)!important;
+}
+#profileSwitchOverlay .switch-profile.active{
+  border:1.5px solid #0b63f6!important;
+  background:#edf5ff!important;color:#0b4fc4!important;
+}
+#profileSwitchOverlay .switch-profile.active .switch-avatar{
+  background:linear-gradient(135deg,#0b63f6,#42a8ff)!important;
+}
+#profileSwitchOverlay .switch-login{
+  background:linear-gradient(135deg,#0b63f6,#238ee9)!important;
+}
+
+/* Não repetir o nome da área em um segundo elemento flutuante. */
+body.v76-split-header #v115SitePod{display:none!important}
+</style>
+
+
+<script id="pp-v122-navigation-profile-final">
+(()=>{
+'use strict';
+
+/* O botão ao lado do perfil troca de ambiente, mas sem exibir "EDUCAÇÃO/SAÚDE..." no topo. */
+function normalizeSiteButton122(){
+  const b=document.getElementById('v115TopSiteButton');
+  if(b){
+    b.setAttribute('aria-label','Trocar área');
+    b.title='Trocar área';
+  }
+  document.getElementById('v115SitePod')?.remove();
+}
+
+/* Normaliza a tela de perfil quando ela for aberta. */
+function normalizeProfile122(){
+  const modal=document.getElementById('profilePanelModal');
+  if(!modal)return;
+  const close=modal.querySelector('#profilePanelClose');
+  if(close){
+    close.textContent='×';
+    close.setAttribute('aria-label','Fechar');
+  }
+  /* Se alguma camada antiga tiver criado outro botão de fechar no topo, mantém apenas o oficial. */
+  modal.querySelectorAll('.modal > button').forEach(b=>{
+    if(b!==close && /fechar|×/i.test((b.textContent||'').trim()))b.style.display='none';
+  });
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('.profile-man,#v76ProfilePod')){
+    setTimeout(normalizeProfile122,0);
+    setTimeout(normalizeProfile122,60);
+  }
+},false);
+
+/* Depois de cada troca de ambiente, o texto do botão antigo é visualmente ignorado
+   e o menu lateral é reconstruído pela rotina existente. */
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('#v115SiteMenu [data-v115-site]')){
+    setTimeout(normalizeSiteButton122,0);
+  }
+},false);
+
+normalizeSiteButton122();
+setTimeout(normalizeProfile122,80);
+
+/* Auditoria de rotas em runtime: todas as páginas configuradas precisam existir. */
+window.ppMenuAuditV122=()=>{
+  const expected=[
+    'dashboard','lancamentos','cartoes','credores','dividas','fgts','previdencia',
+    'investimentos','patrimonio','veiculos','projecao','nuvem',
+    'edu-overview','edu-curriculo','edu-formacoes','edu-publicacoes',
+    'health-overview','health-exams',
+    'ent-overview','ent-filmes','ent-docs','ent-series','ent-livros','ent-viagens'
+  ];
+  try{
+    if(!document.getElementById('credores') && typeof ensureCredorSection==='function')ensureCredorSection();
+  }catch(e){}
+  return expected.map(id=>({id,ok:!!document.getElementById(id)}));
+};
+})();
+</script>
 
