@@ -33,7 +33,23 @@ function modal(html,small=false){let b=document.createElement('div');b.className
 function uid(p){return p+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)}
 function apiToken(){try{return localStorage.getItem(APIK)||''}catch(e){return''}}
 function setApiToken(v){try{localStorage.setItem(APIK,v.trim())}catch(e){}}
-async function tmdb(path,params={}){let token=apiToken().trim();if(!token)throw new Error('Configure seu token/API Key do TMDB na Visão Geral.');let u=new URL('https://api.themoviedb.org/3'+path);Object.entries({language:'pt-BR',...params}).forEach(([k,v])=>u.searchParams.set(k,v));let opt={headers:{Accept:'application/json'}};if(token.startsWith('ey')||token.length>45)opt.headers.Authorization='Bearer '+token;else u.searchParams.set('api_key',token);let r=await fetch(u,opt);if(!r.ok)throw new Error('Falha na API TMDB ('+r.status+').');return r.json()}
+const v138Wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function tmdb(path,params={},attempt=0){
+  let token=apiToken().trim();
+  if(!token)throw new Error('Configure seu token/API Key do TMDB na Visão Geral.');
+  let u=new URL('https://api.themoviedb.org/3'+path);
+  Object.entries({language:'pt-BR',...params}).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')u.searchParams.set(k,v)});
+  let opt={headers:{Accept:'application/json'}};
+  if(token.startsWith('ey')||token.length>45)opt.headers.Authorization='Bearer '+token;else u.searchParams.set('api_key',token);
+  let r;
+  try{r=await fetch(u,opt)}catch(e){if(attempt<2){await v138Wait(450*(attempt+1));return tmdb(path,params,attempt+1)}throw new Error('Não consegui conectar ao TMDB. Verifique sua internet e tente novamente.')}
+  if(!r.ok){
+    if((r.status===429||r.status>=500)&&attempt<3){let retry=Number(r.headers.get('Retry-After')||0);await v138Wait(retry?retry*1000:650*(attempt+1));return tmdb(path,params,attempt+1)}
+    let msg='';try{let j=await r.json();msg=j?.status_message||''}catch(e){}
+    throw new Error('Falha na API TMDB ('+r.status+')'+(msg?': '+msg:'.'));
+  }
+  return r.json();
+}
 async function googleBooks(q){
   const term=String(q||'').trim();
   if(!term)return {items:[],provider:'none'};
@@ -73,8 +89,8 @@ function renderOverview(){let r=document.getElementById('ent-overview');if(!r)re
 }
 function pageHead(kind){let d=defs[kind];return `<div class="v130-page-head"><div><span class="v130-kicker">entretenimento · ${d.title.toLowerCase()}</span><h1>${d.title}</h1><p>${kind==='series'?'Acompanhe temporadas, episódios, progresso e sua avaliação.':kind==='trips'?'Guarde destinos, fotos, datas, custos, lembranças e avaliações.':kind==='books'?'Sua estante pessoal com busca automática e cadastro manual.':'Monte seu catálogo pessoal com dados importados e anotações próprias.'}</p></div><div class="v130-actions"><button class="v130-btn primary" data-v130-add="${kind}">+ Cadastrar ${d.singular}</button></div></div>`}
 function mediaImg(x){let src=x.poster||x.image||'';return src?`<img src="${esc(src)}" alt="" loading="lazy" decoding="async">`:`<div class="fallback">${defs[x.kind||'movies']?.icon||'★'}</div>`}
-function mediaCard(x,kind){let meta=[];if(x.releaseDate)meta.push(x.releaseDate.slice(0,4));if(x.runtime)meta.push(x.runtime+' min');if(x.genres?.length)meta.push(x.genres.slice(0,2).join(' · '));if(kind==='series'){let total=(x.seasons||[]).flatMap(s=>s.episodes||[]).length,done=(x.seasons||[]).flatMap(s=>s.episodes||[]).filter(e=>e.watched).length;meta.push(done+'/'+total+' episódios')}let together=x.sharedExperience?`<div class="v132-shared-pill"><span>◎</span> Com ${esc(sharedWithLabel(x))}</div>`:'';return `<article class="v130-media-card"><div class="v130-media-cover">${mediaImg(x)}<div class="v130-media-badges"><span class="v130-badge">${esc(x.status||'Quero ver')}</span><span class="v130-badge v130-fav">${x.favorite?'♥':'♡'}</span></div></div><div class="v130-media-body"><h3>${esc(x.title||'Sem título')}</h3>${together}<div class="v130-media-meta">${meta.map(m=>`<span>${esc(m)}</span>`).join('')}</div><div>${stars(x.personalRating)}</div><div class="v130-media-overview">${esc(x.overview||'Sem sinopse cadastrada.')}</div><div class="v130-card-actions"><button data-detail="${x.id}" data-kind="${kind}">Detalhes</button><button data-edit="${x.id}" data-kind="${kind}">Editar</button></div></div></article>`}
-function renderMediaPage(kind){let r=document.getElementById(defs[kind].view);if(!r)return;let items=db[kind]||[];r.innerHTML=`<div class="v130-ent-shell">${pageHead(kind)}<section class="v130-section"><div class="v130-toolbar"><div class="v130-searchbox"><input id="v130Filter_${kind}" placeholder="Buscar na sua coleção..."><span>⌕</span></div><button class="v130-btn soft" data-api-search="${kind}">Buscar na API</button><button class="v130-btn" data-v130-add="${kind}">Cadastro manual</button></div><div id="v130Grid_${kind}" class="v130-library-grid">${items.length?items.map(x=>mediaCard(x,kind)).join(''):`<div class="v130-empty" style="grid-column:1/-1"><b>Nenhum ${defs[kind].singular} cadastrado.</b><span>Use a busca automática ou faça um cadastro manual.</span></div>`}</div></section></div>`;bindCommon(r);let f=r.querySelector('#v130Filter_'+kind);f.oninput=()=>{let q=f.value.toLowerCase();r.querySelector('#v130Grid_'+kind).innerHTML=(db[kind]||[]).filter(x=>(x.title+' '+(x.overview||'')).toLowerCase().includes(q)).map(x=>mediaCard(x,kind)).join('')||`<div class="v130-empty" style="grid-column:1/-1"><b>Nada encontrado.</b></div>`;bindCardActions(r)};bindCardActions(r)}
+function mediaCard(x,kind){let meta=[];if(x.releaseDate)meta.push(x.releaseDate.slice(0,4));if(x.runtime)meta.push(x.runtime+' min');if(x.genres?.length)meta.push(x.genres.slice(0,2).join(' · '));if(kind==='series'){let total=(x.seasons||[]).flatMap(s=>s.episodes||[]).length,done=(x.seasons||[]).flatMap(s=>s.episodes||[]).filter(e=>e.watched).length;meta.push(done+'/'+total+' episódios')}let together=x.sharedExperience?`<div class="v132-shared-pill"><span>◎</span> Com ${esc(sharedWithLabel(x))}</div>`:'';return `<article class="v130-media-card v138-media-${kind}"><div class="v130-media-cover">${mediaImg(x)}<div class="v130-media-badges"><span class="v130-badge">${esc(x.status||'Quero ver')}</span><span class="v130-badge v130-fav">${x.favorite?'♥':'♡'}</span></div></div><div class="v130-media-body"><h3>${esc(x.title||'Sem título')}</h3>${together}<div class="v130-media-meta">${meta.map(m=>`<span>${esc(m)}</span>`).join('')}</div><div>${stars(x.personalRating)}</div><div class="v130-media-overview">${esc(x.overview||'Sem sinopse cadastrada.')}</div><div class="v130-card-actions"><button data-detail="${x.id}" data-kind="${kind}">Detalhes</button><button data-edit="${x.id}" data-kind="${kind}">Editar</button></div></div></article>`}
+function renderMediaPage(kind){let r=document.getElementById(defs[kind].view);if(!r)return;let items=db[kind]||[];r.innerHTML=`<div class="v130-ent-shell">${pageHead(kind)}<section class="v130-section"><div class="v130-toolbar"><div class="v130-searchbox"><input id="v130Filter_${kind}" placeholder="Buscar na sua coleção..."><span>⌕</span></div><button class="v130-btn soft" data-api-search="${kind}">Buscar na API</button><button class="v130-btn" data-v130-add="${kind}">Cadastro manual</button></div><div id="v130Grid_${kind}" class="v130-library-grid v138-library-${kind}">${items.length?items.map(x=>mediaCard(x,kind)).join(''):`<div class="v130-empty" style="grid-column:1/-1"><b>Nenhum ${defs[kind].singular} cadastrado.</b><span>Use a busca automática ou faça um cadastro manual.</span></div>`}</div></section></div>`;bindCommon(r);let f=r.querySelector('#v130Filter_'+kind);f.oninput=()=>{let q=f.value.toLowerCase();r.querySelector('#v130Grid_'+kind).innerHTML=(db[kind]||[]).filter(x=>(x.title+' '+(x.overview||'')).toLowerCase().includes(q)).map(x=>mediaCard(x,kind)).join('')||`<div class="v130-empty" style="grid-column:1/-1"><b>Nada encontrado.</b></div>`;bindCardActions(r)};bindCardActions(r)}
 function bindCommon(root){root.querySelectorAll('[data-v130-add]').forEach(b=>b.onclick=()=>openEdit(b.dataset.v130Add));root.querySelectorAll('[data-api-search]').forEach(b=>b.onclick=()=>openApiSearch(b.dataset.apiSearch))}
 function bindCardActions(root){root.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>openDetails(b.dataset.kind,b.dataset.detail));root.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openEdit(b.dataset.kind,b.dataset.edit))}
 function openApiSearch(kind){
@@ -108,6 +124,53 @@ function openApiSearch(kind){
   };
   b.querySelector('#v130DoSearch').onclick=go;q.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}};setTimeout(()=>q.focus(),20)
 }
+async function v138FetchSeriesSeasons(obj,det,existing,onProgress){
+  const seriesId=Number(obj.apiId||det?.id||0);
+  if(!seriesId)throw new Error('A série não possui o identificador do TMDB para buscar os episódios.');
+  let seasonDefs=(det?.seasons||[]).filter(s=>Number(s.season_number)>0).sort((a,b)=>Number(a.season_number)-Number(b.season_number));
+  if(!seasonDefs.length&&Number(det?.number_of_seasons)>0){seasonDefs=Array.from({length:Number(det.number_of_seasons)},(_,i)=>({season_number:i+1,name:`Temporada ${i+1}`,episode_count:0,air_date:'',poster_path:''}))}
+  if(!seasonDefs.length)throw new Error('O TMDB não informou temporadas para esta série.');
+  const oldWatched=new Map();
+  (existing?.seasons||obj.seasons||[]).forEach(s=>(s.episodes||[]).forEach(e=>oldWatched.set(`${s.number}:${e.number}`,!!e.watched)));
+  const oldSeasons=new Map((existing?.seasons||obj.seasons||[]).map(s=>[String(s.number),s]));
+  const out=[];let failures=[];let totalEpisodes=0;
+  for(let i=0;i<seasonDefs.length;i++){
+    const s=seasonDefs[i],sn=Number(s.season_number);
+    onProgress?.(`Buscando episódios · temporada ${i+1}/${seasonDefs.length}`);
+    let sd=null,lastErr=null;
+    for(const lang of ['pt-BR','en-US']){
+      try{const candidate=await tmdb(`/tv/${seriesId}/season/${sn}`,{language:lang});if(Array.isArray(candidate?.episodes)&&candidate.episodes.length){sd=candidate;break}if(!sd)sd=candidate}catch(e){lastErr=e}
+    }
+    let episodes=Array.isArray(sd?.episodes)?sd.episodes:[];
+    if(!episodes.length){
+      const old=oldSeasons.get(String(sn));
+      if(old?.episodes?.length){episodes=old.episodes.map(e=>({...e,_preserved:true}))}
+      else if(Number(s.episode_count)>0){episodes=Array.from({length:Number(s.episode_count)},(_,n)=>({episode_number:n+1,name:`Episódio ${n+1}`,air_date:'',runtime:0,_placeholder:true}))}
+      if(!episodes.length)failures.push(`T${sn}${lastErr?` (${lastErr.message})`:''}`);
+    }
+    const normalized=episodes.map(e=>{
+      const num=Number(e.episode_number??e.number??0);
+      return {id:e.id||'',number:num,name:e.name||`Episódio ${num||''}`.trim(),overview:e.overview||'',airDate:e.air_date||e.airDate||'',runtime:Number(e.runtime||0),still:e.still_path?IMG+e.still_path:(e.still||''),watched:oldWatched.get(`${sn}:${num}`)??!!e.watched,placeholder:!!e._placeholder};
+    }).filter(e=>e.number>0);
+    totalEpisodes+=normalized.length;
+    out.push({number:sn,name:sd?.name||s.name||`Temporada ${sn}`,airDate:sd?.air_date||s.air_date||'',poster:(sd?.poster_path||s.poster_path)?IMG+(sd?.poster_path||s.poster_path):'',episodes:normalized});
+    obj.seasons=out.slice();
+    try{localStorage.setItem(key(),JSON.stringify(db))}catch(e){}
+    if(i<seasonDefs.length-1)await v138Wait(120);
+  }
+  obj.seasons=out;
+  obj.episodeSync={at:new Date().toISOString(),total:totalEpisodes,failures};
+  return {failures,totalEpisodes};
+}
+async function v138RefreshSeriesEpisodes(obj,onProgress){
+  if(!obj?.apiId)throw new Error('Esta série não tem vínculo com o TMDB. Importe-a novamente pela busca automática.');
+  onProgress?.('Atualizando dados da série...');
+  const det=await tmdb('/tv/'+obj.apiId,{append_to_response:'external_ids'});
+  const snapshot=clone(obj);
+  const result=await v138FetchSeriesSeasons(obj,det,snapshot,onProgress);
+  persistOrThrow('series',obj);
+  return result;
+}
 async function importTMDB(kind,id,onProgress){
   let type=defs[kind].api;
   if(!type)throw new Error('Esta categoria não usa o TMDB.');
@@ -119,7 +182,6 @@ async function importTMDB(kind,id,onProgress){
   const existing=existingIndex>=0?db[kind][existingIndex]:null;
   if(existing){obj.id=existing.id;obj.status=existing.status||obj.status;obj.personalRating=existing.personalRating||0;obj.watchedDate=existing.watchedDate||'';obj.favorite=!!existing.favorite;obj.notes=existing.notes||'';obj.seasons=existing.seasons||[];if(existing.sharedExperience){obj.sharedExperience=true;obj.sharedId=existing.sharedId||existing.id;obj.sharedProfiles=existing.sharedProfiles||['Marcos','Christian']}}
   if(!existing)setSharing(kind,obj,askShareOnImport(kind));
-  // Salva primeiro o item principal. Para séries, os episódios são enriquecidos depois.
   onProgress?.('Salvando título...');
   if(existingIndex>=0)db[kind][existingIndex]=obj;else db[kind].unshift(obj);
   try{persistOrThrow(kind,obj)}catch(err){if(existingIndex>=0)db[kind][existingIndex]=existing;else db[kind]=db[kind].filter(x=>x.id!==obj.id);throw err}
@@ -128,13 +190,12 @@ async function importTMDB(kind,id,onProgress){
     toast(existing?'Dados atualizados e salvos.':(obj.sharedExperience?`Importado e compartilhado com ${otherProfile()}.`:'Importado com sucesso.'));
     return obj;
   }
-  let seasons=(det.seasons||[]).filter(s=>s.season_number>=0),out=new Array(seasons.length),cursor=0;
-  const oldWatched=new Map();(existing?.seasons||[]).forEach(s=>(s.episodes||[]).forEach(e=>oldWatched.set(`${s.number}:${e.number}`,!!e.watched)));
-  async function worker(){while(true){const i=cursor++;if(i>=seasons.length)return;const s=seasons[i];onProgress?.(`Temporada ${i+1}/${seasons.length}`);try{let sd=await tmdb('/tv/'+id+'/season/'+s.season_number);out[i]={number:s.season_number,name:s.name,airDate:s.air_date||'',poster:s.poster_path?IMG+s.poster_path:'',episodes:(sd.episodes||[]).map(e=>({number:e.episode_number,name:e.name,airDate:e.air_date||'',runtime:e.runtime||0,watched:oldWatched.get(`${s.season_number}:${e.episode_number}`)||false}))}}catch(e){out[i]={number:s.season_number,name:s.name,airDate:s.air_date||'',poster:s.poster_path?IMG+s.poster_path:'',episodes:(existing?.seasons||[]).find(z=>String(z.number)===String(s.season_number))?.episodes||[]}}}}
-  const workers=Math.min(2,Math.max(1,seasons.length));await Promise.all(Array.from({length:workers},worker));obj.seasons=out.filter(Boolean);
+  const episodeResult=await v138FetchSeriesSeasons(obj,det,existing,onProgress);
   onProgress?.('Salvando episódios...');
   try{persistOrThrow(kind,obj)}catch(err){throw new Error('A série foi salva, mas não consegui gravar todos os episódios: '+err.message)}
-  renderAllEnt(defs[kind].view);toast(existing?'Série atualizada com temporadas e episódios.':(obj.sharedExperience?`Série importada e compartilhada com ${otherProfile()}.`:'Série importada com temporadas e episódios.'));
+  renderAllEnt(defs[kind].view);
+  if(episodeResult.totalEpisodes){toast(`Série salva com ${episodeResult.totalEpisodes} episódios${episodeResult.failures.length?' (algumas temporadas exigem atualização)':''}.`)}
+  else toast('A série foi salva, mas o TMDB não retornou episódios. Abra Detalhes e use “Atualizar episódios”.');
   return obj;
 }
 function importBook(it){
@@ -150,7 +211,7 @@ function openDetails(kind,id){
   if(x.sharedExperience)extra.push(['Experiência compartilhada','Com '+sharedWithLabel(x)]);
   const seasonMarkup=()=>{
     const seasons=x.seasons||[],all=seasons.flatMap(s=>s.episodes||[]),done=all.filter(e=>e.watched).length;
-    return `<div class="v133-series-master"><div><b>Progresso da série</b><span>${done}/${all.length} episódios assistidos</span></div><div class="v133-bulk-actions"><button type="button" data-v133-all="1">✓ Marcar todos</button><button type="button" data-v133-all="0">↶ Desmarcar todos</button></div></div><div class="v130-seasons">${seasons.map(s=>{let eps=s.episodes||[],sd=eps.filter(e=>e.watched).length,allSeason=eps.length>0&&sd===eps.length;return `<details class="v130-season" data-v133-season-block="${s.number}"><summary><span>Temporada ${s.number} · ${esc(s.name||'')} · <b class="v133-season-count">${sd}/${eps.length}</b></span><button type="button" class="v133-season-toggle" data-v133-season="${s.number}">${allSeason?'↶ Desmarcar temporada':'✓ Marcar temporada'}</button></summary><div class="v130-episodes">${eps.map(e=>`<label class="v130-episode"><input type="checkbox" data-ep-s="${s.number}" data-ep-n="${e.number}" ${e.watched?'checked':''}><b>${e.number}</b><span>${esc(e.name||'Episódio')}</span><small>${date(e.airDate)}</small></label>`).join('')}</div></details>`}).join('')}</div>`;
+    return `<div class="v133-series-master"><div><b>Progresso da série</b><span>${done}/${all.length} episódios assistidos</span></div><div class="v133-bulk-actions"><button type="button" id="v138RefreshEpisodes">↻ Atualizar episódios</button><button type="button" data-v133-all="1">✓ Marcar todos</button><button type="button" data-v133-all="0">↶ Desmarcar todos</button></div></div><div id="v138EpisodeState" class="v138-episode-state"></div><div class="v130-seasons">${seasons.map(s=>{let eps=s.episodes||[],sd=eps.filter(e=>e.watched).length,allSeason=eps.length>0&&sd===eps.length;return `<details class="v130-season" data-v133-season-block="${s.number}"><summary><span>Temporada ${s.number} · ${esc(s.name||'')} · <b class="v133-season-count">${sd}/${eps.length}</b></span><button type="button" class="v133-season-toggle" data-v133-season="${s.number}">${allSeason?'↶ Desmarcar temporada':'✓ Marcar temporada'}</button></summary><div class="v130-episodes">${eps.map(e=>`<label class="v130-episode"><input type="checkbox" data-ep-s="${s.number}" data-ep-n="${e.number}" ${e.watched?'checked':''}><b>${e.number}</b><span>${esc(e.name||'Episódio')}</span><small>${date(e.airDate)}</small></label>`).join('')}</div></details>`}).join('')}</div>`;
   };
   let seriesHtml=kind==='series'?`<div id="v133SeriesProgress">${seasonMarkup()}</div>`:'';
   let b=modal(`<div class="v130-modal-head"><div><h2>${esc(x.title)}</h2><p>${esc((x.genres||[]).join(' · '))}</p>${x.sharedExperience?`<div class="v132-shared-pill detail"><span>◎</span> Experiência com ${esc(sharedWithLabel(x))}</div>`:''}</div><button class="v130-close" data-v130-close>×</button></div><div class="v130-details-grid"><div>${x.poster||x.image?`<img class="v130-detail-poster" src="${esc(x.poster||x.image)}" loading="lazy" decoding="async">`:`<div class="v130-upload-preview">Sem imagem</div>`}<div style="margin-top:10px">${stars(x.personalRating)}</div></div><div><p style="color:#64717a;line-height:1.65;margin-top:0">${esc(x.overview||'Sem descrição.')}</p><div class="v130-detail-list">${extra.map(a=>`<div><b>${esc(a[0])}</b>${esc(a[1]||'—')}</div>`).join('')}</div>${x.cast?.length?`<div class="v130-cast">${x.cast.map(n=>`<span>${esc(n)}</span>`).join('')}</div>`:''}<p style="margin-top:14px;color:#735d4d"><b>Suas notas:</b> ${esc(x.notes||'—')}</p></div></div>${seriesHtml}<div class="v130-modal-foot"><button class="v130-btn" data-v130-close>Fechar</button><button class="v130-btn primary" id="v130DetailEdit">Editar</button></div>`);
@@ -161,6 +222,7 @@ function openDetails(kind,id){
       b.querySelectorAll('[data-ep-s]').forEach(cb=>cb.onchange=()=>{let s=(x.seasons||[]).find(y=>String(y.number)===String(cb.dataset.epS));let e=s?.episodes?.find(y=>String(y.number)===String(cb.dataset.epN));if(e){e.watched=cb.checked;persistSeries();}});
       b.querySelectorAll('[data-v133-season]').forEach(btn=>btn.onclick=ev=>{ev.preventDefault();ev.stopPropagation();let s=(x.seasons||[]).find(y=>String(y.number)===String(btn.dataset.v133Season));if(!s)return;let eps=s.episodes||[],mark=eps.some(e=>!e.watched);eps.forEach(e=>e.watched=mark);save('series',x);toast(mark?'Temporada marcada como assistida.':'Temporada desmarcada.');refreshSeriesUI();});
       b.querySelectorAll('[data-v133-all]').forEach(btn=>btn.onclick=()=>{const mark=btn.dataset.v133All==='1';(x.seasons||[]).forEach(s=>(s.episodes||[]).forEach(e=>e.watched=mark));save('series',x);toast(mark?'Todos os episódios foram marcados como assistidos.':'Todos os episódios foram desmarcados.');refreshSeriesUI();});
+      const refreshBtn=b.querySelector('#v138RefreshEpisodes');if(refreshBtn)refreshBtn.onclick=async()=>{if(refreshBtn.disabled)return;const state=b.querySelector('#v138EpisodeState');refreshBtn.disabled=true;refreshBtn.textContent='Atualizando...';const show=t=>{if(state)state.textContent=t||''};try{const result=await v138RefreshSeriesEpisodes(x,show);show(result.totalEpisodes?`${result.totalEpisodes} episódios sincronizados com o TMDB.`:'O TMDB não retornou episódios para esta série.');toast(result.totalEpisodes?'Episódios atualizados.':'Série atualizada sem episódios retornados.');setTimeout(refreshSeriesUI,350)}catch(err){show(err.message);alert(err.message);refreshBtn.disabled=false;refreshBtn.textContent='↻ Atualizar episódios'}};
     }
     bindSeriesControls();
   }
