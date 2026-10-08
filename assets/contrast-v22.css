@@ -1,0 +1,104 @@
+/* V22 — revisão global de contraste sem alterar a identidade visual */
+:root{
+  --v22-text:#14233a;
+  --v22-muted:#53657b;
+  --v22-border:#cfd9e6;
+  --v22-soft:#edf3f8;
+  --v22-soft-hover:#e3edf6;
+  --v22-blue:#153a68;
+  --v22-danger:#a61b1b;
+  --v22-danger-bg:#fff1f1;
+}
+
+/* Campos e placeholders */
+input,select,textarea{color:var(--v22-text)}
+input::placeholder,textarea::placeholder{color:#687a90!important;opacity:1!important}
+
+/* Botões neutros em áreas claras: nunca branco sobre branco */
+.v130-modal-foot .v130-btn:not(.primary):not(.danger),
+.v130-actions .v130-btn:not(.primary),
+.v126-editor-actions .v126-btn:not(.primary),
+#v117EduModal .v15-save-row .cancel,
+#v117EduModal .v15-history-actions button:not(#efAddSubject),
+.v120-save .cancel,
+.modalfoot .ghost,
+.modalfoot button.ghost,
+.invoice-line .item-actions button,
+.v39-actions button,
+.v22-actions button,
+.v26-actions button,
+.v28-actions button,
+.v29-actions button,
+.v30-actions button{
+  background:var(--v22-soft)!important;
+  color:var(--v22-blue)!important;
+  border:1px solid var(--v22-border)!important;
+  box-shadow:none!important;
+}
+.v130-modal-foot .v130-btn:not(.primary):not(.danger):hover,
+.v130-actions .v130-btn:not(.primary):hover,
+.v126-editor-actions .v126-btn:not(.primary):hover,
+#v117EduModal .v15-save-row .cancel:hover,
+#v117EduModal .v15-history-actions button:not(#efAddSubject):hover,
+.v120-save .cancel:hover,
+.modalfoot .ghost:hover,
+.invoice-line .item-actions button:hover,
+.v39-actions button:hover,
+.v22-actions button:hover,
+.v26-actions button:hover,
+.v28-actions button:hover,
+.v29-actions button:hover,
+.v30-actions button:hover{
+  background:var(--v22-soft-hover)!important;
+  color:#0f315d!important;
+}
+
+/* Destrutivos: fundo e texto com contraste explícito */
+.v130-btn.danger,
+#v117EduModal .v117-subject-row button,
+.v119-detail-actions .delete,
+.v13-profile-actions .danger,
+.invoice-line .item-actions .danger,
+.v39-actions .danger,
+.v22-actions .danger,
+.v26-actions .danger,
+.v28-actions .danger,
+.v29-actions .danger,
+.v30-actions .danger,
+.dangerbtn{
+  background:var(--v22-danger-bg)!important;
+  color:var(--v22-danger)!important;
+  border-color:#efc5c5!important;
+}
+
+/* Legibilidade de textos secundários */
+.v130-ent-hero p,.v130-section-head p,.v130-page-head p,.v130-media-overview,
+.v130-result p,.v130-api-help,.v130-trip-notes,.v130-episode small,
+.v126-health-intro p,.v126-pulse-card small,.v126-stat-card small,.v126-section-head p,
+.v126-trend-top small,.v126-meta-lines,.v126-legend,.v126-ref-note,.v126-doc-summary,
+.v115-site-hero p,.v115-page-head p,.v117-form-head p,.v115-overview-card p,.v115-panel p,
+#edu-formacoes .v119-detail-kicker .left p,#edu-formacoes .v119-notes,
+#v117EduModal .v15-modal-head p,#v117EduModal .v15-section-head p,#v117EduModal .v15-save-note{
+  color:var(--v22-muted)!important;
+}
+
+/* Labels pequenos também precisam continuar legíveis */
+.v130-field label,.v126-stat-card span,.v126-pulse-card span,
+#v117EduModal .v117-field,.v120-form label{
+  color:#4d6078!important;
+}
+
+/* Inputs sobre fundo claro */
+.v130-field input,.v130-field select,.v130-field textarea,
+#v117EduModal .v117-field input,#v117EduModal .v117-field select,#v117EduModal .v117-field textarea,
+.v120-form input,.v120-form select,.v120-form textarea{
+  color:#172b4a!important;
+  background:#fff!important;
+  border-color:#cdd8e5!important;
+}
+
+/* Evita estados desabilitados praticamente invisíveis */
+button:disabled,input:disabled,select:disabled,textarea:disabled{opacity:.62!important}
+
+/* Mantém cabeçalho/menu escuros intactos */
+.v13-topbar,.v13-menu-pop,.v13-floatnav,.hub-universe{color:#fff}
