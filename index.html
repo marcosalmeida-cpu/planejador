@@ -1451,7 +1451,7 @@ body.v86-ready #dashboard{visibility:visible!important}
      Nenhuma chave financeira de localStorage é apagada, renomeada ou migrada por esta versão. -->
 <link rel="stylesheet" href="assets/hub.css?v=12">
 <link rel="stylesheet" href="assets/shared-shell-v21.css?v=21">
-<link rel="stylesheet" href="assets/contrast-v22.css?v=22"></head>
+<link rel="stylesheet" href="assets/contrast-v22.css?v=22"><link rel="stylesheet" href="assets/fullscreen-v23.css?v=23"></head>
 <body data-hub-area="financas"><div class="app">
 <header class="topbar"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button class="active" data-view="dashboard">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="veiculos">Veículos</button><button data-view="projecao">Projeção</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx="">+ Lançamento</button></div></div></header>
 <main class="main">
@@ -10757,7 +10757,7 @@ const oldRC=window.renderCards;if(typeof oldRC==='function'){window.renderCards=
 })();
 </script>
 </div>
-<script id="hub-cross-page-action-v7">(()=>{try{const q=new URLSearchParams(location.search);if(q.get('action')==='addtx'){const open=()=>{const b=document.querySelector('[data-addtx]');if(b){b.click();history.replaceState(null,'',location.pathname+location.hash);return true}return false};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(open,500),{once:true});else setTimeout(open,500)}}catch(e){}})();</script></body></html>
+<script id="hub-cross-page-action-v7">(()=>{try{const q=new URLSearchParams(location.search);if(q.get('action')==='addtx'){const open=()=>{const b=document.querySelector('[data-addtx]');if(b){b.click();history.replaceState(null,'',location.pathname+location.hash);return true}return false};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(open,500),{once:true});else setTimeout(open,500)}}catch(e){}})();</script><script src="assets/fullscreen-v23.js?v=23"></script></body></html>
 <style id="recurring-card-style">
 .recurring-note{margin-top:8px;padding:10px 12px;border-radius:12px;background:#fff8ee;border:1px solid #ffd6a7;color:#8a4b00;font-size:11px;line-height:1.45}
 .recurring-tag{background:#fff2df!important;color:#c96c00!important}
