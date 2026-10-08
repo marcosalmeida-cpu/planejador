@@ -1,0 +1,128 @@
+/* V24 — tipografia única, contraste de ações e toolbar responsiva */
+html,body,button,input,select,textarea,optgroup,table,th,td{
+  font-family:Roboto,Arial,sans-serif!important;
+}
+body{font-synthesis:none}
+button,input,select,textarea{letter-spacing:normal}
+
+/* Ações de modal: garante contraste real em todos os estados */
+.v130-modal-foot{
+  align-items:center!important;
+  gap:10px!important;
+}
+.v130-modal-foot .v130-btn{
+  min-height:42px!important;
+  padding:0 16px!important;
+  border-radius:12px!important;
+  font-size:13px!important;
+  font-weight:800!important;
+  opacity:1!important;
+}
+.v130-modal-foot .v130-btn.primary,
+.v130-modal-foot #eSave,
+.v130-modal-foot #tSave{
+  background:#0b63f6!important;
+  border:1px solid #0b63f6!important;
+  color:#fff!important;
+  box-shadow:0 7px 18px rgba(11,99,246,.18)!important;
+}
+.v130-modal-foot .v130-btn.primary:hover,
+.v130-modal-foot #eSave:hover,
+.v130-modal-foot #tSave:hover{
+  background:#084fbf!important;
+  border-color:#084fbf!important;
+  color:#fff!important;
+}
+.v130-modal-foot .v130-btn.danger,
+.v130-modal-foot #eDelete{
+  background:#fff0f0!important;
+  border:1px solid #f2cccc!important;
+  color:#b42318!important;
+}
+.v130-modal-foot .v130-btn:not(.primary):not(.danger):not(#eSave):not(#tSave){
+  background:#edf3f8!important;
+  border:1px solid #cdd8e5!important;
+  color:#173d70!important;
+}
+
+/* Toolbar de busca: campo deliberadamente menor e ações sempre fora do input */
+#ent-filmes .v141-toolbar,
+#ent-docs .v141-toolbar,
+#ent-series .v141-toolbar,
+#ent-livros .v141-toolbar{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:10px!important;
+  width:100%!important;
+  max-width:100%!important;
+  padding:10px!important;
+  overflow:visible!important;
+}
+#ent-filmes .v141-search,
+#ent-docs .v141-search,
+#ent-series .v141-search,
+#ent-livros .v141-search{
+  flex:1 1 520px!important;
+  width:auto!important;
+  min-width:260px!important;
+  max-width:720px!important;
+}
+#ent-filmes .v141-search input,
+#ent-docs .v141-search input,
+#ent-series .v141-search input,
+#ent-livros .v141-search input{
+  box-sizing:border-box!important;
+  width:100%!important;
+  max-width:100%!important;
+}
+.v141-toolbar-actions{
+  position:static!important;
+  flex:0 0 auto!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:9px!important;
+  min-width:0!important;
+  margin:0!important;
+  z-index:auto!important;
+}
+.v141-toolbar-actions .v130-btn{
+  position:static!important;
+  flex:0 0 auto!important;
+  min-width:128px!important;
+  max-width:none!important;
+  height:46px!important;
+  margin:0!important;
+  white-space:nowrap!important;
+  transform:none!important;
+}
+.v141-toolbar-actions [data-api-search]{
+  background:#173f72!important;
+  border-color:#173f72!important;
+  color:#fff!important;
+}
+.v141-toolbar-actions [data-v130-add]{
+  background:#edf3f8!important;
+  border-color:#cdd8e5!important;
+  color:#173d70!important;
+}
+
+@media(max-width:980px){
+  #ent-filmes .v141-search,
+  #ent-docs .v141-search,
+  #ent-series .v141-search,
+  #ent-livros .v141-search{
+    flex:1 1 100%!important;
+    max-width:none!important;
+  }
+  .v141-toolbar-actions{width:100%!important}
+}
+@media(max-width:520px){
+  .v141-toolbar-actions{display:grid!important;grid-template-columns:1fr!important}
+  .v141-toolbar-actions .v130-btn{width:100%!important;min-width:0!important}
+}
+
+/* Pequenos reforços de legibilidade globais */
+body .muted,body small{font-family:Roboto,Arial,sans-serif}
+button{font-family:Roboto,Arial,sans-serif!important}
