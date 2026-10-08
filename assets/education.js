@@ -138,8 +138,104 @@ function render117(){
 }
 function delete117(id){const f=formations117.find(x=>String(x.id)===String(id));if(!f)return;if(!confirm(`Excluir a formação "${f.course}"?`))return;formations117=formations117.filter(x=>String(x.id)!==String(id));if(String(selectedFormationId)===String(id))selectedFormationId=formations117[0]?.id||null;persist117();render117();try{toast('Formação excluída.')}catch(e){}}
 function modal117(html){document.getElementById('v117EduModal')?.remove();const ov=document.createElement('div');ov.id='v117EduModal';ov.innerHTML=html;document.body.appendChild(ov);ov.classList.add('open');ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});return ov}
-function subjectRow117(x={}){return `<div class="v117-subject-row"><input data-k="period" placeholder="Período" value="${esc117(x.period||'')}"><input data-k="name" placeholder="Disciplina / etapa" value="${esc117(x.name||'')}"><input data-k="hours" placeholder="CH" value="${esc117(x.hours??'')}"><input data-k="grade" placeholder="Nota" value="${esc117(x.grade||'')}"><input data-k="result" placeholder="Resultado" value="${esc117(x.result||'')}"><button type="button" title="Remover">×</button></div>`}
-function openForm117(id=null){reload117();const existing=id?formations117.find(x=>String(x.id)===String(id)):null;const f=existing?JSON.parse(JSON.stringify(existing)):{history:[]};const ov=modal117(`<div class="v117-modal"><div class="v117-modal-head"><div><span class="v117-modal-kicker">educação · cadastro</span><h2>${existing?'Editar formação':'Nova formação'}</h2><p>Cadastre os dados acadêmicos e, se desejar, o histórico de disciplinas.</p></div><button type="button" class="v117-close">×</button></div><div class="v117-form-grid"><label class="v117-field span2">Nome da formação / curso<input id="efCourse" value="${esc117(f.course||'')}"></label><label class="v117-field">Grau<input id="efDegree" placeholder="Ex.: Bacharelado" value="${esc117(f.degree||'')}"></label><label class="v117-field">Nível<select id="efLevel">${['Educação Básica','Graduação','Pós-graduação','Curso Livre','Certificação','Outra'].map(x=>`<option ${f.level===x?'selected':''}>${x}</option>`).join('')}</select></label><label class="v117-field span2">Instituição<input id="efInstitution" value="${esc117(f.institution||'')}"></label><label class="v117-field">Status<input id="efStatus" placeholder="Concluído / Em curso" value="${esc117(f.status||'')}"></label><label class="v117-field">Início<input id="efStart" placeholder="Ex.: 2026/1" value="${esc117(f.start||'')}"></label><label class="v117-field">Fim<input id="efEnd" placeholder="Ex.: 2029/2" value="${esc117(f.end||'')}"></label><label class="v117-field">Carga horária<input id="efWorkload" placeholder="Ex.: 3.200 h" value="${esc117(f.workload||'')}"></label><label class="v117-field">Data de conclusão<input id="efCompletion" value="${esc117(f.completionDate||'')}"></label><label class="v117-field">Colação de grau<input id="efGraduation" value="${esc117(f.graduationDate||'')}"></label><label class="v117-field">Diploma / certificado<input id="efDiploma" value="${esc117(f.diplomaDate||'')}"></label><label class="v117-field">Matrícula / registro<input id="efRegistration" value="${esc117(f.registration||'')}"></label><label class="v117-field">Forma de ingresso<input id="efAdmission" value="${esc117(f.admission||'')}"></label><label class="v117-field">Modalidade<input id="efModality" placeholder="Presencial / EAD" value="${esc117(f.modality||'')}"></label><label class="v117-field span2">Cidade / UF<input id="efCity" value="${esc117(f.city||'')}"></label><label class="v117-field full">Observações<textarea id="efNotes">${esc117(f.notes||'')}</textarea></label></div><div class="v117-subjects-editor"><div class="v117-subjects-head"><h3>Histórico / disciplinas</h3><button type="button" id="efAddSubject">+ Adicionar item</button></div><div id="efSubjects">${(f.history||[]).map(subjectRow117).join('')}</div></div><div class="v117-save-row"><button type="button" class="cancel">Cancelar</button><button type="button" class="save">Salvar formação</button></div></div>`);const subj=ov.querySelector('#efSubjects');function bindRemove(){subj.querySelectorAll('.v117-subject-row button').forEach(b=>b.onclick=()=>b.closest('.v117-subject-row').remove())}bindRemove();ov.querySelector('#efAddSubject').onclick=()=>{subj.insertAdjacentHTML('beforeend',subjectRow117());bindRemove()};ov.querySelector('.v117-close').onclick=()=>ov.remove();ov.querySelector('.cancel').onclick=()=>ov.remove();ov.querySelector('.save').onclick=()=>{const course=ov.querySelector('#efCourse').value.trim(),institution=ov.querySelector('#efInstitution').value.trim();if(!course||!institution){alert('Informe pelo menos o nome da formação e a instituição.');return}const history=[...subj.querySelectorAll('.v117-subject-row')].map(r=>{const o={};r.querySelectorAll('input[data-k]').forEach(i=>o[i.dataset.k]=i.value.trim());return o}).filter(x=>x.name||x.period);const obj={id:existing?.id||('edu-'+Date.now()),course,level:ov.querySelector('#efLevel').value,degree:ov.querySelector('#efDegree').value.trim(),institution,status:ov.querySelector('#efStatus').value.trim(),start:ov.querySelector('#efStart').value.trim(),end:ov.querySelector('#efEnd').value.trim(),workload:ov.querySelector('#efWorkload').value.trim(),completionDate:ov.querySelector('#efCompletion').value.trim(),graduationDate:ov.querySelector('#efGraduation').value.trim(),diplomaDate:ov.querySelector('#efDiploma').value.trim(),registration:ov.querySelector('#efRegistration').value.trim(),admission:ov.querySelector('#efAdmission').value.trim(),modality:ov.querySelector('#efModality').value.trim(),city:ov.querySelector('#efCity').value.trim(),notes:ov.querySelector('#efNotes').value.trim(),history};if(existing)formations117=formations117.map(x=>String(x.id)===String(existing.id)?obj:x);else formations117.push(obj);selectedFormationId=obj.id;persist117();ov.remove();render117();try{toast(existing?'Formação atualizada.':'Formação adicionada.')}catch(e){}}}
+function subjectRow117(x={}){return `<div class="v117-subject-row"><input data-k="period" aria-label="Período" placeholder="Período" value="${esc117(x.period||'')}"><input data-k="name" aria-label="Disciplina ou etapa" placeholder="Disciplina / etapa" value="${esc117(x.name||'')}"><input data-k="hours" aria-label="Carga horária" placeholder="CH" value="${esc117(x.hours??'')}"><input data-k="grade" aria-label="Nota ou conceito" placeholder="Nota" value="${esc117(x.grade||'')}"><input data-k="result" aria-label="Resultado" placeholder="Resultado" value="${esc117(x.result||'')}"><button type="button" title="Remover disciplina" aria-label="Remover disciplina">×</button></div>`}
+function openForm117(id=null){
+  reload117();
+  const existing=id?formations117.find(x=>String(x.id)===String(id)):null;
+  const f=existing?JSON.parse(JSON.stringify(existing)):{history:[]};
+  const historyCount=(f.history||[]).length;
+  const ov=modal117(`<div class="v117-modal v15-formation-modal">
+    <div class="v117-modal-head v15-modal-head">
+      <div>
+        <span class="v117-modal-kicker">EDUCAÇÃO · FORMAÇÃO</span>
+        <h2>${existing?'Editar formação':'Nova formação'}</h2>
+        <p>Organize as informações principais e mantenha o histórico acadêmico em um só lugar.</p>
+      </div>
+      <button type="button" class="v117-close" aria-label="Fechar">×</button>
+    </div>
+
+    <div class="v15-modal-body">
+      <section class="v15-form-section v15-section-main">
+        <div class="v15-section-head"><div><span>01</span><div><h3>Identificação</h3><p>Dados principais da formação.</p></div></div></div>
+        <div class="v117-form-grid v15-grid-main">
+          <label class="v117-field span2">Nome da formação / curso<input id="efCourse" value="${esc117(f.course||'')}"></label>
+          <label class="v117-field">Nível<select id="efLevel">${['Educação Básica','Graduação','Pós-graduação','Curso Livre','Certificação','Outra'].map(x=>`<option ${f.level===x?'selected':''}>${x}</option>`).join('')}</select></label>
+          <label class="v117-field">Grau<input id="efDegree" placeholder="Ex.: Bacharelado" value="${esc117(f.degree||'')}"></label>
+          <label class="v117-field span2">Instituição<input id="efInstitution" value="${esc117(f.institution||'')}"></label>
+          <label class="v117-field">Status<input id="efStatus" placeholder="Concluído / Em curso" value="${esc117(f.status||'')}"></label>
+          <label class="v117-field">Modalidade<input id="efModality" placeholder="Presencial / EAD" value="${esc117(f.modality||'')}"></label>
+        </div>
+      </section>
+
+      <section class="v15-form-section">
+        <div class="v15-section-head"><div><span>02</span><div><h3>Período e conclusão</h3><p>Datas e carga horária da trajetória.</p></div></div></div>
+        <div class="v117-form-grid v15-grid-dates">
+          <label class="v117-field">Início<input id="efStart" placeholder="Ex.: 2026/1" value="${esc117(f.start||'')}"></label>
+          <label class="v117-field">Fim<input id="efEnd" placeholder="Ex.: 2029/2" value="${esc117(f.end||'')}"></label>
+          <label class="v117-field">Carga horária<input id="efWorkload" placeholder="Ex.: 3.200 h" value="${esc117(f.workload||'')}"></label>
+          <label class="v117-field">Data de conclusão<input id="efCompletion" value="${esc117(f.completionDate||'')}"></label>
+          <label class="v117-field">Colação de grau<input id="efGraduation" value="${esc117(f.graduationDate||'')}"></label>
+          <label class="v117-field">Diploma / certificado<input id="efDiploma" value="${esc117(f.diplomaDate||'')}"></label>
+        </div>
+      </section>
+
+      <section class="v15-form-section">
+        <div class="v15-section-head"><div><span>03</span><div><h3>Registro e localização</h3><p>Informações administrativas e de ingresso.</p></div></div></div>
+        <div class="v117-form-grid v15-grid-admin">
+          <label class="v117-field">Matrícula / registro<input id="efRegistration" value="${esc117(f.registration||'')}"></label>
+          <label class="v117-field">Forma de ingresso<input id="efAdmission" value="${esc117(f.admission||'')}"></label>
+          <label class="v117-field">Cidade / UF<input id="efCity" value="${esc117(f.city||'')}"></label>
+          <label class="v117-field full">Observações<textarea id="efNotes">${esc117(f.notes||'')}</textarea></label>
+        </div>
+      </section>
+
+      <section class="v15-form-section v15-history-section ${historyCount?'is-collapsed':''}">
+        <div class="v15-section-head v15-history-head">
+          <div><span>04</span><div><h3>Histórico acadêmico</h3><p>${historyCount?`${historyCount} registro${historyCount===1?'':'s'} cadastrado${historyCount===1?'':'s'}.`:'Adicione disciplinas, etapas ou componentes curriculares.'}</p></div></div>
+          <div class="v15-history-actions">
+            ${historyCount?`<button type="button" class="v15-history-toggle" id="efToggleHistory">Mostrar histórico</button>`:''}
+            <button type="button" id="efAddSubject">+ Adicionar item</button>
+          </div>
+        </div>
+        <div class="v117-subjects-editor v15-subjects-editor">
+          <div class="v15-subject-labels"><span>Período</span><span>Disciplina / etapa</span><span>CH</span><span>Nota</span><span>Resultado</span><span></span></div>
+          <div id="efSubjects">${(f.history||[]).map(subjectRow117).join('')}</div>
+          <div class="v15-subject-empty" ${historyCount?'hidden':''}>Nenhum item no histórico. Use “Adicionar item” para começar.</div>
+        </div>
+      </section>
+    </div>
+
+    <div class="v117-save-row v15-save-row">
+      <span class="v15-save-note">Os dados são salvos somente no perfil atual.</span>
+      <div><button type="button" class="cancel">Cancelar</button><button type="button" class="save">Salvar formação</button></div>
+    </div>
+  </div>`);
+
+  const subj=ov.querySelector('#efSubjects');
+  const historySection=ov.querySelector('.v15-history-section');
+  const empty=ov.querySelector('.v15-subject-empty');
+  const toggle=ov.querySelector('#efToggleHistory');
+  function updateHistoryState(){
+    const count=subj.querySelectorAll('.v117-subject-row').length;
+    if(empty)empty.hidden=count>0;
+    if(toggle)toggle.textContent=historySection.classList.contains('is-collapsed')?'Mostrar histórico':'Ocultar histórico';
+  }
+  function bindRemove(){subj.querySelectorAll('.v117-subject-row button').forEach(b=>b.onclick=()=>{b.closest('.v117-subject-row').remove();updateHistoryState();})}
+  bindRemove();
+  toggle?.addEventListener('click',()=>{historySection.classList.toggle('is-collapsed');updateHistoryState();});
+  ov.querySelector('#efAddSubject').onclick=()=>{historySection.classList.remove('is-collapsed');subj.insertAdjacentHTML('beforeend',subjectRow117());bindRemove();updateHistoryState();subj.lastElementChild?.querySelector('input[data-k="period"]')?.focus();};
+  ov.querySelector('.v117-close').onclick=()=>ov.remove();
+  ov.querySelector('.cancel').onclick=()=>ov.remove();
+  ov.querySelector('.save').onclick=()=>{
+    const course=ov.querySelector('#efCourse').value.trim(),institution=ov.querySelector('#efInstitution').value.trim();
+    if(!course||!institution){alert('Informe pelo menos o nome da formação e a instituição.');return}
+    const history=[...subj.querySelectorAll('.v117-subject-row')].map(r=>{const o={};r.querySelectorAll('input[data-k]').forEach(i=>o[i.dataset.k]=i.value.trim());return o}).filter(x=>x.name||x.period);
+    const obj={id:existing?.id||('edu-'+Date.now()),course,level:ov.querySelector('#efLevel').value,degree:ov.querySelector('#efDegree').value.trim(),institution,status:ov.querySelector('#efStatus').value.trim(),start:ov.querySelector('#efStart').value.trim(),end:ov.querySelector('#efEnd').value.trim(),workload:ov.querySelector('#efWorkload').value.trim(),completionDate:ov.querySelector('#efCompletion').value.trim(),graduationDate:ov.querySelector('#efGraduation').value.trim(),diplomaDate:ov.querySelector('#efDiploma').value.trim(),registration:ov.querySelector('#efRegistration').value.trim(),admission:ov.querySelector('#efAdmission').value.trim(),modality:ov.querySelector('#efModality').value.trim(),city:ov.querySelector('#efCity').value.trim(),notes:ov.querySelector('#efNotes').value.trim(),history};
+    if(existing)formations117=formations117.map(x=>String(x.id)===String(existing.id)?obj:x);else formations117.push(obj);
+    selectedFormationId=obj.id;persist117();ov.remove();render117();try{toast(existing?'Formação atualizada.':'Formação adicionada.')}catch(e){}
+  };
+  updateHistoryState();
+}
 document.addEventListener('click',e=>{if(e.target.closest?.('#v117AddFormation'))openForm117()},false);
 window.addEventListener('storage',()=>render117());
 render117();

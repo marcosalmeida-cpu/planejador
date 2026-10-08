@@ -1,0 +1,122 @@
+/* Educação V15 — editor premium e histórico legível */
+#v117EduModal{padding:22px!important;background:rgba(6,18,38,.72)!important;backdrop-filter:blur(18px)!important}
+#v117EduModal .v117-modal.v15-formation-modal{
+  width:min(1180px,calc(100vw - 36px))!important;
+  max-height:94vh!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border-radius:30px!important;
+  background:#f4f7fb!important;
+  border:1px solid rgba(207,219,233,.9)!important;
+  box-shadow:0 36px 100px rgba(2,19,49,.34)!important;
+}
+#v117EduModal .v15-modal-head{
+  position:sticky!important;top:0;z-index:8;
+  margin:0!important;padding:22px 26px 18px!important;
+  background:rgba(255,255,255,.96)!important;
+  backdrop-filter:blur(18px)!important;
+  border-bottom:1px solid #e2e8f0!important;
+  align-items:center!important;
+}
+#v117EduModal .v117-modal-kicker{font-size:9px!important;letter-spacing:.12em!important;color:#1d5fbd!important}
+#v117EduModal .v15-modal-head h2{margin:5px 0 4px!important;font-size:28px!important;line-height:1.05!important;letter-spacing:-.035em!important;color:#102444!important}
+#v117EduModal .v15-modal-head p{font-size:12px!important;line-height:1.45!important;color:#65758b!important}
+#v117EduModal .v117-close{width:42px!important;height:42px!important;border-radius:14px!important;font-size:22px!important;background:#f8fafc!important;border:1px solid #d7e0eb!important;color:#53647a!important;box-shadow:0 4px 14px rgba(15,23,42,.05)!important}
+#v117EduModal .v117-close:hover{background:#eef4fb!important;color:#123f80!important}
+
+#v117EduModal .v15-modal-body{max-height:calc(94vh - 154px);overflow:auto;padding:20px 22px 10px;scrollbar-gutter:stable}
+#v117EduModal .v15-form-section{margin:0 0 14px;padding:18px;border:1px solid #dfe7f0;border-radius:20px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.035)}
+#v117EduModal .v15-section-main{background:linear-gradient(135deg,#fff,#f8fbff)}
+#v117EduModal .v15-section-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+#v117EduModal .v15-section-head>div:first-child{display:flex;align-items:center;gap:11px}
+#v117EduModal .v15-section-head>div:first-child>span{width:31px;height:31px;display:grid;place-items:center;border-radius:10px;background:#eaf2ff;color:#1558ad;font-size:10px;font-weight:900;letter-spacing:.04em;flex:0 0 auto}
+#v117EduModal .v15-section-head h3{margin:0;font-size:15px;line-height:1.2;color:#182b48;letter-spacing:-.015em}
+#v117EduModal .v15-section-head p{margin:3px 0 0;font-size:10.5px;color:#78879a;line-height:1.35}
+
+#v117EduModal .v117-form-grid{gap:12px!important}
+#v117EduModal .v15-grid-main{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+#v117EduModal .v15-grid-main .span2{grid-column:span 2!important}
+#v117EduModal .v15-grid-dates{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#v117EduModal .v15-grid-admin{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#v117EduModal .v117-field{font-size:10px!important;font-weight:800!important;color:#526277!important;line-height:1.2!important}
+#v117EduModal .v117-field input,
+#v117EduModal .v117-field select,
+#v117EduModal .v117-field textarea{
+  margin-top:6px!important;min-height:46px!important;padding:11px 12px!important;border-radius:12px!important;
+  border:1px solid #cfdae7!important;background:#fbfdff!important;color:#172b4a!important;font-size:12px!important;font-weight:500!important;
+  box-shadow:inset 0 1px 2px rgba(15,23,42,.02)!important;transition:border-color .15s ease,box-shadow .15s ease,background .15s ease!important
+}
+#v117EduModal .v117-field input:focus,
+#v117EduModal .v117-field select:focus,
+#v117EduModal .v117-field textarea:focus{outline:none!important;border-color:#4e8ee8!important;background:#fff!important;box-shadow:0 0 0 3px rgba(34,112,219,.10)!important}
+#v117EduModal .v117-field textarea{min-height:88px!important;line-height:1.5!important}
+#v117EduModal .v117-field.full{grid-column:1/-1!important}
+
+#v117EduModal .v15-history-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#v117EduModal .v15-history-actions button{min-height:36px;border:1px solid #d6e1ee;border-radius:11px;padding:8px 11px;background:#f7faff;color:#24538e;font-size:10px;font-weight:900;cursor:pointer}
+#v117EduModal .v15-history-actions #efAddSubject{background:#0e56b5;border-color:#0e56b5;color:#fff;box-shadow:0 8px 20px rgba(14,86,181,.16)}
+#v117EduModal .v117-subjects-editor{margin:0!important;padding:0!important;border:0!important}
+#v117EduModal .v15-history-section.is-collapsed .v15-subjects-editor{display:none}
+#v117EduModal .v15-subject-labels{display:grid;grid-template-columns:.72fr 2.2fr .55fr .65fr .8fr 36px;gap:8px;padding:0 4px 6px}
+#v117EduModal .v15-subject-labels span{font-size:8px;font-weight:900;color:#8290a2;text-transform:uppercase;letter-spacing:.06em}
+#v117EduModal .v117-subject-row{grid-template-columns:.72fr 2.2fr .55fr .65fr .8fr 36px!important;gap:8px!important;margin-bottom:8px!important}
+#v117EduModal .v117-subject-row input{min-height:40px!important;padding:9px 10px!important;border-radius:10px!important;border:1px solid #d8e1ec!important;background:#fbfdff!important;font-size:11px!important;color:#273b57!important}
+#v117EduModal .v117-subject-row input:focus{outline:none;border-color:#5a94e5!important;box-shadow:0 0 0 3px rgba(34,112,219,.08)!important;background:#fff!important}
+#v117EduModal .v117-subject-row button{width:34px!important;height:34px!important;border-radius:10px!important;font-size:18px!important;background:#fff1f2!important;color:#b42318!important;align-self:center}
+#v117EduModal .v15-subject-empty{padding:20px;border:1px dashed #ced9e6;border-radius:14px;background:#f8fafc;text-align:center;color:#79879a;font-size:11px}
+#v117EduModal .v15-subject-empty[hidden]{display:none!important}
+
+#v117EduModal .v15-save-row{position:sticky!important;bottom:0;z-index:8;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;margin:0!important;padding:14px 22px!important;background:rgba(255,255,255,.97)!important;backdrop-filter:blur(18px)!important;border-top:1px solid #e1e7ef!important}
+#v117EduModal .v15-save-row>div{display:flex;gap:9px}
+#v117EduModal .v15-save-note{font-size:9.5px;color:#7d8a9b}
+#v117EduModal .v15-save-row button{min-height:40px!important;border-radius:12px!important;padding:10px 16px!important;font-size:10.5px!important}
+#v117EduModal .v15-save-row .cancel{background:#eef2f7!important;color:#45566d!important}
+#v117EduModal .v15-save-row .save{background:linear-gradient(135deg,#103f82,#1563c8)!important;color:#fff!important;box-shadow:0 10px 24px rgba(15,78,160,.18)!important}
+
+/* Detalhe e histórico da formação: maior legibilidade */
+#edu-formacoes .v121-detail{border-radius:24px!important;padding:22px!important;background:#fff!important;border:1px solid #dfe6ef!important;box-shadow:0 12px 32px rgba(15,23,42,.045)!important}
+#edu-formacoes .v119-detail-kicker .left small{font-size:9px!important;color:#426895!important}
+#edu-formacoes .v119-detail-kicker .left h2{font-size:29px!important;line-height:1.08!important;color:#142640!important}
+#edu-formacoes .v119-detail-kicker .left p{font-size:11px!important;color:#6c7b8f!important}
+#edu-formacoes .v119-detail-actions button{font-size:10px!important;padding:9px 13px!important;border-radius:10px!important}
+#edu-formacoes .v119-detail-actions .edit{background:#144b91!important}
+#edu-formacoes .v119-summary-grid{gap:10px!important}
+#edu-formacoes .v119-summary-grid div{padding:13px!important;border:1px solid #e5ebf2!important;background:#f8fafc!important;border-radius:14px!important}
+#edu-formacoes .v119-summary-grid span{font-size:8px!important;color:#7a8798!important}
+#edu-formacoes .v119-summary-grid b{font-size:11px!important;color:#263a55!important}
+#edu-formacoes .v119-notes{font-size:10.5px!important;line-height:1.55!important;background:#f3f7fd!important;color:#4e6178!important}
+#edu-formacoes .v119-history-title{margin:20px 0 10px!important}
+#edu-formacoes .v119-history-title h3{font-size:16px!important;color:#162a47!important}
+#edu-formacoes .v119-history-title span{font-size:9px!important}
+#edu-formacoes .v119-history-wrap{max-height:520px!important;border-radius:16px!important;border:1px solid #dbe4ef!important;box-shadow:inset 0 1px 0 #fff!important}
+#edu-formacoes .v119-history-table{min-width:920px!important}
+#edu-formacoes .v119-history-table th{padding:11px 12px!important;font-size:8.5px!important;line-height:1.25!important;background:#eef3f8!important;color:#53647a!important;letter-spacing:.055em!important}
+#edu-formacoes .v119-history-table td{padding:11px 12px!important;font-size:10.5px!important;line-height:1.35!important;color:#30445f!important}
+#edu-formacoes .v119-history-table td.name{font-size:10.7px!important;font-weight:800!important;color:#142844!important}
+#edu-formacoes .v119-history-table tr:hover td{background:#f8fbff!important}
+
+@media(max-width:900px){
+  #v117EduModal{padding:10px!important}
+  #v117EduModal .v117-modal.v15-formation-modal{width:calc(100vw - 20px)!important;max-height:96vh!important;border-radius:22px!important}
+  #v117EduModal .v15-modal-head{padding:18px!important}
+  #v117EduModal .v15-modal-head h2{font-size:24px!important}
+  #v117EduModal .v15-modal-body{max-height:calc(96vh - 146px);padding:14px!important}
+  #v117EduModal .v15-form-section{padding:14px!important}
+  #v117EduModal .v15-grid-main,#v117EduModal .v15-grid-dates,#v117EduModal .v15-grid-admin{grid-template-columns:1fr 1fr!important}
+  #v117EduModal .v15-grid-main .span2{grid-column:1/-1!important}
+  #v117EduModal .v15-subject-labels{display:none!important}
+  #v117EduModal .v117-subject-row{grid-template-columns:1fr 1fr!important;padding:10px;border:1px solid #e2e8f0;border-radius:14px;background:#fafcff}
+  #v117EduModal .v117-subject-row input[data-k="name"]{grid-column:1/-1}
+  #v117EduModal .v117-subject-row button{grid-column:2;justify-self:end}
+  #v117EduModal .v15-save-note{display:none}
+  #v117EduModal .v15-save-row{justify-content:flex-end!important;padding:12px 14px!important}
+}
+@media(max-width:580px){
+  #v117EduModal .v15-grid-main,#v117EduModal .v15-grid-dates,#v117EduModal .v15-grid-admin{grid-template-columns:1fr!important}
+  #v117EduModal .v15-grid-main .span2{grid-column:auto!important}
+  #v117EduModal .v15-section-head{align-items:flex-start;flex-direction:column}
+  #v117EduModal .v15-history-actions{width:100%;justify-content:flex-start}
+  #v117EduModal .v15-modal-head p{display:none}
+  #v117EduModal .v15-save-row>div{width:100%}
+  #v117EduModal .v15-save-row button{flex:1}
+}

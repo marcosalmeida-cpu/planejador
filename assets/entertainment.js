@@ -79,58 +79,62 @@ function bindCommon(root){root.querySelectorAll('[data-v130-add]').forEach(b=>b.
 function bindCardActions(root){root.querySelectorAll('[data-detail]').forEach(b=>b.onclick=()=>openDetails(b.dataset.kind,b.dataset.detail));root.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openEdit(b.dataset.kind,b.dataset.edit))}
 function openApiSearch(kind){
   let d=defs[kind],lastResults=[];
-  let b=modal(`<div class="v130-modal-head"><div><h2>Buscar ${d.title.toLowerCase()}</h2><p>${kind==='books'?'Pesquisa via Google Books com alternativa automática pelo Open Library.':'Pesquisa via TMDB. Escolha um resultado para importar os dados.'}</p></div><button class="v130-close" data-v130-close>×</button></div><div class="v130-toolbar" style="grid-template-columns:1fr auto"><div class="v130-searchbox"><input id="v130ApiQ" placeholder="Digite o nome..."><span>⌕</span></div><button class="v130-btn primary" id="v130DoSearch" type="button">Buscar</button></div><div id="v130Results" class="v130-results" style="margin-top:16px"></div>`);
-  let q=b.querySelector('#v130ApiQ'),res=b.querySelector('#v130Results');
+  let b=modal(`<div class="v130-modal-head"><div><h2>Buscar ${d.title.toLowerCase()}</h2><p>${kind==='books'?'Pesquisa via Google Books com alternativa automática pelo Open Library.':'Pesquisa via TMDB. Escolha um resultado e clique em Importar.'}</p></div><button class="v130-close" data-v130-close>×</button></div><div class="v136-api-searchbar"><div class="v130-searchbox"><input id="v130ApiQ" placeholder="Digite o nome..." autocomplete="off"><span>⌕</span></div><button class="v130-btn primary" id="v130DoSearch" type="button">Buscar</button></div><div id="v136ImportState" class="v136-import-state" aria-live="polite"></div><div id="v130Results" class="v130-results v136-api-results"></div>`);
+  b.querySelector('.v130-modal')?.classList.add('v136-api-modal');
+  let q=b.querySelector('#v130ApiQ'),res=b.querySelector('#v130Results'),state=b.querySelector('#v136ImportState');
+  const setState=(msg,type='')=>{state.textContent=msg||'';state.className='v136-import-state'+(type?' '+type:'')};
+  const bindResultActions=()=>{
+    res.querySelectorAll('[data-import-book]').forEach(btn=>{
+      btn.onclick=e=>{e.preventDefault();e.stopPropagation();if(btn.disabled)return;btn.disabled=true;btn.textContent='Salvando...';setState('Salvando livro...','working');try{importBook(lastResults[+btn.dataset.importBook]);setState('Livro salvo com sucesso.','ok');setTimeout(()=>b.remove(),260)}catch(err){setState(err.message,'err');alert(err.message);btn.disabled=false;btn.textContent='Importar'}};
+    });
+    res.querySelectorAll('[data-import-id]').forEach(btn=>{
+      btn.onclick=async e=>{e.preventDefault();e.stopPropagation();if(btn.disabled)return;const tmdbId=Number(btn.dataset.importId);if(!tmdbId)return;btn.disabled=true;btn.textContent='Importando...';setState('Buscando os dados completos no TMDB...','working');try{const obj=await importTMDB(kind,tmdbId,msg=>{setState(msg||'Importando...','working');if(btn.isConnected)btn.textContent=msg&&msg.startsWith('Temporada')?'Carregando...':'Importando...'});setState(`${obj.title||'Item'} salvo com sucesso.`,'ok');if(btn.isConnected){btn.textContent='✓ Importado';btn.classList.add('v136-imported')}setTimeout(()=>b.remove(),520)}catch(err){setState(err.message,'err');alert(err.message);if(btn.isConnected){btn.disabled=false;btn.textContent='Importar'}}};
+    });
+  };
   let go=async()=>{
-    let term=q.value.trim();if(!term)return;
-    res.innerHTML='<div class="v130-empty"><b>Buscando...</b></div>';lastResults=[];
+    let term=q.value.trim();if(!term)return q.focus();
+    setState('');res.innerHTML='<div class="v130-empty"><b>Buscando...</b><span>Aguarde alguns segundos.</span></div>';lastResults=[];
     try{
       if(kind==='books'){
         let data=await googleBooks(term);let arr=data.items||[];lastResults=arr;let provider=data.provider||(arr[0]?._provider)||'Google Books';
-        res.innerHTML=`<div class="v131-book-provider">Fonte da busca: <b>${esc(provider)}</b></div>`+arr.map((it,i)=>{let v=it.volumeInfo||{},im=v.imageLinks?.thumbnail?.replace('http:','https:')||'';return `<div class="v130-result">${im?`<img src="${esc(im)}" loading="lazy" decoding="async">`:`<div></div>`}<div><h3>${esc(v.title||'Sem título')}</h3><small>${esc((v.authors||[]).join(', '))} · ${esc(v.publishedDate||'')}</small><p>${esc(v.description||'')}</p></div><button type="button" class="v130-btn primary" data-import-book="${i}">Importar</button></div>`}).join('')||'<div class="v130-empty"><b>Nenhum resultado.</b></div>';
+        res.innerHTML=`<div class="v131-book-provider">Fonte da busca: <b>${esc(provider)}</b></div>`+arr.map((it,i)=>{let v=it.volumeInfo||{},im=v.imageLinks?.thumbnail?.replace('http:','https:')||'';return `<div class="v130-result">${im?`<img src="${esc(im)}" loading="lazy" decoding="async">`:`<div class="v136-no-poster">▥</div>`}<div class="v136-result-copy"><h3>${esc(v.title||'Sem título')}</h3><small>${esc((v.authors||[]).join(', '))} · ${esc(v.publishedDate||'')}</small><p>${esc(v.description||'')}</p></div><button type="button" class="v130-btn primary v136-import-btn" data-import-book="${i}">Importar</button></div>`}).join('')||'<div class="v130-empty"><b>Nenhum resultado.</b></div>';
       }else{
         let type=d.api,data=await tmdb('/search/'+type,{query:term,include_adult:'false'});let arr=data.results||[];
         if(kind==='docs')arr.sort((a,b)=>(b.genre_ids?.includes(99)?1:0)-(a.genre_ids?.includes(99)?1:0));lastResults=arr.slice(0,15);
-        res.innerHTML=lastResults.map((x,i)=>`<div class="v130-result">${x.poster_path?`<img src="${IMG+x.poster_path}" loading="lazy" decoding="async">`:`<div></div>`}<div><h3>${esc(x.title||x.name)}</h3><small>${esc((x.release_date||x.first_air_date||'').slice(0,4))} · TMDB ${Number(x.vote_average||0).toFixed(1)}</small><p>${esc(x.overview||'')}</p></div><button type="button" class="v130-btn primary" data-import-id="${x.id}" data-result-index="${i}">Importar</button></div>`).join('')||'<div class="v130-empty"><b>Nenhum resultado.</b></div>';
+        res.innerHTML=lastResults.map((x,i)=>`<div class="v130-result">${x.poster_path?`<img src="${IMG+x.poster_path}" loading="lazy" decoding="async">`:`<div class="v136-no-poster">${d.icon}</div>`}<div class="v136-result-copy"><h3>${esc(x.title||x.name)}</h3><small>${esc((x.release_date||x.first_air_date||'').slice(0,4))} · TMDB ${Number(x.vote_average||0).toFixed(1)}</small><p>${esc(x.overview||'Sem sinopse disponível.')}</p></div><button type="button" class="v130-btn primary v136-import-btn" data-import-id="${x.id}" data-result-index="${i}">Importar</button></div>`).join('')||'<div class="v130-empty"><b>Nenhum resultado.</b></div>';
       }
-    }catch(e){res.innerHTML=`<div class="v130-empty"><b>Não foi possível buscar.</b><span>${esc(e.message)}</span></div>`}
+      bindResultActions();
+    }catch(e){res.innerHTML=`<div class="v130-empty"><b>Não foi possível buscar.</b><span>${esc(e.message)}</span></div>`;setState(e.message,'err')}
   };
-  res.addEventListener('click',async e=>{
-    const bookBtn=e.target.closest?.('[data-import-book]');
-    if(bookBtn){
-      e.preventDefault();e.stopPropagation();bookBtn.disabled=true;bookBtn.textContent='Salvando...';
-      try{importBook(lastResults[+bookBtn.dataset.importBook]);b.remove()}catch(err){alert(err.message);bookBtn.disabled=false;bookBtn.textContent='Importar'}
-      return;
-    }
-    const mediaBtn=e.target.closest?.('[data-import-id]');
-    if(!mediaBtn)return;
-    e.preventDefault();e.stopPropagation();mediaBtn.disabled=true;mediaBtn.textContent='Importando...';
-    try{
-      await importTMDB(kind,+mediaBtn.dataset.importId,msg=>{if(mediaBtn.isConnected)mediaBtn.textContent=msg||'Importando...'});
-      b.remove();
-    }catch(err){alert(err.message);if(mediaBtn.isConnected){mediaBtn.disabled=false;mediaBtn.textContent='Importar'}}
-  });
-  b.querySelector('#v130DoSearch').onclick=go;q.onkeydown=e=>{if(e.key==='Enter')go()};setTimeout(()=>q.focus(),20)
+  b.querySelector('#v130DoSearch').onclick=go;q.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}};setTimeout(()=>q.focus(),20)
 }
 async function importTMDB(kind,id,onProgress){
   let type=defs[kind].api;
+  if(!type)throw new Error('Esta categoria não usa o TMDB.');
   onProgress?.('Carregando dados...');
   let det=await tmdb('/'+type+'/'+id,{append_to_response:'credits,external_ids,keywords'});
   let obj={id:uid(kind),kind,title:det.title||det.name||'',originalTitle:det.original_title||det.original_name||'',releaseDate:det.release_date||det.first_air_date||'',endDate:det.last_air_date||'',overview:det.overview||'',poster:det.poster_path?IMG+det.poster_path:'',backdrop:det.backdrop_path?BACK+det.backdrop_path:'',genres:(det.genres||[]).map(g=>g.name),runtime:type==='movie'?(det.runtime||0):((det.episode_run_time||[])[0]||0),countries:(det.production_countries||det.origin_country||[]).map?.(c=>c.name||c)||[],languages:(det.spoken_languages||[]).map(l=>l.name||l.english_name),companies:(det.production_companies||[]).map(c=>c.name),cast:(det.credits?.cast||[]).slice(0,12).map(c=>c.name),director:type==='movie'?(det.credits?.crew||[]).filter(c=>c.job==='Director').map(c=>c.name).join(', '):(det.created_by||[]).map(c=>c.name).join(', '),networks:(det.networks||[]).map(n=>n.name),tmdbRating:det.vote_average||0,tmdbVotes:det.vote_count||0,imdbId:det.external_ids?.imdb_id||'',homepage:det.homepage||'',apiId:id,status:'Quero ver',personalRating:0,watchedDate:'',favorite:false,notes:'',seasons:[]};
+  if(!obj.title)throw new Error('O TMDB retornou um registro sem título. Tente outro resultado.');
   const existingIndex=(db[kind]||[]).findIndex(x=>String(x.apiId||'')===String(id));
   const existing=existingIndex>=0?db[kind][existingIndex]:null;
-  if(existing){obj.id=existing.id;obj.status=existing.status||obj.status;obj.personalRating=existing.personalRating||0;obj.watchedDate=existing.watchedDate||'';obj.favorite=!!existing.favorite;obj.notes=existing.notes||'';if(existing.sharedExperience){obj.sharedExperience=true;obj.sharedId=existing.sharedId||existing.id;obj.sharedProfiles=existing.sharedProfiles||['Marcos','Christian']}}
-  if(type==='tv'){
-    let seasons=(det.seasons||[]).filter(s=>s.season_number>=0),out=new Array(seasons.length),cursor=0;
-    const oldWatched=new Map();(existing?.seasons||[]).forEach(s=>(s.episodes||[]).forEach(e=>oldWatched.set(`${s.number}:${e.number}`,!!e.watched)));
-    async function worker(){while(true){const i=cursor++;if(i>=seasons.length)return;const s=seasons[i];onProgress?.(`Temporada ${i+1}/${seasons.length}`);try{let sd=await tmdb('/tv/'+id+'/season/'+s.season_number);out[i]={number:s.season_number,name:s.name,airDate:s.air_date||'',poster:s.poster_path?IMG+s.poster_path:'',episodes:(sd.episodes||[]).map(e=>({number:e.episode_number,name:e.name,airDate:e.air_date||'',runtime:e.runtime||0,watched:oldWatched.get(`${s.season_number}:${e.episode_number}`)||false}))}}catch(e){out[i]={number:s.season_number,name:s.name,airDate:s.air_date||'',poster:s.poster_path?IMG+s.poster_path:'',episodes:[]}}}}
-    const workers=Math.min(3,Math.max(1,seasons.length));await Promise.all(Array.from({length:workers},worker));obj.seasons=out.filter(Boolean);
-  }
+  if(existing){obj.id=existing.id;obj.status=existing.status||obj.status;obj.personalRating=existing.personalRating||0;obj.watchedDate=existing.watchedDate||'';obj.favorite=!!existing.favorite;obj.notes=existing.notes||'';obj.seasons=existing.seasons||[];if(existing.sharedExperience){obj.sharedExperience=true;obj.sharedId=existing.sharedId||existing.id;obj.sharedProfiles=existing.sharedProfiles||['Marcos','Christian']}}
   if(!existing)setSharing(kind,obj,askShareOnImport(kind));
-  onProgress?.('Salvando...');
+  // Salva primeiro o item principal. Para séries, os episódios são enriquecidos depois.
+  onProgress?.('Salvando título...');
   if(existingIndex>=0)db[kind][existingIndex]=obj;else db[kind].unshift(obj);
   try{persistOrThrow(kind,obj)}catch(err){if(existingIndex>=0)db[kind][existingIndex]=existing;else db[kind]=db[kind].filter(x=>x.id!==obj.id);throw err}
-  renderAllEnt(defs[kind].view);toast(existing?'Dados atualizados e salvos.':(obj.sharedExperience?`Importado e compartilhado com ${otherProfile()}.`:'Importado com sucesso.'));
+  renderAllEnt(defs[kind].view);
+  if(type!=='tv'){
+    toast(existing?'Dados atualizados e salvos.':(obj.sharedExperience?`Importado e compartilhado com ${otherProfile()}.`:'Importado com sucesso.'));
+    return obj;
+  }
+  let seasons=(det.seasons||[]).filter(s=>s.season_number>=0),out=new Array(seasons.length),cursor=0;
+  const oldWatched=new Map();(existing?.seasons||[]).forEach(s=>(s.episodes||[]).forEach(e=>oldWatched.set(`${s.number}:${e.number}`,!!e.watched)));
+  async function worker(){while(true){const i=cursor++;if(i>=seasons.length)return;const s=seasons[i];onProgress?.(`Temporada ${i+1}/${seasons.length}`);try{let sd=await tmdb('/tv/'+id+'/season/'+s.season_number);out[i]={number:s.season_number,name:s.name,airDate:s.air_date||'',poster:s.poster_path?IMG+s.poster_path:'',episodes:(sd.episodes||[]).map(e=>({number:e.episode_number,name:e.name,airDate:e.air_date||'',runtime:e.runtime||0,watched:oldWatched.get(`${s.season_number}:${e.episode_number}`)||false}))}}catch(e){out[i]={number:s.season_number,name:s.name,airDate:s.air_date||'',poster:s.poster_path?IMG+s.poster_path:'',episodes:(existing?.seasons||[]).find(z=>String(z.number)===String(s.season_number))?.episodes||[]}}}}
+  const workers=Math.min(2,Math.max(1,seasons.length));await Promise.all(Array.from({length:workers},worker));obj.seasons=out.filter(Boolean);
+  onProgress?.('Salvando episódios...');
+  try{persistOrThrow(kind,obj)}catch(err){throw new Error('A série foi salva, mas não consegui gravar todos os episódios: '+err.message)}
+  renderAllEnt(defs[kind].view);toast(existing?'Série atualizada com temporadas e episódios.':(obj.sharedExperience?`Série importada e compartilhada com ${otherProfile()}.`:'Série importada com temporadas e episódios.'));
   return obj;
 }
 function importBook(it){
