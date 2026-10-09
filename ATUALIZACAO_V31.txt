@@ -1,0 +1,11 @@
+HUB PESSOAL — V31
+
+Esta atualização contém somente os quatro arquivos HTML.
+
+No GitHub:
+1. Substitua index.html, educacao.html, saude.html e entretenimento.html pelos arquivos deste pacote.
+2. NÃO apague nem substitua a pasta assets existente no seu repositório.
+3. Depois da publicação, faça Ctrl + F5 uma vez.
+
+A V31 volta o Financeiro para a base anterior aos modais experimentais V27–V30 e aplica uma camada nova, menor e mais estável para os modais.
+As chaves de armazenamento dos seus dados não foram alteradas.

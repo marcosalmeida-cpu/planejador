@@ -1,2 +1,84 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hub Pessoal — Saúde</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/hub.css?v=12"><link rel="stylesheet" href="assets/page.css"><link rel="stylesheet" href="assets/health.css"><link rel="stylesheet" href="assets/shared-shell-v21.css?v=21"><link rel="stylesheet" href="assets/contrast-v22.css?v=22"><link rel="stylesheet" href="assets/fullscreen-v23.css?v=23"><link rel="stylesheet" href="assets/ui-fixes-v24.css?v=24"></head><body class="hub-page" data-hub-area="saude"><main class="main hub-content"><section class="view v115-life-view" id="health-overview"></section>
-<section class="view v115-life-view" id="health-exams"></section></main><script src="assets/hub.js?v=12"></script><script src="assets/health.js?v=9"></script><script src="assets/shared-shell-v21.js?v=21"></script><script src="assets/fullscreen-v23.js?v=23"></script></body></html>
+<section class="view v115-life-view" id="health-exams"></section></main><script src="assets/hub.js?v=12"></script><script src="assets/health.js?v=9"></script><script src="assets/shared-shell-v21.js?v=21"></script><script src="assets/fullscreen-v23.js?v=23"></script></body></html><style id="hub-v31-global-readable-responsive">
+/* V31 — leitura saudável e responsividade compartilhada */
+:root{
+  --hub-v31-text:#17243a;
+  --hub-v31-muted:#66758a;
+  --hub-v31-border:#dbe4ee;
+  --hub-v31-surface:#ffffff;
+}
+html{font-size:16px!important;text-size-adjust:100%;-webkit-text-size-adjust:100%}
+body,button,input,select,textarea{font-family:Roboto,Arial,sans-serif!important}
+body{font-size:15px!important;line-height:1.46!important;color:var(--hub-v31-text)!important}
+main,.main,.hub-content{min-width:0!important}
+h1{font-size:clamp(26px,2.15vw,38px)!important;line-height:1.08!important;letter-spacing:-.035em!important;text-wrap:balance}
+h2{font-size:clamp(21px,1.55vw,29px)!important;line-height:1.12!important;letter-spacing:-.025em!important;text-wrap:balance}
+h3{font-size:clamp(16px,1.15vw,21px)!important;line-height:1.2!important;letter-spacing:-.015em!important}
+h4{font-size:clamp(14px,1vw,18px)!important;line-height:1.25!important}
+p,li,td{font-size:clamp(12.5px,.88vw,14px)!important;line-height:1.5!important}
+th,label{font-size:clamp(11px,.76vw,12.5px)!important;line-height:1.35!important}
+small,.muted,.sub,.meta,.hint,.footnote{font-size:clamp(10.5px,.72vw,12px)!important;line-height:1.4!important}
+button,input,select,textarea{font-size:clamp(12.5px,.86vw,14px)!important;line-height:1.25!important}
+button{white-space:nowrap}
+input,select,textarea{min-width:0}
+img,svg{max-width:100%}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px!important;vertical-align:middle!important}
+.main,.hub-content{padding-left:clamp(14px,2vw,30px)!important;padding-right:clamp(14px,2vw,30px)!important}
+.view{min-width:0!important}
+.card,.panel,.v115-panel,.v115-overview-card,.v130-media-card,.v130-trip-card{
+  min-width:0!important;
+}
+.v115-overview-grid,.v115-content-grid{
+  gap:clamp(12px,1.35vw,20px)!important;
+}
+.v115-overview-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))!important}
+.v115-content-grid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))!important}
+.v115-site-hero,.v115-wide-panel,.v115-panel,.v115-overview-card{
+  border-radius:22px!important;
+}
+.v115-site-hero,.v115-wide-panel,.v115-panel{padding:clamp(16px,1.7vw,26px)!important}
+.v115-overview-card{padding:clamp(14px,1.4vw,20px)!important}
+.v130-library-grid{gap:clamp(12px,1.3vw,18px)!important}
+/* evita grandes áreas mortas criadas por alturas fixas antigas */
+.view,.v115-life-view,[class*="panel"],[class*="card"]{max-width:100%}
+@media(max-width:980px){
+  body{font-size:14.5px!important}
+  .main,.hub-content{padding-left:16px!important;padding-right:16px!important}
+  th,td{padding:9px 10px!important}
+}
+@media(max-width:720px){
+  html{font-size:15px!important}
+  h1{font-size:26px!important}h2{font-size:22px!important}h3{font-size:17px!important}
+  p,li,td{font-size:13px!important}button,input,select,textarea{font-size:13px!important}
+  .main,.hub-content{padding-left:12px!important;padding-right:12px!important}
+  .v115-overview-grid,.v115-content-grid{grid-template-columns:1fr!important}
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  button{white-space:normal}
+}
+</style>
+<style id="hub-v31b-readable-overrides">
+/* reforço de legibilidade contra regras antigas muito pequenas */
+:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) p,
+:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) td{
+  font-size:clamp(12.5px,.9vw,14px)!important;line-height:1.45!important
+}
+:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) small,
+:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) label,
+:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) th{
+  font-size:clamp(10.8px,.76vw,12px)!important;line-height:1.35!important
+}
+:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) button,
+:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) input,
+:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) select,
+:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) textarea{
+  font-size:clamp(12.5px,.86vw,14px)!important
+}
+:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) [class*="grid"]{
+  gap:clamp(10px,1.15vw,18px)!important;min-width:0!important
+}
+:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) h2,
+:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) h3{
+  text-wrap:balance!important;overflow-wrap:normal!important
+}
+</style>
