@@ -26718,375 +26718,106 @@ input,select,textarea{font-size:14px!important;line-height:1.3!important}
   .view h2,.hub-content h2{font-size:21px!important}
 }
 </style>
-<style id="pp-v33-premium-finance-modals">
-/* V33 — redesign premium bancário dos modais financeiros, preservando a lógica existente */
+
+<style id="pp-v35-banking-surface">
+/* V35 — superfície bancária limpa, compacta e realmente responsiva */
 #txModal,#cardPurchaseModal{
-  padding:20px!important;
-  background:rgba(7,19,43,.48)!important;
+  padding:16px!important;
+  background:rgba(7,19,42,.50)!important;
   backdrop-filter:blur(10px)!important;
   -webkit-backdrop-filter:blur(10px)!important;
 }
 #txModal .modal,#cardPurchaseModal .modal{
-  width:min(1180px,95vw)!important;
-  max-width:1180px!important;
-  max-height:min(92vh,920px)!important;
+  width:min(1060px,calc(100vw - 28px))!important;
+  max-width:1060px!important;
+  max-height:calc(100dvh - 28px)!important;
   overflow:auto!important;
-  padding:22px!important;
-  border-radius:30px!important;
-  border:1px solid rgba(203,219,238,.78)!important;
-  background:
-    radial-gradient(1000px 260px at 110% -10%,rgba(58,123,255,.14),transparent 42%),
-    radial-gradient(580px 180px at -5% 115%,rgba(56,189,149,.11),transparent 40%),
-    linear-gradient(180deg,#f8fbff 0%,#f2f7fd 100%)!important;
-  box-shadow:0 30px 80px rgba(10,24,55,.22)!important;
-  position:relative!important;
-}
-#txModal .modal h2,#cardPurchaseModal .modal h2{
-  font-size:clamp(30px,2.2vw,38px)!important;
-  line-height:1.04!important;
-  letter-spacing:-.045em!important;
-  color:#142845!important;
-  margin:0 0 6px!important;
-  max-width:760px!important;
-}
-#txModal .modal>p,#cardPurchaseModal .modal>p{
-  margin:0 0 18px!important;
-  font-size:14px!important;
-  line-height:1.45!important;
-  color:#677b96!important;
-  max-width:820px!important;
-}
-#txModal .modal .formgrid,#cardPurchaseModal .modal .formgrid{
-  display:grid!important;
-  grid-template-columns:repeat(12,minmax(0,1fr))!important;
-  gap:14px!important;
-  align-items:start!important;
-}
-#txModal .modal .field,#cardPurchaseModal .modal .field{
-  min-height:0!important;
-  margin:0!important;
-  padding:12px 12px 13px!important;
-  border-radius:22px!important;
-  border:1px solid #d8e3f0!important;
-  background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(245,249,255,.96))!important;
-  box-shadow:0 10px 24px rgba(28,53,94,.05)!important;
-  display:flex!important;
-  flex-direction:column!important;
-  gap:8px!important;
-}
-#txModal .modal .field label,#cardPurchaseModal .modal .field label{
-  font-size:11px!important;
-  font-weight:800!important;
-  text-transform:uppercase!important;
-  letter-spacing:.03em!important;
-  color:#5b7090!important;
-  margin:0!important;
-}
-#txModal .modal input,#txModal .modal select,#txModal .modal textarea,
-#cardPurchaseModal .modal input,#cardPurchaseModal .modal select,#cardPurchaseModal .modal textarea{
-  min-height:48px!important;
-  height:48px!important;
-  border-radius:15px!important;
-  border:1px solid #c8d6e8!important;
-  background:#fff!important;
-  color:#17304f!important;
-  font-size:16px!important;
-  padding:0 14px!important;
-  box-shadow:none!important;
-}
-#txModal .modal textarea,#cardPurchaseModal .modal textarea{
-  min-height:92px!important;
-  height:auto!important;
-  padding:12px 14px!important;
-  resize:vertical!important;
-}
-#txModal .modal input:focus,#txModal .modal select:focus,#txModal .modal textarea:focus,
-#cardPurchaseModal .modal input:focus,#cardPurchaseModal .modal select:focus,#cardPurchaseModal .modal textarea:focus{
-  outline:none!important;
-  border-color:#2c72ff!important;
-  box-shadow:0 0 0 4px rgba(44,114,255,.12)!important;
-}
-#txModal .choice-wrap:not(.category-picker),#cardPurchaseModal .choice-wrap:not(.category-picker),
-#txModal #v21StatusBar,#txModal #standardRecurringBar,#txModal #v21CardModeBar,#cardPurchaseModal #v52ModeBar{
-  display:grid!important;
-  grid-template-columns:repeat(auto-fit,minmax(120px,1fr))!important;
-  gap:8px!important;
-  background:#eef4fb!important;
-  padding:5px!important;
-  border-radius:18px!important;
-  min-height:54px!important;
-}
-#txModal .choice-wrap:not(.category-picker) .choice-btn,
-#txModal #v21StatusBar button,#txModal #standardRecurringBar button,#txModal #v21CardModeBar button,
-#cardPurchaseModal #v52ModeBar button{
-  min-height:44px!important;
-  border-radius:14px!important;
-  border:0!important;
-  background:transparent!important;
-  color:#274667!important;
-  font-size:14px!important;
-  font-weight:800!important;
-  letter-spacing:-.01em!important;
-  padding:0 12px!important;
-}
-#txModal .choice-wrap:not(.category-picker) .choice-btn.active,
-#txModal #v21StatusBar button.active,#txModal #standardRecurringBar button.active,#txModal #v21CardModeBar button.active,
-#cardPurchaseModal #v52ModeBar button.active{
-  color:#fff!important;
-  box-shadow:0 12px 26px rgba(44,114,255,.22)!important;
-}
-#txModal .v32-f-type .choice-btn.active[data-choice="entrada"]{background:linear-gradient(135deg,#18a267,#48cd93)!important}
-#txModal .v32-f-type .choice-btn.active[data-choice="saida"]{background:linear-gradient(135deg,#2663ea,#4b9fff)!important}
-#txModal #v21StatusBar button.active[data-choice="Quitado"],#txModal #v21StatusBar button.active[data-v="Quitado"]{background:linear-gradient(135deg,#18a267,#48cd93)!important}
-#txModal #v21StatusBar button.active[data-choice="Pendente"],#txModal #v21StatusBar button.active[data-v="Pendente"]{background:linear-gradient(135deg,#2663ea,#4b9fff)!important}
-#txModal #standardRecurringBar button.active[data-sr-mode="unico"]{background:linear-gradient(135deg,#8f5bff,#738dff)!important}
-#txModal #standardRecurringBar button.active[data-sr-mode="parcelado"]{background:linear-gradient(135deg,#2663ea,#4b9fff)!important}
-#txModal #standardRecurringBar button.active[data-sr-mode="recorrente"]{background:linear-gradient(135deg,#18a267,#48cd93)!important}
-#cardPurchaseModal #v52ModeBar button.active[data-mode="avista"]{background:linear-gradient(135deg,#27456d,#3b6cad)!important}
-#cardPurchaseModal #v52ModeBar button.active[data-mode="parcelado"]{background:linear-gradient(135deg,#2663ea,#4b9fff)!important}
-#cardPurchaseModal #v52ModeBar button.active[data-mode="recorrente"]{background:linear-gradient(135deg,#18a267,#48cd93)!important}
-#cardPurchaseModal #v52ModeBar button.active[data-mode="estorno"]{background:linear-gradient(135deg,#0a7d48,#17a965)!important}
-
-/* esconder duplicidades de categoria e manter seleção premium limpa */
-#txModal .v32-f-category .choice-wrap,
-#cardPurchaseModal .v32-cp-category .choice-wrap,
-#cardPurchaseModal .v32-cp-category [id*="Chip"],
-#cardPurchaseModal .v32-cp-category [class*="chip-grid"],
-#cardPurchaseModal .v32-cp-category [class*="chipGrid"],
-#cardPurchaseModal .v32-cp-category [class*="category-chip"]{display:none!important}
-
-/* grid do lançamento */
-#txModal .v32-f-type{grid-column:span 3!important}
-#txModal .v32-f-status{grid-column:span 3!important}
-#txModal .v32-f-year{grid-column:span 2!important}
-#txModal .v32-f-month{grid-column:span 4!important}
-#txModal .v32-f-desc{grid-column:span 8!important}
-#txModal .v32-f-value{grid-column:span 4!important}
-#txModal .v32-f-category{grid-column:span 4!important}
-#txModal .v32-f-class{grid-column:span 3!important}
-#txModal .v32-f-origin{grid-column:span 5!important}
-#txModal .v32-f-pay{grid-column:1 / -1!important}
-#txModal #txCardBlock,#txModal #standardRecurringBlock,#txModal #salaryBox{
-  grid-column:1 / -1!important;
-  padding:14px!important;
+  padding:22px 24px 20px!important;
+  border:1px solid #d6e1ed!important;
   border-radius:24px!important;
-  border:1px solid #d8e3f0!important;
-  background:linear-gradient(180deg,#ffffff,#f6faff)!important;
-  box-shadow:0 12px 24px rgba(28,53,94,.05)!important;
+  background:#fbfcfe!important;
+  box-shadow:0 28px 72px rgba(8,24,54,.25)!important;
+  position:relative!important;
+  scrollbar-width:thin!important;
 }
-#txModal #standardRecurringBlock .field,#txModal #txCardBlock .field,#txModal #salaryBox .field{background:#f8fbff!important;box-shadow:none!important}
-#txModal #standardInstallmentFields{display:none!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;margin-top:12px!important}
-#txModal #standardInstallmentFields.show{display:grid!important}
-#txModal #standardRecurringHelp,#txModal #v21CardModeHelp{margin-top:8px!important;font-size:12px!important;color:#6d8098!important}
-
-/* grid da compra cartão */
-#cardPurchaseModal .v32-cp-card{grid-column:span 4!important}
-#cardPurchaseModal .v32-cp-date{grid-column:span 4!important}
-#cardPurchaseModal .v32-cp-first{grid-column:span 4!important}
-#cardPurchaseModal .v32-cp-desc{grid-column:span 7!important}
-#cardPurchaseModal .v32-cp-category{grid-column:span 5!important}
-#cardPurchaseModal .v32-cp-mode{grid-column:1 / -1!important}
-#cardPurchaseModal .v32-cp-total{grid-column:span 3!important}
-#cardPurchaseModal .v32-cp-installments{grid-column:span 3!important}
-#cardPurchaseModal .v32-cp-paid{grid-column:span 3!important}
-#cardPurchaseModal .v32-cp-status{grid-column:span 3!important}
-#cardPurchaseModal .v32-cp-installments{background:linear-gradient(180deg,#edf5ff,#f8fbff)!important;border-color:#bfd5fb!important}
-#cardPurchaseModal .v32-cp-installments input{font-size:22px!important;font-weight:900!important;color:#1850a6!important;text-align:right!important}
-#cardPurchaseModal #v52ModeHelp,#cardPurchaseModal #v39InstallmentPreview{font-size:12px!important;color:#6d8098!important;margin-top:8px!important;line-height:1.45!important}
-
-/* rodapé premium */
-#txModal .modalfoot,#cardPurchaseModal .modalfoot{
-  display:flex!important;
-  justify-content:flex-end!important;
-  gap:12px!important;
-  padding-top:18px!important;
-  margin-top:18px!important;
-  border-top:1px solid rgba(198,212,231,.7)!important;
-  position:sticky!important;
-  bottom:-22px!important;
-  background:linear-gradient(180deg,rgba(248,251,255,0),rgba(248,251,255,.94) 28%,rgba(248,251,255,.99) 100%)!important;
-  backdrop-filter:blur(8px)!important;
-  -webkit-backdrop-filter:blur(8px)!important;
-}
-#txModal .modalfoot button,#cardPurchaseModal .modalfoot button{
-  min-width:166px!important;
-  min-height:50px!important;
-  border-radius:16px!important;
-  font-size:15px!important;
-  font-weight:800!important;
-  letter-spacing:-.01em!important;
-}
-#txModal .modalfoot .ghost,#cardPurchaseModal .modalfoot .ghost{background:#eef3f9!important;color:#274667!important;border:1px solid #d5e0ec!important}
-#txModal .modalfoot .primary,#cardPurchaseModal .modalfoot .primary{background:linear-gradient(135deg,#2663ea,#4b9fff)!important;color:#fff!important;border:0!important;box-shadow:0 16px 30px rgba(38,99,234,.22)!important}
-
-/* tipografia mais legível dentro dos modais */
-#txModal .modal *,#cardPurchaseModal .modal *{box-sizing:border-box!important}
-#txModal .modal .field p,#cardPurchaseModal .modal .field p,#txModal .modal small,#cardPurchaseModal .modal small{font-size:12px!important;line-height:1.45!important}
-
-@media(max-width:980px){
-  #txModal .modal .formgrid,#cardPurchaseModal .modal .formgrid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
-  #txModal .v32-f-type,#txModal .v32-f-status,#txModal .v32-f-year,#txModal .v32-f-month,
-  #txModal .v32-f-category,#txModal .v32-f-class,#txModal .v32-f-origin,#txModal .v32-f-value,
-  #cardPurchaseModal .v32-cp-card,#cardPurchaseModal .v32-cp-date,#cardPurchaseModal .v32-cp-first,
-  #cardPurchaseModal .v32-cp-total,#cardPurchaseModal .v32-cp-installments,#cardPurchaseModal .v32-cp-paid,#cardPurchaseModal .v32-cp-status{grid-column:span 3!important}
-  #txModal .v32-f-desc,#cardPurchaseModal .v32-cp-desc{grid-column:1 / -1!important}
-  #cardPurchaseModal .v32-cp-category{grid-column:1 / -1!important}
-}
-@media(max-width:720px){
-  #txModal,#cardPurchaseModal{padding:8px!important}
-  #txModal .modal,#cardPurchaseModal .modal{width:calc(100vw - 16px)!important;max-height:calc(100vh - 16px)!important;padding:16px!important;border-radius:24px!important}
-  #txModal .modal .formgrid,#cardPurchaseModal .modal .formgrid{grid-template-columns:1fr!important;gap:10px!important}
-  #txModal [class*="v32-f-"],#cardPurchaseModal [class*="v32-cp-"]{grid-column:auto!important}
-  #txModal #standardInstallmentFields{grid-template-columns:1fr!important}
-  #cardPurchaseModal #v52ModeBar{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  #txModal .modalfoot,#cardPurchaseModal .modalfoot{position:static!important;display:grid!important;grid-template-columns:1fr 1fr!important}
-  #txModal .modalfoot button,#cardPurchaseModal .modalfoot button{min-width:0!important;width:100%!important}
-}
-</style>
-<script id="pp-v33-premium-finance-modals-script">
-(()=>{
-'use strict';
-const $=id=>document.getElementById(id);
-function syncChoice(selectId){
-  const sel=$(selectId); if(!sel) return;
-  const field=sel.closest('.field'); if(!field) return;
-  field.querySelectorAll('.choice-wrap .choice-btn').forEach(btn=>btn.classList.toggle('active', String(btn.dataset.choice)===String(sel.value)));
-}
-function syncModeBar(modeId, barSelector, attr){
-  const sel=$(modeId); if(!sel) return;
-  document.querySelectorAll(barSelector).forEach(btn=>btn.classList.toggle('active', String(btn.dataset[attr])===String(sel.value)));
-}
-function refreshTxUI(forceType){
-  const t=$('fType'); if(!t) return;
-  if(forceType) t.value=forceType;
-  t.dispatchEvent(new Event('change',{bubbles:true}));
-  syncChoice('fType');
-  syncChoice('fStatus');
-  syncChoice('fClass');
-  syncChoice('fPayMethod');
-  syncModeBar('standardRecurringMode','#standardRecurringBar [data-sr-mode]','srMode');
-  syncModeBar('fCardMode','#v21CardModeBar [data-v],#v21CardModeBar [data-choice]','choice');
-}
-function refreshPurchaseUI(){
-  syncModeBar('cpMode','#v52ModeBar [data-mode]','mode');
-}
-function openAsSaida(){
-  [40,120,240].forEach(ms=>setTimeout(()=>refreshTxUI('saida'),ms));
-}
-function bind(){
-  document.addEventListener('click',e=>{
-    if(e.target.closest?.('[data-addtx]')) setTimeout(openAsSaida,10);
-    if(e.target.closest?.('#addCardPurchaseBtn')) [80,180].forEach(ms=>setTimeout(refreshPurchaseUI,ms));
-  },true);
-  document.addEventListener('change',e=>{
-    if(['fType','fStatus','fClass','fPayMethod','standardRecurringMode','fCardMode'].includes(e.target?.id)) setTimeout(()=>refreshTxUI(),0);
-    if(e.target?.id==='cpMode') setTimeout(refreshPurchaseUI,0);
-  },true);
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{refreshTxUI('saida');refreshPurchaseUI();},500),{once:true});
-  else setTimeout(()=>{refreshTxUI('saida');refreshPurchaseUI();},500);
-}
-bind();
-})();
-</script>
-
-<style id="pp-v34-banking-clean-modals">
-/* V34 — linguagem bancária clean: menos caixas, mais hierarquia, sem mexer na lógica */
-#txModal,#cardPurchaseModal{
-  background:rgba(9,23,49,.46)!important;
-  backdrop-filter:blur(12px)!important;
-  -webkit-backdrop-filter:blur(12px)!important;
-  padding:18px!important;
-}
-#txModal .modal,#cardPurchaseModal .modal{
-  width:min(1120px,96vw)!important;
-  max-width:1120px!important;
-  max-height:94vh!important;
-  overflow:auto!important;
-  padding:26px 28px 24px!important;
-  border-radius:28px!important;
-  border:1px solid #d9e3ef!important;
-  background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%)!important;
-  box-shadow:0 34px 90px rgba(10,28,61,.24)!important;
+#txModal .modal:before,#cardPurchaseModal .modal:before{
+  content:"";position:absolute;left:24px;right:24px;top:0;height:3px;
+  border-radius:0 0 999px 999px;
+  background:linear-gradient(90deg,#123f86 0%,#2877ff 52%,#18a267 100%);
+  opacity:.92;
 }
 #txModal .modal h2,#cardPurchaseModal .modal h2{
-  margin:0 0 5px!important;
-  font-size:clamp(28px,2.1vw,34px)!important;
+  margin:2px 0 4px!important;
+  font-size:clamp(25px,2vw,31px)!important;
   line-height:1.06!important;
   letter-spacing:-.035em!important;
-  color:#10233f!important;
-  max-width:70%!important;
+  color:#12243e!important;
 }
 #txModal .modal>p,#cardPurchaseModal .modal>p{
-  margin:0 0 22px!important;
-  max-width:70%!important;
-  font-size:13.5px!important;
-  line-height:1.5!important;
-  color:#6d7e94!important;
+  margin:0 0 17px!important;
+  max-width:760px!important;
+  font-size:13px!important;
+  line-height:1.42!important;
+  color:#6b7d93!important;
 }
 
-/* resumo do topo — discreto, sem transformar em outro card grande */
-.v34-modal-summary{
-  position:absolute;top:22px;right:70px;
-  min-width:210px;max-width:270px;
-  padding:12px 14px;border-radius:16px;
-  border:1px solid #d7e2ef;
-  background:#f4f8fd;
-  color:#17304f;
-}
-.v34-modal-summary small{display:block;font-size:10px!important;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#75879d!important}
-.v34-modal-summary strong{display:block;margin-top:3px;font-size:20px!important;line-height:1.05;letter-spacing:-.03em;color:#102d55!important}
-.v34-modal-summary span{display:block;margin-top:4px;font-size:11px!important;color:#6c7f96!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-
-/* grade principal: sem cards por campo */
+/* UMA ÚNICA SUPERFÍCIE: sem cards em volta de cada campo */
 #txModal .formgrid,#cardPurchaseModal .formgrid{
   display:grid!important;
   grid-template-columns:repeat(12,minmax(0,1fr))!important;
-  gap:14px 16px!important;
+  gap:13px 16px!important;
   align-items:end!important;
 }
-#txModal .field,#cardPurchaseModal .field{
+#txModal .formgrid>*:not(#txCardBlock):not(#standardRecurringBlock):not(#standardInstallmentFields):not(#salaryBox),
+#cardPurchaseModal .formgrid>*{
   min-width:0!important;
-  min-height:0!important;
   margin:0!important;
   padding:0!important;
   border:0!important;
   border-radius:0!important;
   background:transparent!important;
   box-shadow:none!important;
+}
+#txModal .field,#cardPurchaseModal .field{
   display:flex!important;
   flex-direction:column!important;
-  gap:7px!important;
+  gap:6px!important;
+  min-height:0!important;
 }
 #txModal .field label,#cardPurchaseModal .field label{
   margin:0!important;
-  font-size:11.5px!important;
-  line-height:1.2!important;
-  font-weight:800!important;
-  color:#52677f!important;
-  text-transform:none!important;
-  letter-spacing:0!important;
+  color:#53677f!important;
+  font-size:11px!important;
+  line-height:1.15!important;
+  font-weight:850!important;
+  letter-spacing:.018em!important;
+  text-transform:uppercase!important;
+  white-space:nowrap!important;
 }
 #txModal input,#txModal select,#txModal textarea,
 #cardPurchaseModal input,#cardPurchaseModal select,#cardPurchaseModal textarea{
   width:100%!important;
-  min-height:46px!important;
-  height:46px!important;
-  padding:0 14px!important;
-  border:1px solid #cfdbe8!important;
-  border-radius:13px!important;
+  min-width:0!important;
+  height:42px!important;
+  min-height:42px!important;
+  padding:0 13px!important;
+  border:1px solid #cbd8e7!important;
+  border-radius:11px!important;
   background:#fff!important;
-  color:#17304f!important;
-  font-size:15px!important;
-  line-height:1.25!important;
-  box-shadow:0 1px 2px rgba(16,35,63,.02)!important;
+  color:#17304d!important;
+  font-size:14px!important;
+  line-height:1.2!important;
+  box-shadow:none!important;
 }
-#txModal textarea,#cardPurchaseModal textarea{height:auto!important;min-height:78px!important;padding:12px 14px!important;resize:vertical!important}
+#txModal textarea,#cardPurchaseModal textarea{
+  min-height:70px!important;height:auto!important;padding:10px 13px!important;resize:vertical!important
+}
 #txModal input:focus,#txModal select:focus,#txModal textarea:focus,
 #cardPurchaseModal input:focus,#cardPurchaseModal select:focus,#cardPurchaseModal textarea:focus{
-  outline:none!important;border-color:#2568e9!important;box-shadow:0 0 0 3px rgba(37,104,233,.11)!important
+  outline:none!important;border-color:#2a70f3!important;box-shadow:0 0 0 3px rgba(42,112,243,.10)!important
 }
 
-/* layout lançamento */
+/* LANÇAMENTO: linhas compactas e previsíveis */
 #txModal .v32-f-type{grid-column:span 3!important}
 #txModal .v32-f-status{grid-column:span 3!important}
 #txModal .v32-f-year{grid-column:span 2!important}
@@ -27094,215 +26825,211 @@ bind();
 #txModal .v32-f-desc{grid-column:span 8!important}
 #txModal .v32-f-value{grid-column:span 4!important}
 #txModal .v32-f-category{grid-column:span 4!important}
-#txModal .v32-f-class{grid-column:span 3!important}
-#txModal .v32-f-origin{grid-column:span 5!important}
-#txModal .v32-f-pay{grid-column:1/-1!important;margin-top:2px!important}
+#txModal .v32-f-class{grid-column:span 4!important}
+#txModal .v32-f-origin{grid-column:span 4!important}
+#txModal .v32-f-pay{grid-column:1/-1!important;padding-top:3px!important}
 
-/* layout compra */
+/* COMPRA NO CARTÃO */
 #cardPurchaseModal .v32-cp-card{grid-column:span 4!important}
 #cardPurchaseModal .v32-cp-date{grid-column:span 4!important}
 #cardPurchaseModal .v32-cp-first{grid-column:span 4!important}
-#cardPurchaseModal .v32-cp-desc{grid-column:span 7!important}
-#cardPurchaseModal .v32-cp-category{grid-column:span 5!important}
-#cardPurchaseModal .v32-cp-mode{grid-column:1/-1!important;margin-top:2px!important}
-#cardPurchaseModal .v32-cp-total{grid-column:span 4!important}
-#cardPurchaseModal .v32-cp-installments{grid-column:span 4!important}
-#cardPurchaseModal .v32-cp-paid{grid-column:span 4!important}
-#cardPurchaseModal .v32-cp-status{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-desc{grid-column:span 8!important}
+#cardPurchaseModal .v32-cp-category{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-mode{grid-column:1/-1!important;padding-top:3px!important}
+#cardPurchaseModal .v32-cp-total{grid-column:span 3!important}
+#cardPurchaseModal .v32-cp-installments{grid-column:span 3!important}
+#cardPurchaseModal .v32-cp-paid{grid-column:span 3!important}
+#cardPurchaseModal .v32-cp-status{grid-column:span 3!important}
 
-/* category: apenas select */
-#txModal .v32-f-category .choice-wrap,
-#cardPurchaseModal .v32-cp-category .choice-wrap,
-#cardPurchaseModal .v32-cp-category [class*="chip"],
-#cardPurchaseModal .v32-cp-category [id*="Chip"]{display:none!important}
+/* categoria: SOMENTE o select; nada de segunda lista/chips */
+#txModal .v32-f-category>*:not(label):not(select),
+#cardPurchaseModal .v32-cp-category>*:not(label):not(select){display:none!important}
 #txModal #fCategory,#cardPurchaseModal #cpCategory{display:block!important}
 
-/* segmented controls reais: trilho único, sem espaço enorme */
+/* status da compra: usa select limpo, evita bloco vazio */
+#cardPurchaseModal .v32-cp-status .choice-wrap{display:none!important}
+#cardPurchaseModal #cpStatus{display:block!important}
+
+/* controles segmentados: trilho único e compacto */
 #txModal .choice-wrap:not(.category-picker),
 #txModal #v21StatusBar,
 #txModal #standardRecurringBar,
 #txModal #v21CardModeBar,
 #cardPurchaseModal #v52ModeBar{
-  display:grid!important;
-  grid-auto-flow:column!important;
-  grid-auto-columns:1fr!important;
+  display:flex!important;
+  align-items:center!important;
   gap:3px!important;
   width:100%!important;
-  min-height:46px!important;
+  min-height:42px!important;
   padding:3px!important;
-  border:1px solid #d5e0eb!important;
-  border-radius:14px!important;
-  background:#eef3f8!important;
+  border:1px solid #d6e0eb!important;
+  border-radius:12px!important;
+  background:#edf2f7!important;
+  overflow:hidden!important;
 }
 #txModal .choice-wrap:not(.category-picker) .choice-btn,
-#txModal #v21StatusBar button,
-#txModal #standardRecurringBar button,
-#txModal #v21CardModeBar button,
+#txModal #v21StatusBar button,#txModal #standardRecurringBar button,#txModal #v21CardModeBar button,
 #cardPurchaseModal #v52ModeBar button{
+  flex:1 1 0!important;
   min-width:0!important;
-  min-height:38px!important;
-  height:38px!important;
-  padding:0 10px!important;
+  height:34px!important;
+  min-height:34px!important;
+  padding:0 8px!important;
   border:0!important;
-  border-radius:11px!important;
+  border-radius:9px!important;
   background:transparent!important;
-  color:#36506d!important;
-  font-size:13px!important;
-  font-weight:800!important;
-  box-shadow:none!important;
+  color:#344f70!important;
+  font-size:12px!important;
+  line-height:1!important;
+  font-weight:850!important;
   white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  box-shadow:none!important;
 }
 #txModal .choice-wrap:not(.category-picker) .choice-btn.active,
-#txModal #v21StatusBar button.active,
-#txModal #standardRecurringBar button.active,
-#txModal #v21CardModeBar button.active,
+#txModal #v21StatusBar button.active,#txModal #standardRecurringBar button.active,#txModal #v21CardModeBar button.active,
 #cardPurchaseModal #v52ModeBar button.active{
-  background:#123f86!important;
-  color:#fff!important;
-  box-shadow:0 5px 12px rgba(18,63,134,.16)!important;
+  background:#123f86!important;color:#fff!important;box-shadow:0 4px 10px rgba(18,63,134,.14)!important
 }
 #txModal .v32-f-type .choice-btn.active[data-choice="entrada"]{background:#15835c!important}
 #txModal .v32-f-type .choice-btn.active[data-choice="saida"]{background:#123f86!important}
-#txModal #v21StatusBar button.active[data-choice="Quitado"],
-#txModal #v21StatusBar button.active[data-v="Quitado"]{background:#15835c!important}
-#txModal #v21StatusBar button.active[data-choice="Pendente"],
-#txModal #v21StatusBar button.active[data-v="Pendente"]{background:#123f86!important}
-#txModal #standardRecurringBar button.active[data-sr-mode="unico"]{background:#5666a9!important}
+#txModal #v21StatusBar button.active[data-choice="Quitado"],#txModal #v21StatusBar button.active[data-v="Quitado"]{background:#15835c!important}
+#txModal #v21StatusBar button.active[data-choice="Pendente"],#txModal #v21StatusBar button.active[data-v="Pendente"]{background:#123f86!important}
+#txModal #standardRecurringBar button.active[data-sr-mode="unico"]{background:#6252a5!important}
 #txModal #standardRecurringBar button.active[data-sr-mode="parcelado"]{background:#123f86!important}
 #txModal #standardRecurringBar button.active[data-sr-mode="recorrente"]{background:#15835c!important}
-#cardPurchaseModal #v52ModeBar button.active[data-mode="avista"]{background:#324e74!important}
+#cardPurchaseModal #v52ModeBar button.active[data-mode="avista"]{background:#344f70!important}
 #cardPurchaseModal #v52ModeBar button.active[data-mode="parcelado"]{background:#123f86!important}
 #cardPurchaseModal #v52ModeBar button.active[data-mode="recorrente"]{background:#15835c!important}
-#cardPurchaseModal #v52ModeBar button.active[data-mode="estorno"]{background:#7b4db7!important}
+#cardPurchaseModal #v52ModeBar button.active[data-mode="estorno"]{background:#6d4aa6!important}
 
-/* sub-blocos funcionais: apenas um separador sutil, não outro card */
+/* sub-blocos funcionais: só uma linha separadora, sem novo card */
 #txModal #txCardBlock,#txModal #standardRecurringBlock,#txModal #salaryBox{
   grid-column:1/-1!important;
-  margin-top:4px!important;
-  padding:14px 0 2px!important;
+  margin:2px 0 0!important;
+  padding:13px 0 0!important;
   border:0!important;
-  border-top:1px solid #dbe5ef!important;
+  border-top:1px solid #dce5ef!important;
   border-radius:0!important;
   background:transparent!important;
   box-shadow:none!important;
 }
+#txModal #txCardBlock .formgrid,#txModal #salaryBox .formgrid{gap:10px 12px!important}
 #txModal #standardInstallmentFields{
   display:none!important;
   grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  gap:12px!important;
-  margin-top:10px!important;
+  gap:10px!important;
   padding:0!important;
+  margin-top:9px!important;
 }
 #txModal #standardInstallmentFields.show{display:grid!important}
 #txModal #standardRecurringHelp,#txModal #v21CardModeHelp,#cardPurchaseModal #v52ModeHelp,#cardPurchaseModal #v39InstallmentPreview{
-  margin-top:7px!important;
-  font-size:11.5px!important;
-  line-height:1.45!important;
-  color:#718198!important;
+  margin-top:5px!important;font-size:11px!important;line-height:1.4!important;color:#718198!important
 }
 
-/* Quantidade de parcelas: funcional, com destaque somente quando aparece */
-#cardPurchaseModal .v32-cp-installments{padding:0!important;border:0!important;background:transparent!important}
-#cardPurchaseModal .v32-cp-installments input{font-size:17px!important;font-weight:800!important;color:#123f86!important;text-align:left!important}
+/* parcelamento da compra: o campo precisa ficar óbvio e compacto */
+#cardPurchaseModal .v32-cp-installments{display:none!important}
+#cardPurchaseModal .v32-cp-installments.v35-visible{display:flex!important}
+#cardPurchaseModal .v32-cp-paid{display:none!important}
+#cardPurchaseModal .v32-cp-paid.v35-visible{display:flex!important}
+#cardPurchaseModal .v32-cp-installments input{font-weight:900!important;color:#123f86!important}
 
-/* rodapé no final natural */
+/* botão Novo do credor */
+#txModal .v32-f-origin>div{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important}
+#txModal .v32-f-origin .btn{min-height:42px!important;height:42px!important;padding:0 13px!important;border-radius:11px!important;font-size:12px!important}
+
+/* rodapé natural e enxuto */
 #txModal .modalfoot,#cardPurchaseModal .modalfoot{
   position:static!important;
   display:flex!important;
   justify-content:flex-end!important;
-  gap:10px!important;
-  margin-top:22px!important;
-  padding-top:18px!important;
+  gap:9px!important;
+  margin-top:18px!important;
+  padding-top:15px!important;
   border-top:1px solid #dce5ef!important;
   background:transparent!important;
   backdrop-filter:none!important;
 }
 #txModal .modalfoot button,#cardPurchaseModal .modalfoot button{
-  min-width:145px!important;
-  min-height:46px!important;
-  border-radius:13px!important;
-  font-size:14px!important;
-  font-weight:800!important;
+  min-width:132px!important;height:42px!important;min-height:42px!important;border-radius:11px!important;font-size:13px!important;font-weight:850!important
 }
-#txModal .modalfoot .ghost,#cardPurchaseModal .modalfoot .ghost{background:#edf2f7!important;color:#27415f!important;border:1px solid #d5dfe9!important}
-#txModal .modalfoot .primary,#cardPurchaseModal .modalfoot .primary{background:#123f86!important;color:#fff!important;border:0!important;box-shadow:0 8px 18px rgba(18,63,134,.14)!important}
+#txModal .modalfoot .ghost,#cardPurchaseModal .modalfoot .ghost{background:#edf2f7!important;color:#294461!important;border:1px solid #d4dee9!important}
+#txModal .modalfoot .primary,#cardPurchaseModal .modalfoot .primary{background:#123f86!important;color:#fff!important;border:0!important;box-shadow:none!important}
+
+/* remove resumos/card extras criados em versões experimentais */
+.v27-modal-shell,.v27-modal-grid,.v27-modal-section,.v28-summary,.v34-modal-summary{all:unset!important}
+.v27-modal-shell,.v27-modal-grid,.v27-modal-section,.v28-summary,.v34-modal-summary{display:contents!important}
 
 @media(max-width:900px){
-  #txModal .modal h2,#cardPurchaseModal .modal h2,#txModal .modal>p,#cardPurchaseModal .modal>p{max-width:100%!important}
-  .v34-modal-summary{position:static!important;margin:-8px 0 18px!important;max-width:none!important;width:100%!important}
   #txModal .formgrid,#cardPurchaseModal .formgrid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
-  #txModal [class*="v32-f-"],#cardPurchaseModal [class*="v32-cp-"]{grid-column:span 3!important}
+  #txModal .v32-f-type,#txModal .v32-f-status,#txModal .v32-f-year,#txModal .v32-f-month,
+  #txModal .v32-f-category,#txModal .v32-f-class,#txModal .v32-f-origin,#txModal .v32-f-value,
+  #cardPurchaseModal .v32-cp-card,#cardPurchaseModal .v32-cp-date,#cardPurchaseModal .v32-cp-first,
+  #cardPurchaseModal .v32-cp-total,#cardPurchaseModal .v32-cp-installments,#cardPurchaseModal .v32-cp-paid,#cardPurchaseModal .v32-cp-status{grid-column:span 3!important}
   #txModal .v32-f-desc,#txModal .v32-f-pay,#cardPurchaseModal .v32-cp-desc,#cardPurchaseModal .v32-cp-category,#cardPurchaseModal .v32-cp-mode{grid-column:1/-1!important}
 }
 @media(max-width:620px){
   #txModal,#cardPurchaseModal{padding:6px!important}
-  #txModal .modal,#cardPurchaseModal .modal{width:calc(100vw - 12px)!important;max-height:none!important;padding:18px!important;border-radius:22px!important}
-  #txModal .formgrid,#cardPurchaseModal .formgrid{grid-template-columns:1fr!important;gap:11px!important}
+  #txModal .modal,#cardPurchaseModal .modal{width:calc(100vw - 12px)!important;max-width:none!important;max-height:none!important;padding:17px!important;border-radius:19px!important}
+  #txModal .formgrid,#cardPurchaseModal .formgrid{grid-template-columns:1fr!important;gap:10px!important}
   #txModal [class*="v32-f-"],#cardPurchaseModal [class*="v32-cp-"]{grid-column:auto!important}
-  #txModal .choice-wrap:not(.category-picker),#txModal #v21StatusBar,#txModal #standardRecurringBar,#txModal #v21CardModeBar,#cardPurchaseModal #v52ModeBar{grid-auto-flow:row!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
   #txModal #standardInstallmentFields{grid-template-columns:1fr!important}
+  #cardPurchaseModal #v52ModeBar{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;height:auto!important}
   #txModal .modalfoot,#cardPurchaseModal .modalfoot{display:grid!important;grid-template-columns:1fr 1fr!important}
   #txModal .modalfoot button,#cardPurchaseModal .modalfoot button{min-width:0!important;width:100%!important}
 }
 </style>
-<script id="pp-v34-banking-clean-modals-script">
+<script id="pp-v35-banking-surface-script">
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
-const brl=v=>{let n=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');if(n.includes(',')&&n.includes('.'))n=n.replace(/\./g,'').replace(',','.');else n=n.replace(',','.');n=Number(n.replace(/[^0-9.-]/g,''))||0;return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})};
-const monthName=m=>['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][Math.max(0,(+m||1)-1)]||'';
-function ensureSummary(modalId,kind){
-  const modal=document.querySelector(`#${modalId} .modal`);if(!modal)return null;
-  let box=modal.querySelector('.v34-modal-summary');
-  if(!box){box=document.createElement('div');box.className='v34-modal-summary';box.innerHTML='<small></small><strong></strong><span></span>';modal.appendChild(box)}
-  box.dataset.kind=kind;return box;
-}
-function updateTxSummary(){
-  const box=ensureSummary('txModal','tx');if(!box)return;
-  const type=$('fType')?.value==='entrada'?'Entrada':'Saída';
-  const desc=($('fDesc')?.value||'Novo lançamento').trim()||'Novo lançamento';
-  const val=brl($('fValue')?.value||0);
-  const y=$('fYear')?.value||'';const m=$('fMonth')?.value||'';
-  const mode=$('standardRecurringMode')?.value||'unico';
-  box.querySelector('small').textContent=type;
-  box.querySelector('strong').textContent=val;
-  box.querySelector('span').textContent=`${desc} · ${monthName(m)}/${y} · ${mode==='parcelado'?'Parcelado':mode==='recorrente'?'Recorrente':'Único'}`;
-}
-function updateCpSummary(){
-  const box=ensureSummary('cardPurchaseModal','cp');if(!box)return;
-  const desc=($('cpDesc')?.value||'Nova compra').trim()||'Nova compra';
-  const val=brl($('cpTotal')?.value||0);
-  const mode=$('cpMode')?.value||'avista';
-  const q=Math.max(1,parseInt($('cpInstallments')?.value,10)||1);
-  box.querySelector('small').textContent='Compra no cartão';
-  box.querySelector('strong').textContent=val;
-  box.querySelector('span').textContent=`${desc} · ${mode==='parcelado'?`${q}x`:mode==='recorrente'?'Recorrente':mode==='estorno'?'Estorno':'À vista'}`;
-}
-function syncTypeVisual(){
-  const sel=$('fType');if(!sel)return;
+let newTxGuard=false;
+function syncChoice(selectId){
+  const sel=$(selectId);if(!sel)return;
   const field=sel.closest('.field');if(!field)return;
-  field.querySelectorAll('.choice-btn').forEach(b=>b.classList.toggle('active',String(b.dataset.choice)===String(sel.value)));
+  field.querySelectorAll('.choice-wrap .choice-btn').forEach(b=>b.classList.toggle('active',String(b.dataset.choice)===String(sel.value)));
 }
-function forceNewTxSaida(){
-  const sel=$('fType');if(!sel)return;
-  sel.value='saida';
-  sel.dispatchEvent(new Event('change',{bubbles:true}));
-  syncTypeVisual();
-  updateTxSummary();
+function enforceNewSaida(){
+  const modal=$('txModal'); if(!modal?.classList.contains('open')||!newTxGuard)return;
+  const t=$('fType'); if(t&&t.value!=='saida'){t.value='saida';t.dispatchEvent(new Event('change',{bubbles:true}));}
+  syncChoice('fType');
 }
+function syncPurchaseVisibility(){
+  const mode=$('cpMode')?.value||'avista';
+  const q=$('cpInstallments')?.closest('.field');
+  const p=$('cpPaid')?.closest('.field');
+  q?.classList.toggle('v35-visible',mode==='parcelado');
+  p?.classList.toggle('v35-visible',mode==='parcelado'||mode==='avista');
+  if(mode==='parcelado'&&$('cpInstallments')&&(+$('cpInstallments').value||0)<2)$('cpInstallments').value='2';
+}
+function cleanCategoryDupes(){
+  [['fCategory','v32-f-category'],['cpCategory','v32-cp-category']].forEach(([id])=>{
+    const sel=$(id),f=sel?.closest('.field'); if(!sel||!f)return;
+    [...f.children].forEach(ch=>{if(ch!==sel&&ch.tagName!=='LABEL')ch.style.setProperty('display','none','important')});
+    sel.style.setProperty('display','block','important');
+  });
+}
+function refresh(){syncChoice('fType');syncChoice('fStatus');syncChoice('fClass');syncChoice('fPayMethod');syncPurchaseVisibility();cleanCategoryDupes();}
 function bind(){
-  ensureSummary('txModal','tx');ensureSummary('cardPurchaseModal','cp');
-  document.addEventListener('input',e=>{if(['fDesc','fValue','fYear','fMonth'].includes(e.target?.id))updateTxSummary();if(['cpDesc','cpTotal','cpInstallments'].includes(e.target?.id))updateCpSummary()},true);
-  document.addEventListener('change',e=>{
-    if(['fType','fStatus','fYear','fMonth','standardRecurringMode'].includes(e.target?.id)){setTimeout(()=>{syncTypeVisual();updateTxSummary()},0)}
-    if(['cpMode','cpCard','cpDate','cpInstallments'].includes(e.target?.id))setTimeout(updateCpSummary,0);
-  },true);
+  const modal=$('txModal');
+  if(modal){
+    new MutationObserver(()=>{if(newTxGuard)setTimeout(enforceNewSaida,0)}).observe(modal,{childList:true,subtree:true});
+  }
   document.addEventListener('click',e=>{
-    if(e.target.closest?.('[data-addtx]'))[20,80,180,320].forEach(ms=>setTimeout(forceNewTxSaida,ms));
-    if(e.target.closest?.('#addCardPurchaseBtn'))[40,120].forEach(ms=>setTimeout(updateCpSummary,ms));
+    if(e.target.closest?.('[data-addtx]')){
+      newTxGuard=true;
+      [20,80,180,420,800].forEach(ms=>setTimeout(()=>{enforceNewSaida();refresh()},ms));
+    }
+    if(e.target.closest?.('#addCardPurchaseBtn'))[40,140].forEach(ms=>setTimeout(refresh,ms));
+    if(e.target.closest?.('#txModal [data-close="txModal"],#txModal .pp-modal-close'))newTxGuard=false;
   },true);
-  setTimeout(()=>{syncTypeVisual();updateTxSummary();updateCpSummary()},500);
+  document.addEventListener('change',e=>{
+    if(e.target?.id==='fType'){newTxGuard=false;setTimeout(refresh,0)}
+    if(['fStatus','fClass','fPayMethod','cpMode'].includes(e.target?.id))setTimeout(refresh,0);
+  },true);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,400),{once:true});else setTimeout(refresh,400);
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
+bind();
 })();
 </script>
