@@ -26821,3 +26821,339 @@ window.ppFinanceModalsV27={refresh(){redistributeTx();redistributePurchase();syn
   document.addEventListener('click',e=>{if(e.target.closest?.('[data-addtx],#addCardPurchaseBtn,[onclick*="openCardPurchase"]'))setTimeout(run,80)},true);
 })();
 </script>
+
+<style id="pp-v28-finance-modal-glass">
+/* V28 — refinamento desktop/glass dos modais financeiros */
+#txModal,#cardPurchaseModal{
+  --v28-accent:#2f7df4;
+  --v28-accent2:#67b3ff;
+  --v28-soft:rgba(47,125,244,.10);
+  --v28-ring:rgba(89,151,255,.28);
+  background:
+    radial-gradient(circle at 16% 8%,rgba(53,111,230,.20),transparent 24%),
+    radial-gradient(circle at 86% 88%,rgba(20,184,166,.12),transparent 24%),
+    rgba(5,14,30,.58)!important;
+  backdrop-filter:blur(18px) saturate(1.08)!important;
+}
+#txModal[data-v28-type="entrada"]{
+  --v28-accent:#0f9d69;
+  --v28-accent2:#4dd8a6;
+  --v28-soft:rgba(15,157,105,.10);
+  --v28-ring:rgba(15,157,105,.28);
+}
+#txModal[data-v28-type="saida"]{
+  --v28-accent:#d34d66;
+  --v28-accent2:#ff8a9e;
+  --v28-soft:rgba(211,77,102,.10);
+  --v28-ring:rgba(211,77,102,.24);
+}
+#cardPurchaseModal{
+  --v28-accent:#4c63d9;
+  --v28-accent2:#8b9cff;
+  --v28-soft:rgba(76,99,217,.10);
+  --v28-ring:rgba(76,99,217,.25);
+}
+#txModal .modal,#cardPurchaseModal .modal{
+  width:min(1240px,calc(100vw - 24px))!important;
+  max-width:min(1240px,calc(100vw - 24px))!important;
+  max-height:94dvh!important;
+  min-height:0!important;
+  padding:14px!important;
+  overflow:hidden!important;
+  border-radius:30px!important;
+  border:1px solid rgba(255,255,255,.78)!important;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.94),rgba(246,250,255,.88))!important;
+  box-shadow:
+    0 42px 110px rgba(0,15,42,.40),
+    inset 0 1px 0 rgba(255,255,255,.95)!important;
+}
+#txModal .v27-modal-shell,#cardPurchaseModal .v27-modal-shell{
+  min-height:0!important;
+  height:auto!important;
+  gap:10px!important;
+  grid-template-rows:auto auto auto!important;
+}
+#txModal .v27-modal-hero,#cardPurchaseModal .v27-modal-hero{
+  min-height:66px!important;
+  padding:8px 54px 5px 7px!important;
+  align-items:center!important;
+  position:relative!important;
+}
+#txModal .v27-modal-hero:after,#cardPurchaseModal .v27-modal-hero:after{
+  content:"";
+  position:absolute;left:72px;right:8px;bottom:-1px;height:1px;
+  background:linear-gradient(90deg,var(--v28-ring),transparent 70%);
+}
+#txModal .v27-modal-mark,#cardPurchaseModal .v27-modal-mark{
+  width:46px!important;height:46px!important;flex-basis:46px!important;
+  border-radius:15px!important;
+  background:linear-gradient(145deg,var(--v28-accent),var(--v28-accent2))!important;
+  box-shadow:0 12px 26px var(--v28-ring)!important;
+  font-size:20px!important;
+  transition:transform .2s ease,box-shadow .2s ease!important;
+}
+#txModal .v27-modal-mark:hover,#cardPurchaseModal .v27-modal-mark:hover{
+  transform:translateY(-2px) rotate(-2deg)!important;
+  box-shadow:0 17px 30px var(--v28-ring)!important;
+}
+#txModal .v27-modal-badge,#cardPurchaseModal .v27-modal-badge{
+  margin-bottom:4px!important;
+  padding:4px 9px!important;
+  border:1px solid var(--v28-ring)!important;
+  background:var(--v28-soft)!important;
+  color:var(--v28-accent)!important;
+  font-size:9px!important;
+}
+#txModal .modal h2,#cardPurchaseModal .modal h2{
+  font-size:21px!important;
+}
+#txModal .modal p,#cardPurchaseModal .modal p{
+  font-size:11.5px!important;
+}
+.v28-live-summary{
+  margin-left:auto;
+  display:flex;align-items:center;gap:10px;
+  min-width:250px;max-width:360px;
+  padding:8px 10px 8px 12px;
+  border-radius:16px;
+  border:1px solid rgba(203,216,232,.9);
+  background:linear-gradient(180deg,rgba(255,255,255,.82),rgba(241,247,255,.72));
+  box-shadow:0 10px 28px rgba(15,35,70,.08);
+}
+.v28-live-summary .v28-live-icon{
+  width:34px;height:34px;border-radius:12px;display:grid;place-items:center;
+  background:var(--v28-soft);color:var(--v28-accent);font-size:15px;font-weight:900;
+  border:1px solid var(--v28-ring)
+}
+.v28-live-summary .v28-live-copy{min-width:0;flex:1}
+.v28-live-summary small{display:block;font-size:9px!important;color:#7a889b!important;text-transform:uppercase;letter-spacing:.08em;font-weight:900}
+.v28-live-summary b{display:block;margin-top:2px;font-size:15px;color:#20314e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v28-live-summary span{display:block;margin-top:1px;font-size:10px;color:#7b8797;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+#txModal .v27-modal-grid{
+  grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr)!important;
+  gap:10px!important;
+}
+#txModal .v27-tx-mode{grid-column:1/-1!important}
+#cardPurchaseModal .v27-modal-grid{
+  grid-template-columns:minmax(0,.9fr) minmax(0,.9fr) minmax(0,1.2fr)!important;
+  gap:10px!important;
+}
+#cardPurchaseModal .v27-cp-details{grid-column:auto!important}
+#txModal .v27-modal-section,#cardPurchaseModal .v27-modal-section{
+  padding:11px!important;
+  border-radius:20px!important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.92),rgba(247,250,255,.76))!important;
+  border:1px solid rgba(210,222,236,.94)!important;
+  box-shadow:0 8px 20px rgba(15,34,67,.045)!important;
+  transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease!important;
+}
+#txModal .v27-modal-section:hover,#cardPurchaseModal .v27-modal-section:hover{
+  border-color:var(--v28-ring)!important;
+  box-shadow:0 11px 24px rgba(15,34,67,.07)!important;
+}
+#txModal .v27-modal-section-head,#cardPurchaseModal .v27-modal-section-head{
+  margin-bottom:7px!important;
+}
+#txModal .v27-modal-section-head h3,#cardPurchaseModal .v27-modal-section-head h3{
+  font-size:12.5px!important;
+}
+#txModal .v27-modal-section-head p,#cardPurchaseModal .v27-modal-section-head p{
+  display:none!important;
+}
+#txModal .v27-pill,#cardPurchaseModal .v27-pill{
+  min-width:28px!important;height:28px!important;padding:0 8px!important;
+  border-radius:10px!important;
+  background:var(--v28-soft)!important;
+  color:var(--v28-accent)!important;
+  border-color:var(--v28-ring)!important;
+  font-size:9px!important;
+}
+#txModal .v27-fields,#cardPurchaseModal .v27-fields{
+  gap:7px!important;
+}
+#txModal .v27-fields{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+#cardPurchaseModal .v27-fields{grid-template-columns:1fr!important}
+#txModal .field,#cardPurchaseModal .field{gap:4px!important}
+#txModal .field label,#cardPurchaseModal .field label{
+  font-size:9.5px!important;
+}
+#txModal .field input,#txModal .field select,#txModal .field textarea,
+#cardPurchaseModal .field input,#cardPurchaseModal .field select,#cardPurchaseModal .field textarea{
+  min-height:38px!important;
+  height:38px!important;
+  border-radius:12px!important;
+  padding:7px 10px!important;
+  font-size:13px!important;
+  background:rgba(255,255,255,.92)!important;
+  border-color:#d4dfeb!important;
+  transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease!important;
+}
+#txModal .field input:focus,#txModal .field select:focus,#txModal .field textarea:focus,
+#cardPurchaseModal .field input:focus,#cardPurchaseModal .field select:focus,#cardPurchaseModal .field textarea:focus{
+  outline:none!important;
+  border-color:var(--v28-accent)!important;
+  box-shadow:0 0 0 3px var(--v28-soft)!important;
+  transform:translateY(-1px)!important;
+}
+#txModal .choice-wrap,#cardPurchaseModal .choice-wrap{gap:6px!important}
+#txModal .choice-wrap .choice-btn,#cardPurchaseModal .choice-wrap .choice-btn,
+#standardRecurringBar button,#v21StatusBar button,#v21CardModeBar button{
+  min-height:34px!important;
+  padding:0 12px!important;
+  border-radius:11px!important;
+  font-size:11px!important;
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease!important;
+}
+#txModal .choice-wrap .choice-btn:hover,#cardPurchaseModal .choice-wrap .choice-btn:hover,
+#standardRecurringBar button:hover,#v21StatusBar button:hover,#v21CardModeBar button:hover{
+  transform:translateY(-1px)!important;
+  border-color:var(--v28-ring)!important;
+}
+#txModal .choice-wrap .choice-btn.active,#cardPurchaseModal .choice-wrap .choice-btn.active,
+#standardRecurringBar button.active,#v21StatusBar button.active,#v21CardModeBar button.active{
+  background:linear-gradient(135deg,var(--v28-accent),var(--v28-accent2))!important;
+  border-color:var(--v28-accent)!important;
+  box-shadow:0 8px 18px var(--v28-ring)!important;
+}
+#txModal #standardRecurringBlock,#txModal #standardInstallmentFields,#txModal #txCardBlock,#txModal #salaryBox{
+  padding:9px!important;
+  border-radius:15px!important;
+}
+#txModal #standardRecurringBlock .sr-title{font-size:11.5px!important}
+#txModal #standardRecurringHelp,#txModal #v21CardModeHelp{font-size:9.5px!important;margin-top:5px!important}
+#txModal #standardInstallmentFields{gap:7px!important}
+#txModal .salary-box{padding:10px!important}
+#txModal .salary-box h3{font-size:11px!important}
+#txModal .salary-box p{display:none!important}
+#txModal .salary-grid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:6px!important}
+#txModal .salary-grid label{font-size:8.5px!important}
+#txModal .salary-grid input{height:34px!important;min-height:34px!important;font-size:11px!important}
+#txModal .salary-result{margin-top:7px!important;padding:8px 10px!important;border-radius:13px!important}
+#txModal .salary-result strong{font-size:18px!important}
+
+#txModal .v27-modal-actions,#cardPurchaseModal .v27-modal-actions{
+  min-height:48px!important;
+  padding:0 4px!important;
+  border-top:1px solid rgba(210,222,236,.72)!important;
+  padding-top:9px!important;
+}
+#txModal .v27-modal-actions button,#cardPurchaseModal .v27-modal-actions button{
+  min-height:39px!important;
+  height:39px!important;
+  border-radius:12px!important;
+  padding:0 15px!important;
+  font-size:12px!important;
+}
+#txModal .v27-modal-actions .primary{
+  background:linear-gradient(135deg,var(--v28-accent),var(--v28-accent2))!important;
+  box-shadow:0 11px 22px var(--v28-ring)!important;
+}
+#cardPurchaseModal .v27-modal-actions .primary{
+  background:linear-gradient(135deg,var(--v28-accent),var(--v28-accent2))!important;
+  box-shadow:0 11px 22px var(--v28-ring)!important;
+}
+.v27-float-close{
+  top:11px!important;right:11px!important;width:34px!important;height:34px!important;
+  border-radius:11px!important;font-size:20px!important;background:rgba(255,255,255,.86)!important;
+  backdrop-filter:blur(8px)!important;
+}
+/* em desktop normal: sem scrollbar interna */
+@media(min-width:901px) and (min-height:620px){
+  #txModal .modal,#cardPurchaseModal .modal{overflow:hidden!important}
+}
+/* viewport mais baixo: compacta ainda mais, sem sacrificar funcionalidade */
+@media(min-width:901px) and (max-height:720px){
+  #txModal .modal,#cardPurchaseModal .modal{max-height:96dvh!important;padding:10px!important}
+  #txModal .v27-modal-shell,#cardPurchaseModal .v27-modal-shell{gap:7px!important}
+  #txModal .v27-modal-hero,#cardPurchaseModal .v27-modal-hero{min-height:54px!important;padding-top:3px!important;padding-bottom:2px!important}
+  #txModal .v27-modal-mark,#cardPurchaseModal .v27-modal-mark{width:40px!important;height:40px!important;flex-basis:40px!important}
+  #txModal .v27-modal-section,#cardPurchaseModal .v27-modal-section{padding:8px!important}
+  #txModal .v27-modal-section-head,#cardPurchaseModal .v27-modal-section-head{margin-bottom:5px!important}
+  #txModal .field input,#txModal .field select,#cardPurchaseModal .field input,#cardPurchaseModal .field select{height:34px!important;min-height:34px!important}
+  #txModal .choice-wrap .choice-btn,#cardPurchaseModal .choice-wrap .choice-btn,#standardRecurringBar button,#v21StatusBar button,#v21CardModeBar button{min-height:30px!important}
+  #txModal .v27-modal-actions,#cardPurchaseModal .v27-modal-actions{min-height:42px!important;padding-top:6px!important}
+  #txModal .v27-modal-actions button,#cardPurchaseModal .v27-modal-actions button{height:35px!important;min-height:35px!important}
+}
+@media(max-width:900px){
+  #txModal .modal,#cardPurchaseModal .modal{overflow:auto!important;max-height:calc(100dvh - 16px)!important}
+  .v28-live-summary{display:none!important}
+  #txModal .v27-modal-grid,#cardPurchaseModal .v27-modal-grid{grid-template-columns:1fr!important}
+  #txModal .v27-tx-mode,#cardPurchaseModal .v27-cp-details{grid-column:auto!important}
+}
+@media(max-width:620px){
+  #txModal .v27-fields,#cardPurchaseModal .v27-fields,#txModal .salary-grid{grid-template-columns:1fr!important}
+}
+</style>
+<script id="pp-v28-finance-modal-glass">
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const money=v=>{
+  const s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+  if(!s)return 0;
+  let x=s;
+  if(x.includes(',')&&x.includes('.'))x=x.replace(/\./g,'').replace(',','.');
+  else if(x.includes(','))x=x.replace(',','.');
+  return Number(x.replace(/[^0-9.-]/g,''))||0;
+};
+const br=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0);
+function monthName(m){return ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][Math.max(0,(+m||1)-1)]}
+function ensureLive(modal,kind){
+  const hero=modal.querySelector('.v27-modal-hero'); if(!hero)return null;
+  let box=hero.querySelector('.v28-live-summary');
+  if(!box){
+    box=document.createElement('div');box.className='v28-live-summary';
+    box.innerHTML='<div class="v28-live-icon">◎</div><div class="v28-live-copy"><small>Resumo</small><b>R$ 0,00</b><span>Pronto para preencher</span></div>';
+    hero.appendChild(box);
+  }
+  box.dataset.kind=kind;
+  return box;
+}
+function updateTx(){
+  const modal=$('txModal'); if(!modal)return;
+  const type=$('fType')?.value||'entrada';
+  modal.dataset.v28Type=type;
+  const box=ensureLive(modal,'tx');if(!box)return;
+  const val=money($('fValue')?.value);
+  const y=$('fYear')?.value||''; const m=$('fMonth')?.value||'';
+  const desc=($('fDesc')?.value||'').trim();
+  const rec=$('standardRecurringMode')?.value||'unico';
+  box.querySelector('.v28-live-icon').textContent=type==='entrada'?'↗':'↘';
+  box.querySelector('small').textContent=type==='entrada'?'Entrada':'Saída';
+  box.querySelector('b').textContent=br(val);
+  box.querySelector('span').textContent=[desc||'Novo lançamento',m&&y?`${monthName(m)} ${y}`:'',rec==='recorrente'?'Recorrente':rec==='parcelado'?'Parcelado':'À vista'].filter(Boolean).join(' · ');
+}
+function updatePurchase(){
+  const modal=$('cardPurchaseModal'); if(!modal)return;
+  const box=ensureLive(modal,'purchase');if(!box)return;
+  const val=money($('cpTotal')?.value);
+  const desc=($('cpDesc')?.value||'').trim();
+  const mode=$('cpMode')?.value||'avista';
+  const q=Math.max(1,+$('cpInstallments')?.value||1);
+  box.querySelector('.v28-live-icon').textContent='▦';
+  box.querySelector('small').textContent='Compra no cartão';
+  box.querySelector('b').textContent=br(val);
+  box.querySelector('span').textContent=[desc||'Nova compra',mode==='parcelado'?`${q}x`:mode==='recorrente'?'Recorrente':mode==='estorno'?'Estorno':'À vista'].join(' · ');
+}
+function refresh(){
+  try{window.ppFinanceModalsV27?.refresh?.()}catch(e){}
+  setTimeout(()=>{updateTx();updatePurchase();},30);
+}
+document.addEventListener('input',e=>{
+  if(e.target.closest?.('#txModal'))updateTx();
+  if(e.target.closest?.('#cardPurchaseModal'))updatePurchase();
+},true);
+document.addEventListener('change',e=>{
+  if(e.target.closest?.('#txModal'))updateTx();
+  if(e.target.closest?.('#cardPurchaseModal'))updatePurchase();
+},true);
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('[data-addtx],#addCardPurchaseBtn,[onclick*="openCardPurchase"]'))setTimeout(refresh,60);
+},true);
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,850),{once:true});else setTimeout(refresh,850);
+window.ppFinanceModalsV28={refresh};
+})();
+</script>
