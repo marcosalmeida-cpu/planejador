@@ -27033,3 +27033,174 @@ function bind(){
 bind();
 })();
 </script>
+
+<style id="pp-v36-alignment-payment-fix">
+/* V36 — alinhamento de informações e separação dos fluxos de pagamento */
+#cardPurchaseModal .v36-info-top{
+  display:flex!important;
+  align-items:flex-start!important;
+  gap:7px!important;
+  margin:0 0 7px!important;
+  padding:0!important;
+  color:#66788f!important;
+  font-size:11px!important;
+  line-height:1.35!important;
+  font-weight:600!important;
+}
+#cardPurchaseModal .v36-info-top::before{
+  content:"i";
+  flex:0 0 16px;
+  width:16px;height:16px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:#fff1f2;
+  color:#d92d20;
+  border:1px solid #fecaca;
+  font-size:10px;
+  line-height:1;
+  font-weight:950;
+  margin-top:0;
+}
+#cardPurchaseModal #v39InstallmentPreview.v36-info-top{
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  min-height:0!important;
+}
+#cardPurchaseModal #cpFirstInvoiceFieldV39 small.v36-info-top{
+  order:2!important;
+}
+#cardPurchaseModal #cpFirstInvoiceFieldV39 input{
+  order:3!important;
+}
+#cardPurchaseModal #cpFirstInvoiceFieldV39 label{
+  order:1!important;
+}
+#cardPurchaseModal .v32-cp-installments label{order:1!important}
+#cardPurchaseModal .v32-cp-installments #v39InstallmentPreview{order:2!important}
+#cardPurchaseModal .v32-cp-installments #cpInstallments{order:3!important}
+
+/* Fluxos mutuamente exclusivos no lançamento */
+#txModal.v36-pay-standard #txCardBlock{display:none!important}
+#txModal.v36-pay-standard #standardRecurringBlock{display:block!important}
+#txModal.v36-pay-standard #standardInstallmentFields.show{display:grid!important}
+
+#txModal.v36-pay-card #txCardBlock{display:block!important}
+#txModal.v36-pay-card #standardRecurringBlock{display:none!important}
+#txModal.v36-pay-card #standardInstallmentFields{display:none!important}
+
+/* O bloco de cartão passa a ser uma superfície limpa e compacta */
+#txModal #txCardBlock{
+  margin-top:2px!important;
+  padding-top:13px!important;
+}
+#txModal #txCardBlock>.formgrid{
+  display:grid!important;
+  grid-template-columns:1.2fr 2fr .8fr 1fr!important;
+  align-items:end!important;
+  gap:10px 12px!important;
+}
+#txModal #txCardBlock>.formgrid>.field{
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+#txModal #txCardBlock #v21CardModeBar{
+  min-width:0!important;
+}
+
+@media(max-width:820px){
+  #txModal #txCardBlock>.formgrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:620px){
+  #txModal #txCardBlock>.formgrid{grid-template-columns:1fr!important}
+}
+</style>
+<script id="pp-v36-alignment-payment-fix-script">
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+
+function moveInfoAbove(){
+  const first=$('cpFirstInvoiceV39');
+  const ff=first?.closest('.field');
+  const firstInfo=ff?.querySelector('small');
+  if(firstInfo){
+    firstInfo.classList.add('v36-info-top');
+    if(first && firstInfo.nextSibling!==first) ff.insertBefore(firstInfo,first);
+  }
+
+  const qty=$('cpInstallments');
+  const qf=qty?.closest('.field');
+  const preview=$('v39InstallmentPreview');
+  if(qf&&qty&&preview){
+    preview.classList.add('v36-info-top');
+    if(preview.nextSibling!==qty) qf.insertBefore(preview,qty);
+  }
+}
+
+function syncTxPayFlow(){
+  const modal=$('txModal');
+  const pay=$('fPayMethod')?.value||'padrao';
+  const isCard=pay==='cartao';
+  if(!modal)return;
+
+  modal.classList.toggle('v36-pay-card',isCard);
+  modal.classList.toggle('v36-pay-standard',!isCard);
+
+  const card=$('txCardBlock');
+  const standard=$('standardRecurringBlock');
+  const installment=$('standardInstallmentFields');
+
+  if(card) card.style.setProperty('display',isCard?'block':'none','important');
+  if(standard) standard.style.setProperty('display',isCard?'none':'block','important');
+  if(installment&&isCard) installment.style.setProperty('display','none','important');
+  else if(installment){
+    installment.style.removeProperty('display');
+    if($('standardRecurringMode')?.value==='parcelado') installment.classList.add('show');
+  }
+
+  // No fluxo cartão, reafirma o visual e os campos próprios do cartão.
+  if(isCard){
+    const mode=$('fCardMode')?.value||'avista';
+    document.querySelectorAll('#v21CardModeBar button').forEach(b=>{
+      const v=b.dataset.v||b.dataset.choice||b.dataset.mode;
+      b.classList.toggle('active',String(v)===String(mode));
+    });
+  }
+}
+
+function refresh(){
+  moveInfoAbove();
+  syncTxPayFlow();
+}
+
+document.addEventListener('change',e=>{
+  if(['fPayMethod','fType','standardRecurringMode','fCardMode','cpMode','cpInstallments','cpFirstInvoiceV39'].includes(e.target?.id)){
+    setTimeout(refresh,0);
+    setTimeout(refresh,80);
+  }
+},true);
+
+document.addEventListener('click',e=>{
+  if(
+    e.target.closest?.('[data-addtx]') ||
+    e.target.closest?.('#addCardPurchaseBtn') ||
+    e.target.closest?.('[data-choice-for="fPayMethod"]') ||
+    e.target.closest?.('#standardRecurringBar [data-sr-mode]') ||
+    e.target.closest?.('#v21CardModeBar button') ||
+    e.target.closest?.('#v52ModeBar button')
+  ){
+    [20,90,180].forEach(ms=>setTimeout(refresh,ms));
+  }
+},true);
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>[250,700].forEach(ms=>setTimeout(refresh,ms)),{once:true});
+}else [100,500].forEach(ms=>setTimeout(refresh,ms));
+
+window.ppV36={refresh};
+})();
+</script>
