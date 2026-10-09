@@ -26988,3 +26988,321 @@ function bind(){
 bind();
 })();
 </script>
+
+<style id="pp-v34-banking-clean-modals">
+/* V34 — linguagem bancária clean: menos caixas, mais hierarquia, sem mexer na lógica */
+#txModal,#cardPurchaseModal{
+  background:rgba(9,23,49,.46)!important;
+  backdrop-filter:blur(12px)!important;
+  -webkit-backdrop-filter:blur(12px)!important;
+  padding:18px!important;
+}
+#txModal .modal,#cardPurchaseModal .modal{
+  width:min(1120px,96vw)!important;
+  max-width:1120px!important;
+  max-height:94vh!important;
+  overflow:auto!important;
+  padding:26px 28px 24px!important;
+  border-radius:28px!important;
+  border:1px solid #d9e3ef!important;
+  background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%)!important;
+  box-shadow:0 34px 90px rgba(10,28,61,.24)!important;
+}
+#txModal .modal h2,#cardPurchaseModal .modal h2{
+  margin:0 0 5px!important;
+  font-size:clamp(28px,2.1vw,34px)!important;
+  line-height:1.06!important;
+  letter-spacing:-.035em!important;
+  color:#10233f!important;
+  max-width:70%!important;
+}
+#txModal .modal>p,#cardPurchaseModal .modal>p{
+  margin:0 0 22px!important;
+  max-width:70%!important;
+  font-size:13.5px!important;
+  line-height:1.5!important;
+  color:#6d7e94!important;
+}
+
+/* resumo do topo — discreto, sem transformar em outro card grande */
+.v34-modal-summary{
+  position:absolute;top:22px;right:70px;
+  min-width:210px;max-width:270px;
+  padding:12px 14px;border-radius:16px;
+  border:1px solid #d7e2ef;
+  background:#f4f8fd;
+  color:#17304f;
+}
+.v34-modal-summary small{display:block;font-size:10px!important;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#75879d!important}
+.v34-modal-summary strong{display:block;margin-top:3px;font-size:20px!important;line-height:1.05;letter-spacing:-.03em;color:#102d55!important}
+.v34-modal-summary span{display:block;margin-top:4px;font-size:11px!important;color:#6c7f96!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* grade principal: sem cards por campo */
+#txModal .formgrid,#cardPurchaseModal .formgrid{
+  display:grid!important;
+  grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:14px 16px!important;
+  align-items:end!important;
+}
+#txModal .field,#cardPurchaseModal .field{
+  min-width:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:7px!important;
+}
+#txModal .field label,#cardPurchaseModal .field label{
+  margin:0!important;
+  font-size:11.5px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  color:#52677f!important;
+  text-transform:none!important;
+  letter-spacing:0!important;
+}
+#txModal input,#txModal select,#txModal textarea,
+#cardPurchaseModal input,#cardPurchaseModal select,#cardPurchaseModal textarea{
+  width:100%!important;
+  min-height:46px!important;
+  height:46px!important;
+  padding:0 14px!important;
+  border:1px solid #cfdbe8!important;
+  border-radius:13px!important;
+  background:#fff!important;
+  color:#17304f!important;
+  font-size:15px!important;
+  line-height:1.25!important;
+  box-shadow:0 1px 2px rgba(16,35,63,.02)!important;
+}
+#txModal textarea,#cardPurchaseModal textarea{height:auto!important;min-height:78px!important;padding:12px 14px!important;resize:vertical!important}
+#txModal input:focus,#txModal select:focus,#txModal textarea:focus,
+#cardPurchaseModal input:focus,#cardPurchaseModal select:focus,#cardPurchaseModal textarea:focus{
+  outline:none!important;border-color:#2568e9!important;box-shadow:0 0 0 3px rgba(37,104,233,.11)!important
+}
+
+/* layout lançamento */
+#txModal .v32-f-type{grid-column:span 3!important}
+#txModal .v32-f-status{grid-column:span 3!important}
+#txModal .v32-f-year{grid-column:span 2!important}
+#txModal .v32-f-month{grid-column:span 4!important}
+#txModal .v32-f-desc{grid-column:span 8!important}
+#txModal .v32-f-value{grid-column:span 4!important}
+#txModal .v32-f-category{grid-column:span 4!important}
+#txModal .v32-f-class{grid-column:span 3!important}
+#txModal .v32-f-origin{grid-column:span 5!important}
+#txModal .v32-f-pay{grid-column:1/-1!important;margin-top:2px!important}
+
+/* layout compra */
+#cardPurchaseModal .v32-cp-card{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-date{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-first{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-desc{grid-column:span 7!important}
+#cardPurchaseModal .v32-cp-category{grid-column:span 5!important}
+#cardPurchaseModal .v32-cp-mode{grid-column:1/-1!important;margin-top:2px!important}
+#cardPurchaseModal .v32-cp-total{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-installments{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-paid{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-status{grid-column:span 4!important}
+
+/* category: apenas select */
+#txModal .v32-f-category .choice-wrap,
+#cardPurchaseModal .v32-cp-category .choice-wrap,
+#cardPurchaseModal .v32-cp-category [class*="chip"],
+#cardPurchaseModal .v32-cp-category [id*="Chip"]{display:none!important}
+#txModal #fCategory,#cardPurchaseModal #cpCategory{display:block!important}
+
+/* segmented controls reais: trilho único, sem espaço enorme */
+#txModal .choice-wrap:not(.category-picker),
+#txModal #v21StatusBar,
+#txModal #standardRecurringBar,
+#txModal #v21CardModeBar,
+#cardPurchaseModal #v52ModeBar{
+  display:grid!important;
+  grid-auto-flow:column!important;
+  grid-auto-columns:1fr!important;
+  gap:3px!important;
+  width:100%!important;
+  min-height:46px!important;
+  padding:3px!important;
+  border:1px solid #d5e0eb!important;
+  border-radius:14px!important;
+  background:#eef3f8!important;
+}
+#txModal .choice-wrap:not(.category-picker) .choice-btn,
+#txModal #v21StatusBar button,
+#txModal #standardRecurringBar button,
+#txModal #v21CardModeBar button,
+#cardPurchaseModal #v52ModeBar button{
+  min-width:0!important;
+  min-height:38px!important;
+  height:38px!important;
+  padding:0 10px!important;
+  border:0!important;
+  border-radius:11px!important;
+  background:transparent!important;
+  color:#36506d!important;
+  font-size:13px!important;
+  font-weight:800!important;
+  box-shadow:none!important;
+  white-space:nowrap!important;
+}
+#txModal .choice-wrap:not(.category-picker) .choice-btn.active,
+#txModal #v21StatusBar button.active,
+#txModal #standardRecurringBar button.active,
+#txModal #v21CardModeBar button.active,
+#cardPurchaseModal #v52ModeBar button.active{
+  background:#123f86!important;
+  color:#fff!important;
+  box-shadow:0 5px 12px rgba(18,63,134,.16)!important;
+}
+#txModal .v32-f-type .choice-btn.active[data-choice="entrada"]{background:#15835c!important}
+#txModal .v32-f-type .choice-btn.active[data-choice="saida"]{background:#123f86!important}
+#txModal #v21StatusBar button.active[data-choice="Quitado"],
+#txModal #v21StatusBar button.active[data-v="Quitado"]{background:#15835c!important}
+#txModal #v21StatusBar button.active[data-choice="Pendente"],
+#txModal #v21StatusBar button.active[data-v="Pendente"]{background:#123f86!important}
+#txModal #standardRecurringBar button.active[data-sr-mode="unico"]{background:#5666a9!important}
+#txModal #standardRecurringBar button.active[data-sr-mode="parcelado"]{background:#123f86!important}
+#txModal #standardRecurringBar button.active[data-sr-mode="recorrente"]{background:#15835c!important}
+#cardPurchaseModal #v52ModeBar button.active[data-mode="avista"]{background:#324e74!important}
+#cardPurchaseModal #v52ModeBar button.active[data-mode="parcelado"]{background:#123f86!important}
+#cardPurchaseModal #v52ModeBar button.active[data-mode="recorrente"]{background:#15835c!important}
+#cardPurchaseModal #v52ModeBar button.active[data-mode="estorno"]{background:#7b4db7!important}
+
+/* sub-blocos funcionais: apenas um separador sutil, não outro card */
+#txModal #txCardBlock,#txModal #standardRecurringBlock,#txModal #salaryBox{
+  grid-column:1/-1!important;
+  margin-top:4px!important;
+  padding:14px 0 2px!important;
+  border:0!important;
+  border-top:1px solid #dbe5ef!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+#txModal #standardInstallmentFields{
+  display:none!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:12px!important;
+  margin-top:10px!important;
+  padding:0!important;
+}
+#txModal #standardInstallmentFields.show{display:grid!important}
+#txModal #standardRecurringHelp,#txModal #v21CardModeHelp,#cardPurchaseModal #v52ModeHelp,#cardPurchaseModal #v39InstallmentPreview{
+  margin-top:7px!important;
+  font-size:11.5px!important;
+  line-height:1.45!important;
+  color:#718198!important;
+}
+
+/* Quantidade de parcelas: funcional, com destaque somente quando aparece */
+#cardPurchaseModal .v32-cp-installments{padding:0!important;border:0!important;background:transparent!important}
+#cardPurchaseModal .v32-cp-installments input{font-size:17px!important;font-weight:800!important;color:#123f86!important;text-align:left!important}
+
+/* rodapé no final natural */
+#txModal .modalfoot,#cardPurchaseModal .modalfoot{
+  position:static!important;
+  display:flex!important;
+  justify-content:flex-end!important;
+  gap:10px!important;
+  margin-top:22px!important;
+  padding-top:18px!important;
+  border-top:1px solid #dce5ef!important;
+  background:transparent!important;
+  backdrop-filter:none!important;
+}
+#txModal .modalfoot button,#cardPurchaseModal .modalfoot button{
+  min-width:145px!important;
+  min-height:46px!important;
+  border-radius:13px!important;
+  font-size:14px!important;
+  font-weight:800!important;
+}
+#txModal .modalfoot .ghost,#cardPurchaseModal .modalfoot .ghost{background:#edf2f7!important;color:#27415f!important;border:1px solid #d5dfe9!important}
+#txModal .modalfoot .primary,#cardPurchaseModal .modalfoot .primary{background:#123f86!important;color:#fff!important;border:0!important;box-shadow:0 8px 18px rgba(18,63,134,.14)!important}
+
+@media(max-width:900px){
+  #txModal .modal h2,#cardPurchaseModal .modal h2,#txModal .modal>p,#cardPurchaseModal .modal>p{max-width:100%!important}
+  .v34-modal-summary{position:static!important;margin:-8px 0 18px!important;max-width:none!important;width:100%!important}
+  #txModal .formgrid,#cardPurchaseModal .formgrid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+  #txModal [class*="v32-f-"],#cardPurchaseModal [class*="v32-cp-"]{grid-column:span 3!important}
+  #txModal .v32-f-desc,#txModal .v32-f-pay,#cardPurchaseModal .v32-cp-desc,#cardPurchaseModal .v32-cp-category,#cardPurchaseModal .v32-cp-mode{grid-column:1/-1!important}
+}
+@media(max-width:620px){
+  #txModal,#cardPurchaseModal{padding:6px!important}
+  #txModal .modal,#cardPurchaseModal .modal{width:calc(100vw - 12px)!important;max-height:none!important;padding:18px!important;border-radius:22px!important}
+  #txModal .formgrid,#cardPurchaseModal .formgrid{grid-template-columns:1fr!important;gap:11px!important}
+  #txModal [class*="v32-f-"],#cardPurchaseModal [class*="v32-cp-"]{grid-column:auto!important}
+  #txModal .choice-wrap:not(.category-picker),#txModal #v21StatusBar,#txModal #standardRecurringBar,#txModal #v21CardModeBar,#cardPurchaseModal #v52ModeBar{grid-auto-flow:row!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #txModal #standardInstallmentFields{grid-template-columns:1fr!important}
+  #txModal .modalfoot,#cardPurchaseModal .modalfoot{display:grid!important;grid-template-columns:1fr 1fr!important}
+  #txModal .modalfoot button,#cardPurchaseModal .modalfoot button{min-width:0!important;width:100%!important}
+}
+</style>
+<script id="pp-v34-banking-clean-modals-script">
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const brl=v=>{let n=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');if(n.includes(',')&&n.includes('.'))n=n.replace(/\./g,'').replace(',','.');else n=n.replace(',','.');n=Number(n.replace(/[^0-9.-]/g,''))||0;return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})};
+const monthName=m=>['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][Math.max(0,(+m||1)-1)]||'';
+function ensureSummary(modalId,kind){
+  const modal=document.querySelector(`#${modalId} .modal`);if(!modal)return null;
+  let box=modal.querySelector('.v34-modal-summary');
+  if(!box){box=document.createElement('div');box.className='v34-modal-summary';box.innerHTML='<small></small><strong></strong><span></span>';modal.appendChild(box)}
+  box.dataset.kind=kind;return box;
+}
+function updateTxSummary(){
+  const box=ensureSummary('txModal','tx');if(!box)return;
+  const type=$('fType')?.value==='entrada'?'Entrada':'Saída';
+  const desc=($('fDesc')?.value||'Novo lançamento').trim()||'Novo lançamento';
+  const val=brl($('fValue')?.value||0);
+  const y=$('fYear')?.value||'';const m=$('fMonth')?.value||'';
+  const mode=$('standardRecurringMode')?.value||'unico';
+  box.querySelector('small').textContent=type;
+  box.querySelector('strong').textContent=val;
+  box.querySelector('span').textContent=`${desc} · ${monthName(m)}/${y} · ${mode==='parcelado'?'Parcelado':mode==='recorrente'?'Recorrente':'Único'}`;
+}
+function updateCpSummary(){
+  const box=ensureSummary('cardPurchaseModal','cp');if(!box)return;
+  const desc=($('cpDesc')?.value||'Nova compra').trim()||'Nova compra';
+  const val=brl($('cpTotal')?.value||0);
+  const mode=$('cpMode')?.value||'avista';
+  const q=Math.max(1,parseInt($('cpInstallments')?.value,10)||1);
+  box.querySelector('small').textContent='Compra no cartão';
+  box.querySelector('strong').textContent=val;
+  box.querySelector('span').textContent=`${desc} · ${mode==='parcelado'?`${q}x`:mode==='recorrente'?'Recorrente':mode==='estorno'?'Estorno':'À vista'}`;
+}
+function syncTypeVisual(){
+  const sel=$('fType');if(!sel)return;
+  const field=sel.closest('.field');if(!field)return;
+  field.querySelectorAll('.choice-btn').forEach(b=>b.classList.toggle('active',String(b.dataset.choice)===String(sel.value)));
+}
+function forceNewTxSaida(){
+  const sel=$('fType');if(!sel)return;
+  sel.value='saida';
+  sel.dispatchEvent(new Event('change',{bubbles:true}));
+  syncTypeVisual();
+  updateTxSummary();
+}
+function bind(){
+  ensureSummary('txModal','tx');ensureSummary('cardPurchaseModal','cp');
+  document.addEventListener('input',e=>{if(['fDesc','fValue','fYear','fMonth'].includes(e.target?.id))updateTxSummary();if(['cpDesc','cpTotal','cpInstallments'].includes(e.target?.id))updateCpSummary()},true);
+  document.addEventListener('change',e=>{
+    if(['fType','fStatus','fYear','fMonth','standardRecurringMode'].includes(e.target?.id)){setTimeout(()=>{syncTypeVisual();updateTxSummary()},0)}
+    if(['cpMode','cpCard','cpDate','cpInstallments'].includes(e.target?.id))setTimeout(updateCpSummary,0);
+  },true);
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.('[data-addtx]'))[20,80,180,320].forEach(ms=>setTimeout(forceNewTxSaida,ms));
+    if(e.target.closest?.('#addCardPurchaseBtn'))[40,120].forEach(ms=>setTimeout(updateCpSummary,ms));
+  },true);
+  setTimeout(()=>{syncTypeVisual();updateTxSummary();updateCpSummary()},500);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
+})();
+</script>
