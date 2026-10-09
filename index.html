@@ -1456,29 +1456,29 @@ body.v86-ready #dashboard{visibility:visible!important}
 <header class="topbar"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button class="active" data-view="dashboard">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="veiculos">Veículos</button><button data-view="projecao">Projeção</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx="">+ Lançamento</button></div></div></header>
 <main class="main">
 <section class="view active" id="dashboard">
-<div class="hero"><div><div class="eyebrow">seu planejamento financeiro</div><h1>Olá, Marcos.</h1><p id="periodText">Receitas e despesas realizadas, sem misturar projeções futuras.</p></div><div class="filterbar"><select id="yearFilter"></select><select id="monthFilter"></select></div></div>
+<div class="hero"><div><h1>Olá, Marcos.</h1><p id="periodText">Receitas e despesas realizadas, sem misturar projeções futuras.</p></div><div class="filterbar"><select id="yearFilter"></select><select id="monthFilter"></select></div></div>
 <div class="kpis" id="dashboardKpis"></div>
 <div class="grid2"><article class="card panel"><div class="panelhead"><div><h2>Fluxo acumulado do ano</h2><span id="dashboardLegend">entradas, saídas e saldo até o mês selecionado</span></div></div><div class="list" id="flowList"></div></article><article class="card panel"><div class="panelhead"><div><h2>Onde você mais gastou</h2><span id="catPeriod">categorias do período</span></div></div><div class="list" id="categoryList"></div></article></div>
 <div class="grid2"><article class="card panel"><div class="panelhead"><div><h2>Próximas faturas de cartões</h2><span>exclusivamente faturas dos cartões de crédito cadastrados</span></div></div><div class="list" id="nextDues"></div></article><article class="card panel"><div class="panelhead"><div><h2>Resumo patrimonial</h2><span>FGTS, patrimônio e investimentos</span></div></div><div class="list" id="assetSnapshot"></div></article></div>
 </section>
 <section class="view" id="lancamentos">
-<div class="section-tools"><div><div class="eyebrow">histórico consolidado</div><h2>Lançamentos</h2></div><div class="filterbar"><select id="txYear"></select><select id="txType"><option value="all">Todos</option><option value="entrada">Entradas</option><option value="saida">Saídas</option><option value="cartao">Faturas de cartão</option></select><input class="search" id="txSearch" placeholder="Buscar lançamento"/></div></div>
+<div class="section-tools"><div><h2>Lançamentos</h2></div><div class="filterbar"><select id="txYear"></select><select id="txType"><option value="all">Todos</option><option value="entrada">Entradas</option><option value="saida">Saídas</option><option value="cartao">Faturas de cartão</option></select><input class="search" id="txSearch" placeholder="Buscar lançamento"/></div></div>
 <div class="summary-strip" id="txSummary"></div>
 <div class="tablewrap"><table><thead><tr><th>Período</th><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>Origem</th><th>Status</th><th>Valor</th><th>Ação</th></tr></thead><tbody id="txBody"></tbody></table></div>
 </section>
 <section class="view" id="cartoes">
-<div class="section-tools"><div><div class="eyebrow">faturas e parcelamentos</div><h2>Cartões</h2></div><div class="filterbar"><select id="cardFilter"></select><select id="cardPurchaseStatus"><option value="all">Todos os registros</option><option value="active">Ativos</option><option value="paid">Quitados</option><option value="archived">Arquivados</option></select><input class="search" id="cardSearch" placeholder="Buscar compra"/><button class="btn" id="addCardBtn">+ Novo cartão</button><button class="primary" id="addCardPurchaseBtn">+ Nova compra</button></div></div>
+<div class="section-tools"><div><h2>Cartões</h2></div><div class="filterbar"><select id="cardFilter"></select><select id="cardPurchaseStatus"><option value="all">Todos os registros</option><option value="active">Ativos</option><option value="paid">Quitados</option><option value="archived">Arquivados</option></select><input class="search" id="cardSearch" placeholder="Buscar compra"/><button class="btn" id="addCardBtn">+ Novo cartão</button><button class="primary" id="addCardPurchaseBtn">+ Nova compra</button></div></div>
 <div class="card-summary" id="cardSummary"></div>
 <div class="card-deck" id="cardDeck"></div>
 <div class="tablewrap"><table><thead><tr><th>Cartão</th><th>Compra</th><th>Compra em</th><th>Tipo</th><th>Parcelas</th><th>Progresso</th><th>Total</th><th>Pendente</th><th>Ação</th></tr></thead><tbody id="cardPurchaseBody"></tbody></table></div>
 </section>
 <section class="view" id="dividas">
-<div class="section-tools"><div><div class="eyebrow">compromissos financeiros</div><h2>Dívidas</h2></div><div class="filterbar"><select id="debtFilter"><option value="all">Todas</option><option selected="" value="pending">Pendentes</option><option value="paid">Quitadas</option><option value="negotiated">Negociadas</option><option value="notnegotiated">Não negociadas</option><option value="archived">Arquivadas</option></select><input class="search" id="debtSearch" placeholder="Buscar dívida"/></div></div>
+<div class="section-tools"><div><h2>Dívidas</h2></div><div class="filterbar"><select id="debtFilter"><option value="all">Todas</option><option selected="" value="pending">Pendentes</option><option value="paid">Quitadas</option><option value="negotiated">Negociadas</option><option value="notnegotiated">Não negociadas</option><option value="archived">Arquivadas</option></select><input class="search" id="debtSearch" placeholder="Buscar dívida"/></div></div>
 <div class="summary-strip" id="debtSummary"></div>
 <div class="tablewrap"><table><thead><tr><th>Descrição</th><th>Credor</th><th>Banco</th><th>Parcela</th><th>Andamento</th><th>Negociado</th><th>Status</th><th>Pendente</th><th>Ação</th></tr></thead><tbody id="debtBody"></tbody></table></div>
 </section>
 <section class="view" id="fgts">
-<div class="section-tools"><div><div class="eyebrow">garantia e antecipações</div><h2>FGTS</h2></div><div class="filterbar"><select id="fgtsYear"></select><select id="fgtsStatus"><option value="all">Todos</option><option value="Quitado">Quitados</option><option value="Pendente">Pendentes</option></select><input class="search" id="fgtsSearch" placeholder="Buscar banco"/><button class="btn" id="editFgtsSummary">Editar saldos</button></div></div>
+<div class="section-tools"><div><h2>FGTS</h2></div><div class="filterbar"><select id="fgtsYear"></select><select id="fgtsStatus"><option value="all">Todos</option><option value="Quitado">Quitados</option><option value="Pendente">Pendentes</option></select><input class="search" id="fgtsSearch" placeholder="Buscar banco"/><button class="btn" id="editFgtsSummary">Editar saldos</button></div></div>
 <div class="summary-strip" id="fgtsSummary"></div>
 <div class="tablewrap"><table><thead><tr><th>Contrato</th><th>Banco</th><th>Ano contratação</th><th>Valor no ano</th><th>Total</th><th>Quitado</th><th>Pendente</th><th>Status</th></tr></thead><tbody id="fgtsBody"></tbody></table></div>
 </section>
@@ -1489,12 +1489,12 @@ body.v86-ready #dashboard{visibility:visible!important}
 </div>
 </section>
 <section class="view" id="investimentos">
-<div class="section-tools"><div><div class="eyebrow">reserva e aplicações</div><h2>Investimentos</h2></div><div class="filterbar"><select id="invYear"></select><select id="invType"><option value="all">Todos os tipos</option><option>CDB</option><option>LCI/LCA</option><option>Previdência privada</option><option>Tesouro Direto</option><option>Ações</option><option>Fundos</option><option>Caixinha / Reserva</option><option>A classificar</option></select><input class="search" id="invSearch" placeholder="Buscar produto ou banco"/><button class="primary" id="addInvestmentBtn">+ Novo investimento</button></div></div>
+<div class="section-tools"><div><h2>Investimentos</h2></div><div class="filterbar"><select id="invYear"></select><select id="invType"><option value="all">Todos os tipos</option><option>CDB</option><option>LCI/LCA</option><option>Previdência privada</option><option>Tesouro Direto</option><option>Ações</option><option>Fundos</option><option>Caixinha / Reserva</option><option>A classificar</option></select><input class="search" id="invSearch" placeholder="Buscar produto ou banco"/><button class="primary" id="addInvestmentBtn">+ Novo investimento</button></div></div>
 <div class="split"><article class="card panel ringbox"><div class="ring"><div class="pig">🐷</div></div><div class="yieldnote" style="text-align:center;margin-top:14px">Guarde com estratégia e acompanhe seu <b id="invYieldRate">0,00%</b><br/><span style="color:var(--muted)">rendimento sobre o capital exibido</span></div></article><div class="right-stack"><div class="summary-strip" id="invSummary"></div><article class="card panel"><div class="panelhead"><div><h2>Composição por tipo</h2><span>similar à visão de produto do banco</span></div></div><div class="list" id="invTypes"></div></article></div></div>
 <div class="invest-grid" id="invGrid" style="margin-top:12px"></div>
 </section>
 <section class="view" id="patrimonio">
-<div class="section-tools"><div><div class="eyebrow">bens e posição geral</div><h2>Patrimônio</h2></div><div class="filterbar"><select id="assetYear"></select><select id="assetType"><option value="all">Todos os tipos</option><option>Investimento</option><option>Carro</option><option>Moto</option><option>Casa</option><option>Imóvel</option><option>Outro</option></select><button class="primary" id="addAsset">+ Novo patrimônio</button></div></div>
+<div class="section-tools"><div><h2>Patrimônio</h2></div><div class="filterbar"><select id="assetYear"></select><select id="assetType"><option value="all">Todos os tipos</option><option>Investimento</option><option>Carro</option><option>Moto</option><option>Casa</option><option>Imóvel</option><option>Outro</option></select><button class="primary" id="addAsset">+ Novo patrimônio</button></div></div>
 <div class="summary-strip" id="assetSummary"></div>
 <div id="propertyHubV120"></div>
 <div class="asset-grid" id="assetGrid"></div>
@@ -1514,12 +1514,12 @@ body.v86-ready #dashboard{visibility:visible!important}
 <div class="vehicle-grid-v101" id="vehicleGridV101"></div>
 </section>
 <section class="view" id="projecao">
-<div class="section-tools"><div><div class="eyebrow">futuro financeiro</div><h2>Projeção</h2></div><div class="filterbar"><select id="projHorizon"><option value="12">Próximos 12 meses</option><option value="24">Próximos 24 meses</option></select><button class="btn" data-addtx="">+ Lançamento futuro</button></div></div>
+<div class="section-tools"><div><h2>Projeção</h2></div><div class="filterbar"><select id="projHorizon"><option value="12">Próximos 12 meses</option><option value="24">Próximos 24 meses</option></select><button class="btn" data-addtx="">+ Lançamento futuro</button></div></div>
 <div class="summary-strip" id="projSummary"></div>
 <div class="projection-grid"><article class="card panel"><div class="panelhead"><div><h2>Visão mensal</h2><span>somente meses futuros</span></div></div><div class="month-cards" id="projMonths"></div></article><article class="card panel"><div class="panelhead"><div><h2>Componentes da projeção</h2><span>parcelas, faturas e lançamentos futuros</span></div></div><div class="list" id="projSources"></div></article></div>
 <div class="tablewrap" style="margin-top:12px"><table><thead><tr><th>Mês</th><th>Entradas projetadas</th><th>Saídas projetadas</th><th>Saldo projetado</th><th>Detalhe</th></tr></thead><tbody id="projBody"></tbody></table></div>
 </section>
-<section class="view" id="nuvem"><div class="section-tools"><div><div class="eyebrow">sincronização</div><h2>Nuvem</h2></div></div><article class="card cloudbox"><div><h3 style="margin-top:0">Pronto para sincronizar depois</h3><p style="color:var(--muted)">Esta versão já está estruturada para evoluir para uma base em nuvem. Por enquanto, ela funciona localmente no navegador e você pode exportar backup sempre que quiser.</p><div class="codehint">Próxima etapa sugerida:
+<section class="view" id="nuvem"><div class="section-tools"><div><h2>Nuvem</h2></div></div><article class="card cloudbox"><div><h3 style="margin-top:0">Pronto para sincronizar depois</h3><p style="color:var(--muted)">Esta versão já está estruturada para evoluir para uma base em nuvem. Por enquanto, ela funciona localmente no navegador e você pode exportar backup sempre que quiser.</p><div class="codehint">Próxima etapa sugerida:
 1. Criar projeto no Supabase
 2. Salvar lançamentos, cartões, investimentos e patrimônio em tabelas próprias
 3. Aplicar login por usuário
@@ -1788,7 +1788,7 @@ function creditorOptions(){return (creditors||[]).filter(c=>c.status!=='Arquivad
 function populateCreditorSelects(selected=''){const sel=document.getElementById('fOriginSelect'); if(sel){sel.innerHTML='<option value="">Selecione</option>'+creditorOptions().map(c=>`<option value="${c.name}" ${selected===c.name?'selected':''}>${esc(c.name)}<\/option>`).join(''); if(selected) sel.value=selected;} const debtCreditor=document.getElementById('crParentSelect'); if(debtCreditor){debtCreditor.innerHTML='<option value="">Sem vínculo<\/option>'+creditorOptions().map(c=>`<option value="${c.name}">${esc(c.name)}<\/option>`).join('')}}
 function ensureHeader(){document.title='Hub Pessoal'; const brand=document.querySelector('.brand'); if(brand) brand.innerHTML='<span>Hub Pessoal<small>seu espaço pessoal<\/small><\/span>';}
 function ensureCredorSection(){const nav=document.getElementById('nav'); if(nav && !nav.querySelector('[data-view="credores"]')){const btn=document.createElement('button'); btn.dataset.view='credores'; btn.textContent='Credores'; const ref=nav.querySelector('[data-view="dividas"]'); nav.insertBefore(btn, ref); btn.onclick=()=>showView('credores');}
-if(!document.getElementById('credores')){const sec=document.createElement('section'); sec.className='view'; sec.id='credores'; sec.innerHTML=`<div class="section-tools"><div><div class="eyebrow">cadastros consistentes</div><h2>Credores</h2></div><div class="filterbar"><select id="credFilter"><option value="all">Todos</option><option value="Pessoa / empresa">Pessoa / empresa</option><option value="Empresa">Empresa</option><option value="Banco">Banco</option><option value="Pessoa">Pessoa</option></select><input id="credSearch" class="search" placeholder="Buscar credor"><button class="primary" id="addCreditorBtn">+ Novo credor</button></div></div><div class="summary-strip" id="credSummary"></div><div class="tablewrap"><table><thead><tr><th>Nome</th><th>Tipo</th><th>Status</th><th>Origem</th><th>Observações</th><th>Ação</th></tr></thead><tbody id="credBody"></tbody></table></div>`; document.getElementById('dividas').before(sec); }
+if(!document.getElementById('credores')){const sec=document.createElement('section'); sec.className='view'; sec.id='credores'; sec.innerHTML=`<div class="section-tools"><div><h2>Credores</h2></div><div class="filterbar"><select id="credFilter"><option value="all">Todos</option><option value="Pessoa / empresa">Pessoa / empresa</option><option value="Empresa">Empresa</option><option value="Banco">Banco</option><option value="Pessoa">Pessoa</option></select><input id="credSearch" class="search" placeholder="Buscar credor"><button class="primary" id="addCreditorBtn">+ Novo credor</button></div></div><div class="summary-strip" id="credSummary"></div><div class="tablewrap"><table><thead><tr><th>Nome</th><th>Tipo</th><th>Status</th><th>Origem</th><th>Observações</th><th>Ação</th></tr></thead><tbody id="credBody"></tbody></table></div>`; document.getElementById('dividas').before(sec); }
 if(!document.getElementById('creditorModal')){const modal=document.createElement('div'); modal.className='modalback'; modal.id='creditorModal'; modal.innerHTML=`<div class="modal"><h2 id="creditorModalTitle">Novo credor</h2><p>Cadastre pessoas, empresas e bancos para manter a origem dos lançamentos consistente.</p><input type="hidden" id="crId"><div class="formgrid"><div class="field full"><label>Nome</label><input id="crName"></div><div class="field"><label>Tipo</label><select id="crType"><option>Pessoa / empresa</option><option>Empresa</option><option>Pessoa</option><option>Banco</option></select></div><div class="field"><label>Status</label><select id="crStatus"><option>Ativo</option><option>Arquivado</option></select></div><div class="field full"><label>Observações</label><input id="crNotes"></div></div><div class="modalfoot"><button class="ghost" data-close="creditorModal">Cancelar</button><button class="primary" id="saveCreditor">Salvar credor</button></div></div>`; document.body.appendChild(modal); modal.onclick=e=>{if(e.target===modal)modal.classList.remove('open')}; }
 }
 function ensureFgtsSeal(){const fgts=document.getElementById('fgts'); if(!fgts || fgts.querySelector('.fgts-seal')) return; const box=fgts.querySelector('.section-tools > div'); box.insertAdjacentHTML('beforeend', `<div class="fgts-seal"><img src="${FGTS_LOGO}" alt="FGTS"><span>Visão dedicada ao FGTS, com saldos e contratos em andamento.<\/span><\/div>`);}
@@ -4985,7 +4985,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     if(!section)return;
     section.innerHTML=`
       <div class="section-tools">
-        <div><div class="eyebrow">planejamento de renda</div><h2>Calculadora de salário líquido</h2></div>
+        <div><h2>Calculadora de salário líquido</h2></div>
       </div>
       <div class="calc-shell">
         <article class="calc-card">
@@ -6792,7 +6792,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
 
     section.innerHTML=`
       <div class="section-tools">
-        <div><div class="eyebrow">planejamento de renda</div><h2 id="calcMainTitle">Calculadora de salário líquido</h2></div>
+        <div><h2 id="calcMainTitle">Calculadora de salário líquido</h2></div>
       </div>
       <div class="calc-shell">
         <article class="calc-card">
@@ -13090,7 +13090,7 @@ setTimeout(initEssence,0);
 
     section.innerHTML=`
       <div class="section-tools">
-        <div><div class="eyebrow">planejamento de renda</div><h2 id="calcTitleV35">Calculadora de salário líquido</h2></div>
+        <div><h2 id="calcTitleV35">Calculadora de salário líquido</h2></div>
       </div>
       <div class="calc-shell">
         <article class="calc-card">
@@ -26245,7 +26245,7 @@ function esc2(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&l
 function br(v){try{return brl(n(v))}catch(e){return n(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}}
 function dateBR(v){if(!v)return '—';const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:v}
 function variance(p){if(!n(p.acquisitionValue))return null;const diff=n(p.currentEstimate)-n(p.acquisitionValue);const pct=n(p.acquisitionValue)>0?diff/n(p.acquisitionValue)*100:0;return {diff,pct}}
-function render(){const root=document.getElementById('propertyHubV120');if(!root)return;const total=props.reduce((a,p)=>a+n(p.currentEstimate),0);root.innerHTML=`<section class="v120-prop-shell"><div class="v120-prop-head"><div><div class="eyebrow">patrimônio imobiliário</div><h3>Imóveis</h3><p>Estimativas de mercado para acompanhamento patrimonial pessoal — não substituem avaliação formal.</p></div><div class="v120-total-box"><span>Patrimônio imobiliário estimado</span><b>${br(total)}</b></div></div><div class="v120-prop-grid">${props.map(card).join('')}</div></section>`;root.querySelectorAll('[data-v120-calc]').forEach(b=>b.onclick=()=>document.getElementById('v120calc-'+b.dataset.v120Calc)?.classList.toggle('open'));root.querySelectorAll('[data-v120-update]').forEach(b=>b.onclick=()=>openUpdate(b.dataset.v120Update))}
+function render(){const root=document.getElementById('propertyHubV120');if(!root)return;const total=props.reduce((a,p)=>a+n(p.currentEstimate),0);root.innerHTML=`<section class="v120-prop-shell"><div class="v120-prop-head"><div><h3>Imóveis</h3><p>Estimativas de mercado para acompanhamento patrimonial pessoal — não substituem avaliação formal.</p></div><div class="v120-total-box"><span>Patrimônio imobiliário estimado</span><b>${br(total)}</b></div></div><div class="v120-prop-grid">${props.map(card).join('')}</div></section>`;root.querySelectorAll('[data-v120-calc]').forEach(b=>b.onclick=()=>document.getElementById('v120calc-'+b.dataset.v120Calc)?.classList.toggle('open'));root.querySelectorAll('[data-v120-update]').forEach(b=>b.onclick=()=>openUpdate(b.dataset.v120Update))}
 function card(p){const v=variance(p);return `<article class="v120-prop-card ${p.kind==='lot'?'lot':'house'}"><div class="v120-prop-top"><div><span class="v120-prop-type">${p.kind==='lot'?'Terreno':'Imóvel residencial'}</span><h4>${esc2(p.name)}</h4><div class="v120-address">${esc2(p.address)}${p.cep?` · CEP ${esc2(p.cep)}`:''}</div></div><span class="v120-confidence">Confiança: ${esc2(p.confidence||'Média')}</span></div><div class="v120-estimate"><span>Estimativa de mercado atual</span><b>${br(p.currentEstimate)}</b></div><div class="v120-prop-metrics"><div><span>Faixa estimada</span><b>${br(p.rangeMin)}–${br(p.rangeMax)}</b></div><div><span>Área terreno</span><b>${n(p.landArea).toLocaleString('pt-BR')} m²</b></div><div><span>Referência</span><b>${p.pricePerM2?br(p.pricePerM2)+'/m²':'—'}</b></div></div>${v?`<div class="v120-variation">Valorização estimada: <strong>${br(v.diff)} (${v.pct.toFixed(1).replace('.',',')}%)</strong></div>`:''}<div class="v120-variation">Situação: <strong>${esc2(p.status||'Não informada')}</strong>${p.builtArea?` · Área construída: ${n(p.builtArea)} m² · ${n(p.floors)} pavimentos`:''}</div><div class="v120-prop-actions"><button type="button" class="primary" data-v120-update="${esc2(p.id)}">Atualizar estimativa</button><button type="button" data-v120-calc="${esc2(p.id)}">Ver cálculo</button></div><div class="v120-calc" id="v120calc-${esc2(p.id)}"><h5>Memória da estimativa</h5><div class="v120-calc-row"><span>Valor adotado</span><b>${br(p.currentEstimate)}</b></div><div class="v120-calc-row"><span>Faixa observada</span><b>${br(p.rangeMin)} a ${br(p.rangeMax)}</b></div><div class="v120-calc-row"><span>Referência por m²</span><b>${p.pricePerM2?br(p.pricePerM2)+'/m²':'Não utilizada'}</b></div><div class="v120-calc-row"><span>Metodologia</span><b>${esc2(p.calcNote||'Estimativa cadastrada manualmente.')}</b></div><div class="v120-calc-row"><span>Referências</span><b>${(p.references||[]).map(esc2).join('<br>')||'Sem referência registrada'}</b></div><div class="v120-history"><h5>Histórico das estimativas</h5>${[...(p.history||[])].sort((a,b)=>String(b.date).localeCompare(String(a.date))).map(h=>`<div class="v120-history-item"><span>${dateBR(h.date)}</span><b>${br(h.value)}</b><span>${esc2(h.note||'Atualização')}</span></div>`).join('')}</div></div></article>`}
 function openUpdate(id){const p=props.find(x=>x.id===id);if(!p)return;document.getElementById('propertyModalV120')?.remove();const ov=document.createElement('div');ov.id='propertyModalV120';ov.innerHTML=`<div class="v120-modal"><div class="v120-modal-head"><div><h3>Atualizar estimativa</h3><p>${esc2(p.name)}</p></div><button type="button" class="v120-close">×</button></div><div class="v120-form"><label>Valor de aquisição<input id="pvAcq" inputmode="decimal" value="${n(p.acquisitionValue)||''}"></label><label>Estimativa atual<input id="pvEst" inputmode="decimal" value="${n(p.currentEstimate)}"></label><label>Faixa mínima<input id="pvMin" inputmode="decimal" value="${n(p.rangeMin)}"></label><label>Faixa máxima<input id="pvMax" inputmode="decimal" value="${n(p.rangeMax)}"></label><label>Referência R$/m²<input id="pvM2" inputmode="decimal" value="${n(p.pricePerM2)||''}"></label><label>Confiança<select id="pvConf"><option ${p.confidence==='Baixa'?'selected':''}>Baixa</option><option ${p.confidence==='Média'?'selected':''}>Média</option><option ${p.confidence==='Alta'?'selected':''}>Alta</option></select></label><label>Situação documental<input id="pvStatus" value="${esc2(p.status||'')}"></label><label>Data da estimativa<input id="pvDate" type="date" value="${new Date().toISOString().slice(0,10)}"></label><label class="full">Observação da atualização<textarea id="pvNote" placeholder="Ex.: revisão com novos anúncios da região"></textarea></label></div><div class="v120-save"><button type="button" class="cancel">Cancelar</button><button type="button" class="save">Salvar estimativa</button></div></div>`;document.body.appendChild(ov);ov.classList.add('open');const close=()=>ov.remove();ov.querySelector('.v120-close').onclick=close;ov.querySelector('.cancel').onclick=close;ov.onclick=e=>{if(e.target===ov)close()};ov.querySelector('.save').onclick=()=>{p.acquisitionValue=n(ov.querySelector('#pvAcq').value);p.currentEstimate=n(ov.querySelector('#pvEst').value);p.rangeMin=n(ov.querySelector('#pvMin').value);p.rangeMax=n(ov.querySelector('#pvMax').value);p.pricePerM2=n(ov.querySelector('#pvM2').value);p.confidence=ov.querySelector('#pvConf').value;p.status=ov.querySelector('#pvStatus').value.trim();p.history=p.history||[];p.history.push({date:ov.querySelector('#pvDate').value,value:p.currentEstimate,rangeMin:p.rangeMin,rangeMax:p.rangeMax,pricePerM2:p.pricePerM2,confidence:p.confidence,note:ov.querySelector('#pvNote').value.trim()||'Atualização manual'});save();syncAssets();render();try{renderAssets()}catch(e){}try{renderDashboard()}catch(e){}close();try{toast('Estimativa do imóvel atualizada.')}catch(e){}}}
 function syncAssets(){if(!Array.isArray(window.assets)&&typeof assets==='undefined')return;const arr=typeof assets!=='undefined'?assets:window.assets;props.forEach(p=>{let a=arr.find(x=>x.propertyEstimateId===p.id || String(x.name||'').toLowerCase()===String(p.name).toLowerCase());if(!a){a={id:'PROP::'+p.id,name:p.name,type:p.kind==='lot'?'Imóvel':'Casa',year:new Date().getFullYear(),value:n(p.currentEstimate),institution:p.city||'',note:'Estimativa de mercado',propertyEstimateId:p.id};arr.push(a)}else{a.value=n(p.currentEstimate);a.propertyEstimateId=p.id;a.note='Estimativa de mercado'}});try{persist()}catch(e){}}
@@ -26362,5 +26362,462 @@ html.hub-login-lock,body.hub-login-lock{overflow:hidden!important;height:100%!im
 </style>
 <script src="assets/hub.js?v=12"></script>
 <script src="assets/shared-shell-v21.js?v=21"></script>
-<link rel="stylesheet" href="assets/finance-launch-v25.css?v=25">
-<script src="assets/finance-launch-v25.js?v=25"></script>
+
+
+<style id="pp-v27-finance-modal-premium">
+/* V27 — modais premium de lançamento e compra no cartão */
+#txModal,#cardPurchaseModal{
+  z-index:2600!important;
+  padding:22px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:radial-gradient(circle at 20% 0%,rgba(77,124,255,.16),transparent 28%),rgba(7,14,29,.58)!important;
+  backdrop-filter:blur(12px)!important;
+}
+#txModal .modal,#cardPurchaseModal .modal{
+  width:min(1180px,calc(100vw - 28px))!important;
+  max-width:min(1180px,calc(100vw - 28px))!important;
+  max-height:min(92dvh,760px)!important;
+  overflow:visible!important;
+  border-radius:30px!important;
+  padding:18px!important;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(33,111,255,.10),transparent 24%),
+    linear-gradient(180deg,#f8fbff 0%,#f4f7fb 100%)!important;
+  border:1px solid #dce4ee!important;
+  box-shadow:0 42px 90px rgba(4,16,36,.34)!important;
+  position:relative!important;
+}
+#txModal .modal>.formgrid,#cardPurchaseModal .modal>.formgrid{
+  display:block!important;
+  margin:0!important;
+}
+#txModal .modal>.formgrid.v27-staging,#cardPurchaseModal .modal>.formgrid.v27-staging{
+  display:block!important;
+  height:0!important;
+  overflow:hidden!important;
+  padding:0!important;
+  margin:0!important;
+  min-height:0!important;
+}
+#txModal .modalfoot,#cardPurchaseModal .modalfoot{
+  position:static!important;
+  margin-top:0!important;
+  padding:0!important;
+  background:transparent!important;
+  border-top:0!important;
+}
+#txModal .modal h2,#cardPurchaseModal .modal h2{
+  margin:0!important;
+  font-size:22px!important;
+  line-height:1.05!important;
+  color:#14213d!important;
+  letter-spacing:-.03em!important;
+}
+#txModal .modal p,#cardPurchaseModal .modal p{
+  margin:5px 0 0!important;
+  font-size:12.5px!important;
+  line-height:1.45!important;
+  color:#697789!important;
+}
+#txModal .modal > button,
+#cardPurchaseModal .modal > button,
+#txModal .modal [data-close="txModal"],
+#cardPurchaseModal .modal [data-close="cardPurchaseModal"]{
+  box-shadow:none!important;
+}
+.v27-modal-shell{display:grid;grid-template-rows:auto 1fr auto;gap:14px;min-height:min(88dvh,720px)}
+.v27-modal-hero{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+  padding:10px 10px 2px 10px;
+}
+.v27-modal-hero-main{display:flex;gap:14px;align-items:flex-start;min-width:0}
+.v27-modal-mark{
+  width:54px;height:54px;border-radius:18px;flex:0 0 54px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#174ea6,#2f80ff 70%,#7cc4ff);
+  color:#fff;font-size:24px;font-weight:900;
+  box-shadow:0 18px 34px rgba(23,78,166,.26);
+}
+.v27-modal-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 11px;border-radius:999px;
+  background:#eef4ff;border:1px solid #d8e4ff;color:#335ea8;
+  font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:8px;
+}
+.v27-modal-copy{min-width:0}
+.v27-modal-copy h2{margin:0!important}
+.v27-modal-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:14px;
+  min-height:0;
+  align-content:start;
+}
+.v27-modal-section{
+  background:linear-gradient(180deg,#ffffff,#f7faff);
+  border:1px solid #dbe4ef;
+  border-radius:24px;
+  padding:14px;
+  box-shadow:0 10px 24px rgba(15,23,42,.05);
+  min-width:0;
+}
+.v27-modal-section.v27-span-2{grid-column:1/-1}
+.v27-modal-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.v27-modal-section-head h3{
+  margin:0;font-size:14px;line-height:1.1;color:#1b2b48;letter-spacing:-.02em
+}
+.v27-modal-section-head p{margin:4px 0 0!important;font-size:11px!important;color:#6f7f93!important}
+.v27-pill{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:32px;height:32px;padding:0 10px;border-radius:12px;
+  background:linear-gradient(135deg,#eef4ff,#f7faff);border:1px solid #d6e1f2;
+  color:#2f5f9c;font-size:12px;font-weight:900;
+}
+.v27-fields{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  align-content:start;
+}
+.v27-fields.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.v27-fields > .field,
+.v27-fields > .salary-box,
+.v27-fields > #txCardBlock,
+.v27-fields > #standardRecurringBlock,
+.v27-fields > #standardInstallmentFields{
+  min-width:0!important;
+}
+.v27-span-2-item{grid-column:1/-1!important}
+#txModal .field,#cardPurchaseModal .field{
+  gap:6px!important;
+  align-content:start!important;
+}
+#txModal .field label,#cardPurchaseModal .field label,
+#txModal .salary-box h3,#cardPurchaseModal .salary-box h3{
+  font-size:11px!important;
+  font-weight:900!important;
+  color:#5d6d81!important;
+  letter-spacing:-.01em!important;
+}
+#txModal .field input,#txModal .field select,#txModal .field textarea,
+#cardPurchaseModal .field input,#cardPurchaseModal .field select,#cardPurchaseModal .field textarea{
+  min-height:46px!important;
+  border-radius:15px!important;
+  border:1px solid #cfdae7!important;
+  background:linear-gradient(180deg,#fff,#fbfdff)!important;
+  color:#1b2b48!important;
+  padding:11px 14px!important;
+  font-size:15px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85)!important;
+}
+#txModal textarea,#cardPurchaseModal textarea{min-height:86px!important}
+#txModal .choice-wrap,#cardPurchaseModal .choice-wrap{
+  display:flex!important;flex-wrap:wrap!important;gap:8px!important;
+}
+#txModal .choice-wrap .choice-btn,#cardPurchaseModal .choice-wrap .choice-btn,
+#standardRecurringBar button,#v21StatusBar button,#v21CardModeBar button{
+  min-height:42px!important;
+  padding:0 16px!important;
+  border-radius:14px!important;
+  border:1px solid #d5e0ec!important;
+  background:linear-gradient(180deg,#fff,#f7faff)!important;
+  color:#29486f!important;
+  font-size:13px!important;
+  font-weight:900!important;
+  box-shadow:none!important;
+}
+#txModal .choice-wrap .choice-btn.active,#cardPurchaseModal .choice-wrap .choice-btn.active,
+#standardRecurringBar button.active,#v21StatusBar button.active,#v21CardModeBar button.active{
+  background:linear-gradient(135deg,#1e63f0,#258eff)!important;
+  border-color:#1e63f0!important;
+  color:#fff!important;
+  box-shadow:0 14px 24px rgba(30,99,240,.24)!important;
+}
+/* categoria em select para caber sem rolagem */
+#txModal #fCategory + .choice-wrap,
+#cardPurchaseModal #cpCategory + .choice-wrap{display:none!important}
+#txModal #fCategory,
+#cardPurchaseModal #cpCategory{display:block!important}
+#txModal .salary-box{
+  display:none;
+  padding:14px!important;border-radius:18px!important;border:1px solid #d8e3ef!important;
+  background:linear-gradient(180deg,#ffffff,#f7faff)!important;
+}
+#txModal .salary-box.open{display:block!important}
+#txModal .salary-box p{font-size:11px!important;margin:4px 0 10px!important}
+#txModal .salary-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important}
+#txModal .salary-grid > div{min-width:0}
+#txModal .salary-grid label{display:grid;gap:5px;font-size:10px!important;color:#5d6d81!important;font-weight:800}
+#txModal .salary-grid input{min-height:42px!important;font-size:14px!important}
+#txModal .salary-result{
+  margin-top:12px!important;padding:12px 14px!important;border-radius:16px!important;
+  background:linear-gradient(135deg,#123f88,#1b6ef3)!important;color:#fff!important
+}
+#txModal .salary-result span{display:block;font-size:10px;opacity:.86;text-transform:uppercase;letter-spacing:.08em}
+#txModal .salary-result strong{display:block;margin-top:4px;font-size:22px;letter-spacing:-.03em}
+#standardRecurringBlock,#standardInstallmentFields,#txCardBlock{
+  padding:12px!important;border-radius:18px!important;border:1px solid #d8e3ef!important;
+  background:linear-gradient(180deg,#ffffff,#f8fbff)!important;
+}
+#standardRecurringBlock .sr-title{font-size:13px!important;color:#233659!important}
+#standardRecurringHelp,#v21CardModeHelp{font-size:11px!important;color:#6c7b8f!important;line-height:1.45!important}
+#standardInstallmentFields{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important
+}
+#cardPurchaseModal .field[data-v27-hide='1'],
+#txModal .field[data-v27-hide='1']{display:none!important}
+.v27-modal-actions{
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  padding:2px 6px 2px 6px;
+}
+.v27-modal-actions button{
+  min-height:48px!important;border-radius:15px!important;padding:0 18px!important;
+  font-size:14px!important;font-weight:900!important
+}
+.v27-modal-actions .ghost{
+  background:#f3f6fa!important;border:1px solid #d2dbe6!important;color:#27415f!important
+}
+.v27-modal-actions .primary{
+  background:linear-gradient(135deg,#12a35d,#18be73)!important;border:0!important;color:#fff!important;
+  box-shadow:0 18px 28px rgba(18,163,93,.22)!important
+}
+#cardPurchaseModal .v27-modal-actions .primary{background:linear-gradient(135deg,#1156cb,#2a8fff)!important;box-shadow:0 18px 28px rgba(17,86,203,.22)!important}
+#cardPurchaseModal .v27-chip-note,#txModal .v27-chip-note{font-size:11px;color:#6e7e92;margin-top:2px}
+#txModal .modalfoot [data-close="txModal"],#cardPurchaseModal .modalfoot [data-close="cardPurchaseModal"]{order:1}
+.v27-modal-close-fix{
+  position:absolute;top:16px;right:16px;z-index:4;
+}
+@media(max-width:1024px){
+  #txModal .modal,#cardPurchaseModal .modal{width:min(980px,calc(100vw - 20px))!important;max-height:min(92dvh,820px)!important}
+  .v27-modal-grid{grid-template-columns:1fr!important}
+  .v27-modal-section.v27-span-2{grid-column:auto}
+}
+@media(max-width:760px){
+  #txModal,#cardPurchaseModal{padding:10px!important;align-items:flex-start!important}
+  #txModal .modal,#cardPurchaseModal .modal{
+    width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;
+    max-height:none!important;overflow:auto!important;border-radius:24px!important;padding:14px!important
+  }
+  .v27-modal-shell{min-height:auto}
+  .v27-modal-hero{padding-right:42px}
+  .v27-modal-mark{width:46px;height:46px;flex-basis:46px;border-radius:15px;font-size:21px}
+  .v27-modal-grid,.v27-fields,.v27-fields.cols-3,#txModal .salary-grid,#standardInstallmentFields{grid-template-columns:1fr!important}
+  .v27-modal-actions{display:grid;grid-template-columns:1fr 1fr}
+}
+</style>
+<script id="pp-v27-finance-modal-premium">
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const q=(sel,root=document)=>root.querySelector(sel);
+const qa=(sel,root=document)=>Array.from(root.querySelectorAll(sel));
+let lastTxType='entrada';
+
+function fieldOf(id){
+  const el=$(id);
+  if(!el)return null;
+  return el.closest('.field')||el.closest('.salary-box')||el.closest('#txCardBlock')||el.closest('#standardRecurringBlock')||el.closest('#standardInstallmentFields')||el;
+}
+function visible(el){
+  if(!el)return false;
+  const cs=getComputedStyle(el);
+  return cs.display!=='none' && cs.visibility!=='hidden';
+}
+function makeSection(title,sub,tag){
+  const sec=document.createElement('section');
+  sec.className='v27-modal-section '+(tag||'');
+  sec.innerHTML=`<div class="v27-modal-section-head"><div><h3>${title}</h3>${sub?`<p>${sub}</p>`:''}</div><span class="v27-pill">${title.split(' ').slice(0,1)[0]}</span></div><div class="v27-fields"></div>`;
+  return sec;
+}
+function ensureHero(modal,kind){
+  if(modal.querySelector(':scope > .v27-modal-shell'))return modal.querySelector(':scope > .v27-modal-shell');
+  const title=modal.querySelector(':scope > h2');
+  const desc=modal.querySelector(':scope > p');
+  const foot=modal.querySelector(':scope > .modalfoot');
+  const shell=document.createElement('div');
+  shell.className='v27-modal-shell '+kind;
+  const hero=document.createElement('div');
+  hero.className='v27-modal-hero';
+  hero.innerHTML=`<div class="v27-modal-hero-main"><div class="v27-modal-mark">${kind==='tx'?'↗':'▦'}</div><div class="v27-modal-copy"><div class="v27-modal-badge">${kind==='tx'?'Lançamentos':'Cartões'}</div></div></div>`;
+  const copy=hero.querySelector('.v27-modal-copy');
+  if(title)copy.appendChild(title);
+  if(desc)copy.appendChild(desc);
+  const grid=document.createElement('div');
+  grid.className='v27-modal-grid';
+  const actions=document.createElement('div');
+  actions.className='v27-modal-actions';
+  if(foot){ Array.from(foot.children).forEach(ch=>actions.appendChild(ch)); foot.remove(); }
+  shell.append(hero,grid,actions);
+  const staging=modal.querySelector(':scope > .formgrid');
+  if(staging){ staging.classList.add('v27-staging'); shell.appendChild(staging); }
+  const hidden=qa(':scope > input[type="hidden"]',modal);
+  modal.innerHTML='';
+  hidden.forEach(h=>modal.appendChild(h));
+  modal.appendChild(shell);
+  return shell;
+}
+function place(node,wrap,full){ if(!node||!wrap)return; if(full)node.classList.add('v27-span-2-item'); else node.classList.remove('v27-span-2-item'); wrap.appendChild(node); }
+function txSections(shell){
+  const grid=shell.querySelector('.v27-modal-grid');
+  if(!grid.dataset.ready){
+    const a=makeSection('Tipo e competência','Defina o lançamento e quando ele entra no fluxo.','v27-tx-meta');
+    const b=makeSection('Detalhes','Valor, categoria e identificação do movimento.','v27-tx-details');
+    const c=makeSection('Forma e repetição','Escolha como entra e se será recorrente.','v27-tx-mode v27-span-2');
+    grid.append(a,b,c); grid.dataset.ready='1';
+  }
+  return {
+    meta:grid.children[0].querySelector('.v27-fields'),
+    details:grid.children[1].querySelector('.v27-fields'),
+    mode:grid.children[2].querySelector('.v27-fields')
+  };
+}
+function purchaseSections(shell){
+  const grid=shell.querySelector('.v27-modal-grid');
+  if(!grid.dataset.ready){
+    const a=makeSection('Compra','Cartão, data e competência da cobrança.','v27-cp-basic');
+    const b=makeSection('Parcelamento','Tipo da compra e andamento das parcelas.','v27-cp-mode');
+    const c=makeSection('Detalhes da compra','Descrição, categoria e valor total.','v27-cp-details v27-span-2');
+    grid.append(a,b,c); grid.dataset.ready='1';
+  }
+  return {
+    basic:grid.children[0].querySelector('.v27-fields'),
+    mode:grid.children[1].querySelector('.v27-fields'),
+    details:grid.children[2].querySelector('.v27-fields')
+  };
+}
+function redistributeTx(){
+  const modal=q('#txModal .modal'); if(!modal)return;
+  const shell=ensureHero(modal,'tx');
+  const sec=txSections(shell);
+  [fieldOf('fType'),fieldOf('fStatus'),fieldOf('fYear'),fieldOf('fMonth')].forEach(n=>place(n,sec.meta,false));
+  [fieldOf('fDesc')].forEach(n=>place(n,sec.details,true));
+  [fieldOf('fValue'),fieldOf('fCategory'),fieldOf('fOriginSelect')||fieldOf('fOrigin'),fieldOf('fClass')].forEach(n=>place(n,sec.details,false));
+  [fieldOf('fPayMethod'),$('txCardBlock'),$('standardRecurringBlock'),$('standardInstallmentFields'),$('salaryBox')].forEach(n=>place(n,sec.mode,n && (n.id==='txCardBlock'||n.id==='standardRecurringBlock'||n.id==='standardInstallmentFields'||n.id==='salaryBox')));
+  const staging=q('#txModal .formgrid');
+  if(staging){
+    qa(':scope > *',staging).forEach(n=>{ if(!n.classList.contains('field') && n.id!=='salaryBox'){ sec.mode.appendChild(n); } });
+  }
+  syncTxState();
+}
+function syncTxState(){
+  const type=$('fType')?.value||lastTxType||'entrada';
+  lastTxType=type;
+  const pay=$('fPayMethod')?.value||'padrao';
+  const origin=fieldOf('fOriginSelect')||fieldOf('fOrigin');
+  const cls=fieldOf('fClass');
+  const payField=fieldOf('fPayMethod');
+  const cardBlock=$('txCardBlock');
+  if(origin)origin.dataset.v27Hide=(type==='saida'?'0':'1');
+  if(cls)cls.dataset.v27Hide=(type==='saida'?'0':'1');
+  if(payField)payField.dataset.v27Hide=(type==='saida'?'0':'1');
+  if(cardBlock)cardBlock.style.display=(type==='saida'&&pay==='cartao')?'block':'none';
+  const recur=$('standardRecurringBlock');
+  if(recur)recur.style.display=(pay==='padrao')?'block':'none';
+}
+function redistributePurchase(){
+  const modal=q('#cardPurchaseModal .modal'); if(!modal)return;
+  const shell=ensureHero(modal,'purchase');
+  const sec=purchaseSections(shell);
+  const firstInvoice = fieldOf('cpFirstInvoiceV39');
+  [fieldOf('cpCard'),fieldOf('cpDate')].forEach(n=>place(n,sec.basic,false));
+  if(firstInvoice) place(firstInvoice,sec.basic,false); else [fieldOf('cpStartYear'),fieldOf('cpStartMonth')].forEach(n=>place(n,sec.basic,false));
+  [fieldOf('cpStatus')].forEach(n=>place(n,sec.basic,false));
+  [fieldOf('cpMode'),fieldOf('cpInstallments'),fieldOf('cpPaid')].forEach(n=>place(n,sec.mode,false));
+  [fieldOf('cpDesc'),fieldOf('cpCategory'),fieldOf('cpTotal')].forEach((n,i)=>place(n,sec.details,i===0));
+  syncPurchaseState();
+}
+function syncPurchaseState(){
+  const mode=$('cpMode')?.value||'avista';
+  const paid=fieldOf('cpPaid');
+  const inst=fieldOf('cpInstallments');
+  if(inst)inst.dataset.v27Hide=(mode==='parcelado'?'0':'1');
+  if(paid)paid.dataset.v27Hide=(mode==='parcelado'?'0':'1');
+  if(mode!=='parcelado'){
+    if($('cpInstallments')) $('cpInstallments').value='1';
+    if($('cpPaid') && !$('cpId')?.value) $('cpPaid').value='0';
+  }
+}
+function bindStateSync(){
+  document.addEventListener('change',e=>{
+    if(e.target?.id==='fType'){ lastTxType=e.target.value; setTimeout(syncTxState,0); }
+    if(e.target?.id==='fPayMethod'){ setTimeout(syncTxState,0); }
+    if(['cpMode','cpCard','cpDate'].includes(e.target?.id)) setTimeout(syncPurchaseState,0);
+  },true);
+}
+function wrapOpeners(){
+  const oldOpenTx=window.openTx;
+  if(typeof oldOpenTx==='function' && !oldOpenTx.__v27){
+    const wrapped=function(){
+      const res=oldOpenTx.apply(this,arguments);
+      const filtered=document.getElementById('txType')?.value;
+      const desired=(filtered==='entrada'||filtered==='saida')?filtered:(lastTxType||'entrada');
+      setTimeout(()=>{
+        if($('fType')){
+          $('fType').value=desired;
+          $('fType').dispatchEvent(new Event('change',{bubbles:true}));
+        }
+        redistributeTx();
+        syncTxState();
+      },30);
+      return res;
+    };
+    wrapped.__v27=true;window.openTx=wrapped;try{openTx=wrapped}catch(e){}
+  }
+  const oldEdit=window.openTxEdit;
+  if(typeof oldEdit==='function' && !oldEdit.__v27){
+    const wrapped=function(){
+      const res=oldEdit.apply(this,arguments);
+      setTimeout(()=>{ redistributeTx(); syncTxState(); },50);
+      return res;
+    };
+    wrapped.__v27=true;window.openTxEdit=wrapped;try{openTxEdit=wrapped}catch(e){}
+  }
+  const oldCard=window.openCardPurchase;
+  if(typeof oldCard==='function' && !oldCard.__v27){
+    const wrapped=function(){
+      const res=oldCard.apply(this,arguments);
+      setTimeout(()=>{ redistributePurchase(); syncPurchaseState(); },30);
+      return res;
+    };
+    wrapped.__v27=true;window.openCardPurchase=wrapped;try{openCardPurchase=wrapped}catch(e){}
+  }
+}
+function init(){
+  redistributeTx();
+  redistributePurchase();
+  bindStateSync();
+  wrapOpeners();
+  setTimeout(()=>{redistributeTx();redistributePurchase();syncTxState();syncPurchaseState();},500);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
+window.ppFinanceModalsV27={refresh(){redistributeTx();redistributePurchase();syncTxState();syncPurchaseState();}};
+})();
+</script>
+<style id="pp-v27-finance-close-fix">
+.v27-float-close{
+  position:absolute;top:14px;right:14px;z-index:8;
+  width:38px;height:38px;border-radius:14px;border:1px solid #d5dfeb;
+  background:linear-gradient(180deg,#fff,#f2f6fb);color:#516276;
+  font-size:24px;line-height:1;display:grid;place-items:center;cursor:pointer;
+  box-shadow:0 10px 22px rgba(15,23,42,.08)
+}
+</style>
+<script id="pp-v27-finance-close-fix">
+(()=>{
+  function ensure(id){
+    const modal=document.querySelector(`#${id} .modal`); if(!modal) return;
+    let b=modal.querySelector('.v27-float-close');
+    if(!b){
+      b=document.createElement('button');
+      b.type='button'; b.className='v27-float-close'; b.setAttribute('aria-label','Fechar'); b.textContent='×';
+      b.onclick=()=>document.getElementById(id)?.classList.remove('open');
+      modal.appendChild(b);
+    }
+  }
+  const run=()=>{ensure('txModal');ensure('cardPurchaseModal')};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,700),{once:true}); else setTimeout(run,700);
+  document.addEventListener('click',e=>{if(e.target.closest?.('[data-addtx],#addCardPurchaseBtn,[onclick*="openCardPurchase"]'))setTimeout(run,80)},true);
+})();
+</script>
