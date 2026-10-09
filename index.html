@@ -26363,103 +26363,50 @@ html.hub-login-lock,body.hub-login-lock{overflow:hidden!important;height:100%!im
 <script src="assets/hub.js?v=12"></script>
 <script src="assets/shared-shell-v21.js?v=21"></script>
 
-<style id="hub-v31-global-readable-responsive">
-/* V31 — leitura saudável e responsividade compartilhada */
-:root{
-  --hub-v31-text:#17243a;
-  --hub-v31-muted:#66758a;
-  --hub-v31-border:#dbe4ee;
-  --hub-v31-surface:#ffffff;
-}
-html{font-size:16px!important;text-size-adjust:100%;-webkit-text-size-adjust:100%}
-body,button,input,select,textarea{font-family:Roboto,Arial,sans-serif!important}
-body{font-size:15px!important;line-height:1.46!important;color:var(--hub-v31-text)!important}
-main,.main,.hub-content{min-width:0!important}
-h1{font-size:clamp(26px,2.15vw,38px)!important;line-height:1.08!important;letter-spacing:-.035em!important;text-wrap:balance}
-h2{font-size:clamp(21px,1.55vw,29px)!important;line-height:1.12!important;letter-spacing:-.025em!important;text-wrap:balance}
-h3{font-size:clamp(16px,1.15vw,21px)!important;line-height:1.2!important;letter-spacing:-.015em!important}
-h4{font-size:clamp(14px,1vw,18px)!important;line-height:1.25!important}
-p,li,td{font-size:clamp(12.5px,.88vw,14px)!important;line-height:1.5!important}
-th,label{font-size:clamp(11px,.76vw,12.5px)!important;line-height:1.35!important}
-small,.muted,.sub,.meta,.hint,.footnote{font-size:clamp(10.5px,.72vw,12px)!important;line-height:1.4!important}
-button,input,select,textarea{font-size:clamp(12.5px,.86vw,14px)!important;line-height:1.25!important}
-button{white-space:nowrap}
-input,select,textarea{min-width:0}
-img,svg{max-width:100%}
-table{width:100%;border-collapse:collapse}
-th,td{padding:10px 12px!important;vertical-align:middle!important}
-.main,.hub-content{padding-left:clamp(14px,2vw,30px)!important;padding-right:clamp(14px,2vw,30px)!important}
-.view{min-width:0!important}
-.card,.panel,.v115-panel,.v115-overview-card,.v130-media-card,.v130-trip-card{
-  min-width:0!important;
-}
-.v115-overview-grid,.v115-content-grid{
-  gap:clamp(12px,1.35vw,20px)!important;
-}
-.v115-overview-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))!important}
-.v115-content-grid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))!important}
-.v115-site-hero,.v115-wide-panel,.v115-panel,.v115-overview-card{
-  border-radius:22px!important;
-}
-.v115-site-hero,.v115-wide-panel,.v115-panel{padding:clamp(16px,1.7vw,26px)!important}
-.v115-overview-card{padding:clamp(14px,1.4vw,20px)!important}
-.v130-library-grid{gap:clamp(12px,1.3vw,18px)!important}
-/* evita grandes áreas mortas criadas por alturas fixas antigas */
-.view,.v115-life-view,[class*="panel"],[class*="card"]{max-width:100%}
-@media(max-width:980px){
-  body{font-size:14.5px!important}
-  .main,.hub-content{padding-left:16px!important;padding-right:16px!important}
-  th,td{padding:9px 10px!important}
-}
-@media(max-width:720px){
-  html{font-size:15px!important}
-  h1{font-size:26px!important}h2{font-size:22px!important}h3{font-size:17px!important}
-  p,li,td{font-size:13px!important}button,input,select,textarea{font-size:13px!important}
-  .main,.hub-content{padding-left:12px!important;padding-right:12px!important}
-  .v115-overview-grid,.v115-content-grid{grid-template-columns:1fr!important}
-  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
-  button{white-space:normal}
-}
-</style>
-<style id="pp-v31-stable-finance-modals">
-/* V31 — modais financeiros estáveis, legíveis e responsivos */
+
+<style id="pp-v32-stable-premium-finance-modals">
+/* V32 — premium, compacto e funcional sem reestruturar o DOM */
 #txModal,#cardPurchaseModal{
-  z-index:2800!important;
-  padding:18px!important;
+  z-index:2900!important;
+  padding:14px!important;
   align-items:center!important;
   justify-content:center!important;
-  background:rgba(8,18,38,.62)!important;
+  overflow:auto!important;
+  background:rgba(8,18,38,.64)!important;
   backdrop-filter:blur(12px)!important;
   -webkit-backdrop-filter:blur(12px)!important;
 }
 #txModal .modal,#cardPurchaseModal .modal{
-  width:min(1120px,calc(100vw - 28px))!important;
-  max-width:min(1120px,calc(100vw - 28px))!important;
-  max-height:92dvh!important;
+  width:min(1180px,calc(100vw - 24px))!important;
+  max-width:min(1180px,calc(100vw - 24px))!important;
+  max-height:min(92dvh,820px)!important;
   overflow:auto!important;
-  margin:0 auto!important;
-  padding:20px!important;
+  margin:auto!important;
+  padding:22px!important;
   border-radius:28px!important;
-  border:1px solid rgba(199,213,230,.92)!important;
+  border:1px solid rgba(205,219,236,.95)!important;
   background:
-    radial-gradient(circle at 95% 0%,rgba(48,125,255,.09),transparent 28%),
-    linear-gradient(180deg,#ffffff 0%,#f7f9fc 100%)!important;
-  box-shadow:0 40px 90px rgba(6,20,44,.32)!important;
+    radial-gradient(circle at 100% 0%,rgba(52,116,255,.10),transparent 27%),
+    linear-gradient(180deg,#ffffff 0%,#f7faff 100%)!important;
+  box-shadow:0 38px 90px rgba(4,17,40,.34)!important;
   scrollbar-width:thin;
+  scrollbar-color:#8aa0bd transparent;
 }
-#txModal .modal>h2,#cardPurchaseModal .modal>h2{
-  margin:0 0 5px!important;
+#txModal .modal::-webkit-scrollbar,#cardPurchaseModal .modal::-webkit-scrollbar{width:7px}
+#txModal .modal::-webkit-scrollbar-track,#cardPurchaseModal .modal::-webkit-scrollbar-track{background:transparent}
+#txModal .modal::-webkit-scrollbar-thumb,#cardPurchaseModal .modal::-webkit-scrollbar-thumb{background:#8aa0bd;border-radius:99px}
+#txModal .modal h2,#cardPurchaseModal .modal h2{
   font-size:clamp(24px,2vw,31px)!important;
-  line-height:1.08!important;
-  color:#152640!important;
+  line-height:1.06!important;
   letter-spacing:-.035em!important;
+  color:#14233d!important;
+  margin:0 0 5px!important;
 }
 #txModal .modal>p,#cardPurchaseModal .modal>p{
-  margin:0 0 16px!important;
-  max-width:760px!important;
-  color:#69798d!important;
   font-size:13px!important;
   line-height:1.45!important;
+  color:#69798e!important;
+  margin:0 0 18px!important;
 }
 #txModal .formgrid,#cardPurchaseModal .formgrid{
   display:grid!important;
@@ -26470,325 +26417,304 @@ th,td{padding:10px 12px!important;vertical-align:middle!important}
 #txModal .field,#cardPurchaseModal .field{
   min-width:0!important;
   gap:6px!important;
+  align-content:start!important;
+  padding:0!important;
   margin:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
 }
 #txModal .field>label,#cardPurchaseModal .field>label{
-  color:#52647c!important;
-  font-size:11.5px!important;
-  font-weight:900!important;
+  display:block!important;
+  font-size:12px!important;
+  font-weight:850!important;
+  line-height:1.25!important;
+  color:#52657c!important;
+  margin:0!important;
 }
 #txModal input,#txModal select,#txModal textarea,
 #cardPurchaseModal input,#cardPurchaseModal select,#cardPurchaseModal textarea{
   min-height:44px!important;
   width:100%!important;
-  min-width:0!important;
+  border:1px solid #cfdbe9!important;
   border-radius:14px!important;
-  border:1px solid #cfdae8!important;
   background:#fff!important;
-  color:#182942!important;
+  color:#172640!important;
   padding:10px 13px!important;
   font-size:14px!important;
-  box-shadow:0 1px 0 rgba(255,255,255,.8) inset!important;
+  line-height:1.25!important;
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset!important;
 }
 #txModal input:focus,#txModal select:focus,#txModal textarea:focus,
 #cardPurchaseModal input:focus,#cardPurchaseModal select:focus,#cardPurchaseModal textarea:focus{
-  outline:none!important;
-  border-color:#5d8fff!important;
-  box-shadow:0 0 0 3px rgba(56,113,240,.12)!important;
+  outline:none!important;border-color:#4384f5!important;box-shadow:0 0 0 3px rgba(67,132,245,.13)!important
 }
-#txModal .v31-span-2,#cardPurchaseModal .v31-span-2{grid-column:span 2!important}
-#txModal .v31-span-3,#cardPurchaseModal .v31-span-3{grid-column:span 3!important}
-#txModal .v31-span-4,#cardPurchaseModal .v31-span-4{grid-column:span 4!important}
-#txModal .v31-span-5,#cardPurchaseModal .v31-span-5{grid-column:span 5!important}
-#txModal .v31-span-6,#cardPurchaseModal .v31-span-6{grid-column:span 6!important}
-#txModal .v31-span-8,#cardPurchaseModal .v31-span-8{grid-column:span 8!important}
-#txModal .v31-span-12,#cardPurchaseModal .v31-span-12{grid-column:1/-1!important}
-
-/* visual de seletores */
-#txModal .choice-wrap,#cardPurchaseModal .choice-wrap,
-#txModal #v21StatusBar,#txModal #standardRecurringBar,#txModal #v21CardModeBar,
-#cardPurchaseModal #v52ModeBar{
-  gap:7px!important;
-}
-#txModal .choice-wrap .choice-btn,#cardPurchaseModal .choice-wrap .choice-btn,
-#txModal #v21StatusBar button,#txModal #standardRecurringBar button,#txModal #v21CardModeBar button,
-#cardPurchaseModal #v52ModeBar button{
-  min-height:40px!important;
-  border-radius:12px!important;
-  padding:8px 12px!important;
-  font-size:12px!important;
-  font-weight:900!important;
-  white-space:nowrap!important;
-}
-#txModal #v21StatusBar{
-  display:grid!important;
-  grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  padding:4px!important;
-  border-radius:15px!important;
-  background:#eaf0f7!important;
-}
-#txModal #v21StatusBar button{border:0!important;background:transparent!important;color:#2c4665!important;box-shadow:none!important}
-#txModal #v21StatusBar button.active{background:linear-gradient(135deg,#1f63e9,#3289ff)!important;color:#fff!important;box-shadow:0 8px 20px rgba(31,99,233,.22)!important}
-#txModal #standardRecurringBar{
-  display:grid!important;
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  width:100%!important;
-}
-#txModal #standardRecurringBar button{min-width:0!important}
-#txModal.v89-entry-mode #standardRecurringBar [data-sr-mode="parcelado"]{display:block!important}
-#txModal #standardInstallmentFields{
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  gap:10px!important;
-  margin-top:10px!important;
-}
-#txModal #standardInstallmentFields.show{display:grid!important}
-#txModal.v89-entry-mode #standardInstallmentFields.show{display:grid!important}
-
-/* cartões */
-#cardPurchaseModal #v52ModeBar{
-  display:grid!important;
-  grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  width:100%!important;
-}
-#cardPurchaseModal #v52ModeBar button{min-width:0!important}
-#cardPurchaseModal #cpCategory{display:block!important}
-#cardPurchaseModal .v31-category-visual{display:none!important}
-#cardPurchaseModal .v31-show{display:grid!important}
-#cardPurchaseModal .v31-hide{display:none!important}
-#cardPurchaseModal .v31-installment-note{
-  grid-column:1/-1!important;
-  padding:11px 13px!important;
-  border-radius:15px!important;
-  background:linear-gradient(135deg,#eef5ff,#f8fbff)!important;
-  border:1px solid #d5e4ff!important;
-  color:#315985!important;
-  font-size:12px!important;
-  line-height:1.4!important;
-}
-#cardPurchaseModal .v31-installment-note b{color:#153d78!important;font-size:14px!important}
-
 #txModal .modalfoot,#cardPurchaseModal .modalfoot{
   position:static!important;
   display:flex!important;
   justify-content:flex-end!important;
+  align-items:center!important;
   gap:10px!important;
-  margin-top:16px!important;
+  margin-top:18px!important;
   padding:14px 0 0!important;
-  border-top:1px solid #e2e8f0!important;
+  border-top:1px solid #dfe7f0!important;
   background:transparent!important;
 }
 #txModal .modalfoot button,#cardPurchaseModal .modalfoot button{
-  min-height:44px!important;
-  min-width:138px!important;
-  border-radius:13px!important;
+  min-height:46px!important;
+  min-width:142px!important;
+  padding:0 18px!important;
+  border-radius:14px!important;
   font-size:13px!important;
   font-weight:900!important;
 }
-#txModal .modalfoot .primary,#cardPurchaseModal .modalfoot .primary{
-  color:#fff!important;
-  border:0!important;
+#txModal .modalfoot .ghost,#cardPurchaseModal .modalfoot .ghost{
+  background:#edf3f8!important;color:#17365d!important;border:1px solid #cedbe9!important
 }
-#txModal .modalfoot .primary{background:linear-gradient(135deg,#1167e8,#2988ff)!important}
-#cardPurchaseModal .modalfoot .primary{background:linear-gradient(135deg,#1457c9,#2d82ff)!important}
+#txModal .modalfoot .primary,#cardPurchaseModal .modalfoot .primary{
+  background:linear-gradient(135deg,#145cd7,#2d88ff)!important;color:#fff!important;border:0!important;box-shadow:0 12px 24px rgba(20,92,215,.22)!important
+}
 
-/* blocos dinâmicos */
+/* Lançamento — grade compacta */
+#txModal .v32-f-type{grid-column:span 3!important}
+#txModal .v32-f-status{grid-column:span 3!important}
+#txModal .v32-f-year{grid-column:span 3!important}
+#txModal .v32-f-month{grid-column:span 3!important}
+#txModal .v32-f-desc{grid-column:span 6!important}
+#txModal .v32-f-value{grid-column:span 2!important}
+#txModal .v32-f-category{grid-column:span 4!important}
+#txModal .v32-f-origin{grid-column:span 4!important}
+#txModal .v32-f-class{grid-column:span 4!important}
+#txModal .v32-f-pay{grid-column:span 4!important}
+#txModal #txCardBlock,#txModal #standardRecurringBlock,#txModal #standardInstallmentFields,#txModal #salaryBox{grid-column:1/-1!important}
+
+/* Compra cartão — grade compacta */
+#cardPurchaseModal .v32-cp-card{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-date{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-first{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-desc{grid-column:span 6!important}
+#cardPurchaseModal .v32-cp-category{grid-column:span 3!important}
+#cardPurchaseModal .v32-cp-total{grid-column:span 3!important}
+#cardPurchaseModal .v32-cp-mode{grid-column:1/-1!important}
+#cardPurchaseModal .v32-cp-installments{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-paid{grid-column:span 4!important}
+#cardPurchaseModal .v32-cp-status{grid-column:span 4!important}
+#cardPurchaseModal .v32-hidden-legacy{display:none!important}
+
+/* controles segmentados */
+#txModal .choice-wrap:not(.category-picker),
+#txModal #v21StatusBar,
+#txModal #standardRecurringBar,
+#txModal #v21CardModeBar,
+#cardPurchaseModal #v52ModeBar{
+  width:100%!important;
+  display:grid!important;
+  gap:5px!important;
+  padding:4px!important;
+  border-radius:15px!important;
+  background:#eaf0f7!important;
+  border:1px solid #dde6f0!important;
+}
+#txModal #v21StatusBar{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+#txModal #standardRecurringBar{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#txModal #v21CardModeBar{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#cardPurchaseModal #v52ModeBar{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+#txModal .choice-wrap:not(.category-picker) .choice-btn,
+#txModal #v21StatusBar button,
+#txModal #standardRecurringBar button,
+#txModal #v21CardModeBar button,
+#cardPurchaseModal #v52ModeBar button{
+  min-height:38px!important;
+  padding:7px 10px!important;
+  border:0!important;
+  border-radius:11px!important;
+  background:transparent!important;
+  color:#2a4567!important;
+  font-size:12px!important;
+  font-weight:900!important;
+  box-shadow:none!important;
+}
+#txModal .choice-wrap:not(.category-picker) .choice-btn.active,
+#txModal #v21StatusBar button.active,
+#txModal #v21CardModeBar button.active,
+#cardPurchaseModal #v52ModeBar button.active{
+  background:linear-gradient(135deg,#1b5fe4,#318cff)!important;
+  color:#fff!important;
+  box-shadow:0 9px 18px rgba(27,95,228,.22)!important;
+}
+#txModal #standardRecurringBar button.active[data-sr-mode="unico"]{background:linear-gradient(135deg,#e35d75,#f17b92)!important;color:#fff!important}
+#txModal #standardRecurringBar button.active[data-sr-mode="parcelado"]{background:linear-gradient(135deg,#1b5fe4,#318cff)!important;color:#fff!important}
+#txModal #standardRecurringBar button.active[data-sr-mode="recorrente"]{background:linear-gradient(135deg,#159a64,#45c889)!important;color:#fff!important}
+#cardPurchaseModal #v52ModeBar button.active[data-mode="estorno"]{background:linear-gradient(135deg,#159a64,#45c889)!important;color:#fff!important}
+
+/* categoria sem duplicação de chips */
+#txModal .v32-f-category>.choice-wrap,
+#cardPurchaseModal .v32-cp-category>.choice-wrap,
+#cardPurchaseModal .v32-cp-category>[id*="Chip"],
+#cardPurchaseModal .v32-cp-category>[class*="chip"],
+#cardPurchaseModal .v32-cp-category>[class*="choice"]{display:none!important}
+#txModal #fCategory,#cardPurchaseModal #cpCategory{display:block!important}
+
+/* origem com botão Novo */
+#txModal .v32-f-origin>div{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important}
+#txModal .v32-f-origin .btn{min-height:44px!important;padding:0 15px!important;border-radius:13px!important;font-size:12px!important}
+
+/* blocos condicionais sem espaços vazios */
 #txModal #txCardBlock,#txModal #standardRecurringBlock,#txModal #standardInstallmentFields,#txModal #salaryBox{
-  grid-column:1/-1!important;
   padding:12px!important;
-  border:1px solid #dbe4ef!important;
-  border-radius:17px!important;
+  border:1px solid #dce5ef!important;
+  border-radius:18px!important;
   background:linear-gradient(180deg,#fff,#f8fbff)!important;
 }
-#txModal #txCardBlock .formgrid{grid-template-columns:repeat(12,minmax(0,1fr))!important}
-#txModal #txCardBlock .field{grid-column:span 3!important}
-#txModal #salaryBox .salary-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important}
+#txModal #standardRecurringBar{margin-top:7px!important}
+#txModal #standardInstallmentFields{display:none!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;margin-top:10px!important}
+#txModal #standardInstallmentFields.show{display:grid!important}
+#txModal.v89-entry-mode #standardRecurringBar [data-sr-mode="parcelado"]{display:block!important}
+#txModal.v89-entry-mode #standardInstallmentFields.show{display:grid!important}
+#txModal #standardRecurringHelp,#txModal #v21CardModeHelp,#cardPurchaseModal #v52ModeHelp{
+  margin-top:6px!important;font-size:11px!important;line-height:1.4!important;color:#6c7c90!important
+}
 
-@media(max-width:920px){
+/* quantidade de parcelas — destaque funcional */
+#cardPurchaseModal .v32-cp-installments{
+  padding:11px!important;
+  border-radius:16px!important;
+  border:1px solid #cfe0fb!important;
+  background:#f4f8ff!important;
+}
+#cardPurchaseModal .v32-cp-installments input{font-size:18px!important;font-weight:900!important;color:#164f9f!important}
+#cardPurchaseModal #v39InstallmentPreview{margin-top:7px!important;font-size:11px!important;color:#546b87!important;line-height:1.4!important}
+
+@media(max-width:900px){
   #txModal .formgrid,#cardPurchaseModal .formgrid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
-  #txModal .v31-span-2,#cardPurchaseModal .v31-span-2{grid-column:span 3!important}
-  #txModal .v31-span-3,#cardPurchaseModal .v31-span-3{grid-column:span 3!important}
-  #txModal .v31-span-4,#cardPurchaseModal .v31-span-4,
-  #txModal .v31-span-5,#cardPurchaseModal .v31-span-5,
-  #txModal .v31-span-6,#cardPurchaseModal .v31-span-6,
-  #txModal .v31-span-8,#cardPurchaseModal .v31-span-8{grid-column:span 6!important}
-  #txModal #txCardBlock .field{grid-column:span 6!important}
-  #txModal #salaryBox .salary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #txModal .v32-f-type,#txModal .v32-f-status,#txModal .v32-f-year,#txModal .v32-f-month{grid-column:span 3!important}
+  #txModal .v32-f-desc{grid-column:1/-1!important}
+  #txModal .v32-f-value{grid-column:span 2!important}
+  #txModal .v32-f-category{grid-column:span 4!important}
+  #txModal .v32-f-origin,#txModal .v32-f-class,#txModal .v32-f-pay{grid-column:span 3!important}
+  #cardPurchaseModal .v32-cp-card,#cardPurchaseModal .v32-cp-date,#cardPurchaseModal .v32-cp-first{grid-column:span 2!important}
+  #cardPurchaseModal .v32-cp-desc{grid-column:1/-1!important}
+  #cardPurchaseModal .v32-cp-category,#cardPurchaseModal .v32-cp-total{grid-column:span 3!important}
+  #cardPurchaseModal .v32-cp-installments,#cardPurchaseModal .v32-cp-paid,#cardPurchaseModal .v32-cp-status{grid-column:span 2!important}
 }
 @media(max-width:620px){
-  #txModal,#cardPurchaseModal{padding:8px!important;align-items:flex-start!important}
-  #txModal .modal,#cardPurchaseModal .modal{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;max-height:none!important;padding:14px!important;border-radius:22px!important}
-  #txModal .formgrid,#cardPurchaseModal .formgrid{grid-template-columns:1fr!important}
-  #txModal [class*="v31-span-"],#cardPurchaseModal [class*="v31-span-"]{grid-column:auto!important}
-  #txModal #standardRecurringBar{grid-template-columns:repeat(3,1fr)!important}
-  #cardPurchaseModal #v52ModeBar{grid-template-columns:repeat(2,1fr)!important}
-  #txModal #standardInstallmentFields,#txModal #salaryBox .salary-grid{grid-template-columns:1fr!important}
+  #txModal,#cardPurchaseModal{padding:6px!important;align-items:flex-start!important}
+  #txModal .modal,#cardPurchaseModal .modal{width:calc(100vw - 12px)!important;max-width:none!important;max-height:none!important;border-radius:22px!important;padding:16px!important}
+  #txModal .formgrid,#cardPurchaseModal .formgrid{grid-template-columns:1fr!important;gap:10px!important}
+  #txModal [class*="v32-f-"],#cardPurchaseModal [class*="v32-cp-"]{grid-column:auto!important}
+  #txModal #standardInstallmentFields{grid-template-columns:1fr!important}
+  #cardPurchaseModal #v52ModeBar{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   #txModal .modalfoot,#cardPurchaseModal .modalfoot{display:grid!important;grid-template-columns:1fr 1fr!important}
   #txModal .modalfoot button,#cardPurchaseModal .modalfoot button{min-width:0!important;width:100%!important}
 }
 </style>
-<script id="pp-v31-stable-finance-modals-script">
+<script id="pp-v32-stable-premium-finance-modals">
 (()=>{
 'use strict';
-const $=id=>document.getElementById(id);
-const field=id=>$(id)?.closest('.field')||null;
-const addClass=(id,cls)=>{const f=field(id);if(f){f.classList.remove('v31-span-2','v31-span-3','v31-span-4','v31-span-5','v31-span-6','v31-span-8','v31-span-12');f.classList.add(cls)}return f};
-const baseOpenTx=window.openTx;
-const baseOpenCardPurchase=window.openCardPurchase;
-let openingTx=false,openingCard=false;
-
-function arrangeTx(){
-  addClass('fType','v31-span-3');
-  addClass('fStatus','v31-span-3');
-  addClass('fYear','v31-span-3');
-  addClass('fMonth','v31-span-3');
-  addClass('fDesc','v31-span-6');
-  addClass('fValue','v31-span-3');
-  addClass('fCategory','v31-span-3');
-  addClass('fOriginSelect','v31-span-4')||addClass('fOrigin','v31-span-4');
-  addClass('fClass','v31-span-4');
-  addClass('fPayMethod','v31-span-4');
-  try{window.ppStandardRecurringV62?.refresh?.()}catch(e){}
-  try{window.ppInstallmentsV66?.refresh?.()}catch(e){}
+const byId=id=>document.getElementById(id);
+const field=id=>byId(id)?.closest('.field')||null;
+function cls(id,name){const f=field(id);if(f)f.classList.add(name);return f}
+function tagFields(){
+  cls('fType','v32-f-type'); cls('fStatus','v32-f-status'); cls('fYear','v32-f-year'); cls('fMonth','v32-f-month');
+  cls('fDesc','v32-f-desc'); cls('fValue','v32-f-value'); cls('fCategory','v32-f-category'); cls('fClass','v32-f-class');
+  const of=field('fOriginSelect')||field('fOrigin'); if(of)of.classList.add('v32-f-origin');
+  cls('fPayMethod','v32-f-pay');
+  cls('cpCard','v32-cp-card'); cls('cpDate','v32-cp-date'); cls('cpDesc','v32-cp-desc'); cls('cpCategory','v32-cp-category');
+  cls('cpMode','v32-cp-mode'); cls('cpTotal','v32-cp-total'); cls('cpInstallments','v32-cp-installments'); cls('cpPaid','v32-cp-paid'); cls('cpStatus','v32-cp-status');
+  const ff=field('cpFirstInvoiceV39'); if(ff)ff.classList.add('v32-cp-first');
+  const sy=field('cpStartYear'),sm=field('cpStartMonth'); if(sy)sy.classList.add('v32-hidden-legacy'); if(sm)sm.classList.add('v32-hidden-legacy');
 }
-function forceExpense(){
-  const type=$('fType');if(!type)return;
-  type.value='saida';
-  type.dispatchEvent(new Event('change',{bubbles:true}));
-  if($('fStatus')){$('fStatus').value='Quitado';$('fStatus').dispatchEvent(new Event('change',{bubbles:true}))}
-  if($('fPayMethod')){$('fPayMethod').value='padrao';$('fPayMethod').dispatchEvent(new Event('change',{bubbles:true}))}
-  arrangeTx();
-}
-function openTxStable(){
-  if(openingTx)return;openingTx=true;
-  try{typeof baseOpenTx==='function'&&baseOpenTx()}finally{openingTx=false}
-  [0,35,90].forEach(ms=>setTimeout(forceExpense,ms));
-}
-function ensureEntryInstallment(){
-  const type=$('fType')?.value;
-  const mode=$('standardRecurringMode');
-  const bar=$('standardRecurringBar');
-  if(type!=='entrada'||!mode||!bar)return;
-  let opt=[...mode.options].find(o=>o.value==='parcelado');
-  if(!opt){opt=document.createElement('option');opt.value='parcelado';opt.textContent='Parcelado';mode.appendChild(opt)}
-  let btn=bar.querySelector('[data-sr-mode="parcelado"]');
-  if(!btn){btn=document.createElement('button');btn.type='button';btn.dataset.srMode='parcelado';btn.textContent='Parcelado';const rec=bar.querySelector('[data-sr-mode="recorrente"]');bar.insertBefore(btn,rec||null)}
-  btn.style.setProperty('display','block','important');
-}
-function reinforceEntryInstallment(){
-  ensureEntryInstallment();
-  if($('fType')?.value==='entrada'&&$('standardRecurringMode')?.value==='parcelado'){
-    $('standardInstallmentFields')?.classList.add('show');
-    $('standardInstallmentFields')?.style.setProperty('display','grid','important');
-    document.querySelectorAll('#standardRecurringBar [data-sr-mode]').forEach(b=>b.classList.toggle('active',b.dataset.srMode==='parcelado'));
-  }
-}
-function cleanCategoryVisual(){
-  const sel=$('cpCategory'),f=sel?.closest('.field');if(!sel||!f)return;
-  sel.style.setProperty('display','block','important');
-  [...f.children].forEach(ch=>{
-    if(ch===sel||ch.tagName==='LABEL')return;
-    const marker=`${ch.id||''} ${ch.className||''}`.toLowerCase();
-    if(/choice|chip|category|picker|pill/.test(marker)){ch.classList.add('v31-category-visual');ch.style.setProperty('display','none','important')}
-  });
-}
-function firstInvoiceLabel(){
-  const direct=$('cpFirstInvoiceV39');
-  if(direct&&direct.value)return direct.value;
-  const y=+$('cpStartYear')?.value||new Date().getFullYear();
-  const m=+$('cpStartMonth')?.value||new Date().getMonth()+1;
-  return `${String(m).padStart(2,'0')}/${y}`;
-}
-function syncCardMode(){
-  const mode=$('cpMode')?.value||'avista';
+function syncCardPurchase(){
+  tagFields();
+  const mode=byId('cpMode')?.value||'avista';
   const qf=field('cpInstallments'),pf=field('cpPaid');
-  const isPar=mode==='parcelado';
-  if(qf){qf.classList.toggle('v31-show',isPar);qf.classList.toggle('v31-hide',!isPar);qf.style.setProperty('display',isPar?'grid':'none','important')}
-  if(pf){const show=isPar||mode==='avista';pf.classList.toggle('v31-show',show);pf.classList.toggle('v31-hide',!show);pf.style.setProperty('display',show?'grid':'none','important')}
-  if(isPar&&$('cpInstallments')&&(+String($('cpInstallments').value).replace(',','.')||0)<2)$('cpInstallments').value='2';
-  let note=$('v31InstallmentNote');
-  if(!note){note=document.createElement('div');note.id='v31InstallmentNote';note.className='v31-installment-note';const form=$('cpInstallments')?.closest('.formgrid')||document.querySelector('#cardPurchaseModal .formgrid');form?.appendChild(note)}
-  if(note){
-    if(isPar){
-      const qty=Math.max(2,parseInt($('cpInstallments')?.value,10)||2);
-      const total=Number(String($('cpTotal')?.value||'0').replace(/\./g,'').replace(',','.').replace(/[^0-9.-]/g,''))||0;
-      const per=qty?total/qty:0;
-      note.style.display='block';
-      note.innerHTML=`<b>${qty} parcelas</b> · ${per.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})} por fatura · início ${firstInvoiceLabel()}`;
-    }else note.style.display='none';
+  if(qf){qf.style.setProperty('display',mode==='parcelado'?'grid':'none','important');}
+  if(pf){pf.style.setProperty('display',(mode==='parcelado'||mode==='avista')?'grid':'none','important');}
+  if(mode==='parcelado'){
+    const q=byId('cpInstallments'); if(q&&(+q.value||0)<2)q.value='2';
   }
 }
-function arrangeCard(){
-  addClass('cpCard','v31-span-4');
-  addClass('cpDate','v31-span-4');
-  addClass('cpFirstInvoiceV39','v31-span-4');
-  addClass('cpStartYear','v31-span-2');
-  addClass('cpStartMonth','v31-span-2');
-  addClass('cpStatus','v31-span-4');
-  addClass('cpDesc','v31-span-6');
-  addClass('cpCategory','v31-span-3');
-  addClass('cpTotal','v31-span-3');
-  addClass('cpMode','v31-span-12');
-  addClass('cpInstallments','v31-span-3');
-  addClass('cpPaid','v31-span-3');
-  cleanCategoryVisual();
-  syncCardMode();
+function forceNewTxOut(){
+  const t=byId('fType'); if(!t)return;
+  t.value='saida';
+  t.dispatchEvent(new Event('change',{bubbles:true}));
+  const mode=byId('standardRecurringMode'); if(mode){mode.value='unico';mode.dispatchEvent(new Event('change',{bubbles:true}));}
+  tagFields();
 }
-function openCardStable(id){
-  if(openingCard)return;openingCard=true;
-  try{typeof baseOpenCardPurchase==='function'&&baseOpenCardPurchase(id)}finally{openingCard=false}
-  [0,50,120].forEach(ms=>setTimeout(arrangeCard,ms));
-}
-
-/* intercepta somente os dois gatilhos problemáticos */
-document.addEventListener('click',e=>{
-  const add=e.target.closest?.('[data-addtx]');
-  if(add){e.preventDefault();e.stopImmediatePropagation();openTxStable();return}
-  const card=e.target.closest?.('#addCardPurchaseBtn');
-  if(card){e.preventDefault();e.stopImmediatePropagation();openCardStable();return}
-  const par=e.target.closest?.('#standardRecurringBar [data-sr-mode="parcelado"]');
-  if(par&&$('fType')?.value==='entrada'){
-    setTimeout(()=>{if($('standardRecurringMode')){$('standardRecurringMode').value='parcelado';$('standardRecurringMode').dispatchEvent(new Event('change',{bubbles:true}))}reinforceEntryInstallment()},70)
+function allowEntryParcel(){
+  const mode=byId('standardRecurringMode'); const bar=byId('standardRecurringBar'); if(!mode||!bar)return;
+  if(!mode.querySelector('option[value="parcelado"]')){const o=document.createElement('option');o.value='parcelado';o.textContent='Parcelado';mode.appendChild(o)}
+  if(!bar.querySelector('[data-sr-mode="parcelado"]')){
+    const b=document.createElement('button');b.type='button';b.dataset.srMode='parcelado';b.textContent='Parcelado';
+    const r=bar.querySelector('[data-sr-mode="recorrente"]');bar.insertBefore(b,r||null);
   }
-},true);
-
-document.addEventListener('change',e=>{
-  if(e.target?.id==='fType')setTimeout(()=>{arrangeTx();ensureEntryInstallment()},20);
-  if(e.target?.id==='standardRecurringMode')setTimeout(reinforceEntryInstallment,30);
-  if(['cpMode','cpInstallments','cpTotal','cpStartYear','cpStartMonth','cpFirstInvoiceV39'].includes(e.target?.id))setTimeout(syncCardMode,20);
-},true);
-document.addEventListener('input',e=>{if(['cpInstallments','cpTotal','cpFirstInvoiceV39'].includes(e.target?.id))syncCardMode()},true);
-
-/* chamadas diretas continuam funcionando */
-window.openCardPurchase=function(id){openCardStable(id)};
-try{openCardPurchase=window.openCardPurchase}catch(e){}
-window.ppFinanceModalV31={openTx:openTxStable,openCard:openCardStable,refresh(){arrangeTx();arrangeCard();reinforceEntryInstallment()}};
-
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{arrangeTx();arrangeCard();ensureEntryInstallment()},500),{once:true});
-else setTimeout(()=>{arrangeTx();arrangeCard();ensureEntryInstallment()},500);
+}
+function reassertParcelado(){
+  if(byId('fType')?.value!=='entrada')return;
+  const mode=byId('standardRecurringMode');if(!mode)return;
+  mode.value='parcelado';
+  byId('standardInstallmentFields')?.classList.add('show');
+  document.querySelectorAll('#standardRecurringBar [data-sr-mode]').forEach(b=>b.classList.toggle('active',b.dataset.srMode==='parcelado'));
+  const h=byId('standardRecurringHelp');if(h)h.textContent='Parcelado: divide o valor total desta entrada entre os meses a partir da primeira parcela informada.';
+}
+function patchOpenNew(){
+  document.addEventListener('click',e=>{
+    const add=e.target.closest?.('[data-addtx]'); if(!add)return;
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    try{window.openTx?.()}catch(err){}
+    [0,30,90].forEach(ms=>setTimeout(()=>{forceNewTxOut();allowEntryParcel();tagFields();},ms));
+  },true);
+}
+function patchRecurringClick(){
+  document.addEventListener('click',e=>{
+    const b=e.target.closest?.('#standardRecurringBar [data-sr-mode]'); if(!b)return;
+    if(b.dataset.srMode==='parcelado'&&byId('fType')?.value==='entrada'){
+      [40,80].forEach(ms=>setTimeout(reassertParcelado,ms));
+    }
+  },true);
+}
+function patchPurchaseMode(){
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.('#v52ModeBar [data-mode]')) setTimeout(syncCardPurchase,0);
+    if(e.target.closest?.('#addCardPurchaseBtn')) [30,90].forEach(ms=>setTimeout(()=>{tagFields();syncCardPurchase();},ms));
+  },true);
+  document.addEventListener('change',e=>{
+    if(e.target?.id==='cpMode')setTimeout(syncCardPurchase,0);
+    if(e.target?.id==='fType')setTimeout(()=>{allowEntryParcel();tagFields();},0);
+  },true);
+}
+function init(){tagFields();allowEntryParcel();syncCardPurchase();patchOpenNew();patchRecurringClick();patchPurchaseMode();setTimeout(()=>{tagFields();allowEntryParcel();syncCardPurchase();},500)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+window.ppFinanceModalV32={refresh(){tagFields();allowEntryParcel();syncCardPurchase()}};
 })();
 </script>
-<style id="hub-v31b-readable-overrides">
-/* reforço de legibilidade contra regras antigas muito pequenas */
-:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) p,
-:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) td{
-  font-size:clamp(12.5px,.9vw,14px)!important;line-height:1.45!important
+<style id="hub-v32-readable-responsive">
+/* V32 — leitura saudável e responsividade global */
+html{font-size:16px!important}
+body{font-family:Roboto,Arial,sans-serif!important;font-size:14px!important;line-height:1.45!important;color:#17243a!important}
+button,input,select,textarea{font-family:inherit!important}
+button{font-size:13px!important;line-height:1.2!important}
+input,select,textarea{font-size:14px!important;line-height:1.3!important}
+.view h1,.hub-content h1{font-size:clamp(26px,2.4vw,34px)!important;line-height:1.08!important;letter-spacing:-.035em!important}
+.view h2,.hub-content h2{font-size:clamp(20px,1.8vw,27px)!important;line-height:1.15!important;letter-spacing:-.025em!important}
+.view h3,.hub-content h3{font-size:clamp(16px,1.2vw,20px)!important;line-height:1.2!important}
+.view p,.hub-content p,.view li,.hub-content li{font-size:clamp(12.5px,.85vw,14px)!important;line-height:1.5!important}
+.view small,.hub-content small{font-size:clamp(11px,.72vw,12.5px)!important;line-height:1.4!important}
+.view label,.hub-content label{font-size:clamp(11px,.74vw,12.5px)!important;line-height:1.3!important}
+.view table th,.hub-content table th{font-size:clamp(10.5px,.7vw,12px)!important;line-height:1.3!important}
+.view table td,.hub-content table td{font-size:clamp(12px,.82vw,13.5px)!important;line-height:1.4!important}
+.view .card,.hub-content .card{min-width:0!important}
+.view .grid,.view [class*="grid"],.hub-content .grid,.hub-content [class*="grid"]{gap:clamp(10px,1vw,16px)!important}
+.view .card,.hub-content .card,[class*="-card"]{box-sizing:border-box}
+@media(max-width:900px){
+  body{font-size:14px!important}
+  .main,.hub-content{padding-left:clamp(12px,2vw,20px)!important;padding-right:clamp(12px,2vw,20px)!important}
 }
-:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) small,
-:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) label,
-:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) th{
-  font-size:clamp(10.8px,.76vw,12px)!important;line-height:1.35!important
-}
-:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) button,
-:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) input,
-:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) select,
-:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) textarea{
-  font-size:clamp(12.5px,.86vw,14px)!important
-}
-:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) [class*="grid"]{
-  gap:clamp(10px,1.15vw,18px)!important;min-width:0!important
-}
-:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) h2,
-:is(#dashboard,#lancamentos,#cartoes,#credores,#dividas,#fgts,#previdencia,#investimentos,#patrimonio,#veiculos,#projecao,#nuvem,#edu-overview,#edu-curriculo,#edu-formacoes,#edu-publicacoes,#health-overview,#health-exams,#ent-overview,#ent-filmes,#ent-docs,#ent-series,#ent-livros,#ent-viagens,#ent-conexoes) h3{
-  text-wrap:balance!important;overflow-wrap:normal!important
+@media(max-width:620px){
+  html{font-size:15px!important}
+  button{font-size:12.5px!important}
+  input,select,textarea{font-size:16px!important}
+  .view h1,.hub-content h1{font-size:26px!important}
+  .view h2,.hub-content h2{font-size:21px!important}
 }
 </style>
