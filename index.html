@@ -27319,3 +27319,277 @@ function openRefine(){ setTimeout(()=>{ensureActions('txModal','saveTx','Salvar 
  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(openRefine,500),{once:true}); else setTimeout(openRefine,500);
 })();
 </script>
+<style id="pp-v30-native-finance-modals">
+/* V30 — layout nativo e funcional */
+#txModal .modal,#cardPurchaseModal .modal{
+  width:min(1120px,96vw)!important;
+  max-height:min(94dvh,820px)!important;
+  border-radius:28px!important;
+  overflow:auto!important;
+}
+#txModal .v27-modal-grid{grid-template-columns:1fr 1.05fr!important;gap:12px!important}
+#txModal .v27-tx-mode{grid-column:1/-1!important}
+#txModal .v27-modal-section,#cardPurchaseModal .v27-modal-section{min-height:auto!important}
+
+/* Compra no cartão em duas áreas reais, sem colunas vazias */
+#cardPurchaseModal .v27-modal-grid.v30-purchase-grid{
+  display:grid!important;
+  grid-template-columns:minmax(0,1.25fr) minmax(310px,.75fr)!important;
+  gap:14px!important;
+  align-items:start!important;
+}
+#cardPurchaseModal .v30-purchase-main,
+#cardPurchaseModal .v30-purchase-plan{
+  min-width:0!important;
+  border:1px solid #d9e3ef!important;
+  border-radius:22px!important;
+  background:linear-gradient(180deg,#fff,#f7faff)!important;
+  padding:14px!important;
+  box-shadow:0 12px 28px rgba(15,34,67,.055)!important;
+}
+#cardPurchaseModal .v30-purchase-plan{
+  background:linear-gradient(155deg,#f9fbff,#eef4ff)!important;
+  border-color:#cfdbef!important;
+}
+.v30-section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.v30-section-title h3{margin:0;font-size:14px;color:#1b2b48;letter-spacing:-.02em}
+.v30-section-title span{font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:900;color:#52709a;background:#edf3fb;border:1px solid #d7e3f0;border-radius:999px;padding:5px 8px}
+.v30-purchase-main-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.v30-purchase-main-grid .v30-wide{grid-column:1/-1!important}
+.v30-purchase-plan-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.v30-installment-box{
+  display:none;
+  padding:13px!important;border-radius:17px!important;
+  background:linear-gradient(135deg,#173f72,#2467cf)!important;color:#fff!important;
+  box-shadow:0 16px 30px rgba(23,63,114,.18)!important;
+}
+.v30-installment-box.show{display:block!important}
+.v30-installment-box label{display:block;color:#dce8ff!important;font-size:10px!important;font-weight:900!important;margin-bottom:7px}
+.v30-installment-row{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center}
+.v30-installment-box input{
+  width:100%!important;height:46px!important;min-height:46px!important;
+  border:1px solid rgba(255,255,255,.42)!important;border-radius:13px!important;
+  background:rgba(255,255,255,.96)!important;color:#17345b!important;
+  font-size:20px!important;font-weight:900!important;text-align:center!important;padding:8px!important
+}
+.v30-installment-copy small{display:block;color:#c5d8fb;font-size:10px;line-height:1.4}
+.v30-installment-copy strong{display:block;margin-top:3px;font-size:17px;color:#fff;letter-spacing:-.02em}
+.v30-schedule-preview{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.v30-schedule-preview span{padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);font-size:9px;font-weight:800;color:#eef5ff}
+
+/* modo de compra mais compacto */
+#cardPurchaseModal #v52ModeBar{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:5px!important;padding:4px!important;border-radius:15px!important;background:#e8eef7!important
+}
+#cardPurchaseModal #v52ModeBar button{min-height:36px!important;padding:7px 8px!important;border-radius:11px!important;font-size:10.5px!important}
+#cardPurchaseModal #v52ModeHelp{font-size:10px!important;line-height:1.4!important;margin-top:6px!important;color:#6a7a8f!important}
+
+/* somente um seletor de categoria */
+#cardPurchaseModal #cpCategory{display:block!important}
+#cardPurchaseModal #cpCategory ~ *:not(.v30-keep){display:none!important}
+
+/* status como controle deslizante */
+#txModal #v21StatusBar{
+  position:relative!important;display:grid!important;grid-template-columns:1fr 1fr!important;
+  gap:0!important;padding:4px!important;background:#e8eef7!important;border-radius:16px!important;overflow:hidden!important
+}
+#txModal #v21StatusBar:before{
+  content:"";position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);
+  border-radius:12px;background:linear-gradient(135deg,#16a565,#4bc98a);
+  box-shadow:0 10px 22px rgba(22,165,101,.22);transition:transform .22s cubic-bezier(.2,.8,.2,1),background .2s ease
+}
+#txModal #v21StatusBar.v30-pending:before{transform:translateX(100%);background:linear-gradient(135deg,#245bd9,#2e82ff);box-shadow:0 10px 22px rgba(36,91,217,.22)}
+#txModal #v21StatusBar button{position:relative;z-index:2;background:transparent!important;box-shadow:none!important;border:0!important;color:#3a526e!important;min-height:36px!important}
+#txModal #v21StatusBar button.active{background:transparent!important;box-shadow:none!important;color:#fff!important}
+
+/* repetição sempre em uma linha e compacta */
+#txModal #standardRecurringBar{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;padding:4px!important;border-radius:15px!important}
+#txModal #standardRecurringBar button{min-height:35px!important;padding:7px 8px!important;font-size:10.5px!important}
+#txModal #standardInstallmentFields{grid-template-columns:110px 1fr 1fr!important;gap:8px!important;margin-top:8px!important}
+#txModal #standardInstallmentFields input,#txModal #standardInstallmentFields select{height:38px!important;min-height:38px!important;font-size:12px!important}
+
+/* ações sempre visíveis */
+#txModal .v27-modal-actions,#cardPurchaseModal .v27-modal-actions{
+  position:sticky!important;bottom:0!important;z-index:20!important;
+  display:flex!important;justify-content:flex-end!important;gap:9px!important;
+  padding:10px 6px 4px!important;margin-top:4px!important;
+  background:linear-gradient(180deg,rgba(247,250,255,0),rgba(247,250,255,.95) 35%,rgba(247,250,255,.99))!important;
+  backdrop-filter:blur(8px)!important;border-top:1px solid rgba(192,207,225,.55)!important
+}
+#txModal .v27-modal-actions button,#cardPurchaseModal .v27-modal-actions button{min-width:135px!important;height:42px!important;min-height:42px!important}
+
+@media(max-width:900px){
+  #cardPurchaseModal .v27-modal-grid.v30-purchase-grid,#txModal .v27-modal-grid{grid-template-columns:1fr!important}
+  .v30-purchase-main-grid{grid-template-columns:1fr!important}
+  .v30-purchase-main-grid .v30-wide{grid-column:auto!important}
+  #cardPurchaseModal #v52ModeBar{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #txModal #standardInstallmentFields{grid-template-columns:1fr!important}
+}
+</style>
+<script id="pp-v30-native-finance-modals-script">
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+function field(id){return $(id)?.closest('.field')||null}
+function move(node,wrap,wide=false){if(!node||!wrap)return;if(wide)node.classList.add('v30-wide');else node.classList.remove('v30-wide');wrap.appendChild(node)}
+function setDisplay(el,on){if(el)el.style.setProperty('display',on?'':'none','important')}
+function money(v){let s=String(v??'').replace(/R\$/gi,'').trim();if(!s)return 0;if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');else if(s.includes(','))s=s.replace(',','.');return Number(s.replace(/[^0-9.-]/g,''))||0}
+function br(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0)}
+function addMonth(y,m,step){let d=new Date(+y,+m-1+step,1);return {y:d.getFullYear(),m:d.getMonth()+1}}
+function monthLabel(y,m){const names=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];return `${names[(+m||1)-1]}/${String(y).slice(-2)}`}
+
+function ensurePurchaseLayout(){
+  const modal=q('#cardPurchaseModal .modal'); if(!modal)return;
+  const shell=modal.querySelector('.v27-modal-shell'); if(!shell)return;
+  const grid=shell.querySelector('.v27-modal-grid'); if(!grid)return;
+  if(!grid.classList.contains('v30-purchase-grid')){
+    grid.className='v27-modal-grid v30-purchase-grid';
+    grid.innerHTML=`
+      <section class="v30-purchase-main"><div class="v30-section-title"><h3>Dados da compra</h3><span>Compra</span></div><div class="v30-purchase-main-grid"></div></section>
+      <section class="v30-purchase-plan"><div class="v30-section-title"><h3>Pagamento</h3><span>Faturas</span></div><div class="v30-purchase-plan-grid"></div></section>`;
+  }
+  const main=grid.querySelector('.v30-purchase-main-grid');
+  const plan=grid.querySelector('.v30-purchase-plan-grid');
+  [field('cpCard'),field('cpDate'),field('cpFirstInvoiceV39')||field('cpStartYear'),field('cpDesc'),field('cpCategory'),field('cpTotal')].forEach((n,i)=>move(n,main,i===3));
+  if(!$('cpFirstInvoiceV39')) move(field('cpStartMonth'),main,false);
+  [field('cpMode'),field('cpStatus'),field('cpPaid')].forEach(n=>move(n,plan,false));
+  let box=$('v30InstallmentBox');
+  if(!box){
+    box=document.createElement('div');box.id='v30InstallmentBox';box.className='v30-installment-box';
+    box.innerHTML=`<label>Quantidade de parcelas</label><div class="v30-installment-row"><input id="v30InstallmentQty" type="number" min="2" max="120" value="2"><div class="v30-installment-copy"><small>O valor será dividido e lançado automaticamente nas faturas mensais.</small><strong id="v30InstallmentValue">—</strong></div></div><div class="v30-schedule-preview" id="v30SchedulePreview"></div>`;
+    plan.appendChild(box);
+    $('v30InstallmentQty').addEventListener('input',()=>{ if($('cpInstallments')) $('cpInstallments').value=Math.max(2,+$('v30InstallmentQty').value||2); updatePurchasePlan(); });
+  }
+  const originalQty=field('cpInstallments'); if(originalQty) originalQty.style.display='none';
+  compactCategory();
+  updatePurchasePlan();
+}
+function compactCategory(){
+  const sel=$('cpCategory'); if(!sel)return; const f=sel.closest('.field'); if(!f)return;
+  [...f.children].forEach(ch=>{if(ch!==sel&&ch.tagName!=='LABEL')ch.style.display='none'});
+}
+function getFirstInvoice(){
+  const monthInput=$('cpFirstInvoiceV39');
+  if(monthInput&&/^\d{4}-\d{2}$/.test(monthInput.value)){const [y,m]=monthInput.value.split('-').map(Number);return {y,m}}
+  return {y:+$('cpStartYear')?.value||new Date().getFullYear(),m:+$('cpStartMonth')?.value||new Date().getMonth()+1};
+}
+function updatePurchasePlan(){
+  const mode=$('cpMode')?.value||'avista'; const box=$('v30InstallmentBox');
+  if(box)box.classList.toggle('show',mode==='parcelado');
+  const qty=Math.max(2,+$('v30InstallmentQty')?.value||+$('cpInstallments')?.value||2);
+  if($('cpInstallments')) $('cpInstallments').value=mode==='parcelado'?qty:1;
+  if($('v30InstallmentQty')) $('v30InstallmentQty').value=qty;
+  const total=money($('cpTotal')?.value); const per=qty?total/qty:0;
+  if($('v30InstallmentValue')) $('v30InstallmentValue').textContent=mode==='parcelado'?`${qty}x de ${br(per)}`:'—';
+  const prev=$('v30SchedulePreview'); if(prev){prev.innerHTML='';if(mode==='parcelado'){const f=getFirstInvoice();const max=Math.min(qty,6);for(let i=0;i<max;i++){const d=addMonth(f.y,f.m,i);const s=document.createElement('span');s.textContent=`${i+1}/${qty} · ${monthLabel(d.y,d.m)}`;prev.appendChild(s)}if(qty>6){const s=document.createElement('span');s.textContent=`+${qty-6} faturas`;prev.appendChild(s)}}}
+  const paid=field('cpPaid'); setDisplay(paid,mode==='avista'||mode==='parcelado');
+}
+
+function forceNewTxAsExpense(){
+  const modal=$('txModal'); if(!modal?.classList.contains('open'))return;
+  const edit=$('txEditId')?.value; if(edit)return;
+  const type=$('fType'); if(!type)return;
+  if(type.value!=='saida'){type.value='saida';type.dispatchEvent(new Event('change',{bubbles:true}));}
+  syncTxOptions();
+}
+function syncTxOptions(){
+  const type=$('fType')?.value||'saida';
+  const modal=$('txModal'); if(!modal)return;
+  modal.dataset.v30Type=type;
+  const origin=field('fOriginSelect')||field('fOrigin');
+  const cls=field('fClass');
+  const pay=field('fPayMethod');
+  setDisplay(origin,type==='saida'); setDisplay(cls,type==='saida');
+  /* Forma de pagamento permanece disponível em entrada e saída */
+  setDisplay(pay,true);
+  const rec=$('standardRecurringBlock'); if(rec)rec.style.display=($('fPayMethod')?.value||'padrao')==='padrao'?'block':'none';
+  ensureEntryParcelled();
+  syncStatusSlider();
+}
+function ensureEntryParcelled(){
+  const type=$('fType')?.value||'saida';
+  const sel=$('standardRecurringMode'); const bar=$('standardRecurringBar'); if(!sel||!bar)return;
+  if(!sel.querySelector('option[value="parcelado"]')){const o=document.createElement('option');o.value='parcelado';o.textContent='Parcelado';sel.appendChild(o)}
+  let b=bar.querySelector('[data-sr-mode="parcelado"]');
+  if(!b){b=document.createElement('button');b.type='button';b.dataset.srMode='parcelado';b.textContent='Parcelado';bar.insertBefore(b,bar.querySelector('[data-sr-mode="recorrente"]'))}
+  b.style.display='block';
+  /* neutraliza a rotina antiga que tenta remover Parcelado da Entrada */
+  if(type==='entrada'&&sel.value==='parcelado'){
+    setTimeout(()=>{sel.value='parcelado';$('standardInstallmentFields')?.classList.add('show');bar.querySelectorAll('[data-sr-mode]').forEach(x=>x.classList.toggle('active',x.dataset.srMode==='parcelado'));},90);
+  }
+}
+function syncStatusSlider(){
+  const bar=$('v21StatusBar'); if(!bar)return; const status=$('fStatus')?.value||'Quitado';bar.classList.toggle('v30-pending',/pendente/i.test(status));
+}
+function q(sel,root=document){return root.querySelector(sel)}
+
+function bind(){
+  document.addEventListener('change',e=>{
+    if(['cpMode','cpTotal','cpFirstInvoiceV39','cpStartYear','cpStartMonth'].includes(e.target?.id)) updatePurchasePlan();
+    if(['fType','fPayMethod','standardRecurringMode','fStatus'].includes(e.target?.id)) setTimeout(syncTxOptions,20);
+  },true);
+  document.addEventListener('input',e=>{if(['cpTotal','v30InstallmentQty'].includes(e.target?.id))updatePurchasePlan()},true);
+  document.addEventListener('click',e=>{
+    const modeBtn=e.target.closest('#v52ModeBar [data-mode]'); if(modeBtn)setTimeout(()=>{ensurePurchaseLayout();updatePurchasePlan()},40);
+    const txType=e.target.closest('[data-choice-for="fType"] .choice-btn,.choice-btn[data-choice="entrada"],.choice-btn[data-choice="saida"]'); if(txType)setTimeout(syncTxOptions,40);
+    const recurring=e.target.closest('#standardRecurringBar [data-sr-mode]'); if(recurring){setTimeout(()=>{const s=$('standardRecurringMode');if(s&&recurring.dataset.srMode==='parcelado'){s.value='parcelado';$('standardInstallmentFields')?.classList.add('show')}syncTxOptions()},120)}
+    if(e.target.closest('#addCardPurchaseBtn,[onclick*="openCardPurchase"]'))setTimeout(ensurePurchaseLayout,80);
+    if(e.target.closest('[data-addtx]'))setTimeout(forceNewTxAsExpense,80);
+  },true);
+}
+function wrapOpeners(){
+  const oldCard=window.openCardPurchase;
+  if(typeof oldCard==='function'&&!oldCard.__v30){const w=function(){const r=oldCard.apply(this,arguments);setTimeout(ensurePurchaseLayout,80);return r};w.__v30=true;window.openCardPurchase=w;try{openCardPurchase=w}catch(e){}}
+  const oldTx=window.openTx;
+  if(typeof oldTx==='function'&&!oldTx.__v30){const w=function(){const r=oldTx.apply(this,arguments);setTimeout(forceNewTxAsExpense,80);return r};w.__v30=true;window.openTx=w;try{openTx=w}catch(e){}}
+}
+function init(){wrapOpeners();bind();setTimeout(()=>{ensurePurchaseLayout();syncTxOptions();syncStatusSlider()},600)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+window.ppNativeFinanceV30={purchase:ensurePurchaseLayout,tx:syncTxOptions};
+})();
+</script>
+<style id="pp-v30b-native-finance-fixes">
+#txModal.v89-entry-mode #standardInstallmentFields{display:none!important}
+#txModal.v89-entry-mode #standardInstallmentFields.show{display:grid!important}
+#txModal .v27-modal-actions .v30-save,
+#cardPurchaseModal .v27-modal-actions .v30-save{color:#fff!important;border:0!important}
+#txModal .v27-modal-actions .v30-save{background:linear-gradient(135deg,#12a365,#21c77d)!important;box-shadow:0 12px 24px rgba(18,163,101,.2)!important}
+#cardPurchaseModal .v27-modal-actions .v30-save{background:linear-gradient(135deg,#2257d9,#2f80ff)!important;box-shadow:0 12px 24px rgba(34,87,217,.2)!important}
+</style>
+<script id="pp-v30b-native-finance-fixes-script">
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+function makeActions(modalId,kind){
+  const modal=$(modalId); if(!modal)return;
+  const shell=modal.querySelector('.v27-modal-shell')||modal.querySelector('.modal'); if(!shell)return;
+  let bar=modal.querySelector('.v27-modal-actions');
+  if(!bar){bar=document.createElement('div');bar.className='v27-modal-actions';shell.appendChild(bar)}
+  bar.innerHTML='';
+  const cancel=document.createElement('button');cancel.type='button';cancel.className='ghost';cancel.textContent='Cancelar';cancel.onclick=()=>modal.classList.remove('open');
+  const save=document.createElement('button');save.type='button';save.className='primary v30-save';save.textContent=kind==='tx'?'Salvar lançamento':'Salvar compra';
+  save.onclick=e=>{e.preventDefault();e.stopPropagation();if(kind==='tx'){if(typeof window.saveTx==='function')window.saveTx()}else{if(typeof window.saveCardPurchase==='function')window.saveCardPurchase()}};
+  bar.append(cancel,save);
+}
+function syncQtyFromReal(){
+  const mode=$('cpMode')?.value||'avista';const real=$('cpInstallments');const ui=$('v30InstallmentQty');if(!ui||!real)return;
+  if(mode==='parcelado'){
+    const q=Math.max(2,parseInt(real.value,10)||2);
+    if(document.activeElement!==ui)ui.value=q;
+  }
+}
+function refresh(){
+  makeActions('txModal','tx');makeActions('cardPurchaseModal','card');
+  syncQtyFromReal();
+  try{window.ppNativeFinanceV30?.purchase?.()}catch(e){}
+  try{window.ppNativeFinanceV30?.tx?.()}catch(e){}
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest('[data-addtx],#addCardPurchaseBtn,[onclick*="openCardPurchase"]'))setTimeout(refresh,140);
+  if(e.target.closest('#v52ModeBar [data-mode="parcelado"]'))setTimeout(()=>{syncQtyFromReal();refresh()},100);
+},true);
+document.addEventListener('change',e=>{if(['cpMode','cpInstallments'].includes(e.target?.id))setTimeout(syncQtyFromReal,50)},true);
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,800),{once:true});else setTimeout(refresh,800);
+})();
+</script>
