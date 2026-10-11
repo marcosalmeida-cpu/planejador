@@ -27184,7 +27184,25 @@ function thirteenthAvos(adm,end){if(!adm||!end||end<adm)return 0;const y=end.get
 function lastAnniversary(adm,end){let x=new Date(end.getFullYear(),adm.getMonth(),adm.getDate(),12);if(x>end)x=new Date(end.getFullYear()-1,adm.getMonth(),adm.getDate(),12);return x}
 function vacationAvos(adm,end){if(!adm||!end||end<adm)return 0;let s=lastAnniversary(adm,end),avos=0,cursor=new Date(s);while(avos<12){let next=new Date(cursor);next.setMonth(next.getMonth()+1);if(next<=end){avos++;cursor=next;continue}const days=Math.floor((end-cursor)/86400000)+1;if(days>=15)avos++;break}return clamp(avos,0,12)}
 function fgts(){let f={};try{f=window.fgtsSummary||fgtsSummary||{}}catch(e){}return{current:Math.max(0,n(f.saldoAtual)),rescision:Math.max(0,n(f.saldoRescisao)),blocked:Math.max(0,n(f.saldoBloqueado)),free:Math.max(0,n(f.saldoDisponivel))}}
-function debtList(){try{return (typeof window.getDebts==='function'?window.getDebts(false):getDebts(false))||[]}catch(e){return []}}
+function debtList(){
+  const byId=new Map();
+  try{
+    const rows=(typeof window.getDebts==='function'?window.getDebts(true):(typeof getDebts==='function'?getDebts(true):[]))||[];
+    rows.forEach(d=>{if(d&&d.id!=null)byId.set(String(d.id),{...d})});
+  }catch(e){}
+  // Lê também o armazenamento atual das dívidas para não depender de closures antigas.
+  try{
+    const edits=JSON.parse(localStorage.getItem('financeiro_marcos_debt_edits_v3')||'{}')||{};
+    const archived=new Set(JSON.parse(localStorage.getItem('financeiro_marcos_debt_archived_v3')||'[]')||[]);
+    const deleted=new Set(JSON.parse(localStorage.getItem('financeiro_marcos_debt_deleted_v3')||'[]')||[]);
+    Object.entries(edits).forEach(([id,x])=>{
+      if(!x||deleted.has(id))return;
+      const base=byId.get(id)||{id,origem:'Site'};
+      byId.set(id,{...base,...x,id,arquivado:archived.has(id)});
+    });
+  }catch(e){}
+  return [...byId.values()].filter(d=>!d.arquivado);
+}
 function isCT(d){return d?.isCreditWorker===true||String(d?.isCreditWorker||'').toLowerCase()==='true'||String(d?.ctFlag||'').toLowerCase()==='sim'}
 function ctDebts(){return debtList().filter(d=>!d.arquivado&&isCT(d)&&n(d.pendente)>0).map(d=>({
   id:d.id,descricao:d.descricao||'Crédito do Trabalhador',credor:d.credor||'',pendente:r2(Math.max(0,n(d.pendente))),parcela:r2(n(d.parcela)),parcelasTotal:Math.max(1,parseInt(d.parcelasTotal,10)||1),parcelasQuitadas:Math.max(0,parseInt(d.parcelasQuitadas,10)||0),
@@ -27192,19 +27210,29 @@ function ctDebts(){return debtList().filter(d=>!d.arquivado&&isCT(d)&&n(d.penden
 })).sort((a,b)=>String(a.date).localeCompare(String(b.date)))}
 function negotiatedPending(){return r2(debtList().filter(d=>!d.arquivado&&!isCT(d)&&n(d.pendente)>0&&String(d.negociado||'').toLowerCase()==='sim').reduce((a,d)=>a+n(d.pendente),0))}
 function futureCards(simDate){const d=parseDate(simDate)||new Date(),idx=d.getFullYear()*12+d.getMonth();let rows=[];try{rows=typeof window.getCardSchedules==='function'?window.getCardSchedules(false):[]}catch(e){}const total=(rows||[]).filter(r=>{const ridx=n(r.year)*12+(n(r.month)-1),paid=r.paid===true||String(r.status||'').toLowerCase()==='quitado',recurring=r.recurring===true||String(r.mode||'').toLowerCase()==='recorrente';return !paid&&!recurring&&ridx>=idx}).reduce((a,r)=>a+n(r.amount),0);return Math.max(0,r2(total))}
-function applyCTGuarantees(trctGross,fine,fired){
-  const debts=ctDebts(),alloc=[];let sevPool=Math.max(0,r2(trctGross*.35)),finePool=fired?Math.max(0,fine):0,totalSev=0,totalFine=0;
+function applyCTGuarantees(trctGross,fine,fired,f){
+  const debts=ctDebts(),alloc=[];
+  let sevPool=fired?Math.max(0,r2(trctGross*.35)):0;
+  let finePool=fired?Math.max(0,fine):0;
+  // A garantia de FGTS do Crédito do Trabalhador é distinta do saque do saldo na rescisão.
+  // Para evitar dupla contagem com valores já bloqueados por antecipação do saque-aniversário,
+  // a simulação usa um único pool compartilhado, limitado a 10% do saldo atual e ao saldo livre informado.
+  const fgtsLegalLimit=fired?r2(Math.max(0,n(f?.current))*0.10):0;
+  const fgtsFree=Math.max(0,n(f?.free));
+  let fgtsPool=fired?r2(Math.min(fgtsLegalLimit,fgtsFree)):0;
+  const fgtsPoolStart=fgtsPool;
+  let totalSev=0,totalFgts=0,totalFine=0;
   for(const d of debts){
     let remain=d.pendente;
-    const sevCap=r2(trctGross*(d.sevPct/100));
+    const sevCap=fired?r2(trctGross*(d.sevPct/100)):0;
     const sev=r2(Math.min(remain,sevCap,sevPool));remain=r2(Math.max(0,remain-sev));sevPool=r2(Math.max(0,sevPool-sev));totalSev=r2(totalSev+sev);
-    // Marcos está no saque-aniversário: os 10% do saldo do FGTS não são acionados neste cálculo.
-    const fgtsUse=0;
+    const fgtsCap=fired?r2(Math.max(0,n(f?.current))*(d.fgtsPct/100)):0;
+    const fgtsUse=r2(Math.min(remain,fgtsCap,fgtsPool));remain=r2(Math.max(0,remain-fgtsUse));fgtsPool=r2(Math.max(0,fgtsPool-fgtsUse));totalFgts=r2(totalFgts+fgtsUse);
     const fineCap=fired?r2(fine*(d.finePct/100)):0;
     const fineUse=r2(Math.min(remain,fineCap,finePool));remain=r2(Math.max(0,remain-fineUse));finePool=r2(Math.max(0,finePool-fineUse));totalFine=r2(totalFine+fineUse);
     alloc.push({...d,sev,fgtsUse,fineUse,remain});
   }
-  return{debts,alloc,totalPending:r2(debts.reduce((a,d)=>a+d.pendente,0)),totalSev,totalFine,totalGuarantee:r2(totalSev+totalFine),unconfirmed:debts.some(d=>!d.confirmed),sevPctTotal:r2(Math.min(35,debts.reduce((a,d)=>a+d.sevPct,0)))};
+  return{debts,alloc,totalPending:r2(debts.reduce((a,d)=>a+d.pendente,0)),totalSev,totalFgts,totalFine,totalGuarantee:r2(totalSev+totalFgts+totalFine),unconfirmed:debts.some(d=>!d.confirmed),sevPctTotal:r2(Math.min(35,debts.reduce((a,d)=>a+d.sevPct,0))),fgtsLegalLimit,fgtsPoolStart};
 }
 function calc(c,scenario){
   scenario=scenario||c.scenario;const sal=Math.max(0,n(c.salary)),adm=parseDate(c.admission),sim=parseDate(c.simulationDate)||parseDate(localToday())||new Date();
@@ -27215,7 +27243,7 @@ function calc(c,scenario){
   const vacDays=clamp(Math.round(n(c.vacationDays)),0,90),fullVac=r2(daily*vacDays*(4/3)),avVac=vacationAvos(adm,projected),propVac=r2(sal*(avVac/12)*(4/3));
   const noticeInd=scenario==='fire_indemnified'?r2(daily*nd):0,noticeDiscount=scenario==='resign_now'?r2(sal):0;
   const trctGross=r2(Math.max(0,salaryBalance+thirteenth+fullVac+propVac+noticeInd-noticeDiscount));
-  const f=fgts(),fine=fired?r2(f.rescision*.40):0,ct=applyCTGuarantees(trctGross,fine,fired);
+  const f=fgts(),fine=fired?r2(f.rescision*.40):0,ct=applyCTGuarantees(trctGross,fine,fired,f);
   const afterCredit=r2(Math.max(0,trctGross-ct.totalSev)+Math.max(0,fine-ct.totalFine));
   const cards=futureCards(c.simulationDate),debts=negotiatedPending(),final=r2(afterCredit-cards-debts);
   return{scenario,fired,worked,noticeDays:nd,projected:iso(projected),payDate:iso(payDate),salary:sal,salaryBalance,av13,thirteenth,vacDays,fullVac,avVac,propVac,noticeInd,noticeDiscount,trctGross,fgts:f,fgtsFine:fine,ct,afterCredit,cards,debts,final};
@@ -27232,7 +27260,7 @@ function renderCard(){const h=ensureHost();if(!h)return;if(profile()!=='Marcos')
 function ensureModal(){let m=document.getElementById(MODAL_ID);if(m)return m;m=document.createElement('div');m.id=MODAL_ID;m.className='modalback';m.innerHTML='<div class="modal"><div class="rp38-head"><div><h2>Memória de cálculo da rescisão</h2><p>Verbas trabalhistas, garantias do Crédito do Trabalhador e compromissos financeiros</p></div><button type="button" class="rp38-close" data-rp38-close>Fechar</button></div><div class="rp38-body" id="rp38Body"></div></div>';document.body.appendChild(m);m.addEventListener('click',e=>{if(e.target===m||e.target.closest?.('[data-rp38-close]')){m.classList.remove('open');return}const s=e.target.closest?.('[data-rp38-scenario]');if(s){let c=collect(load());c.scenario=s.dataset.rp38Scenario;save(c);renderModal();renderCard();return}if(e.target.closest?.('[data-rp38-apply]')){const c=save(collect(load()));renderModal(c);renderCard();try{toast('Parâmetros da rescisão atualizados.')}catch(err){}return}});return m}
 function collect(base){const $=id=>document.getElementById(id),c={...base};if(!$('rp38Salary'))return c;c.salary=n($('rp38Salary').value);c.admission=$('rp38Admission').value||c.admission;c.simulationDate=$('rp38Date').value||c.simulationDate;c.vacationDays=clamp(n($('rp38VacationDays').value),0,90);c.thirteenthPaid=Math.max(0,n($('rp38ThirteenthPaid').value));return c}
 function line(label,value,cls=''){return `<div class="rp38-line"><span>${label}</span><b class="${cls}">${value}</b></div>`}
-function ctRows(x){return x.ct.alloc.length?x.ct.alloc.map(d=>`<div class="rp38-ctrow"><div><b>${attr(d.credor||d.descricao)}</b><span>${attr(d.contract?`Contrato ${d.contract}`:'Crédito do Trabalhador')} · ${d.parcelasQuitadas}/${d.parcelasTotal} parcelas quitadas</span></div><div class="rp38-ctnums"><b>${money(d.pendente)}</b><span>Verbas ${String(d.sevPct.toFixed(2)).replace('.',',')}% · FGTS ${String(d.fgtsPct.toFixed(2)).replace('.',',')}% · multa ${String(d.finePct.toFixed(0)).replace('.',',')}%</span></div></div>`).join(''):'<div class="rp38-ctempty">Nenhum Crédito do Trabalhador marcado nas dívidas.</div>'}
+function ctRows(x){return x.ct.alloc.length?x.ct.alloc.map(d=>`<div class="rp38-ctrow"><div><b>${attr(d.credor||d.descricao)}</b><span>${attr(d.contract?`Contrato ${d.contract}`:'Crédito do Trabalhador')} · ${d.parcelasQuitadas}/${d.parcelasTotal} parcelas quitadas</span></div><div class="rp38-ctnums"><b>${money(d.pendente)}</b><span>Garantias: verbas ${String(d.sevPct.toFixed(2)).replace('.',',')}% · FGTS ${String(d.fgtsPct.toFixed(2)).replace('.',',')}% · multa ${String(d.finePct.toFixed(0)).replace('.',',')}%</span><span>Uso simulado: verbas ${money(d.sev)} · FGTS ${money(d.fgtsUse)} · multa ${money(d.fineUse)}</span></div></div>`).join(''):'<div class="rp38-ctempty">Nenhum Crédito do Trabalhador marcado nas dívidas.</div>'}
 function renderModal(forced){const c=forced||load(),x=calc(c,c.scenario),body=document.getElementById('rp38Body')||ensureModal().querySelector('#rp38Body'),partial=warningState(x);
  body.innerHTML=`<div class="rp38-source"><span>Vínculo considerado</span><b>Rede Cidadã · início disponível no CNIS: out/2021 · saque-aniversário</b></div>
  <div class="rp38-seg">${Object.entries(SCENARIOS).map(([k,v])=>`<button type="button" data-rp38-scenario="${k}" class="${k===c.scenario?'active':''}">${attr(v.label)}</button>`).join('')}</div>
@@ -27245,12 +27273,12 @@ function renderModal(forced){const c=forced||load(),x=calc(c,c.scenario),body=do
  </div><div class="rp38-applyrow"><button type="button" class="rp38-apply" data-rp38-apply>Atualizar cálculo</button></div></div>
  <div class="rp38-ctbox"><div class="rp38-cthead"><div><h3>Crédito do Trabalhador</h3><p>${x.ct.debts.length} contratos · ${money(x.ct.totalPending)} em parcelas contratuais pendentes</p></div><b>garantia usada ${money(x.ct.totalGuarantee)}</b></div>${ctRows(x)}</div>
  <div class="rp38-memory"><div class="rp38-block"><h3>Verbas rescisórias · ${attr(SCENARIOS[c.scenario].label)}</h3>
-   ${line('Saldo de salário',money(x.salaryBalance),'plus')}${line(`13º proporcional · ${x.av13}/12`,money(x.thirteenth),'plus')}${line(`Férias integrais/vencidas · ${x.vacDays} dias + 1/3`,money(x.fullVac),'plus')}${line(`Férias proporcionais · ${x.avVac}/12 + 1/3`,money(x.propVac),'plus')}${x.noticeInd?line(`Aviso indenizado · ${x.noticeDays} dias`,money(x.noticeInd),'plus'):''}${x.noticeDiscount?line('Desconto estimado por aviso não cumprido',`− ${money(x.noticeDiscount)}`,'minus'):''}${line('TRCT bruto estimado',money(x.trctGross))}${line('Multa rescisória do FGTS · 40%',money(x.fgtsFine),x.fgtsFine?'plus':'')}${line('Saldo do FGTS liberado na rescisão','R$ 0,00')}
+   ${line('Saldo de salário',money(x.salaryBalance),'plus')}${line(`13º proporcional · ${x.av13}/12`,money(x.thirteenth),'plus')}${line(`Férias integrais/vencidas · ${x.vacDays} dias + 1/3`,money(x.fullVac),'plus')}${line(`Férias proporcionais · ${x.avVac}/12 + 1/3`,money(x.propVac),'plus')}${x.noticeInd?line(`Aviso indenizado · ${x.noticeDays} dias`,money(x.noticeInd),'plus'):''}${x.noticeDiscount?line('Desconto estimado por aviso não cumprido',`− ${money(x.noticeDiscount)}`,'minus'):''}${line('TRCT bruto estimado',money(x.trctGross))}${line('Base FGTS para fins rescisórios',money(x.fgts.rescision))}${line('Multa rescisória do FGTS · 40%',money(x.fgtsFine),x.fgtsFine?'plus':'')}${line('Saldo atual do FGTS',money(x.fgts.current))}${line('Saldo bloqueado do FGTS',money(x.fgts.blocked))}${line('Saldo livre informado',money(x.fgts.free))}${line('Saldo do FGTS sacável na demissão · saque-aniversário','R$ 0,00')}
   </div><div class="rp38-block"><h3>Garantias e compromissos</h3>
-   ${line(`CT · garantia em verbas · até ${String(x.ct.sevPctTotal.toFixed(2)).replace('.',',')}%`,`− ${money(x.ct.totalSev)}`,'minus')}${line('CT · 10% do saldo FGTS (saque-aniversário)','R$ 0,00')}${line('CT · multa rescisória usada',`− ${money(x.ct.totalFine)}`,'minus')}${line('Faturas futuras do cartão',`− ${money(x.cards)}`,'minus')}${line('Parcelas pendentes de outras dívidas negociadas',`− ${money(x.debts)}`,'minus')}${line('Recursos após garantia do CT',money(x.afterCredit))}
+   ${line(`CT · garantia em verbas · até ${String(x.ct.sevPctTotal.toFixed(2)).replace('.',',')}%`,`− ${money(x.ct.totalSev)}`,'minus')}${line(`CT · garantia FGTS · limite compartilhado ${money(x.ct.fgtsPoolStart)}`,`− ${money(x.ct.totalFgts)}`,'minus')}${line('CT · multa rescisória usada',`− ${money(x.ct.totalFine)}`,'minus')}${line('Faturas futuras do cartão',`− ${money(x.cards)}`,'minus')}${line('Parcelas pendentes de outras dívidas negociadas',`− ${money(x.debts)}`,'minus')}${line('Recursos após garantia do CT',money(x.afterCredit))}
   </div></div>
  <div class="rp38-total ${x.final<0?'negative':''}"><div><span>Saldo estimado após todos os compromissos</span><small>${partial?'Há percentuais de garantia de CT ainda marcados como estimados; confirme-os no contrato/Emprega Brasil quando disponíveis.':'Garantias cadastradas como confirmadas.'} O saldo dos CTs é exibido como parcelas futuras; o valor de liquidação antecipada pode ser menor.</small></div><b>${money(x.final)}</b></div>
- <div class="rp38-notes"><div class="rp38-note"><i>i</i><span>No saque-aniversário, a simulação não soma o saldo integral do FGTS à rescisão. Em dispensa sem justa causa, considera a multa de 40%; para o Crédito do Trabalhador, os 10% do saldo do FGTS não são usados neste cenário.</span></div><div class="rp38-note"><i>i</i><span>As garantias das verbas rescisórias dos contratos anteriores a 26/06/2026 podem depender da conversão da prestação em percentual pelo agente operador. Os percentuais iniciais do Hub são estimativas de planejamento e podem ser editados em Dívidas → Editar → Crédito do Trabalhador.</span></div><div class="rp38-note"><i>i</i><span>A multa rescisória é tratada como uma garantia compartilhada e nunca é contada mais de uma vez, mesmo com vários contratos. O saldo devedor real na rescisão deve ser o informado pelas instituições.</span></div></div>`;
+ <div class="rp38-notes"><div class="rp38-note"><i>i</i><span>No saque-aniversário, o saldo integral do FGTS não é sacado na demissão; em dispensa sem justa causa, a multa rescisória continua devida. Isso é diferente da garantia do Crédito do Trabalhador: se contratada, ela pode alcançar até 10% do saldo do FGTS. O Hub usa um pool único e conservador, limitado também ao saldo livre informado, para não reutilizar valores já bloqueados.</span></div><div class="rp38-note"><i>i</i><span>A multa de 40% é calculada sobre o campo “saldo para fins rescisórios”, e não sobre o saldo atual disponível. Por isso a memória mostra separadamente base rescisória, saldo atual, bloqueado e livre.</span></div><div class="rp38-note"><i>i</i><span>As garantias de verbas, FGTS e multa são compartilhadas entre os CTs e nunca são contadas várias vezes. A prioridade real de apropriação entre bancos e o saldo de liquidação antecipada dependem do Emprega Brasil/FGTS e das instituições; o Hub faz uma simulação de planejamento.</span></div></div>`;
 }
 function openModal(){if(profile()!=='Marcos')return;const m=ensureModal();renderModal();document.querySelectorAll('.modalback.open').forEach(x=>{if(x!==m)x.classList.remove('open')});m.classList.add('open')}
 function bind(){const h=ensureHost();if(h&&!h.dataset.rp38Bound){h.dataset.rp38Bound='1';h.addEventListener('click',openModal);h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal()}})}
@@ -27282,10 +27310,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 'use strict';
 const EDIT_KEY='financeiro_marcos_debt_edits_v3',DATE_KEY='planejador_debt_dates_v16';
 const CT_SEED=[
- {id:'DEBT_MANUAL_CT_INTER_12538033',descricao:'Crédito do Trabalhador · Banco Inter',credor:'Banco Inter',parcela:1510,totalInst:48,first:'2025-02',contract:'12538033',contractDate:'2025-01-29',sevPct:18.70,fgtsPct:0,finePct:0,rule:'Anterior à Res. 3/2026 · conversão estimada da prestação'},
- {id:'DEBT_MANUAL_CT_SAFRA_56871297',descricao:'Crédito do Trabalhador · Banco Safra',credor:'Banco Safra',parcela:51.42,totalInst:36,first:'2026-06',contract:'56871297',contractDate:'2026-03-23',sevPct:.64,fgtsPct:10,finePct:100,rule:'Anterior à Res. 3/2026 · conversão estimada + garantias contratuais'},
- {id:'DEBT_MANUAL_CT_DIGIO_500003473033',descricao:'Crédito do Trabalhador · Banco Digio',credor:'Banco Digio',parcela:117.85,totalInst:48,first:'2026-05',contract:'500003473033',contractDate:'2026-03-02',sevPct:1.46,fgtsPct:10,finePct:100,rule:'Anterior à Res. 3/2026 · conversão estimada + garantias contratuais'},
- {id:'DEBT_MANUAL_CT_MERCANTIL_594108018',descricao:'Crédito do Trabalhador · Banco Mercantil',credor:'Banco Mercantil',parcela:61.56,totalInst:48,first:'2026-10',contract:'594108018',contractDate:'2026-07-08',sevPct:14.20,fgtsPct:10,finePct:100,rule:'Posterior à Res. 3/2026 · percentual remanescente estimado'}
+ {id:'DEBT_MANUAL_CT_INTER_12538033',descricao:'Crédito do Trabalhador · Banco Inter',credor:'Banco Inter',parcela:1510,totalInst:48,first:'2025-02',contract:'12538033',contractDate:'2025-01-29',sevPct:35,fgtsPct:0,finePct:0,confirmed:true,rule:'Contrato Inter · até 35% das verbas rescisórias'},
+ {id:'DEBT_MANUAL_CT_SAFRA_56871297',descricao:'Crédito do Trabalhador · Banco Safra',credor:'Banco Safra',parcela:51.42,totalInst:36,first:'2026-06',contract:'56871297',contractDate:'2026-03-23',sevPct:0,fgtsPct:10,finePct:100,confirmed:true,rule:'Contrato Safra · 10% FGTS + 100% multa rescisória'},
+ {id:'DEBT_MANUAL_CT_DIGIO_500003473033',descricao:'Crédito do Trabalhador · Banco Digio',credor:'Banco Digio',parcela:117.85,totalInst:48,first:'2026-05',contract:'500003473033',contractDate:'2026-03-02',sevPct:35,fgtsPct:10,finePct:100,confirmed:true,rule:'Contrato Digio · até 35% verbas + 10% FGTS + 100% multa'},
+ {id:'DEBT_MANUAL_CT_MERCANTIL_594108018',descricao:'Crédito do Trabalhador · Banco Mercantil',credor:'Banco Mercantil',parcela:61.56,totalInst:48,first:'2026-10',contract:'594108018',contractDate:'2026-07-08',sevPct:0,fgtsPct:10,finePct:100,confirmed:true,rule:'Contrato Mercantil · 10% FGTS + 100% multa rescisória'}
 ];
 function profile(){try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}}
 function readObj(k){try{const x=JSON.parse(localStorage.getItem(k)||'{}');return x&&typeof x==='object'&&!Array.isArray(x)?x:{}}catch(e){return {}}}
@@ -27299,9 +27327,13 @@ function seedAndSync(){
   if(profile()!=='Marcos')return false;
   const edits=readObj(EDIT_KEY),dates=readObj(DATE_KEY),now=ymNow();let changed=false;
   for(const z of CT_SEED){
+    const legacy=edits[z.id];
+    if(legacy&&legacy.ctSeedV39===true&&legacy.ctRulesVersion!=='v40'&&/estimad|Res\. 3\/2026/i.test(String(legacy.ctRuleLabel||''))){
+      legacy.ctGuaranteeSeverancePct=z.sevPct;legacy.ctGuaranteeFgtsPct=z.fgtsPct;legacy.ctGuaranteeFinePct=z.finePct;legacy.ctGuaranteeConfirmed=z.confirmed===true;legacy.ctRuleLabel=z.rule;legacy.ctRulesVersion='v40';changed=true;
+    }
     if(!edits[z.id]){
       const paid=Math.min(z.totalInst,monthsInclusive(z.first,now)),total=round(z.parcela*z.totalInst),quitado=round(z.parcela*paid);
-      edits[z.id]={descricao:z.descricao,credor:z.credor,banco:'',parcela:z.parcela,total,quitado,pendente:round(total-quitado),negociado:'Sim',parcelasTotal:z.totalInst,parcelasQuitadas:paid,primeiraParcelaMes:z.first,ultimaParcelaMes:addMonths(z.first,z.totalInst-1),status:paid>=z.totalInst?'Quitado':'Pendente',isCreditWorker:true,ctContractNumber:z.contract,ctContractDate:z.contractDate,ctGuaranteeSeverancePct:z.sevPct,ctGuaranteeFgtsPct:z.fgtsPct,ctGuaranteeFinePct:z.finePct,ctGuaranteeConfirmed:false,ctAutoPaid:true,ctRuleLabel:z.rule,ctSeedV39:true};
+      edits[z.id]={descricao:z.descricao,credor:z.credor,banco:'',parcela:z.parcela,total,quitado,pendente:round(total-quitado),negociado:'Sim',parcelasTotal:z.totalInst,parcelasQuitadas:paid,primeiraParcelaMes:z.first,ultimaParcelaMes:addMonths(z.first,z.totalInst-1),status:paid>=z.totalInst?'Quitado':'Pendente',isCreditWorker:true,ctContractNumber:z.contract,ctContractDate:z.contractDate,ctGuaranteeSeverancePct:z.sevPct,ctGuaranteeFgtsPct:z.fgtsPct,ctGuaranteeFinePct:z.finePct,ctGuaranteeConfirmed:z.confirmed===true,ctAutoPaid:true,ctRuleLabel:z.rule,ctSeedV39:true,ctRulesVersion:'v40'};
       changed=true;
     }else if(edits[z.id].isCreditWorker!==false && edits[z.id].ctAutoPaid!==false){
       const x=edits[z.id],first=validYM(x.primeiraParcelaMes)?x.primeiraParcelaMes:z.first,totalInst=Math.max(1,parseInt(x.parcelasTotal,10)||z.totalInst),parcela=Number(x.parcela)||z.parcela,paid=Math.min(totalInst,monthsInclusive(first,now)),total=round(parcela*totalInst),quitado=round(parcela*paid);
@@ -27337,7 +27369,7 @@ function ensureUI(){
   if(!document.getElementById('dCtFlagFieldV39')){
     const box=document.createElement('div');box.className='field full';box.id='dCtFlagFieldV39';box.innerHTML='<label class="ct-toggle-v39"><div><b>Crédito do Trabalhador (CT)</b><small>Marque para vincular esta dívida às regras de garantia em caso de rescisão.</small></div><span class="ct-switch-v39"><input id="dIsCTV39" type="checkbox"><i></i></span></label>';
     neg.closest('.field')?.after(box);
-    const g=document.createElement('div');g.id='dCtGuaranteesV39';g.innerHTML='<div class="field"><label>Nº do contrato</label><input id="dCtContractV39"></div><div class="field"><label>Data do contrato</label><input id="dCtContractDateV39" type="date"></div><div class="field"><label>Garantia · verbas rescisórias (%)</label><input id="dCtSevV39" inputmode="decimal" placeholder="0 a 35"></div><div class="field"><label>Garantia · saldo FGTS (%)</label><input id="dCtFgtsV39" inputmode="decimal" placeholder="0 a 10"></div><div class="field"><label>Garantia · multa FGTS (%)</label><input id="dCtFineV39" inputmode="decimal" placeholder="0 a 100"></div><div class="field"><label>Regra/origem</label><input id="dCtRuleV39"></div><label class="ct-check-v39"><input id="dCtConfirmedV39" type="checkbox"><span>Percentuais confirmados no contrato/Emprega Brasil.</span></label><label class="ct-check-v39"><input id="dCtAutoPaidV39" type="checkbox"><span>Considerar automaticamente quitadas as parcelas até o mês atual.</span></label><div class="ct-note-v39">No saque-aniversário, o simulador não usa os 10% do saldo do FGTS na rescisão. A multa rescisória pode ser usada conforme a garantia cadastrada. O saldo exibido da dívida é a soma das parcelas futuras, não o valor de liquidação antecipada.</div>';
+    const g=document.createElement('div');g.id='dCtGuaranteesV39';g.innerHTML='<div class="field"><label>Nº do contrato</label><input id="dCtContractV39"></div><div class="field"><label>Data do contrato</label><input id="dCtContractDateV39" type="date"></div><div class="field"><label>Garantia · verbas rescisórias (%)</label><input id="dCtSevV39" inputmode="decimal" placeholder="0 a 35"></div><div class="field"><label>Garantia · saldo FGTS (%)</label><input id="dCtFgtsV39" inputmode="decimal" placeholder="0 a 10"></div><div class="field"><label>Garantia · multa FGTS (%)</label><input id="dCtFineV39" inputmode="decimal" placeholder="0 a 100"></div><div class="field"><label>Regra/origem</label><input id="dCtRuleV39"></div><label class="ct-check-v39"><input id="dCtConfirmedV39" type="checkbox"><span>Percentuais confirmados no contrato/Emprega Brasil.</span></label><label class="ct-check-v39"><input id="dCtAutoPaidV39" type="checkbox"><span>Considerar automaticamente quitadas as parcelas até o mês atual.</span></label><div class="ct-note-v39">No saque-aniversário, o saldo integral do FGTS não é liberado ao trabalhador na demissão. Porém, se o CT tiver garantia de FGTS cadastrada, o simulador pode usar até o percentual contratado (máximo legal de 10%), sem reutilizar o saldo já bloqueado. A multa rescisória também pode ser usada conforme a garantia.</div>';
     box.after(g);
     document.getElementById('dIsCTV39')?.addEventListener('change',toggleUI);
   }
@@ -27375,5 +27407,38 @@ seedAndSync();ensureUI();bindSave();
 const previousRender=window.renderDebts;
 if(typeof previousRender==='function'&&!previousRender.__ctV39){const wrapped=function(){seedAndSync();const r=previousRender.apply(this,arguments);decorateRows();setTimeout(()=>window.renderRescisaoPlanner?.(),0);return r};wrapped.__ctV39=true;window.renderDebts=wrapped;try{renderDebts=wrapped}catch(e){}}
 try{window.renderDebts?.()}catch(e){}decorateRows();setTimeout(()=>{ensureUI();bindSave();decorateRows();try{window.renderPrevidencia?.()}catch(e){}},120);
+})();
+</script>
+
+<script id="pp-v40-creditors-live-rescission-repair">
+(()=>{
+'use strict';
+function ensureCreditorsV40(){
+  try{if(typeof ensureCredorSection==='function')ensureCredorSection();else window.ensureCredorSection?.()}catch(e){}
+  const nav=document.getElementById('nav');
+  if(nav&&!nav.querySelector('[data-view="credores"]')){
+    const b=document.createElement('button');b.type='button';b.dataset.view='credores';b.textContent='Credores';
+    nav.insertBefore(b,nav.querySelector('[data-view="dividas"]')||null);
+  }
+  const rail=document.getElementById('v76FloatNav');
+  if(rail&&!rail.querySelector('[data-view="credores"]')){
+    const b=document.createElement('button');b.type='button';b.dataset.view='credores';b.title='Credores';b.setAttribute('aria-label','Credores');
+    const ref=rail.querySelector('[data-view="dividas"]');rail.insertBefore(b,ref||null);
+  }
+  const filter=document.getElementById('credFilter'),search=document.getElementById('credSearch'),add=document.getElementById('addCreditorBtn');
+  if(filter)filter.onchange=()=>{try{window.renderCreditors?.()}catch(e){}};
+  if(search)search.oninput=()=>{try{window.renderCreditors?.()}catch(e){}};
+  if(add)add.onclick=()=>{try{if(typeof openCreditor==='function')openCreditor('');else window.openCreditorV61?.()}catch(e){}};
+}
+function refreshRescissionV40(){try{window.renderRescisaoPlanner?.()}catch(e){}}
+document.addEventListener('click',e=>{
+  const nav=e.target.closest?.('#nav button[data-view="credores"],#v76FloatNav button[data-view="credores"]');
+  if(nav){e.preventDefault();e.stopPropagation();try{window.showView?.('credores')}catch(x){}setTimeout(()=>{try{window.renderCreditors?.()}catch(x){}},0);return}
+  if(e.target.closest?.('#menuBtn,#v76MenuBtn,.menu-toggle,.hamburger'))setTimeout(ensureCreditorsV40,0);
+  if(e.target.closest?.('#saveDebtV16,#saveDebt,#saveCardPurchaseV52,#saveCardPurchaseV39,#saveCardPurchase,#debtPayModal .primary,[data-debt-confirm-payment]')){setTimeout(refreshRescissionV40,60);setTimeout(refreshRescissionV40,300)}
+},true);
+['focus','pageshow'].forEach(ev=>window.addEventListener(ev,()=>{ensureCreditorsV40();refreshRescissionV40()},{passive:true}));
+ensureCreditorsV40();setTimeout(ensureCreditorsV40,120);setTimeout(ensureCreditorsV40,700);
+window.ppRepairCreditorsV40=ensureCreditorsV40;
 })();
 </script>
