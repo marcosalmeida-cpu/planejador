@@ -524,7 +524,7 @@ html.pp-session-resume-v45 #loginOverlay{display:none!important}
 .rgps-hero-v51 h1{margin:12px 0 6px;font-size:34px;letter-spacing:-.055em}
 .rgps-hero-v51 p{margin:0;max-width:760px;color:rgba(255,255,255,.72);font-size:11.5px;line-height:1.55}
 .rgps-source-v51{text-align:right;min-width:165px}.rgps-source-v51 b{display:block;font-size:12px}.rgps-source-v51 span{font-size:9.5px;color:rgba(255,255,255,.62)}
-.rgps-kpis-v51{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px;position:relative;z-index:1}
+.rgps-kpis-v51{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:18px;position:relative;z-index:1}
 .rgps-kpi-v51{padding:14px;border-radius:18px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.10);backdrop-filter:blur(10px)}
 .rgps-kpi-v51 span{display:block;font-size:9px;font-weight:800;color:rgba(255,255,255,.60);text-transform:uppercase;letter-spacing:.06em}
 .rgps-kpi-v51 strong{display:block;font-size:21px;margin-top:5px;letter-spacing:-.035em}
@@ -9735,6 +9735,25 @@ Os dados atuais deste navegador serão substituídos.`);
     return map;
   }
 
+  function unemploymentEstimate(s){
+    // A funcionalidade existe para todos os perfis, mas os dados solicitados nesta etapa
+    // são pré-calculados somente para Marcos.
+    if(profile()!=='Marcos')return null;
+    const valid=(s.contributions||[]).filter(r=>r&&r.valid!==false&&num(r.value)>0)
+      .slice().sort((a,b)=>b.year-a.year||b.month-a.month);
+    if(!valid.length)return null;
+    const last3=valid.slice(0,3),avg=last3.reduce((a,r)=>a+num(r.value),0)/last3.length;
+    let value=0;
+    if(avg<=2222.17)value=avg*.80;
+    else if(avg<=3703.99)value=(avg-2222.17)*.50+1777.74;
+    else value=2518.65;
+    value=Math.max(1621,Math.min(2518.65,value));
+    const now=new Date(),start=new Date(now.getFullYear(),now.getMonth()-35,1,12);
+    const months36=new Set(valid.filter(r=>new Date(r.year,r.month-1,1,12)>=start).map(r=>`${r.year}-${String(r.month).padStart(2,'0')}`)).size;
+    const installments=months36>=24?5:months36>=12?4:months36>=6?3:0;
+    return {avg,value,installments,months36,total:value*installments};
+  }
+
   function renderRows(s){
     const body=document.getElementById('rgpsBodyV54'); if(!body)return;
     const y=document.getElementById('rgpsYearFilterV54')?.value||filterYear;
@@ -9763,7 +9782,7 @@ Os dados atuais deste navegador serão substituídos.`);
   function render(){
     try{
       const sec=document.getElementById('previdencia'); if(!sec)return;
-      const s=load(),cm=uniqueMonths(s),r=rules(s),b=benefits(s,r),ym=years(s),ys=Object.keys(ym).map(Number).sort((a,b)=>b-a);
+      const s=load(),cm=uniqueMonths(s),r=rules(s),b=benefits(s,r),ym=years(s),ys=Object.keys(ym).map(Number).sort((a,b)=>b-a),sd=unemploymentEstimate(s);
       const carPct=Math.min(100,cm/180*100),best=r.best;
       sec.innerHTML=`
         <div class="rgps-hero-v51">
@@ -9776,6 +9795,7 @@ Os dados atuais deste navegador serão substituídos.`);
             <div class="rgps-kpi-v51"><span>Carência</span><strong>${cm} / 180</strong><small>${Math.max(0,180-cm)} competências restantes</small></div>
             <div class="rgps-kpi-v51"><span>Idade atual</span><strong>${ageLabel(s.profileData.dob)}</strong><small>perfil previdenciário</small></div>
             <div class="rgps-kpi-v51"><span>Melhor data simulada</span><strong>${best?fmtDate(best[1]):'Configure o perfil'}</strong><small>${best?`${best[0]} · faltam ${diffDate(best[1])}`:'informe nascimento'}</small></div>
+            <div class="rgps-kpi-v51" id="rgpsUnemploymentV39" title="${sd?`Média das 3 últimas contribuições: ${money(sd.avg)} · total potencial ${money(sd.total)}`:'Simulação não preenchida neste perfil'}"><span>Seguro-desemprego</span><strong>${sd?money(sd.value):'—'}</strong><small>${sd?`${sd.installments} parcelas · total ${money(sd.total)}`:'Sem simulação neste perfil'}</small></div>
           </div>
           <div class="rgps-progress-v51"><div class="rgps-progress-meta-v51"><span>Carência para aposentadoria por idade</span><span>${carPct.toFixed(0)}%</span></div><div class="rgps-progress-bar-v51"><i style="width:${carPct}%"></i></div></div>
         </div>
@@ -16321,6 +16341,35 @@ function normalizedQty(v){
   return n;
 }
 
+function moneyV54(v){
+  if(typeof v==='number')return Number.isFinite(v)?v:0;
+  let s=String(v??'').trim().replace(/R\$|\s/g,'');
+  if(!s)return 0;
+  if(s.includes(',')&&s.includes('.'))s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');
+  else if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');
+  const n=Number(s);return Number.isFinite(n)?n:0;
+}
+function firstInvoiceV54(){
+  const v=String(document.getElementById('cpFirstInvoiceV39')?.value||'');
+  const m=v.match(/^(\d{4})-(\d{2})$/);return m?{year:+m[1],month:+m[2]}:null;
+}
+function addMonthV54(y,m,i){const d=new Date(+y,+m-1+i,1,12);return {year:d.getFullYear(),month:d.getMonth()+1}}
+function labelMonthV54(y,m){const names=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];return `${names[m-1]||String(m).padStart(2,'0')}/${String(y).slice(-2)}`}
+function brlV54(v){return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function refreshInstallmentPreviewV54(){
+  const p=document.getElementById('v39InstallmentPreview');
+  if(!p)return;
+  const total=moneyV54(document.getElementById('cpTotal')?.value);
+  const first=firstInvoiceV54();
+  const mode=modeEl()?.value||'avista';
+  const qty=Math.max(1, normalizedQty(qEl()?.value)||normalizedQty(qEl()?.dataset.v54Qty)||draft.qty||1);
+  if(!first||total<=0){p.textContent='';return}
+  if(mode==='estorno'){p.textContent=`Crédito de ${brlV54(total)} em ${labelMonthV54(first.year,first.month)}.`;return}
+  if(mode==='recorrente'){p.textContent=`${brlV54(total)} por mês a partir de ${labelMonthV54(first.year,first.month)}.`;return}
+  const n=mode==='parcelado'?Math.max(2,qty):1;
+  const last=addMonthV54(first.year,first.month,n-1);
+  p.textContent=n>1?`${n} parcelas de aproximadamente ${brlV54(total/n)} · de ${labelMonthV54(first.year,first.month)} até ${labelMonthV54(last.year,last.month)}.`:`${brlV54(total)} em ${labelMonthV54(first.year,first.month)}.`;
+}
 function rememberQty(){
   const q=qEl();
   if(!q) return;
@@ -16328,8 +16377,9 @@ function rememberQty(){
   if(n) {
     draft.qty=n;
     q.dataset.v54Qty=String(n);
-    // Remove vírgulas/decimais visualmente para deixar claro que é uma contagem inteira.
+    // Quantidade é contagem inteira: exibe 3, não 3,00.
     if(String(q.value).trim()!==String(n)) q.value=String(n);
+    refreshInstallmentPreviewV54();
   }
 }
 
@@ -16383,8 +16433,16 @@ document.addEventListener('click',e=>{
       const stored=normalizedQty(q.dataset.v54Qty)||draft.qty;
       if(stored) q.value=stored;
       else if(!normalizedQty(q.value)) q.value='2';
+      refreshInstallmentPreviewV54();
     },0);
-  }
+  }else setTimeout(refreshInstallmentPreviewV54,0);
+},true);
+
+document.addEventListener('input',e=>{
+  if(['cpTotal','cpFirstInvoiceV39'].includes(e.target?.id))setTimeout(refreshInstallmentPreviewV54,0);
+},true);
+document.addEventListener('change',e=>{
+  if(['cpTotal','cpFirstInvoiceV39','cpMode'].includes(e.target?.id))setTimeout(refreshInstallmentPreviewV54,0);
 },true);
 
 /* Intercepta o salvar antes de qualquer rotina antiga e grava a quantidade
@@ -27031,5 +27089,291 @@ function bind(){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,400),{once:true});else setTimeout(refresh,400);
 }
 bind();
+})();
+</script>
+<style id="pp-rescisao-planner-v38-style">
+/* Planejamento de rescisão — compacto, sem observers e sem alterar o motor de Dívidas. */
+#rescisaoPlannerCardV38{margin:12px 0 15px}
+.rp38-card{
+  position:relative;overflow:hidden;cursor:pointer;color:#fff;
+  border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:17px 18px;
+  background:linear-gradient(135deg,#11151c 0%,#172130 58%,#12355d 100%);
+  box-shadow:0 12px 30px rgba(12,22,38,.14);transition:transform .16s ease,box-shadow .16s ease
+}
+.rp38-card:hover{transform:translateY(-1px);box-shadow:0 16px 36px rgba(12,22,38,.19)}
+.rp38-card:focus-visible{outline:3px solid rgba(42,112,243,.28);outline-offset:3px}
+.rp38-card:after{content:"";position:absolute;right:-48px;top:-66px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(79,151,255,.21),transparent 68%);pointer-events:none}
+.rp38-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:start;position:relative;z-index:1}
+.rp38-kicker{display:flex;align-items:center;gap:7px;font-size:9.5px;font-weight:900;letter-spacing:.11em;text-transform:uppercase;color:#9fc7ff}
+.rp38-kicker i{width:7px;height:7px;border-radius:50%;background:#56a0ff;box-shadow:0 0 0 4px rgba(86,160,255,.13)}
+.rp38-card h3{margin:5px 0 2px;font-size:18px;letter-spacing:-.02em;color:#fff}
+.rp38-card .rp38-sub{margin:0;color:#aeb9ca;font-size:10.5px;line-height:1.45}
+.rp38-main{text-align:right;min-width:190px}
+.rp38-main span{display:block;color:#aeb9ca;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.rp38-main b{display:block;margin-top:3px;font-size:27px;line-height:1.05;letter-spacing:-.035em;color:#fff}
+.rp38-main b.negative{color:#ffacb8!important}.rp38-main b.positive{color:#9fe2bd!important}
+.rp38-badge{display:inline-flex;margin-top:7px;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.07);border-radius:999px;padding:4px 8px;color:#c9d6e6;font-size:8.5px;font-weight:850}
+.rp38-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:14px;padding-top:13px;border-top:1px solid rgba(255,255,255,.10);position:relative;z-index:1}
+.rp38-fact{padding:0 12px;border-left:1px solid rgba(255,255,255,.09);min-width:0}.rp38-fact:first-child{padding-left:0;border-left:0}
+.rp38-fact span{display:block;color:#93a2b7;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp38-fact b{display:block;margin-top:4px;font-size:13px;color:#f3f7fc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp38-scenarios{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:12px;position:relative;z-index:1}
+.rp38-scenario-mini{min-width:0;padding:8px 9px;border-radius:11px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.07)}
+.rp38-scenario-mini.active{background:rgba(83,151,255,.13);border-color:rgba(115,171,255,.27)}
+.rp38-scenario-mini span{display:block;color:#9aaabd;font-size:8.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp38-scenario-mini b{display:block;margin-top:3px;font-size:11px;color:#eef5ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp38-open{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:10px;color:#a7caff;font-size:9px;font-weight:850;position:relative;z-index:1}
+
+#rescisaoMemoryModalV38{z-index:10180!important;align-items:center!important;justify-content:center!important;padding:14px!important}
+#rescisaoMemoryModalV38 .modal{width:min(880px,calc(100vw - 22px))!important;max-height:92vh!important;padding:0!important;border-radius:22px!important;overflow:auto!important;background:#fff!important;box-shadow:0 30px 90px rgba(5,16,32,.28)!important}
+.rp38-head{position:sticky;top:0;z-index:4;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px 20px;background:linear-gradient(135deg,#11151c,#172334 70%,#143f72);color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}
+.rp38-head h2{margin:0;font-size:20px;letter-spacing:-.025em}.rp38-head p{margin:4px 0 0;color:#adbbcd;font-size:10px}
+.rp38-close{border:1px solid rgba(255,255,255,.17);background:rgba(255,255,255,.08);color:#fff;border-radius:10px;height:34px;padding:0 11px;font-weight:850;font-size:10px;cursor:pointer}
+.rp38-body{padding:17px 20px 21px;color:#152235}
+.rp38-source{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:9px 11px;margin-bottom:11px;border-radius:12px;background:#f6f8fb;border:1px solid #e7ecf2;font-size:9.5px;color:#69788c}
+.rp38-source b{color:#263b56;font-size:10px}
+.rp38-seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:4px;border:1px solid #dbe3ed;border-radius:13px;background:#eef2f6;margin-bottom:12px}
+.rp38-seg button{min-width:0;border:0;background:transparent;color:#536579;border-radius:9px;min-height:36px;padding:5px 7px;font-size:9.2px;font-weight:850;cursor:pointer;line-height:1.2}
+.rp38-seg button.active{background:#123f86;color:#fff;box-shadow:0 4px 10px rgba(18,63,134,.13)}
+.rp38-params{padding:13px 14px;border:1px solid #e3e9f0;border-radius:15px;background:#fbfcfd;margin-bottom:12px}
+.rp38-params-head{display:flex;justify-content:space-between;align-items:end;gap:10px;margin-bottom:10px}.rp38-params-head h3{margin:0;font-size:12px}.rp38-params-head span{color:#8190a3;font-size:8.8px;text-align:right}
+.rp38-form{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px 10px}
+.rp38-field{min-width:0}.rp38-field.w2{grid-column:span 2}.rp38-field label{display:block;margin:0 0 4px;color:#66768a;font-size:8.7px;font-weight:850}.rp38-field input,.rp38-field select{width:100%;min-width:0;height:38px;border:1px solid #d8e0e9;border-radius:10px;background:#fff;color:#16283f;padding:0 10px;font-size:11px;font-weight:750;box-sizing:border-box}.rp38-field input:focus,.rp38-field select:focus{outline:none;border-color:#78a8ff;box-shadow:0 0 0 3px rgba(42,112,243,.08)}
+.rp38-check{grid-column:span 2;display:flex;align-items:center;gap:8px;min-height:38px;padding:7px 9px;border:1px solid #e0e6ee;border-radius:10px;background:#fff;color:#586a7f;font-size:9px;font-weight:750}.rp38-check input{width:15px;height:15px;margin:0;accent-color:#123f86}
+.rp38-applyrow{display:flex;justify-content:flex-end;margin-top:10px}.rp38-apply{border:0;border-radius:10px;background:#123f86;color:#fff;height:36px;padding:0 14px;font-size:10px;font-weight:900;cursor:pointer}
+.rp38-memory{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.rp38-block{border:1px solid #e4e9f0;border-radius:15px;background:#fff;padding:12px 13px}.rp38-block h3{margin:0 0 7px;font-size:11px;color:#263b56}.rp38-line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start;padding:6px 0;border-bottom:1px dashed #e6ebf1;font-size:9.7px}.rp38-line:last-child{border-bottom:0}.rp38-line span{color:#69788c;line-height:1.35}.rp38-line b{text-align:right;color:#1c304a;font-size:9.9px;white-space:nowrap}.rp38-line .minus{color:#b42335}.rp38-line .plus{color:#087a52}
+.rp38-total{margin-top:11px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 15px;border-radius:15px;background:#ecf7f1;border:1px solid #cfe9da}.rp38-total.negative{background:#fff1f3;border-color:#f3cbd2}.rp38-total span{display:block;color:#4b6a5a;font-size:10px;font-weight:800}.rp38-total small{display:block;margin-top:3px;color:#75897e;font-size:8.5px;font-weight:600}.rp38-total b{font-size:22px;color:#087a52;letter-spacing:-.025em}.rp38-total.negative b{color:#b42335}.rp38-total.negative span{color:#82414c}
+.rp38-notes{margin-top:10px;display:grid;gap:5px}.rp38-note{display:flex;gap:7px;align-items:flex-start;color:#718095;font-size:8.8px;line-height:1.45}.rp38-note i{flex:0 0 15px;height:15px;border-radius:50%;display:grid;place-items:center;background:#fff0f1;color:#b42335;font-style:normal;font-weight:950;font-size:8px;margin-top:1px}
+@media(max-width:760px){
+ .rp38-top{grid-template-columns:1fr}.rp38-main{text-align:left;min-width:0}.rp38-main b{font-size:24px}.rp38-facts,.rp38-scenarios{grid-template-columns:1fr 1fr}.rp38-fact:nth-child(3){border-left:0;padding-left:0}.rp38-fact:nth-child(n+3){margin-top:10px}
+ .rp38-seg{grid-template-columns:1fr 1fr}.rp38-form{grid-template-columns:1fr 1fr}.rp38-field.w2,.rp38-check{grid-column:span 2}.rp38-memory{grid-template-columns:1fr}
+}
+@media(max-width:500px){
+ #rescisaoMemoryModalV38{padding:6px!important}#rescisaoMemoryModalV38 .modal{width:100%!important;max-height:95vh!important;border-radius:18px!important}.rp38-head,.rp38-body{padding:15px}.rp38-source{align-items:flex-start;flex-direction:column}.rp38-form{grid-template-columns:1fr}.rp38-field.w2,.rp38-check{grid-column:auto}.rp38-total{grid-template-columns:1fr}.rp38-facts,.rp38-scenarios{grid-template-columns:1fr 1fr}.rp38-card{padding:15px}
+}
+</style>
+<script id="pp-rescisao-planner-v38-script">
+(()=>{
+'use strict';
+const HOST_ID='rescisaoPlannerCardV38',MODAL_ID='rescisaoMemoryModalV38',KEY_PREFIX='planejador_rescisao_v38_';
+const SCENARIOS={
+  resign_worked:{short:'Pedi demissão + aviso',label:'Pedido de demissão · aviso trabalhado'},
+  resign_now:{short:'Pedi demissão sem aviso',label:'Pedido de demissão · sem cumprir aviso'},
+  fire_worked:{short:'Demitido + aviso',label:'Demissão sem justa causa · aviso trabalhado'},
+  fire_indemnified:{short:'Demitido · indenizado',label:'Demissão sem justa causa · aviso indenizado'}
+};
+const money=v=>{try{return brl(Number(v)||0)}catch(e){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0)}};
+const n=v=>{if(typeof v==='number')return Number.isFinite(v)?v:0;let s=String(v??'').trim().replace(/R\$|\s/g,'');if(!s)return 0;if(s.includes(',')&&s.includes('.'))s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');else if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const x=Number(s);return Number.isFinite(x)?x:0};
+const r2=v=>Math.round((Number(v)||0)*100)/100;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const attr=v=>String(v??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));
+function profile(){try{return String(localStorage.getItem('planejador_active_profile')||'Marcos')}catch(e){return 'Marcos'}}
+function key(){return KEY_PREFIX+profile().toLowerCase().replace(/\s+/g,'_')}
+function localToday(){const d=new Date(),p=x=>String(x).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
+function defaults(){const marcos=profile()==='Marcos';return{salary:marcos?8072.78:0,admission:marcos?'2021-10-01':'',simulationDate:localToday(),vacationDays:marcos?30:0,thirteenthPaid:0,scenario:'fire_indemnified'}}
+function load(){let out=defaults();try{const raw=JSON.parse(localStorage.getItem(key())||'{}');if(raw&&typeof raw==='object')out={...out,...raw}}catch(e){};if(!SCENARIOS[out.scenario])out.scenario='fire_indemnified';return out}
+function save(c){try{localStorage.setItem(key(),JSON.stringify(c))}catch(e){}return c}
+function parseDate(v){const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return null;const d=new Date(+m[1],+m[2]-1,+m[3],12);return Number.isNaN(+d)?null:d}
+function iso(d){if(!(d instanceof Date)||Number.isNaN(+d))return '';const p=x=>String(x).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`}
+function addDays(d,days){const x=new Date(d);x.setDate(x.getDate()+Number(days||0));return x}
+function completeYears(a,b){if(!a||!b||b<a)return 0;let y=b.getFullYear()-a.getFullYear();const ann=new Date(b.getFullYear(),a.getMonth(),a.getDate(),12);if(b<ann)y--;return Math.max(0,y)}
+function noticeDays(a,b){return Math.min(90,30+3*completeYears(a,b))}
+function overlapDays(start,end,ms,me){const s=new Date(Math.max(+start,+ms)),e=new Date(Math.min(+end,+me));return e<s?0:Math.floor((e-s)/86400000)+1}
+function thirteenthAvos(adm,end){if(!adm||!end||end<adm)return 0;const y=end.getFullYear();let c=0;for(let m=0;m<12;m++){const ms=new Date(y,m,1,12),me=new Date(y,m+1,0,12);if(overlapDays(adm,end,ms,me)>=15)c++}return c}
+function lastAnniversary(adm,end){let x=new Date(end.getFullYear(),adm.getMonth(),adm.getDate(),12);if(x>end)x=new Date(end.getFullYear()-1,adm.getMonth(),adm.getDate(),12);return x}
+function vacationAvos(adm,end){if(!adm||!end||end<adm)return 0;let s=lastAnniversary(adm,end),avos=0,cursor=new Date(s);while(avos<12){let next=new Date(cursor);next.setMonth(next.getMonth()+1);if(next<=end){avos++;cursor=next;continue}const days=Math.floor((end-cursor)/86400000)+1;if(days>=15)avos++;break}return clamp(avos,0,12)}
+function fgts(){let f={};try{f=window.fgtsSummary||fgtsSummary||{}}catch(e){}return{current:Math.max(0,n(f.saldoAtual)),rescision:Math.max(0,n(f.saldoRescisao)),blocked:Math.max(0,n(f.saldoBloqueado)),free:Math.max(0,n(f.saldoDisponivel))}}
+function debtList(){try{return (typeof window.getDebts==='function'?window.getDebts(false):getDebts(false))||[]}catch(e){return []}}
+function isCT(d){return d?.isCreditWorker===true||String(d?.isCreditWorker||'').toLowerCase()==='true'||String(d?.ctFlag||'').toLowerCase()==='sim'}
+function ctDebts(){return debtList().filter(d=>!d.arquivado&&isCT(d)&&n(d.pendente)>0).map(d=>({
+  id:d.id,descricao:d.descricao||'Crédito do Trabalhador',credor:d.credor||'',pendente:r2(Math.max(0,n(d.pendente))),parcela:r2(n(d.parcela)),parcelasTotal:Math.max(1,parseInt(d.parcelasTotal,10)||1),parcelasQuitadas:Math.max(0,parseInt(d.parcelasQuitadas,10)||0),
+  contract:d.ctContractNumber||'',date:d.ctContractDate||'',sevPct:clamp(n(d.ctGuaranteeSeverancePct),0,35),fgtsPct:clamp(n(d.ctGuaranteeFgtsPct),0,10),finePct:clamp(n(d.ctGuaranteeFinePct),0,100),confirmed:d.ctGuaranteeConfirmed===true||String(d.ctGuaranteeConfirmed||'').toLowerCase()==='true',rule:d.ctRuleLabel||''
+})).sort((a,b)=>String(a.date).localeCompare(String(b.date)))}
+function negotiatedPending(){return r2(debtList().filter(d=>!d.arquivado&&!isCT(d)&&n(d.pendente)>0&&String(d.negociado||'').toLowerCase()==='sim').reduce((a,d)=>a+n(d.pendente),0))}
+function futureCards(simDate){const d=parseDate(simDate)||new Date(),idx=d.getFullYear()*12+d.getMonth();let rows=[];try{rows=typeof window.getCardSchedules==='function'?window.getCardSchedules(false):[]}catch(e){}const total=(rows||[]).filter(r=>{const ridx=n(r.year)*12+(n(r.month)-1),paid=r.paid===true||String(r.status||'').toLowerCase()==='quitado',recurring=r.recurring===true||String(r.mode||'').toLowerCase()==='recorrente';return !paid&&!recurring&&ridx>=idx}).reduce((a,r)=>a+n(r.amount),0);return Math.max(0,r2(total))}
+function applyCTGuarantees(trctGross,fine,fired){
+  const debts=ctDebts(),alloc=[];let sevPool=Math.max(0,r2(trctGross*.35)),finePool=fired?Math.max(0,fine):0,totalSev=0,totalFine=0;
+  for(const d of debts){
+    let remain=d.pendente;
+    const sevCap=r2(trctGross*(d.sevPct/100));
+    const sev=r2(Math.min(remain,sevCap,sevPool));remain=r2(Math.max(0,remain-sev));sevPool=r2(Math.max(0,sevPool-sev));totalSev=r2(totalSev+sev);
+    // Marcos está no saque-aniversário: os 10% do saldo do FGTS não são acionados neste cálculo.
+    const fgtsUse=0;
+    const fineCap=fired?r2(fine*(d.finePct/100)):0;
+    const fineUse=r2(Math.min(remain,fineCap,finePool));remain=r2(Math.max(0,remain-fineUse));finePool=r2(Math.max(0,finePool-fineUse));totalFine=r2(totalFine+fineUse);
+    alloc.push({...d,sev,fgtsUse,fineUse,remain});
+  }
+  return{debts,alloc,totalPending:r2(debts.reduce((a,d)=>a+d.pendente,0)),totalSev,totalFine,totalGuarantee:r2(totalSev+totalFine),unconfirmed:debts.some(d=>!d.confirmed),sevPctTotal:r2(Math.min(35,debts.reduce((a,d)=>a+d.sevPct,0)))};
+}
+function calc(c,scenario){
+  scenario=scenario||c.scenario;const sal=Math.max(0,n(c.salary)),adm=parseDate(c.admission),sim=parseDate(c.simulationDate)||parseDate(localToday())||new Date();
+  const fired=scenario.startsWith('fire_'),worked=scenario.endsWith('_worked'),nd=fired?noticeDays(adm,sim):30;
+  const projected=(scenario==='fire_indemnified'||worked)?addDays(sim,nd):sim;
+  const payDate=worked?projected:sim,daily=sal/30,salaryBalance=r2(daily*Math.min(30,payDate.getDate()));
+  const av13=thirteenthAvos(adm,projected),thirteenth=r2(Math.max(0,sal*(av13/12)-Math.max(0,n(c.thirteenthPaid))));
+  const vacDays=clamp(Math.round(n(c.vacationDays)),0,90),fullVac=r2(daily*vacDays*(4/3)),avVac=vacationAvos(adm,projected),propVac=r2(sal*(avVac/12)*(4/3));
+  const noticeInd=scenario==='fire_indemnified'?r2(daily*nd):0,noticeDiscount=scenario==='resign_now'?r2(sal):0;
+  const trctGross=r2(Math.max(0,salaryBalance+thirteenth+fullVac+propVac+noticeInd-noticeDiscount));
+  const f=fgts(),fine=fired?r2(f.rescision*.40):0,ct=applyCTGuarantees(trctGross,fine,fired);
+  const afterCredit=r2(Math.max(0,trctGross-ct.totalSev)+Math.max(0,fine-ct.totalFine));
+  const cards=futureCards(c.simulationDate),debts=negotiatedPending(),final=r2(afterCredit-cards-debts);
+  return{scenario,fired,worked,noticeDays:nd,projected:iso(projected),payDate:iso(payDate),salary:sal,salaryBalance,av13,thirteenth,vacDays,fullVac,avVac,propVac,noticeInd,noticeDiscount,trctGross,fgts:f,fgtsFine:fine,ct,afterCredit,cards,debts,final};
+}
+function ensureHost(){let h=document.getElementById(HOST_ID);if(h)return h;const s=document.getElementById('debtSummary');if(!s)return null;h=document.createElement('div');h.id=HOST_ID;s.insertAdjacentElement('afterend',h);return h}
+function fmtInput(v){return (Number(v)||0).toFixed(2).replace('.',',')}
+function warningState(x){return x.ct.unconfirmed||!x.ct.debts.length}
+function renderCard(){const h=ensureHost();if(!h)return;if(profile()!=='Marcos'){h.innerHTML='';return}const c=load(),x=calc(c,c.scenario),all=Object.keys(SCENARIOS).map(k=>calc(c,k)),partial=warningState(x);h.innerHTML=`<div class="rp38-card" role="button" tabindex="0" aria-label="Abrir memória de cálculo da rescisão">
+  <div class="rp38-top"><div><div class="rp38-kicker"><i></i>Proteção em caso de rescisão</div><h3>Reserva de saída</h3><p class="rp38-sub">${attr(SCENARIOS[c.scenario].label)} · Rede Cidadã</p></div><div class="rp38-main"><span>Saldo após compromissos</span><b class="${x.final<0?'negative':'positive'}">${money(x.final)}</b><em class="rp38-badge">${partial?'garantias CT estimadas':'garantias CT confirmadas'}</em></div></div>
+  <div class="rp38-facts"><div class="rp38-fact"><span>Rescisão após garantia</span><b>${money(x.afterCredit)}</b></div><div class="rp38-fact"><span>Faturas futuras</span><b>${money(x.cards)}</b></div><div class="rp38-fact"><span>Dívidas negociadas</span><b>${money(x.debts)}</b></div><div class="rp38-fact"><span>${x.ct.debts.length} CT · saldo parcelado</span><b>${money(x.ct.totalPending)}</b></div></div>
+  <div class="rp38-scenarios">${all.map(z=>`<div class="rp38-scenario-mini ${z.scenario===c.scenario?'active':''}"><span>${attr(SCENARIOS[z.scenario].short)}</span><b>${money(z.final)}</b></div>`).join('')}</div>
+  <div class="rp38-open">Ver memória, garantias de cada CT e cenários →</div></div>`;
+}
+function ensureModal(){let m=document.getElementById(MODAL_ID);if(m)return m;m=document.createElement('div');m.id=MODAL_ID;m.className='modalback';m.innerHTML='<div class="modal"><div class="rp38-head"><div><h2>Memória de cálculo da rescisão</h2><p>Verbas trabalhistas, garantias do Crédito do Trabalhador e compromissos financeiros</p></div><button type="button" class="rp38-close" data-rp38-close>Fechar</button></div><div class="rp38-body" id="rp38Body"></div></div>';document.body.appendChild(m);m.addEventListener('click',e=>{if(e.target===m||e.target.closest?.('[data-rp38-close]')){m.classList.remove('open');return}const s=e.target.closest?.('[data-rp38-scenario]');if(s){let c=collect(load());c.scenario=s.dataset.rp38Scenario;save(c);renderModal();renderCard();return}if(e.target.closest?.('[data-rp38-apply]')){const c=save(collect(load()));renderModal(c);renderCard();try{toast('Parâmetros da rescisão atualizados.')}catch(err){}return}});return m}
+function collect(base){const $=id=>document.getElementById(id),c={...base};if(!$('rp38Salary'))return c;c.salary=n($('rp38Salary').value);c.admission=$('rp38Admission').value||c.admission;c.simulationDate=$('rp38Date').value||c.simulationDate;c.vacationDays=clamp(n($('rp38VacationDays').value),0,90);c.thirteenthPaid=Math.max(0,n($('rp38ThirteenthPaid').value));return c}
+function line(label,value,cls=''){return `<div class="rp38-line"><span>${label}</span><b class="${cls}">${value}</b></div>`}
+function ctRows(x){return x.ct.alloc.length?x.ct.alloc.map(d=>`<div class="rp38-ctrow"><div><b>${attr(d.credor||d.descricao)}</b><span>${attr(d.contract?`Contrato ${d.contract}`:'Crédito do Trabalhador')} · ${d.parcelasQuitadas}/${d.parcelasTotal} parcelas quitadas</span></div><div class="rp38-ctnums"><b>${money(d.pendente)}</b><span>Verbas ${String(d.sevPct.toFixed(2)).replace('.',',')}% · FGTS ${String(d.fgtsPct.toFixed(2)).replace('.',',')}% · multa ${String(d.finePct.toFixed(0)).replace('.',',')}%</span></div></div>`).join(''):'<div class="rp38-ctempty">Nenhum Crédito do Trabalhador marcado nas dívidas.</div>'}
+function renderModal(forced){const c=forced||load(),x=calc(c,c.scenario),body=document.getElementById('rp38Body')||ensureModal().querySelector('#rp38Body'),partial=warningState(x);
+ body.innerHTML=`<div class="rp38-source"><span>Vínculo considerado</span><b>Rede Cidadã · início disponível no CNIS: out/2021 · saque-aniversário</b></div>
+ <div class="rp38-seg">${Object.entries(SCENARIOS).map(([k,v])=>`<button type="button" data-rp38-scenario="${k}" class="${k===c.scenario?'active':''}">${attr(v.label)}</button>`).join('')}</div>
+ <div class="rp38-params"><div class="rp38-params-head"><h3>Parâmetros trabalhistas</h3><span>As garantias de CT são editadas diretamente em cada dívida marcada como CT.</span></div><div class="rp38-form">
+  <div class="rp38-field"><label>Salário bruto mensal</label><input id="rp38Salary" inputmode="decimal" value="${attr(fmtInput(c.salary))}"></div>
+  <div class="rp38-field"><label>Admissão</label><input id="rp38Admission" type="date" value="${attr(c.admission)}"></div>
+  <div class="rp38-field"><label>Data da simulação</label><input id="rp38Date" type="date" value="${attr(c.simulationDate)}"></div>
+  <div class="rp38-field"><label>Férias integrais/vencidas pendentes (dias)</label><input id="rp38VacationDays" type="number" min="0" max="90" value="${attr(c.vacationDays)}"></div>
+  <div class="rp38-field"><label>13º já recebido no ano</label><input id="rp38ThirteenthPaid" inputmode="decimal" value="${attr(fmtInput(c.thirteenthPaid))}"></div>
+ </div><div class="rp38-applyrow"><button type="button" class="rp38-apply" data-rp38-apply>Atualizar cálculo</button></div></div>
+ <div class="rp38-ctbox"><div class="rp38-cthead"><div><h3>Crédito do Trabalhador</h3><p>${x.ct.debts.length} contratos · ${money(x.ct.totalPending)} em parcelas contratuais pendentes</p></div><b>garantia usada ${money(x.ct.totalGuarantee)}</b></div>${ctRows(x)}</div>
+ <div class="rp38-memory"><div class="rp38-block"><h3>Verbas rescisórias · ${attr(SCENARIOS[c.scenario].label)}</h3>
+   ${line('Saldo de salário',money(x.salaryBalance),'plus')}${line(`13º proporcional · ${x.av13}/12`,money(x.thirteenth),'plus')}${line(`Férias integrais/vencidas · ${x.vacDays} dias + 1/3`,money(x.fullVac),'plus')}${line(`Férias proporcionais · ${x.avVac}/12 + 1/3`,money(x.propVac),'plus')}${x.noticeInd?line(`Aviso indenizado · ${x.noticeDays} dias`,money(x.noticeInd),'plus'):''}${x.noticeDiscount?line('Desconto estimado por aviso não cumprido',`− ${money(x.noticeDiscount)}`,'minus'):''}${line('TRCT bruto estimado',money(x.trctGross))}${line('Multa rescisória do FGTS · 40%',money(x.fgtsFine),x.fgtsFine?'plus':'')}${line('Saldo do FGTS liberado na rescisão','R$ 0,00')}
+  </div><div class="rp38-block"><h3>Garantias e compromissos</h3>
+   ${line(`CT · garantia em verbas · até ${String(x.ct.sevPctTotal.toFixed(2)).replace('.',',')}%`,`− ${money(x.ct.totalSev)}`,'minus')}${line('CT · 10% do saldo FGTS (saque-aniversário)','R$ 0,00')}${line('CT · multa rescisória usada',`− ${money(x.ct.totalFine)}`,'minus')}${line('Faturas futuras do cartão',`− ${money(x.cards)}`,'minus')}${line('Parcelas pendentes de outras dívidas negociadas',`− ${money(x.debts)}`,'minus')}${line('Recursos após garantia do CT',money(x.afterCredit))}
+  </div></div>
+ <div class="rp38-total ${x.final<0?'negative':''}"><div><span>Saldo estimado após todos os compromissos</span><small>${partial?'Há percentuais de garantia de CT ainda marcados como estimados; confirme-os no contrato/Emprega Brasil quando disponíveis.':'Garantias cadastradas como confirmadas.'} O saldo dos CTs é exibido como parcelas futuras; o valor de liquidação antecipada pode ser menor.</small></div><b>${money(x.final)}</b></div>
+ <div class="rp38-notes"><div class="rp38-note"><i>i</i><span>No saque-aniversário, a simulação não soma o saldo integral do FGTS à rescisão. Em dispensa sem justa causa, considera a multa de 40%; para o Crédito do Trabalhador, os 10% do saldo do FGTS não são usados neste cenário.</span></div><div class="rp38-note"><i>i</i><span>As garantias das verbas rescisórias dos contratos anteriores a 26/06/2026 podem depender da conversão da prestação em percentual pelo agente operador. Os percentuais iniciais do Hub são estimativas de planejamento e podem ser editados em Dívidas → Editar → Crédito do Trabalhador.</span></div><div class="rp38-note"><i>i</i><span>A multa rescisória é tratada como uma garantia compartilhada e nunca é contada mais de uma vez, mesmo com vários contratos. O saldo devedor real na rescisão deve ser o informado pelas instituições.</span></div></div>`;
+}
+function openModal(){if(profile()!=='Marcos')return;const m=ensureModal();renderModal();document.querySelectorAll('.modalback.open').forEach(x=>{if(x!==m)x.classList.remove('open')});m.classList.add('open')}
+function bind(){const h=ensureHost();if(h&&!h.dataset.rp38Bound){h.dataset.rp38Bound='1';h.addEventListener('click',openModal);h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal()}})}
+ const prior=window.renderDebts;if(typeof prior==='function'&&!prior.__rp38){const wrapped=function(){const r=prior.apply(this,arguments);renderCard();return r};wrapped.__rp38=true;window.renderDebts=wrapped;try{renderDebts=wrapped}catch(e){}}
+ document.addEventListener('click',e=>{if(e.target.closest?.('[data-view="dividas"],#nav [data-view="dividas"]'))setTimeout(renderCard,30)},true);
+ window.openRescisaoMemory=openModal;window.renderRescisaoPlanner=renderCard;renderCard();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
+})();
+</script>
+
+
+<style id="pp-v39-credit-worker-debts-style">
+#debtModal #dCtFlagFieldV39{grid-column:1/-1;margin-top:3px;padding-top:12px;border-top:1px solid #e6ebf1}
+#debtModal .ct-toggle-v39{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 12px;border:1px solid #dbe3ed;border-radius:13px;background:#f7f9fc;cursor:pointer}
+#debtModal .ct-toggle-v39 div b{display:block;color:#172b45;font-size:11px}#debtModal .ct-toggle-v39 div small{display:block;margin-top:2px;color:#77869a;font-size:9px;line-height:1.35}
+#debtModal .ct-switch-v39{position:relative;width:40px;height:22px;flex:0 0 40px}.ct-switch-v39 input{position:absolute;opacity:0;pointer-events:none}.ct-switch-v39 i{position:absolute;inset:0;border-radius:999px;background:#d6dee8;transition:.15s}.ct-switch-v39 i:after{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 2px 5px #0002;transition:.15s}.ct-switch-v39 input:checked+i{background:#144a94}.ct-switch-v39 input:checked+i:after{transform:translateX(18px)}
+#debtModal #dCtGuaranteesV39{grid-column:1/-1;display:none;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:12px;border-radius:14px;background:#f8fafc;border:1px solid #e3e9f0}
+#debtModal #dCtGuaranteesV39.open{display:grid}#debtModal #dCtGuaranteesV39 .field{min-width:0}#debtModal #dCtGuaranteesV39 .full{grid-column:1/-1}
+#debtModal .ct-check-v39{display:flex;align-items:flex-start;gap:7px;padding:8px 9px;border-radius:10px;border:1px solid #e2e7ee;background:#fff;color:#5e6f82;font-size:9px;line-height:1.35;font-weight:700}.ct-check-v39 input{margin:1px 0 0;accent-color:#144a94}
+#debtModal .ct-note-v39{grid-column:1/-1;color:#7b8798;font-size:8.8px;line-height:1.45;margin-top:-1px}
+.ct-tag-v39{display:inline-flex;margin-left:6px;vertical-align:middle;padding:2px 5px;border-radius:999px;background:#e9f2ff;color:#0f5ab8;border:1px solid #cfe2ff;font-size:7.5px;font-weight:950;letter-spacing:.05em}
+.rp38-ctbox{margin:0 0 12px;border:1px solid #e2e8f0;border-radius:15px;background:#f8fafc;padding:12px 13px}.rp38-cthead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:7px}.rp38-cthead h3{margin:0;font-size:11px;color:#263b56}.rp38-cthead p{margin:3px 0 0;color:#758399;font-size:8.8px}.rp38-cthead>b{font-size:10px;color:#173a68;white-space:nowrap}.rp38-ctrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 0;border-top:1px solid #e7ebf1}.rp38-ctrow>div>b{display:block;font-size:9.7px;color:#203651}.rp38-ctrow>div>span{display:block;margin-top:2px;color:#7c899a;font-size:8.4px}.rp38-ctnums{text-align:right}.rp38-ctnums>b{color:#a22d3e!important}.rp38-ctempty{padding:8px 0;color:#7d8998;font-size:9px}
+@media(max-width:760px){#debtModal #dCtGuaranteesV39{grid-template-columns:1fr 1fr}.rp38-ctrow{grid-template-columns:1fr}.rp38-ctnums{text-align:left}}
+@media(max-width:520px){#debtModal #dCtGuaranteesV39{grid-template-columns:1fr}}
+</style>
+<script id="pp-v39-credit-worker-debts-script">
+(()=>{
+'use strict';
+const EDIT_KEY='financeiro_marcos_debt_edits_v3',DATE_KEY='planejador_debt_dates_v16';
+const CT_SEED=[
+ {id:'DEBT_MANUAL_CT_INTER_12538033',descricao:'Crédito do Trabalhador · Banco Inter',credor:'Banco Inter',parcela:1510,totalInst:48,first:'2025-02',contract:'12538033',contractDate:'2025-01-29',sevPct:18.70,fgtsPct:0,finePct:0,rule:'Anterior à Res. 3/2026 · conversão estimada da prestação'},
+ {id:'DEBT_MANUAL_CT_SAFRA_56871297',descricao:'Crédito do Trabalhador · Banco Safra',credor:'Banco Safra',parcela:51.42,totalInst:36,first:'2026-06',contract:'56871297',contractDate:'2026-03-23',sevPct:.64,fgtsPct:10,finePct:100,rule:'Anterior à Res. 3/2026 · conversão estimada + garantias contratuais'},
+ {id:'DEBT_MANUAL_CT_DIGIO_500003473033',descricao:'Crédito do Trabalhador · Banco Digio',credor:'Banco Digio',parcela:117.85,totalInst:48,first:'2026-05',contract:'500003473033',contractDate:'2026-03-02',sevPct:1.46,fgtsPct:10,finePct:100,rule:'Anterior à Res. 3/2026 · conversão estimada + garantias contratuais'},
+ {id:'DEBT_MANUAL_CT_MERCANTIL_594108018',descricao:'Crédito do Trabalhador · Banco Mercantil',credor:'Banco Mercantil',parcela:61.56,totalInst:48,first:'2026-10',contract:'594108018',contractDate:'2026-07-08',sevPct:14.20,fgtsPct:10,finePct:100,rule:'Posterior à Res. 3/2026 · percentual remanescente estimado'}
+];
+function profile(){try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}}
+function readObj(k){try{const x=JSON.parse(localStorage.getItem(k)||'{}');return x&&typeof x==='object'&&!Array.isArray(x)?x:{}}catch(e){return {}}}
+function writeObj(k,x){try{localStorage.setItem(k,JSON.stringify(x))}catch(e){}}
+function ymNow(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function validYM(v){return /^\d{4}-(0[1-9]|1[0-2])$/.test(String(v||''))}
+function addMonths(ym,n){if(!validYM(ym))return '';const [y,m]=ym.split('-').map(Number),d=new Date(y,m-1+n,1,12);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function monthsInclusive(first,through){if(!validYM(first)||!validYM(through))return 0;const [y,m]=first.split('-').map(Number),[y2,m2]=through.split('-').map(Number);return Math.max(0,(y2-y)*12+(m2-m)+1)}
+function round(v){return Math.round((Number(v)||0)*100)/100}
+function seedAndSync(){
+  if(profile()!=='Marcos')return false;
+  const edits=readObj(EDIT_KEY),dates=readObj(DATE_KEY),now=ymNow();let changed=false;
+  for(const z of CT_SEED){
+    if(!edits[z.id]){
+      const paid=Math.min(z.totalInst,monthsInclusive(z.first,now)),total=round(z.parcela*z.totalInst),quitado=round(z.parcela*paid);
+      edits[z.id]={descricao:z.descricao,credor:z.credor,banco:'',parcela:z.parcela,total,quitado,pendente:round(total-quitado),negociado:'Sim',parcelasTotal:z.totalInst,parcelasQuitadas:paid,primeiraParcelaMes:z.first,ultimaParcelaMes:addMonths(z.first,z.totalInst-1),status:paid>=z.totalInst?'Quitado':'Pendente',isCreditWorker:true,ctContractNumber:z.contract,ctContractDate:z.contractDate,ctGuaranteeSeverancePct:z.sevPct,ctGuaranteeFgtsPct:z.fgtsPct,ctGuaranteeFinePct:z.finePct,ctGuaranteeConfirmed:false,ctAutoPaid:true,ctRuleLabel:z.rule,ctSeedV39:true};
+      changed=true;
+    }else if(edits[z.id].isCreditWorker!==false && edits[z.id].ctAutoPaid!==false){
+      const x=edits[z.id],first=validYM(x.primeiraParcelaMes)?x.primeiraParcelaMes:z.first,totalInst=Math.max(1,parseInt(x.parcelasTotal,10)||z.totalInst),parcela=Number(x.parcela)||z.parcela,paid=Math.min(totalInst,monthsInclusive(first,now)),total=round(parcela*totalInst),quitado=round(parcela*paid);
+      if(x.parcelasQuitadas!==paid||Math.abs((Number(x.pendente)||0)-(total-quitado))>.009){x.parcelasQuitadas=paid;x.total=total;x.quitado=quitado;x.pendente=round(total-quitado);x.status=paid>=totalInst?'Quitado':'Pendente';changed=true}
+    }
+    const x=edits[z.id];if(x){const first=validYM(x.primeiraParcelaMes)?x.primeiraParcelaMes:z.first,forecast=addMonths(first,Math.max(1,parseInt(x.parcelasTotal,10)||z.totalInst)-1);if(!dates[z.id]||dates[z.id].first!==first||dates[z.id].forecast!==forecast){dates[z.id]={...(dates[z.id]||{}),first,forecast};changed=true}}
+  }
+  // Também aplica a regra de parcelas quitadas até o mês atual a qualquer dívida marcada manualmente como CT.
+  for(const [id,x] of Object.entries(edits)){
+    if(!x||x.isCreditWorker!==true||x.ctAutoPaid===false||!validYM(x.primeiraParcelaMes))continue;
+    const totalInst=Math.max(1,parseInt(x.parcelasTotal,10)||1),parcela=Number(x.parcela)||0;
+    if(parcela<=0)continue;
+    const paid=Math.min(totalInst,monthsInclusive(x.primeiraParcelaMes,now)),total=round(parcela*totalInst),quitado=round(parcela*paid),pendente=round(total-quitado);
+    if(x.parcelasQuitadas!==paid||Math.abs((Number(x.pendente)||0)-pendente)>.009){x.parcelasQuitadas=paid;x.total=total;x.quitado=quitado;x.pendente=pendente;x.status=paid>=totalInst?'Quitado':'Pendente';changed=true}
+    const forecast=addMonths(x.primeiraParcelaMes,totalInst-1);if(!dates[id]||dates[id].first!==x.primeiraParcelaMes||dates[id].forecast!==forecast){dates[id]={...(dates[id]||{}),first:x.primeiraParcelaMes,forecast};changed=true}
+  }
+  if(changed){writeObj(EDIT_KEY,edits);writeObj(DATE_KEY,dates);try{debtEdits=edits}catch(e){}}
+  return changed;
+}
+
+// Mantém os campos CT, que os mapeadores antigos de dívidas não conhecem.
+const previousGet=window.getDebts;
+function getDebtsV39(includeArchived=true){
+  let rows=[];try{rows=typeof previousGet==='function'?(previousGet.call(window,includeArchived)||[]):[]}catch(e){rows=[]}
+  const edits=readObj(EDIT_KEY);
+  return rows.map(d=>{const x=edits[String(d.id)]||{};return {...d,isCreditWorker:x.isCreditWorker===true,ctContractNumber:x.ctContractNumber||'',ctContractDate:x.ctContractDate||'',ctGuaranteeSeverancePct:x.ctGuaranteeSeverancePct??0,ctGuaranteeFgtsPct:x.ctGuaranteeFgtsPct??0,ctGuaranteeFinePct:x.ctGuaranteeFinePct??0,ctGuaranteeConfirmed:x.ctGuaranteeConfirmed===true,ctAutoPaid:x.ctAutoPaid!==false,ctRuleLabel:x.ctRuleLabel||'',primeiraParcelaMes:x.primeiraParcelaMes||d.primeiraParcelaMes||'',ultimaParcelaMes:x.ultimaParcelaMes||d.ultimaParcelaMes||''}}
+  )
+}
+window.getDebts=getDebtsV39;try{getDebts=getDebtsV39}catch(e){}
+
+function ensureUI(){
+  const modal=document.getElementById('debtModal'),neg=document.getElementById('dNegotiated');if(!modal||!neg)return;
+  if(!document.getElementById('dCtFlagFieldV39')){
+    const box=document.createElement('div');box.className='field full';box.id='dCtFlagFieldV39';box.innerHTML='<label class="ct-toggle-v39"><div><b>Crédito do Trabalhador (CT)</b><small>Marque para vincular esta dívida às regras de garantia em caso de rescisão.</small></div><span class="ct-switch-v39"><input id="dIsCTV39" type="checkbox"><i></i></span></label>';
+    neg.closest('.field')?.after(box);
+    const g=document.createElement('div');g.id='dCtGuaranteesV39';g.innerHTML='<div class="field"><label>Nº do contrato</label><input id="dCtContractV39"></div><div class="field"><label>Data do contrato</label><input id="dCtContractDateV39" type="date"></div><div class="field"><label>Garantia · verbas rescisórias (%)</label><input id="dCtSevV39" inputmode="decimal" placeholder="0 a 35"></div><div class="field"><label>Garantia · saldo FGTS (%)</label><input id="dCtFgtsV39" inputmode="decimal" placeholder="0 a 10"></div><div class="field"><label>Garantia · multa FGTS (%)</label><input id="dCtFineV39" inputmode="decimal" placeholder="0 a 100"></div><div class="field"><label>Regra/origem</label><input id="dCtRuleV39"></div><label class="ct-check-v39"><input id="dCtConfirmedV39" type="checkbox"><span>Percentuais confirmados no contrato/Emprega Brasil.</span></label><label class="ct-check-v39"><input id="dCtAutoPaidV39" type="checkbox"><span>Considerar automaticamente quitadas as parcelas até o mês atual.</span></label><div class="ct-note-v39">No saque-aniversário, o simulador não usa os 10% do saldo do FGTS na rescisão. A multa rescisória pode ser usada conforme a garantia cadastrada. O saldo exibido da dívida é a soma das parcelas futuras, não o valor de liquidação antecipada.</div>';
+    box.after(g);
+    document.getElementById('dIsCTV39')?.addEventListener('change',toggleUI);
+  }
+}
+function toggleUI(){const on=!!document.getElementById('dIsCTV39')?.checked;document.getElementById('dCtGuaranteesV39')?.classList.toggle('open',on)}
+function num(v){let s=String(v??'').trim().replace(/R\$|\s/g,'');if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');else if(s.includes(','))s=s.replace(',','.');const x=Number(s);return Number.isFinite(x)?x:0}
+function populateCT(){
+  ensureUI();const id=String(document.getElementById('dId')?.value||''),x=id?readObj(EDIT_KEY)[id]||{}:{};
+  document.getElementById('dIsCTV39').checked=x.isCreditWorker===true;
+  document.getElementById('dCtContractV39').value=x.ctContractNumber||'';
+  document.getElementById('dCtContractDateV39').value=x.ctContractDate||'';
+  document.getElementById('dCtSevV39').value=x.ctGuaranteeSeverancePct??'';
+  document.getElementById('dCtFgtsV39').value=x.ctGuaranteeFgtsPct??'';
+  document.getElementById('dCtFineV39').value=x.ctGuaranteeFinePct??'';
+  document.getElementById('dCtRuleV39').value=x.ctRuleLabel||'';
+  document.getElementById('dCtConfirmedV39').checked=x.ctGuaranteeConfirmed===true;
+  document.getElementById('dCtAutoPaidV39').checked=x.ctAutoPaid!==false;
+  toggleUI();
+}
+let staged=null;
+function stageCT(){ensureUI();staged={isCreditWorker:!!document.getElementById('dIsCTV39')?.checked,ctContractNumber:document.getElementById('dCtContractV39')?.value.trim()||'',ctContractDate:document.getElementById('dCtContractDateV39')?.value||'',ctGuaranteeSeverancePct:Math.max(0,Math.min(35,num(document.getElementById('dCtSevV39')?.value))),ctGuaranteeFgtsPct:Math.max(0,Math.min(10,num(document.getElementById('dCtFgtsV39')?.value))),ctGuaranteeFinePct:Math.max(0,Math.min(100,num(document.getElementById('dCtFineV39')?.value))),ctGuaranteeConfirmed:!!document.getElementById('dCtConfirmedV39')?.checked,ctAutoPaid:!!document.getElementById('dCtAutoPaidV39')?.checked,ctRuleLabel:document.getElementById('dCtRuleV39')?.value.trim()||''}}
+function saveStaged(){if(!staged)return;const id=String(document.getElementById('dId')?.value||'');if(!id)return;const edits=readObj(EDIT_KEY);if(!edits[id])return;edits[id]={...edits[id],...staged};writeObj(EDIT_KEY,edits);try{debtEdits=edits}catch(e){}staged=null;seedAndSync();setTimeout(()=>{try{window.renderDebts?.()}catch(e){}try{window.renderRescisaoPlanner?.()}catch(e){}},0)}
+function bindSave(){const b=document.getElementById('saveDebtV16')||document.getElementById('saveDebt');if(!b||b.dataset.ctV39)return;b.dataset.ctV39='1';b.addEventListener('click',stageCT,true);b.addEventListener('click',saveStaged,false)}
+function decorateRows(){if(profile()!=='Marcos')return;const cts=(window.getDebts?.(true)||[]).filter(x=>x.isCreditWorker);document.querySelectorAll('#debtBody tr').forEach(tr=>{const b=tr.querySelector('td:first-child b');if(!b||b.querySelector?.('.ct-tag-v39'))return;const cred=tr.cells?.[1]?.textContent?.trim()||'',name=b.textContent.trim();if(cts.some(x=>String(x.descricao||'').trim()===name&&String(x.credor||'—').trim()===cred)){b.insertAdjacentHTML('beforeend','<span class="ct-tag-v39">CT</span>')}})}
+function afterDebtOpen(){setTimeout(()=>{ensureUI();bindSave();populateCT()},0);setTimeout(populateCT,70)}
+
+// Reaproveita os abridores existentes e apenas completa os campos CT.
+const oldEdit=window.openDebtEdit;
+if(typeof oldEdit==='function'){window.openDebtEdit=function(id){const r=oldEdit(id);afterDebtOpen();return r};try{openDebtEdit=window.openDebtEdit}catch(e){}}
+// O menu de linha chama internamente o editor antigo; após o clique em “Editar”, completamos os campos CT.
+document.addEventListener('click',e=>{const b=e.target.closest?.('#rowMenu button');if(!b||(b.textContent||'').trim()!=='Editar')return;setTimeout(()=>{if(document.getElementById('debtModal')?.classList.contains('open'))afterDebtOpen()},0)});
+const add=document.getElementById('addDebtV67');if(add)add.addEventListener('click',afterDebtOpen);
+
+seedAndSync();ensureUI();bindSave();
+const previousRender=window.renderDebts;
+if(typeof previousRender==='function'&&!previousRender.__ctV39){const wrapped=function(){seedAndSync();const r=previousRender.apply(this,arguments);decorateRows();setTimeout(()=>window.renderRescisaoPlanner?.(),0);return r};wrapped.__ctV39=true;window.renderDebts=wrapped;try{renderDebts=wrapped}catch(e){}}
+try{window.renderDebts?.()}catch(e){}decorateRows();setTimeout(()=>{ensureUI();bindSave();decorateRows();try{window.renderPrevidencia?.()}catch(e){}},120);
 })();
 </script>
