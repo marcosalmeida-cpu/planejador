@@ -7433,6 +7433,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     try{renderFgts()}catch(e){}
     try{renderDashboard()}catch(e){}
     try{renderAssets()}catch(e){}
+    try{window.renderRescisaoPlanner?.()}catch(e){}
     if(typeof toast==='function')toast('Saldos do FGTS atualizados.');
   };
   const saveBtn=document.getElementById('saveFgts');
@@ -27113,7 +27114,7 @@ bind();
 .rp38-main b{display:block;margin-top:3px;font-size:27px;line-height:1.05;letter-spacing:-.035em;color:#fff}
 .rp38-main b.negative{color:#ffacb8!important}.rp38-main b.positive{color:#9fe2bd!important}
 .rp38-badge{display:inline-flex;margin-top:7px;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.07);border-radius:999px;padding:4px 8px;color:#c9d6e6;font-size:8.5px;font-weight:850}
-.rp38-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:14px;padding-top:13px;border-top:1px solid rgba(255,255,255,.10);position:relative;z-index:1}
+.rp38-facts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin-top:14px;padding-top:13px;border-top:1px solid rgba(255,255,255,.10);position:relative;z-index:1}
 .rp38-fact{padding:0 12px;border-left:1px solid rgba(255,255,255,.09);min-width:0}.rp38-fact:first-child{padding-left:0;border-left:0}
 .rp38-fact span{display:block;color:#93a2b7;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rp38-fact b{display:block;margin-top:4px;font-size:13px;color:#f3f7fc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -27183,7 +27184,17 @@ function overlapDays(start,end,ms,me){const s=new Date(Math.max(+start,+ms)),e=n
 function thirteenthAvos(adm,end){if(!adm||!end||end<adm)return 0;const y=end.getFullYear();let c=0;for(let m=0;m<12;m++){const ms=new Date(y,m,1,12),me=new Date(y,m+1,0,12);if(overlapDays(adm,end,ms,me)>=15)c++}return c}
 function lastAnniversary(adm,end){let x=new Date(end.getFullYear(),adm.getMonth(),adm.getDate(),12);if(x>end)x=new Date(end.getFullYear()-1,adm.getMonth(),adm.getDate(),12);return x}
 function vacationAvos(adm,end){if(!adm||!end||end<adm)return 0;let s=lastAnniversary(adm,end),avos=0,cursor=new Date(s);while(avos<12){let next=new Date(cursor);next.setMonth(next.getMonth()+1);if(next<=end){avos++;cursor=next;continue}const days=Math.floor((end-cursor)/86400000)+1;if(days>=15)avos++;break}return clamp(avos,0,12)}
-function fgts(){let f={};try{f=window.fgtsSummary||fgtsSummary||{}}catch(e){}return{current:Math.max(0,n(f.saldoAtual)),rescision:Math.max(0,n(f.saldoRescisao)),blocked:Math.max(0,n(f.saldoBloqueado)),free:Math.max(0,n(f.saldoDisponivel))}}
+function fgts(){
+  // Fonte única: os valores salvos na própria página FGTS. Assim a rescisão usa exatamente
+  // o campo "Saldo rescisão" (saldo para fins rescisórios) informado pelo usuário.
+  let f={};
+  try{
+    const stored=JSON.parse(localStorage.getItem('financeiro_marcos_fgts_summary_v3')||'null');
+    if(stored&&typeof stored==='object')f=stored;
+  }catch(e){}
+  if(!f||typeof f!=='object'||!Object.keys(f).length){try{f=window.fgtsSummary||fgtsSummary||{}}catch(e){f={}}}
+  return{current:Math.max(0,n(f.saldoAtual)),rescision:Math.max(0,n(f.saldoRescisao)),blocked:Math.max(0,n(f.saldoBloqueado)),free:Math.max(0,n(f.saldoDisponivel))}
+}
 function debtList(){
   const byId=new Map();
   try{
@@ -27243,17 +27254,19 @@ function calc(c,scenario){
   const vacDays=clamp(Math.round(n(c.vacationDays)),0,90),fullVac=r2(daily*vacDays*(4/3)),avVac=vacationAvos(adm,projected),propVac=r2(sal*(avVac/12)*(4/3));
   const noticeInd=scenario==='fire_indemnified'?r2(daily*nd):0,noticeDiscount=scenario==='resign_now'?r2(sal):0;
   const trctGross=r2(Math.max(0,salaryBalance+thirteenth+fullVac+propVac+noticeInd-noticeDiscount));
-  const f=fgts(),fine=fired?r2(f.rescision*.40):0,ct=applyCTGuarantees(trctGross,fine,fired,f);
+  const f=fgts();
+  // A multa rescisória entra no total como 40% do saldo para fins rescisórios da página FGTS.
+  const fineBase=f.rescision,fine=fired?r2(fineBase*.40):0,ct=applyCTGuarantees(trctGross,fine,fired,f);
   const afterCredit=r2(Math.max(0,trctGross-ct.totalSev)+Math.max(0,fine-ct.totalFine));
   const cards=futureCards(c.simulationDate),debts=negotiatedPending(),final=r2(afterCredit-cards-debts);
-  return{scenario,fired,worked,noticeDays:nd,projected:iso(projected),payDate:iso(payDate),salary:sal,salaryBalance,av13,thirteenth,vacDays,fullVac,avVac,propVac,noticeInd,noticeDiscount,trctGross,fgts:f,fgtsFine:fine,ct,afterCredit,cards,debts,final};
+  return{scenario,fired,worked,noticeDays:nd,projected:iso(projected),payDate:iso(payDate),salary:sal,salaryBalance,av13,thirteenth,vacDays,fullVac,avVac,propVac,noticeInd,noticeDiscount,trctGross,fgts:f,fgtsFineBase:fineBase,fgtsFine:fine,ct,afterCredit,cards,debts,final};
 }
 function ensureHost(){let h=document.getElementById(HOST_ID);if(h)return h;const s=document.getElementById('debtSummary');if(!s)return null;h=document.createElement('div');h.id=HOST_ID;s.insertAdjacentElement('afterend',h);return h}
 function fmtInput(v){return (Number(v)||0).toFixed(2).replace('.',',')}
 function warningState(x){return x.ct.unconfirmed||!x.ct.debts.length}
 function renderCard(){const h=ensureHost();if(!h)return;if(profile()!=='Marcos'){h.innerHTML='';return}const c=load(),x=calc(c,c.scenario),all=Object.keys(SCENARIOS).map(k=>calc(c,k)),partial=warningState(x);h.innerHTML=`<div class="rp38-card" role="button" tabindex="0" aria-label="Abrir memória de cálculo da rescisão">
   <div class="rp38-top"><div><div class="rp38-kicker"><i></i>Proteção em caso de rescisão</div><h3>Reserva de saída</h3><p class="rp38-sub">${attr(SCENARIOS[c.scenario].label)} · Rede Cidadã</p></div><div class="rp38-main"><span>Saldo após compromissos</span><b class="${x.final<0?'negative':'positive'}">${money(x.final)}</b><em class="rp38-badge">${partial?'garantias CT estimadas':'garantias CT confirmadas'}</em></div></div>
-  <div class="rp38-facts"><div class="rp38-fact"><span>Rescisão após garantia</span><b>${money(x.afterCredit)}</b></div><div class="rp38-fact"><span>Faturas futuras</span><b>${money(x.cards)}</b></div><div class="rp38-fact"><span>Dívidas negociadas</span><b>${money(x.debts)}</b></div><div class="rp38-fact"><span>${x.ct.debts.length} CT · saldo parcelado</span><b>${money(x.ct.totalPending)}</b></div></div>
+  <div class="rp38-facts"><div class="rp38-fact"><span>Rescisão após garantia</span><b>${money(x.afterCredit)}</b></div><div class="rp38-fact"><span>Multa FGTS · 40%</span><b>${money(x.fgtsFine)}</b></div><div class="rp38-fact"><span>Faturas futuras</span><b>${money(x.cards)}</b></div><div class="rp38-fact"><span>Dívidas negociadas</span><b>${money(x.debts)}</b></div><div class="rp38-fact"><span>${x.ct.debts.length} CT · saldo parcelado</span><b>${money(x.ct.totalPending)}</b></div></div>
   <div class="rp38-scenarios">${all.map(z=>`<div class="rp38-scenario-mini ${z.scenario===c.scenario?'active':''}"><span>${attr(SCENARIOS[z.scenario].short)}</span><b>${money(z.final)}</b></div>`).join('')}</div>
   <div class="rp38-open">Ver memória, garantias de cada CT e cenários →</div></div>`;
 }
@@ -27273,12 +27286,12 @@ function renderModal(forced){const c=forced||load(),x=calc(c,c.scenario),body=do
  </div><div class="rp38-applyrow"><button type="button" class="rp38-apply" data-rp38-apply>Atualizar cálculo</button></div></div>
  <div class="rp38-ctbox"><div class="rp38-cthead"><div><h3>Crédito do Trabalhador</h3><p>${x.ct.debts.length} contratos · ${money(x.ct.totalPending)} em parcelas contratuais pendentes</p></div><b>garantia usada ${money(x.ct.totalGuarantee)}</b></div>${ctRows(x)}</div>
  <div class="rp38-memory"><div class="rp38-block"><h3>Verbas rescisórias · ${attr(SCENARIOS[c.scenario].label)}</h3>
-   ${line('Saldo de salário',money(x.salaryBalance),'plus')}${line(`13º proporcional · ${x.av13}/12`,money(x.thirteenth),'plus')}${line(`Férias integrais/vencidas · ${x.vacDays} dias + 1/3`,money(x.fullVac),'plus')}${line(`Férias proporcionais · ${x.avVac}/12 + 1/3`,money(x.propVac),'plus')}${x.noticeInd?line(`Aviso indenizado · ${x.noticeDays} dias`,money(x.noticeInd),'plus'):''}${x.noticeDiscount?line('Desconto estimado por aviso não cumprido',`− ${money(x.noticeDiscount)}`,'minus'):''}${line('TRCT bruto estimado',money(x.trctGross))}${line('Base FGTS para fins rescisórios',money(x.fgts.rescision))}${line('Multa rescisória do FGTS · 40%',money(x.fgtsFine),x.fgtsFine?'plus':'')}${line('Saldo atual do FGTS',money(x.fgts.current))}${line('Saldo bloqueado do FGTS',money(x.fgts.blocked))}${line('Saldo livre informado',money(x.fgts.free))}${line('Saldo do FGTS sacável na demissão · saque-aniversário','R$ 0,00')}
+   ${line('Saldo de salário',money(x.salaryBalance),'plus')}${line(`13º proporcional · ${x.av13}/12`,money(x.thirteenth),'plus')}${line(`Férias integrais/vencidas · ${x.vacDays} dias + 1/3`,money(x.fullVac),'plus')}${line(`Férias proporcionais · ${x.avVac}/12 + 1/3`,money(x.propVac),'plus')}${x.noticeInd?line(`Aviso indenizado · ${x.noticeDays} dias`,money(x.noticeInd),'plus'):''}${x.noticeDiscount?line('Desconto estimado por aviso não cumprido',`− ${money(x.noticeDiscount)}`,'minus'):''}${line('TRCT bruto estimado',money(x.trctGross))}${line('Saldo para fins rescisórios · página FGTS',money(x.fgts.rescision))}${line(`Multa rescisória · 40% de ${money(x.fgtsFineBase)}`,money(x.fgtsFine),x.fgtsFine?'plus':'')}${line('Saldo atual do FGTS',money(x.fgts.current))}${line('Saldo bloqueado do FGTS',money(x.fgts.blocked))}${line('Saldo livre informado',money(x.fgts.free))}${line('Saldo do FGTS sacável na demissão · saque-aniversário','R$ 0,00')}
   </div><div class="rp38-block"><h3>Garantias e compromissos</h3>
    ${line(`CT · garantia em verbas · até ${String(x.ct.sevPctTotal.toFixed(2)).replace('.',',')}%`,`− ${money(x.ct.totalSev)}`,'minus')}${line(`CT · garantia FGTS · limite compartilhado ${money(x.ct.fgtsPoolStart)}`,`− ${money(x.ct.totalFgts)}`,'minus')}${line('CT · multa rescisória usada',`− ${money(x.ct.totalFine)}`,'minus')}${line('Faturas futuras do cartão',`− ${money(x.cards)}`,'minus')}${line('Parcelas pendentes de outras dívidas negociadas',`− ${money(x.debts)}`,'minus')}${line('Recursos após garantia do CT',money(x.afterCredit))}
   </div></div>
  <div class="rp38-total ${x.final<0?'negative':''}"><div><span>Saldo estimado após todos os compromissos</span><small>${partial?'Há percentuais de garantia de CT ainda marcados como estimados; confirme-os no contrato/Emprega Brasil quando disponíveis.':'Garantias cadastradas como confirmadas.'} O saldo dos CTs é exibido como parcelas futuras; o valor de liquidação antecipada pode ser menor.</small></div><b>${money(x.final)}</b></div>
- <div class="rp38-notes"><div class="rp38-note"><i>i</i><span>No saque-aniversário, o saldo integral do FGTS não é sacado na demissão; em dispensa sem justa causa, a multa rescisória continua devida. Isso é diferente da garantia do Crédito do Trabalhador: se contratada, ela pode alcançar até 10% do saldo do FGTS. O Hub usa um pool único e conservador, limitado também ao saldo livre informado, para não reutilizar valores já bloqueados.</span></div><div class="rp38-note"><i>i</i><span>A multa de 40% é calculada sobre o campo “saldo para fins rescisórios”, e não sobre o saldo atual disponível. Por isso a memória mostra separadamente base rescisória, saldo atual, bloqueado e livre.</span></div><div class="rp38-note"><i>i</i><span>As garantias de verbas, FGTS e multa são compartilhadas entre os CTs e nunca são contadas várias vezes. A prioridade real de apropriação entre bancos e o saldo de liquidação antecipada dependem do Emprega Brasil/FGTS e das instituições; o Hub faz uma simulação de planejamento.</span></div></div>`;
+ <div class="rp38-notes"><div class="rp38-note"><i>i</i><span>No saque-aniversário, o saldo integral do FGTS não é sacado na demissão; em dispensa sem justa causa, a multa rescisória continua devida. Isso é diferente da garantia do Crédito do Trabalhador: se contratada, ela pode alcançar até 10% do saldo do FGTS. O Hub usa um pool único e conservador, limitado também ao saldo livre informado, para não reutilizar valores já bloqueados.</span></div><div class="rp38-note"><i>i</i><span>O valor-base da multa é buscado diretamente em FGTS → “Saldo rescisão”. O Hub aplica 40% sobre esse valor e inclui a multa entre os recursos da rescisão; se parte da multa estiver vinculada como garantia de CT, somente o saldo remanescente fica disponível no resultado final.</span></div><div class="rp38-note"><i>i</i><span>As garantias de verbas, FGTS e multa são compartilhadas entre os CTs e nunca são contadas várias vezes. A prioridade real de apropriação entre bancos e o saldo de liquidação antecipada dependem do Emprega Brasil/FGTS e das instituições; o Hub faz uma simulação de planejamento.</span></div></div>`;
 }
 function openModal(){if(profile()!=='Marcos')return;const m=ensureModal();renderModal();document.querySelectorAll('.modalback.open').forEach(x=>{if(x!==m)x.classList.remove('open')});m.classList.add('open')}
 function bind(){const h=ensureHost();if(h&&!h.dataset.rp38Bound){h.dataset.rp38Bound='1';h.addEventListener('click',openModal);h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openModal()}})}
@@ -27442,3 +27455,5 @@ ensureCreditorsV40();setTimeout(ensureCreditorsV40,120);setTimeout(ensureCredito
 window.ppRepairCreditorsV40=ensureCreditorsV40;
 })();
 </script>
+
+<!-- Hub Pessoal V41: FGTS saldo rescisório ao vivo -> multa 40% na reserva de saída -->
