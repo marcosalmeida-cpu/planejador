@@ -1540,7 +1540,7 @@ body.v86-ready #dashboard{visibility:visible!important}
 <div class="menu-pop" id="rowMenu"></div>
 <div class="modalback" id="txModal"><div class="modal"><h2>Novo lançamento</h2><p>Use também para projeções futuras: se escolher um mês/ano à frente, ele entra na aba de projeção e não no realizado.</p><div class="formgrid"><div class="field"><label>Tipo</label><select id="fType"><option value="entrada">Entrada</option><option value="saida">Saída</option></select></div><div class="field"><label>Status</label><select id="fStatus"><option>Quitado</option><option>Pendente</option></select></div><div class="field"><label>Ano</label><input id="fYear" type="number"/></div><div class="field"><label>Mês</label><select id="fMonth"></select></div><div class="field full"><label>Descrição</label><input id="fDesc"/></div><div class="field"><label>Categoria</label><select id="fCategory"></select></div><div class="field"><label>Classificação</label><select id="fClass"><option>Fixo</option><option>Variável</option><option>Extra</option></select></div><div class="field"><label>Origem / conta</label><input id="fOrigin"/></div><div class="field"><label>Valor</label><input id="fValue" inputmode="decimal"/></div></div><div class="modalfoot"><button class="ghost" data-close="txModal">Cancelar</button><button class="primary" id="saveTx">Salvar lançamento</button></div></div></div>
 <div class="modalback" id="debtModal"><div class="modal"><h2>Editar dívida</h2><p>Ajuste os dados visíveis no site. A planilha original não será alterada.</p><input id="dId" type="hidden"/><div class="formgrid"><div class="field full"><label>Descrição</label><input id="dDesc"/></div><div class="field"><label>Credor</label><input id="dCreditor"/></div><div class="field"><label>Banco</label><input id="dBank"/></div><div class="field"><label>Parcela</label><input id="dInstallment" inputmode="decimal"/></div><div class="field"><label>Total contratado</label><input id="dTotal" inputmode="decimal"/></div><div class="field"><label>Já quitado</label><input id="dPaid" inputmode="decimal"/></div><div class="field"><label>Total de parcelas</label><input id="dInstallments" type="number"/></div><div class="field"><label>Parcelas quitadas</label><input id="dInstallmentsPaid" type="number"/></div><div class="field"><label>Negociado</label><select id="dNegotiated"><option>Sim</option><option>Não</option></select></div></div><div class="modalfoot"><button class="ghost" data-close="debtModal">Cancelar</button><button class="primary" id="saveDebt">Salvar alterações</button></div></div></div>
-<div class="modalback" id="assetModal"><div class="modal"><h2 id="assetModalTitle">Novo patrimônio</h2><p>Cadastre investimentos, veículos, imóveis ou outros bens por ano.</p><input id="aId" type="hidden"/><div class="formgrid"><div class="field full"><label>Nome / descrição</label><input id="aName"/></div><div class="field"><label>Tipo</label><select id="aType"><option>Investimento</option><option>Carro</option><option>Moto</option><option>Casa</option><option>Imóvel</option><option>Outro</option></select></div><div class="field"><label>Ano</label><input id="aYear" type="number"/></div><div class="field"><label>Valor registrado</label><input id="aValue" inputmode="decimal"/></div><div class="field"><label>Banco / instituição</label><input id="aBank"/></div><div class="field full"><label>Observação</label><input id="aNote"/></div></div><div class="modalfoot"><button class="ghost" data-close="assetModal">Cancelar</button><button class="primary" id="saveAsset">Salvar</button></div></div></div>
+<div class="modalback" id="assetModal"><div class="modal"><h2 id="assetModalTitle">Novo patrimônio</h2><p>Cadastre investimentos, veículos, imóveis ou outros bens por ano.</p><input id="aId" type="hidden"/><div class="formgrid"><div class="field full"><label>Nome / descrição</label><input id="aName"/></div><div class="field"><label>Tipo</label><select id="aType"><option>Investimento</option><option>Carro</option><option>Moto</option><option>Casa</option><option>Imóvel</option><option>Outro</option></select></div><div class="field"><label>Ano</label><input id="aYear" type="number"/></div><div class="field"><label>Valor registrado</label><input id="aValue" inputmode="decimal"/></div><div class="field"><label>Banco / instituição</label><input id="aBank"/></div><div class="field full"><label>Observação</label><input id="aNote"/></div><div class="field full v122-share-field" id="aShareFieldV122"><label class="v122-share-box"><span class="v122-share-copy"><b>Partilhar entre perfis</b><small id="aShareNoteV122">Quando ativado, este patrimônio também aparecerá no outro perfil.</small></span><span class="v122-share-switch"><input id="aSharedV122" type="checkbox"/><i></i></span></label></div></div><div class="modalfoot"><button class="ghost" data-close="assetModal">Cancelar</button><button class="primary" id="saveAsset">Salvar</button></div></div></div>
 <div class="modalback" id="fgtsModal"><div class="modal"><h2>Editar saldos do FGTS</h2><p>Atualize a posição atual quando houver mudança.</p><div class="formgrid"><div class="field"><label>Saldo atual</label><input id="gCurrent" inputmode="decimal"/></div><div class="field"><label>Saldo bloqueado</label><input id="gBlocked" inputmode="decimal"/></div><div class="field"><label>Saldo rescisão</label><input id="gRescission" inputmode="decimal"/></div><div class="field"><label>Saldo disponível</label><input id="gFree" inputmode="decimal"/></div></div><div class="modalfoot"><button class="ghost" data-close="fgtsModal">Cancelar</button><button class="primary" id="saveFgts">Salvar</button></div></div></div>
 <div class="modalback" id="cardModal"><div class="modal"><h2 id="cardModalTitle">Novo cartão</h2><p>Cadastre o limite total e os dados da fatura.</p><input id="cId" type="hidden"/><div class="formgrid"><div class="field full"><label>Nome do cartão</label><input id="cName"/></div><div class="field"><label>Bandeira</label><input id="cBrand"/></div><div class="field"><label>Tema</label><select id="cTheme"><option value="inter">Inter</option><option value="nubank">Nubank</option><option value="picpay">PicPay</option><option value="xp">XP</option><option value="itaulatam">Itaú / LATAM</option><option value="redvelvet">Vermelho</option><option value="sunset">Laranja</option></select></div><div class="field"><label>Limite total</label><input id="cLimit" inputmode="decimal"/></div><div class="field"><label>Dia de fechamento</label><input id="cCloseDay" type="number"/></div><div class="field"><label>Dia de vencimento</label><input id="cDueDay" type="number"/></div></div><div class="modalfoot"><button class="ghost" data-close="cardModal">Cancelar</button><button class="primary" id="saveCard">Salvar cartão</button></div></div></div>
 <div class="modalback" id="cardPurchaseModal"><div class="modal"><h2 id="cardPurchaseModalTitle">Nova compra no cartão</h2><p>Ao salvar aqui, o valor passa a compor as faturas agregadas na aba de lançamentos.</p><input id="cpId" type="hidden"/><div class="formgrid"><div class="field"><label>Cartão</label><select id="cpCard"></select></div><div class="field"><label>Data da compra</label><input id="cpDate" type="date"/></div><div class="field full"><label>Descrição</label><input id="cpDesc"/></div><div class="field"><label>Categoria</label><select id="cpCategory"></select></div><div class="field"><label>Tipo</label><select id="cpMode"><option value="avista">À vista</option><option value="parcelado">Parcelado</option></select></div><div class="field"><label>Valor total</label><input id="cpTotal" inputmode="decimal"/></div><div class="field"><label>Qtd. de parcelas</label><input id="cpInstallments" min="1" type="number"/></div><div class="field"><label>Parcelas já pagas</label><input id="cpPaid" min="0" type="number"/></div><div class="field"><label>1ª fatura - ano</label><input id="cpStartYear" type="number"/></div><div class="field"><label>1ª fatura - mês</label><select id="cpStartMonth"></select></div><div class="field"><label>Status</label><select id="cpStatus"><option>Ativo</option><option>Quitado</option><option>Arquivado</option></select></div></div><div class="modalfoot"><button class="ghost" data-close="cardPurchaseModal">Cancelar</button><button class="primary" id="saveCardPurchase">Salvar compra</button></div></div></div>
@@ -27613,170 +27613,170 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
-<style id="pp-v121-shared-patrimony-style">
-#assetModal .v121-share-field{grid-column:1/-1!important;margin-top:2px}
-#assetModal .v121-share-box{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:50px;padding:10px 12px;border:1px solid #dbe4ee;border-radius:14px;background:#f7f9fc;cursor:pointer}
-#assetModal .v121-share-copy{min-width:0}
-#assetModal .v121-share-copy b{display:block;font-size:11px;color:#263b56}
-#assetModal .v121-share-copy small{display:block;margin-top:3px;font-size:9px;line-height:1.35;color:#7a8798}
-#assetModal .v121-share-switch{position:relative;width:42px;height:24px;flex:0 0 42px}
-#assetModal .v121-share-switch input{position:absolute;opacity:0;pointer-events:none}
-#assetModal .v121-share-switch i{position:absolute;inset:0;border-radius:999px;background:#d8e0e9;transition:.16s}
-#assetModal .v121-share-switch i:after{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(15,23,42,.18);transition:.16s}
-#assetModal .v121-share-switch input:checked+i{background:#174a94}
-#assetModal .v121-share-switch input:checked+i:after{transform:translateX(18px)}
-#assetModal .v121-share-switch input:disabled+i{opacity:.68}
-#assetGrid .v121-shared-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:999px;background:#eef5ff;border:1px solid #d4e5ff;color:#1859a5;font-size:8px;font-weight:900;white-space:nowrap}
-#assetGrid .v121-shared-tag:before{content:"↔";font-size:10px;line-height:1}
-@media(max-width:560px){#assetModal .v121-share-box{align-items:flex-start}.v121-share-switch{margin-top:2px}}
+<style id="pp-v122-shared-patrimony-style">
+#assetModal #aShareFieldV122{grid-column:1/-1!important;margin-top:2px!important}
+#assetModal .v122-share-box{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:52px;padding:10px 12px;border:1px solid #dbe4ee;border-radius:14px;background:#f7f9fc;cursor:pointer}
+#assetModal .v122-share-copy{min-width:0}
+#assetModal .v122-share-copy b{display:block;font-size:11px;color:#263b56}
+#assetModal .v122-share-copy small{display:block;margin-top:3px;font-size:9px;line-height:1.35;color:#7a8798}
+#assetModal .v122-share-switch{position:relative;width:42px;height:24px;flex:0 0 42px}
+#assetModal .v122-share-switch input{position:absolute;opacity:0;pointer-events:none}
+#assetModal .v122-share-switch i{position:absolute;inset:0;border-radius:999px;background:#d8e0e9;transition:.16s}
+#assetModal .v122-share-switch i:after{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(15,23,42,.18);transition:.16s}
+#assetModal .v122-share-switch input:checked+i{background:#174a94}
+#assetModal .v122-share-switch input:checked+i:after{transform:translateX(18px)}
+#assetModal .v122-share-switch input:disabled+i{opacity:.65}
+#assetModal .v122-share-box:has(input:disabled){cursor:default;background:#f4f6f9}
+#assetGrid .v122-shared-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:999px;background:#eef5ff;border:1px solid #d4e5ff;color:#1859a5;font-size:8px;font-weight:900;white-space:nowrap}
+#assetGrid .v122-shared-tag:before{content:"↔";font-size:10px;line-height:1}
+@media(max-width:560px){#assetModal .v122-share-box{align-items:flex-start}.v122-share-switch{margin-top:2px}}
 </style>
-<script id="pp-v121-shared-patrimony-script">
+<script id="pp-v122-shared-patrimony-script">
 (()=>{
 'use strict';
-const KEY='rgps_shared_assets_v46';
-const ASSET_KEY='financeiro_marcos_assets_v3';
-const currentProfile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
-function clone(v){try{return JSON.parse(JSON.stringify(v))}catch(e){return v}}
-function readRegistry(){
-  try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}
+const REGISTRY_KEY='hub_shared_assets_v122';
+const LEGACY_KEY='rgps_shared_assets_v46';
+const PROFILE_ASSET_KEY='financeiro_marcos_assets_v3';
+const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+const copy=v=>{try{return JSON.parse(JSON.stringify(v))}catch(e){return v}};
+function read(){
+  try{
+    let v=JSON.parse(localStorage.getItem(REGISTRY_KEY)||'null');
+    if(!Array.isArray(v)){
+      const old=JSON.parse(localStorage.getItem(LEGACY_KEY)||'[]');
+      v=Array.isArray(old)?old:[];
+      if(v.length)localStorage.setItem(REGISTRY_KEY,JSON.stringify(v));
+    }
+    return Array.isArray(v)?v:[];
+  }catch(e){return []}
 }
-function writeRegistry(list){
-  const clean=(Array.isArray(list)?list:[]).filter(x=>x&&x.id&&x.asset);
-  localStorage.setItem(KEY,JSON.stringify(clean));
+function write(v){
+  const clean=(Array.isArray(v)?v:[]).filter(x=>x&&x.id&&x.asset&&x.ownerProfile);
+  localStorage.setItem(REGISTRY_KEY,JSON.stringify(clean));
   try{window.ppCloudV66?.save?.()}catch(e){}
 }
-function entryById(id){return readRegistry().find(x=>String(x.id)===String(id))||null}
-function upsertShared(asset,owner){
-  const list=readRegistry(),id=String(asset.id),i=list.findIndex(x=>String(x.id)===id);
-  const item={id,ownerProfile:owner||currentProfile(),updatedAt:new Date().toISOString(),asset:{...clone(asset),shared:true,sharedOwner:owner||currentProfile()}};
-  if(i>=0)list[i]=item;else list.push(item);writeRegistry(list);return item;
+function findEntry(id){return read().find(x=>String(x.id)===String(id))||null}
+function upsert(asset,owner){
+  const list=read(),id=String(asset.id),i=list.findIndex(x=>String(x.id)===id);
+  const e={id,ownerProfile:owner||profile(),updatedAt:new Date().toISOString(),asset:{...copy(asset),shared:true,sharedOwner:owner||profile()}};
+  if(i>=0)list[i]=e;else list.push(e);write(list);return e;
 }
-function removeShared(id){writeRegistry(readRegistry().filter(x=>String(x.id)!==String(id)))}
-function mergedAssets(){
+function remove(id){write(read().filter(x=>String(x.id)!==String(id)))}
+function merged(){
   const map=new Map();
-  (Array.isArray(assets)?assets:[]).forEach(a=>a?.id&&map.set(String(a.id),a));
-  readRegistry().forEach(e=>{if(e?.asset?.id)map.set(String(e.asset.id),{...clone(e.asset),shared:true,sharedOwner:e.ownerProfile})});
+  (Array.isArray(assets)?assets:[]).forEach(a=>{if(a?.id)map.set(String(a.id),a)});
+  read().forEach(e=>{if(e?.asset?.id)map.set(String(e.asset.id),{...copy(e.asset),shared:true,sharedOwner:e.ownerProfile})});
   return [...map.values()];
 }
 function withMerged(fn,args,ctx){
   if(typeof fn!=='function')return;
-  const original=assets;assets=mergedAssets();
-  try{return fn.apply(ctx,args||[])}finally{assets=original}
+  const own=assets;assets=merged();
+  try{return fn.apply(ctx,args||[])}finally{assets=own}
 }
-function installShareField(){
-  const modal=document.querySelector('#assetModal .modal'),grid=modal?.querySelector('.formgrid');if(!modal||!grid)return null;
-  let field=document.getElementById('aShareFieldV121');
-  if(!field){
-    field=document.createElement('div');field.id='aShareFieldV121';field.className='field v121-share-field';
-    field.innerHTML=`<label class="v121-share-box"><span class="v121-share-copy"><b>Partilhar entre perfis</b><small id="aShareNoteV121">Quando ativado, este patrimônio também aparece nos demais perfis.</small></span><span class="v121-share-switch"><input id="aSharedV121" type="checkbox"><i></i></span></label>`;
-    const note=document.getElementById('aNote')?.closest('.field');
-    if(note)note.insertAdjacentElement('afterend',field);else grid.appendChild(field);
-  }
-  return field;
-}
-function setShareUi(id){
-  installShareField();
-  const input=document.getElementById('aSharedV121'),note=document.getElementById('aShareNoteV121');if(!input)return;
-  const entry=id?entryById(id):null,profile=currentProfile(),foreign=!!entry&&entry.ownerProfile!==profile;
-  input.checked=!!entry;input.disabled=foreign;
-  if(note)note.textContent=foreign?`Partilhado por ${entry.ownerProfile}. As alterações feitas aqui atualizam o patrimônio compartilhado.`:'Quando ativado, este patrimônio também aparece nos demais perfis.';
-}
-function syncOwnerMirror(entry){
+function updateOwnerState(entry){
   try{
     const PM=window.__ppV41Profile;if(!entry||!PM?.readState||!PM?.saveState)return;
-    const owner=entry.ownerProfile;if(!owner||owner===currentProfile())return;
-    const st=PM.readState(owner)||{};let arr=[];
-    try{arr=JSON.parse(st[ASSET_KEY]||'[]')}catch(e){}if(!Array.isArray(arr))arr=[];
+    const owner=entry.ownerProfile;if(!owner)return;
+    if(owner===profile()){
+      try{persist()}catch(e){}
+      return;
+    }
+    const st=PM.readState(owner)||{};
+    let arr=[];try{arr=JSON.parse(st[PROFILE_ASSET_KEY]||'[]')}catch(e){}if(!Array.isArray(arr))arr=[];
     const i=arr.findIndex(a=>String(a?.id)===String(entry.id));
-    const value={...clone(entry.asset),shared:true,sharedOwner:owner};
-    if(i>=0)arr[i]=value;else arr.push(value);
-    st[ASSET_KEY]=JSON.stringify(arr);PM.saveState(owner,st);
+    const val={...copy(entry.asset),shared:true,sharedOwner:owner};
+    if(i>=0)arr[i]=val;else arr.push(val);
+    st[PROFILE_ASSET_KEY]=JSON.stringify(arr);PM.saveState(owner,st);
   }catch(e){}
 }
-function decorateShared(){
+function setToggle(id){
+  const cb=document.getElementById('aSharedV122'),note=document.getElementById('aShareNoteV122');if(!cb)return;
+  const e=id?findEntry(id):null,foreign=!!e&&e.ownerProfile!==profile();
+  cb.checked=!!e;cb.disabled=foreign;
+  if(note)note.textContent=foreign?`Partilhado por ${e.ownerProfile}. Alterações feitas aqui também atualizam o item compartilhado.`:'Quando ativado, este patrimônio também aparecerá no outro perfil.';
+}
+function decorate(){
   const grid=document.getElementById('assetGrid');if(!grid)return;
   const y=document.getElementById('assetYear')?.value||'all',t=document.getElementById('assetType')?.value||'all';
-  const list=mergedAssets().filter(x=>(y==='all'||+x.year===+y)&&(t==='all'||x.type===t)).sort((a,b)=>+b.year-+a.year);
-  const cards=[...grid.querySelectorAll('.asset-card')];
-  cards.forEach((card,i)=>{
-    const a=list[i],entry=a?entryById(a.id):null;if(!entry)return;
+  const list=merged().filter(x=>(y==='all'||+x.year===+y)&&(t==='all'||x.type===t)).sort((a,b)=>+b.year-+a.year);
+  [...grid.querySelectorAll('.asset-card')].forEach((card,i)=>{
+    const a=list[i],e=a?findEntry(a.id):null;if(!e)return;
     const tags=card.querySelector('.tags')||card;
-    if(!tags.querySelector('.v121-shared-tag')){const s=document.createElement('span');s.className='v121-shared-tag';s.textContent=entry.ownerProfile===currentProfile()?'Compartilhado':`Compartilhado por ${entry.ownerProfile}`;tags.appendChild(s)}
+    let tag=tags.querySelector('.v122-shared-tag');if(!tag){tag=document.createElement('span');tag.className='v122-shared-tag';tags.appendChild(tag)}
+    tag.textContent=e.ownerProfile===profile()?'Compartilhado':`Compartilhado por ${e.ownerProfile}`;
   });
 }
+const render0=window.renderAssets;
+window.renderAssets=function(){const r=withMerged(render0,arguments,this);setTimeout(decorate,0);return r};
+const dash0=window.renderDashboard;
+if(typeof dash0==='function')window.renderDashboard=function(){return withMerged(dash0,arguments,this)};
+const cloud0=window.renderNuvem;
+if(typeof cloud0==='function')window.renderNuvem=function(){return withMerged(cloud0,arguments,this)};
 
-const baseRenderAssets=window.renderAssets;
-window.renderAssets=function(){const r=withMerged(baseRenderAssets,arguments,this);setTimeout(decorateShared,0);return r};
-const baseRenderDashboard=window.renderDashboard;
-if(typeof baseRenderDashboard==='function')window.renderDashboard=function(){return withMerged(baseRenderDashboard,arguments,this)};
-const baseRenderNuvem=window.renderNuvem;
-if(typeof baseRenderNuvem==='function')window.renderNuvem=function(){return withMerged(baseRenderNuvem,arguments,this)};
-
-const baseOpenAsset=window.openAsset;
+const open0=window.openAsset;
 window.openAsset=function(id){
-  installShareField();
-  const entry=id?entryById(id):null;
-  let idx=-1,backup=null,inserted=false;
-  if(entry){
-    idx=assets.findIndex(a=>String(a?.id)===String(id));
-    if(idx>=0){backup=assets[idx];assets[idx]={...clone(entry.asset),shared:true,sharedOwner:entry.ownerProfile}}
-    else{assets.push({...clone(entry.asset),shared:true,sharedOwner:entry.ownerProfile});inserted=true}
+  const e=id?findEntry(id):null;let inserted=false,idx=-1,bak=null;
+  if(e){
+    idx=(assets||[]).findIndex(a=>String(a?.id)===String(id));
+    if(idx>=0){bak=assets[idx];assets[idx]={...copy(e.asset),shared:true,sharedOwner:e.ownerProfile}}
+    else{assets.push({...copy(e.asset),shared:true,sharedOwner:e.ownerProfile});inserted=true}
   }
   let r;
-  try{r=typeof baseOpenAsset==='function'?baseOpenAsset.apply(this,arguments):undefined}
-  finally{
-    if(entry){if(inserted)assets.pop();else if(idx>=0)assets[idx]=backup}
-  }
-  setTimeout(()=>setShareUi(id),0);return r;
+  try{r=typeof open0==='function'?open0.apply(this,arguments):undefined}
+  finally{if(e){if(inserted)assets.pop();else if(idx>=0)assets[idx]=bak}}
+  setTimeout(()=>setToggle(id),0);return r;
 };
 try{openAsset=window.openAsset}catch(e){}
 
-const baseSaveAsset=window.saveAsset;
+const save0=window.saveAsset;
 window.saveAsset=function(){
-  installShareField();
   const idEl=document.getElementById('aId');if(idEl&&!idEl.value)idEl.value='A'+Date.now();
-  const id=idEl?.value||'',before=entryById(id),profile=currentProfile(),owner=before?.ownerProfile||profile;
-  const shareInput=document.getElementById('aSharedV121'),wantShared=!!shareInput?.checked;
-  const r=typeof baseSaveAsset==='function'?baseSaveAsset.apply(this,arguments):undefined;
+  const id=idEl?.value||'',before=findEntry(id),owner=before?.ownerProfile||profile(),share=!!document.getElementById('aSharedV122')?.checked;
+  const r=typeof save0==='function'?save0.apply(this,arguments):undefined;
   if(document.getElementById('assetModal')?.classList.contains('open'))return r;
-  let local=(assets||[]).find(a=>String(a?.id)===String(id));if(!local)return r;
-  if(wantShared){
+  let local=(assets||[]).find(a=>String(a?.id)===String(id));
+  if(!local&&before)local={...copy(before.asset),id};
+  if(!local)return r;
+  if(share){
     local.shared=true;local.sharedOwner=owner;
-    const entry=upsertShared(local,owner);syncOwnerMirror(entry);
-    if(owner!==profile){assets=assets.filter(a=>String(a?.id)!==String(id));try{persist()}catch(e){}}
-    else{try{persist()}catch(e){}}
+    const e=upsert(local,owner);updateOwnerState(e);
+    if(owner!==profile()){
+      assets=assets.filter(a=>String(a?.id)!==String(id));
+      try{persist()}catch(e){}
+    }else try{persist()}catch(e){}
   }else{
-    if(before&&before.ownerProfile===profile)removeShared(id);
-    local.shared=false;delete local.sharedOwner;try{persist()}catch(e){}
+    if(before&&before.ownerProfile===profile())remove(id);
+    if(owner===profile()){
+      const a=(assets||[]).find(x=>String(x?.id)===String(id));if(a){delete a.shared;delete a.sharedOwner}
+      try{persist()}catch(e){}
+    }
   }
   try{window.renderAssets?.();window.renderDashboard?.();window.renderNuvem?.()}catch(e){}
   return r;
 };
 try{saveAsset=window.saveAsset}catch(e){}
 const saveBtn=document.getElementById('saveAsset');if(saveBtn)saveBtn.onclick=window.saveAsset;
+const addBtn=document.getElementById('addAsset');if(addBtn)addBtn.onclick=e=>{e?.preventDefault?.();window.openAsset()};
 
-const baseDeleteAsset=window.deleteAsset;
+const del0=window.deleteAsset;
 window.deleteAsset=function(id){
-  const entry=entryById(id),profile=currentProfile();
-  if(entry&&entry.ownerProfile!==profile){try{toast(`Este patrimônio foi partilhado por ${entry.ownerProfile}.`)}catch(e){}return}
-  const existed=(assets||[]).some(a=>String(a?.id)===String(id));
-  const r=typeof baseDeleteAsset==='function'?baseDeleteAsset.apply(this,arguments):undefined;
-  const still=(assets||[]).some(a=>String(a?.id)===String(id));
-  if(existed&&!still&&entry){removeShared(id);try{window.renderAssets?.();window.renderDashboard?.()}catch(e){}}
+  const e=findEntry(id);if(e&&e.ownerProfile!==profile()){try{toast(`Este patrimônio foi partilhado por ${e.ownerProfile}.`)}catch(x){}return}
+  const had=(assets||[]).some(a=>String(a?.id)===String(id));
+  const r=typeof del0==='function'?del0.apply(this,arguments):undefined;
+  if(had&&!(assets||[]).some(a=>String(a?.id)===String(id)))remove(id);
   return r;
 };
 try{deleteAsset=window.deleteAsset}catch(e){}
-
-window.openAssetMenu=function(e,id){
-  const entry=entryById(id),foreign=!!entry&&entry.ownerProfile!==currentProfile();
+window.openAssetMenu=function(ev,id){
+  const e=findEntry(id),foreign=!!e&&e.ownerProfile!==profile();
   const items=[['Editar',()=>window.openAsset(id)]];
   if(!foreign)items.push(['Excluir',()=>window.deleteAsset(id),'danger']);
-  else items.push([`Partilhado por ${entry.ownerProfile}`,()=>{try{toast(`Patrimônio partilhado por ${entry.ownerProfile}.`)}catch(e){}}]);
-  return openRowMenu(e,items);
+  else items.push([`Partilhado por ${e.ownerProfile}`,()=>{try{toast(`Patrimônio partilhado por ${e.ownerProfile}.`)}catch(x){}}]);
+  return openRowMenu(ev,items);
 };
 
-installShareField();
+setToggle('');
 setTimeout(()=>{try{window.renderAssets?.()}catch(e){}},80);
-window.ppSharedPatrimonyV121={read:readRegistry,render:()=>window.renderAssets?.()};
+window.ppSharedPatrimonyV122={read,render:()=>window.renderAssets?.()};
 })();
 </script>
