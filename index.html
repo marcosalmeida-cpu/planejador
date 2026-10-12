@@ -27261,7 +27261,7 @@ function calc(c,scenario){
   const cards=futureCards(c.simulationDate),debts=negotiatedPending(),final=r2(afterCredit-cards-debts);
   return{scenario,fired,worked,noticeDays:nd,projected:iso(projected),payDate:iso(payDate),salary:sal,salaryBalance,av13,thirteenth,vacDays,fullVac,avVac,propVac,noticeInd,noticeDiscount,trctGross,fgts:f,fgtsFineBase:fineBase,fgtsFine:fine,ct,afterCredit,cards,debts,final};
 }
-function ensureHost(){let h=document.getElementById(HOST_ID);if(h)return h;const s=document.getElementById('debtSummary');if(!s)return null;h=document.createElement('div');h.id=HOST_ID;s.insertAdjacentElement('afterend',h);return h}
+function ensureHost(){let h=document.getElementById(HOST_ID);if(h)return h;const s=document.getElementById('debtSummary');if(!s)return null;h=document.createElement('div');h.id=HOST_ID;s.insertAdjacentElement('beforebegin',h);return h}
 function fmtInput(v){return (Number(v)||0).toFixed(2).replace('.',',')}
 function warningState(x){return x.ct.unconfirmed||!x.ct.debts.length}
 function renderCard(){const h=ensureHost();if(!h)return;if(profile()!=='Marcos'){h.innerHTML='';return}const c=load(),x=calc(c,c.scenario),all=Object.keys(SCENARIOS).map(k=>calc(c,k)),partial=warningState(x);h.innerHTML=`<div class="rp38-card" role="button" tabindex="0" aria-label="Abrir memória de cálculo da rescisão">
