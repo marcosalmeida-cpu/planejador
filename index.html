@@ -27610,3 +27610,102 @@ setTimeout(()=>{purgeProjection49();refreshCreditorList49()},180);
 window.ppLaunchCreditorV49={refresh:refreshCreditorList49};
 })();
 </script>
+
+<style id="pp-v50-launch-creditor-select-style">
+#lancamentos #txSearch,#lancamentos #txCreditorList{display:none!important}
+#lancamentos #txCreditorV50{
+  min-width:240px!important;
+  max-width:360px!important;
+  min-height:40px!important;
+  border:1px solid #d9e1eb!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  color:#1d3553!important;
+  font-size:12px!important;
+  font-weight:750!important;
+  padding:0 36px 0 12px!important;
+}
+#lancamentos .v49-creditor-hint{display:none!important}
+#lancamentos .v50-creditor-hint{
+  margin:-3px 0 12px!important;
+  font-size:10.5px!important;
+  line-height:1.4!important;
+  color:#748196!important;
+}
+#lancamentos .v50-creditor-hint b{color:#284566!important}
+@media(max-width:700px){
+  #lancamentos #txCreditorV50{min-width:0!important;max-width:none!important;width:100%!important}
+}
+</style>
+<script id="pp-v50-launch-creditor-select-final">
+(()=>{'use strict';
+const INPUT='txSearch', SELECT='txCreditorV50';
+
+function esc50(s){return String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]))}
+function values50(){
+  let rows=[];try{rows=window.allTx?.()||[]}catch(e){}
+  return [...new Set(rows.map(x=>String(x?.origem||x?.credor||'').trim()).filter(Boolean))]
+    .sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));
+}
+function ensure50(){
+  const tools=document.querySelector('#lancamentos .filterbar');
+  const hidden=document.getElementById(INPUT);
+  if(!tools||!hidden)return null;
+
+  hidden.style.display='none';
+  hidden.setAttribute('aria-hidden','true');
+
+  let sel=document.getElementById(SELECT);
+  if(!sel){
+    sel=document.createElement('select');
+    sel.id=SELECT;
+    sel.setAttribute('aria-label','Filtrar por credor ou origem');
+    hidden.insertAdjacentElement('beforebegin',sel);
+    sel.addEventListener('change',()=>{
+      hidden.value=sel.value||'';
+      try{window.renderLancamentos?.()}catch(e){}
+      setTimeout(()=>{try{window.ppLaunchSummaryV75?.refresh?.()}catch(e){}},0);
+    });
+  }
+
+  const current=sel.value||hidden.value||'';
+  const vals=values50();
+  sel.innerHTML='<option value="">Todos os credores / origens</option>'+vals.map(v=>`<option value="${esc50(v)}">${esc50(v)}</option>`).join('');
+  if(current&&vals.includes(current))sel.value=current;
+  else if(hidden.value&&vals.includes(hidden.value))sel.value=hidden.value;
+  else{sel.value='';hidden.value=''}
+
+  const section=document.querySelector('#lancamentos .section-tools');
+  if(section&&!document.querySelector('#lancamentos .v50-creditor-hint')){
+    section.insertAdjacentHTML('afterend','<div class="v50-creditor-hint"><b>Filtro por credor/origem:</b> selecione um nome para recalcular Entradas, Saídas, Saldo e Pendentes do período.</div>');
+  }
+  return sel;
+}
+
+const previous50=window.renderLancamentos;
+window.renderLancamentos=function(){
+  ensure50();
+  const r=typeof previous50==='function'?previous50.apply(this,arguments):undefined;
+  setTimeout(()=>{
+    ensure50();
+    try{window.ppLaunchSummaryV75?.refresh?.()}catch(e){}
+  },0);
+  return r;
+};
+try{renderLancamentos=window.renderLancamentos}catch(e){}
+
+// Mantém o filtro atualizado quando novos lançamentos/credor forem incluídos.
+document.addEventListener('click',e=>{
+  if(e.target.closest?.('#saveTx,#saveCardPurchaseV52,#saveCardPurchase,[data-v63-pay]')){
+    setTimeout(()=>{ensure50();try{window.renderLancamentos?.()}catch(x){}},140);
+  }
+},false);
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>{ensure50();setTimeout(()=>window.renderLancamentos?.(),80)},{once:true});
+}else{
+  ensure50();setTimeout(()=>window.renderLancamentos?.(),80);
+}
+window.ppLaunchCreditorV50={refresh:ensure50};
+})();
+</script>
