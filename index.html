@@ -27612,3 +27612,171 @@ function install(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
 })();
 </script>
+
+<style id="pp-v121-shared-patrimony-style">
+#assetModal .v121-share-field{grid-column:1/-1!important;margin-top:2px}
+#assetModal .v121-share-box{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:50px;padding:10px 12px;border:1px solid #dbe4ee;border-radius:14px;background:#f7f9fc;cursor:pointer}
+#assetModal .v121-share-copy{min-width:0}
+#assetModal .v121-share-copy b{display:block;font-size:11px;color:#263b56}
+#assetModal .v121-share-copy small{display:block;margin-top:3px;font-size:9px;line-height:1.35;color:#7a8798}
+#assetModal .v121-share-switch{position:relative;width:42px;height:24px;flex:0 0 42px}
+#assetModal .v121-share-switch input{position:absolute;opacity:0;pointer-events:none}
+#assetModal .v121-share-switch i{position:absolute;inset:0;border-radius:999px;background:#d8e0e9;transition:.16s}
+#assetModal .v121-share-switch i:after{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(15,23,42,.18);transition:.16s}
+#assetModal .v121-share-switch input:checked+i{background:#174a94}
+#assetModal .v121-share-switch input:checked+i:after{transform:translateX(18px)}
+#assetModal .v121-share-switch input:disabled+i{opacity:.68}
+#assetGrid .v121-shared-tag{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:999px;background:#eef5ff;border:1px solid #d4e5ff;color:#1859a5;font-size:8px;font-weight:900;white-space:nowrap}
+#assetGrid .v121-shared-tag:before{content:"↔";font-size:10px;line-height:1}
+@media(max-width:560px){#assetModal .v121-share-box{align-items:flex-start}.v121-share-switch{margin-top:2px}}
+</style>
+<script id="pp-v121-shared-patrimony-script">
+(()=>{
+'use strict';
+const KEY='rgps_shared_assets_v46';
+const ASSET_KEY='financeiro_marcos_assets_v3';
+const currentProfile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+function clone(v){try{return JSON.parse(JSON.stringify(v))}catch(e){return v}}
+function readRegistry(){
+  try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}
+}
+function writeRegistry(list){
+  const clean=(Array.isArray(list)?list:[]).filter(x=>x&&x.id&&x.asset);
+  localStorage.setItem(KEY,JSON.stringify(clean));
+  try{window.ppCloudV66?.save?.()}catch(e){}
+}
+function entryById(id){return readRegistry().find(x=>String(x.id)===String(id))||null}
+function upsertShared(asset,owner){
+  const list=readRegistry(),id=String(asset.id),i=list.findIndex(x=>String(x.id)===id);
+  const item={id,ownerProfile:owner||currentProfile(),updatedAt:new Date().toISOString(),asset:{...clone(asset),shared:true,sharedOwner:owner||currentProfile()}};
+  if(i>=0)list[i]=item;else list.push(item);writeRegistry(list);return item;
+}
+function removeShared(id){writeRegistry(readRegistry().filter(x=>String(x.id)!==String(id)))}
+function mergedAssets(){
+  const map=new Map();
+  (Array.isArray(assets)?assets:[]).forEach(a=>a?.id&&map.set(String(a.id),a));
+  readRegistry().forEach(e=>{if(e?.asset?.id)map.set(String(e.asset.id),{...clone(e.asset),shared:true,sharedOwner:e.ownerProfile})});
+  return [...map.values()];
+}
+function withMerged(fn,args,ctx){
+  if(typeof fn!=='function')return;
+  const original=assets;assets=mergedAssets();
+  try{return fn.apply(ctx,args||[])}finally{assets=original}
+}
+function installShareField(){
+  const modal=document.querySelector('#assetModal .modal'),grid=modal?.querySelector('.formgrid');if(!modal||!grid)return null;
+  let field=document.getElementById('aShareFieldV121');
+  if(!field){
+    field=document.createElement('div');field.id='aShareFieldV121';field.className='field v121-share-field';
+    field.innerHTML=`<label class="v121-share-box"><span class="v121-share-copy"><b>Partilhar entre perfis</b><small id="aShareNoteV121">Quando ativado, este patrimônio também aparece nos demais perfis.</small></span><span class="v121-share-switch"><input id="aSharedV121" type="checkbox"><i></i></span></label>`;
+    const note=document.getElementById('aNote')?.closest('.field');
+    if(note)note.insertAdjacentElement('afterend',field);else grid.appendChild(field);
+  }
+  return field;
+}
+function setShareUi(id){
+  installShareField();
+  const input=document.getElementById('aSharedV121'),note=document.getElementById('aShareNoteV121');if(!input)return;
+  const entry=id?entryById(id):null,profile=currentProfile(),foreign=!!entry&&entry.ownerProfile!==profile;
+  input.checked=!!entry;input.disabled=foreign;
+  if(note)note.textContent=foreign?`Partilhado por ${entry.ownerProfile}. As alterações feitas aqui atualizam o patrimônio compartilhado.`:'Quando ativado, este patrimônio também aparece nos demais perfis.';
+}
+function syncOwnerMirror(entry){
+  try{
+    const PM=window.__ppV41Profile;if(!entry||!PM?.readState||!PM?.saveState)return;
+    const owner=entry.ownerProfile;if(!owner||owner===currentProfile())return;
+    const st=PM.readState(owner)||{};let arr=[];
+    try{arr=JSON.parse(st[ASSET_KEY]||'[]')}catch(e){}if(!Array.isArray(arr))arr=[];
+    const i=arr.findIndex(a=>String(a?.id)===String(entry.id));
+    const value={...clone(entry.asset),shared:true,sharedOwner:owner};
+    if(i>=0)arr[i]=value;else arr.push(value);
+    st[ASSET_KEY]=JSON.stringify(arr);PM.saveState(owner,st);
+  }catch(e){}
+}
+function decorateShared(){
+  const grid=document.getElementById('assetGrid');if(!grid)return;
+  const y=document.getElementById('assetYear')?.value||'all',t=document.getElementById('assetType')?.value||'all';
+  const list=mergedAssets().filter(x=>(y==='all'||+x.year===+y)&&(t==='all'||x.type===t)).sort((a,b)=>+b.year-+a.year);
+  const cards=[...grid.querySelectorAll('.asset-card')];
+  cards.forEach((card,i)=>{
+    const a=list[i],entry=a?entryById(a.id):null;if(!entry)return;
+    const tags=card.querySelector('.tags')||card;
+    if(!tags.querySelector('.v121-shared-tag')){const s=document.createElement('span');s.className='v121-shared-tag';s.textContent=entry.ownerProfile===currentProfile()?'Compartilhado':`Compartilhado por ${entry.ownerProfile}`;tags.appendChild(s)}
+  });
+}
+
+const baseRenderAssets=window.renderAssets;
+window.renderAssets=function(){const r=withMerged(baseRenderAssets,arguments,this);setTimeout(decorateShared,0);return r};
+const baseRenderDashboard=window.renderDashboard;
+if(typeof baseRenderDashboard==='function')window.renderDashboard=function(){return withMerged(baseRenderDashboard,arguments,this)};
+const baseRenderNuvem=window.renderNuvem;
+if(typeof baseRenderNuvem==='function')window.renderNuvem=function(){return withMerged(baseRenderNuvem,arguments,this)};
+
+const baseOpenAsset=window.openAsset;
+window.openAsset=function(id){
+  installShareField();
+  const entry=id?entryById(id):null;
+  let idx=-1,backup=null,inserted=false;
+  if(entry){
+    idx=assets.findIndex(a=>String(a?.id)===String(id));
+    if(idx>=0){backup=assets[idx];assets[idx]={...clone(entry.asset),shared:true,sharedOwner:entry.ownerProfile}}
+    else{assets.push({...clone(entry.asset),shared:true,sharedOwner:entry.ownerProfile});inserted=true}
+  }
+  let r;
+  try{r=typeof baseOpenAsset==='function'?baseOpenAsset.apply(this,arguments):undefined}
+  finally{
+    if(entry){if(inserted)assets.pop();else if(idx>=0)assets[idx]=backup}
+  }
+  setTimeout(()=>setShareUi(id),0);return r;
+};
+try{openAsset=window.openAsset}catch(e){}
+
+const baseSaveAsset=window.saveAsset;
+window.saveAsset=function(){
+  installShareField();
+  const idEl=document.getElementById('aId');if(idEl&&!idEl.value)idEl.value='A'+Date.now();
+  const id=idEl?.value||'',before=entryById(id),profile=currentProfile(),owner=before?.ownerProfile||profile;
+  const shareInput=document.getElementById('aSharedV121'),wantShared=!!shareInput?.checked;
+  const r=typeof baseSaveAsset==='function'?baseSaveAsset.apply(this,arguments):undefined;
+  if(document.getElementById('assetModal')?.classList.contains('open'))return r;
+  let local=(assets||[]).find(a=>String(a?.id)===String(id));if(!local)return r;
+  if(wantShared){
+    local.shared=true;local.sharedOwner=owner;
+    const entry=upsertShared(local,owner);syncOwnerMirror(entry);
+    if(owner!==profile){assets=assets.filter(a=>String(a?.id)!==String(id));try{persist()}catch(e){}}
+    else{try{persist()}catch(e){}}
+  }else{
+    if(before&&before.ownerProfile===profile)removeShared(id);
+    local.shared=false;delete local.sharedOwner;try{persist()}catch(e){}
+  }
+  try{window.renderAssets?.();window.renderDashboard?.();window.renderNuvem?.()}catch(e){}
+  return r;
+};
+try{saveAsset=window.saveAsset}catch(e){}
+const saveBtn=document.getElementById('saveAsset');if(saveBtn)saveBtn.onclick=window.saveAsset;
+
+const baseDeleteAsset=window.deleteAsset;
+window.deleteAsset=function(id){
+  const entry=entryById(id),profile=currentProfile();
+  if(entry&&entry.ownerProfile!==profile){try{toast(`Este patrimônio foi partilhado por ${entry.ownerProfile}.`)}catch(e){}return}
+  const existed=(assets||[]).some(a=>String(a?.id)===String(id));
+  const r=typeof baseDeleteAsset==='function'?baseDeleteAsset.apply(this,arguments):undefined;
+  const still=(assets||[]).some(a=>String(a?.id)===String(id));
+  if(existed&&!still&&entry){removeShared(id);try{window.renderAssets?.();window.renderDashboard?.()}catch(e){}}
+  return r;
+};
+try{deleteAsset=window.deleteAsset}catch(e){}
+
+window.openAssetMenu=function(e,id){
+  const entry=entryById(id),foreign=!!entry&&entry.ownerProfile!==currentProfile();
+  const items=[['Editar',()=>window.openAsset(id)]];
+  if(!foreign)items.push(['Excluir',()=>window.deleteAsset(id),'danger']);
+  else items.push([`Partilhado por ${entry.ownerProfile}`,()=>{try{toast(`Patrimônio partilhado por ${entry.ownerProfile}.`)}catch(e){}}]);
+  return openRowMenu(e,items);
+};
+
+installShareField();
+setTimeout(()=>{try{window.renderAssets?.()}catch(e){}},80);
+window.ppSharedPatrimonyV121={read:readRegistry,render:()=>window.renderAssets?.()};
+})();
+</script>
