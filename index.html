@@ -11009,6 +11009,192 @@ window.ppDebtBalanceV55={reconcile:reconcile55,reconcileAll:reconcileAll55};
 })();
 </script>
 
+
+<style id="pp-v56-fgts-contract-installments-style">
+#fgtsBody tr[data-v56-fgts-contract]{cursor:pointer;transition:background .15s ease}
+#fgtsBody tr[data-v56-fgts-contract]:hover{background:#f7faff}
+#fgtsBody tr[data-v56-fgts-contract] td:first-child{font-weight:900;color:#075cff}
+#fgtsContractDetailV56{position:fixed;inset:0;z-index:26000;background:rgba(7,17,34,.55);backdrop-filter:blur(5px);display:none;align-items:flex-start;justify-content:center;padding:72px 12px 18px;overflow:auto}
+#fgtsContractDetailV56.open{display:flex}
+#fgtsContractDetailV56 .v56-card{width:min(920px,100%);background:#fff;border-radius:24px;box-shadow:0 30px 90px rgba(8,22,48,.28);padding:20px;position:relative}
+#fgtsContractDetailV56 .v56-close{position:absolute;right:14px;top:14px;width:36px;height:36px;border:1px solid #e3e9f1;border-radius:11px;background:#fff;color:#344054;font-size:21px;cursor:pointer}
+#fgtsContractDetailV56 .v56-head{padding-right:50px;display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+#fgtsContractDetailV56 .v56-head h2{margin:0;font-size:23px;letter-spacing:-.035em;color:#172b4d}
+#fgtsContractDetailV56 .v56-head p{margin:5px 0 0;font-size:11px;color:#7b8797}
+#fgtsContractDetailV56 .v56-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:16px 0 12px}
+#fgtsContractDetailV56 .v56-mini{border:1px solid #e7ecf2;border-radius:15px;background:#fbfcfe;padding:11px}
+#fgtsContractDetailV56 .v56-mini span{display:block;font-size:10px;color:#7b8797;font-weight:700}
+#fgtsContractDetailV56 .v56-mini b{display:block;margin-top:5px;font-size:17px;color:#182744;letter-spacing:-.025em}
+#fgtsContractDetailV56 .v56-actions{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 12px}
+#fgtsContractDetailV56 .v56-actions button,#fgtsContractDetailV56 .v56-row-action{border:1px solid #dce4ef;background:#fff;color:#0b63f6;border-radius:10px;min-height:36px;padding:7px 11px;font-size:11px;font-weight:900;cursor:pointer}
+#fgtsContractDetailV56 .v56-actions button.primary{background:#075cff;border-color:#075cff;color:#fff}
+#fgtsContractDetailV56 .v56-actions button.reopen{color:#b42318;border-color:#f0c7c4}
+#fgtsContractDetailV56 .v56-table-wrap{max-height:55vh;overflow:auto;border:1px solid #e7ecf2;border-radius:15px}
+#fgtsContractDetailV56 table{width:100%;border-collapse:collapse;font-size:12px}
+#fgtsContractDetailV56 th{position:sticky;top:0;background:#f7f9fc;color:#667085;text-align:left;padding:10px;border-bottom:1px solid #e7ecf2;z-index:2}
+#fgtsContractDetailV56 td{padding:10px;border-bottom:1px solid #eef2f6;color:#344054;vertical-align:middle}
+#fgtsContractDetailV56 tr:last-child td{border-bottom:0}
+#fgtsContractDetailV56 .v56-status{display:inline-flex;padding:5px 8px;border-radius:999px;font-size:9px;font-weight:900}
+#fgtsContractDetailV56 .v56-status.paid{background:#eaf7ef;color:#087443}
+#fgtsContractDetailV56 .v56-status.pending{background:#fff4e8;color:#b54708}
+#fgtsContractDetailV56 .v56-row-action.reopen{color:#b42318}
+#fgtsContractDetailV56 .v56-note{font-size:10px;line-height:1.45;color:#7b8797;margin-top:10px}
+@media(max-width:720px){
+ #fgtsContractDetailV56{padding:66px 7px 10px}
+ #fgtsContractDetailV56 .v56-card{padding:14px;border-radius:18px}
+ #fgtsContractDetailV56 .v56-summary{grid-template-columns:1fr 1fr}
+ #fgtsContractDetailV56 .v56-head{display:block}
+ #fgtsContractDetailV56 .v56-table-wrap{max-height:58vh}
+}
+</style>
+<script id="pp-v56-fgts-contract-installments">
+(function(){
+  const STATUS_KEY='parcelStatusV56';
+  const ACTION_KEY='parcelActionAtV56';
+  function n(v){
+    if(typeof v==='number'&&Number.isFinite(v))return v;
+    let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+    if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');
+    else if(s.includes(','))s=s.replace(',','.');
+    const x=Number(s.replace(/[^0-9.-]/g,''));return Number.isFinite(x)?x:0;
+  }
+  function money(v){return typeof brl==='function'?brl(n(v)):n(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+  function escv(v){return typeof esc==='function'?esc(String(v??'')):String(v??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[m]))}
+  function activeProfile(){return localStorage.getItem('planejador_active_profile')||'Marcos'}
+  function baseRows(){
+    try{return typeof priorGetFgtsV56==='function'?(priorGetFgtsV56()||[]):[]}catch(e){return []}
+  }
+  function defaultPaid(year,c){
+    if(c?.quitadoManual===true||c?.status==='Quitado'&&n(c?.pendente)<=0)return true;
+    return Number(year)<=Number(typeof currentYear!=='undefined'?currentYear:new Date().getFullYear());
+  }
+  function stateMap(c){return Object.assign({},c?.[STATUS_KEY]||{},(typeof fgtsItemEdits!=='undefined'&&fgtsItemEdits?.[c?.id]?.[STATUS_KEY])||{})}
+  function schedule(c){
+    const states=stateMap(c);
+    return Object.entries(c?.anos||{}).map(([year,value])=>{
+      const manual=states[String(year)];
+      const paid=manual?manual==='Quitado':defaultPaid(year,c);
+      return {year:Number(year),value:n(value),status:paid?'Quitado':'Pendente'};
+    }).filter(x=>x.value>0).sort((a,b)=>a.year-b.year);
+  }
+  function derived(c){
+    const rows=schedule(c),paid=rows.filter(x=>x.status==='Quitado'),pending=rows.filter(x=>x.status==='Pendente');
+    const quitado=paid.reduce((a,x)=>a+x.value,0),pendente=pending.reduce((a,x)=>a+x.value,0),total=rows.reduce((a,x)=>a+x.value,0);
+    return Object.assign({},c,{total:Math.round(total*100)/100,quitado:Math.round(quitado*100)/100,pendente:Math.round(pendente*100)/100,status:pending.length?'Pendente':'Quitado',parcelasTotalV56:rows.length,parcelasQuitadasV56:paid.length,parcelasPendentesV56:pending.length});
+  }
+
+  const priorGetFgtsV56=window.getFgtsContracts || (typeof getFgtsContracts==='function'?getFgtsContracts:null);
+  window.getFgtsContracts=function(){return baseRows().map(derived)};
+  try{getFgtsContracts=window.getFgtsContracts}catch(e){}
+
+  function rawContract(id){
+    const rows=baseRows();
+    return rows.find(c=>String(c.id)===String(id))||null;
+  }
+  function liveContract(id){
+    const c=rawContract(id);return c?derived(c):null;
+  }
+  function persist(id,map){
+    const c=rawContract(id);if(!c)return;
+    const d=derived(Object.assign({},c,{[STATUS_KEY]:map,quitadoManual:false}));
+    const edit=(typeof fgtsItemEdits!=='undefined'?(fgtsItemEdits[id]||{}):{});
+    if(typeof fgtsItemEdits!=='undefined'){
+      fgtsItemEdits[id]=Object.assign({},c,edit,{[STATUS_KEY]:map,[ACTION_KEY]:new Date().toISOString(),quitadoManual:d.pendente<=0,status:d.status,total:d.total,quitado:d.quitado,pendente:d.pendente});
+      if(typeof saveFgtsItems==='function')saveFgtsItems();
+      else localStorage.setItem('planejador_fgts_item_edits_v1',JSON.stringify(fgtsItemEdits));
+    }
+  }
+  function setInstallment(id,year,status){
+    const c=rawContract(id);if(!c)return;
+    const map=stateMap(c);map[String(year)]=status;persist(id,map);
+    refreshAll(id);
+  }
+  function setMany(id,years,status){
+    const c=rawContract(id);if(!c)return;
+    const map=stateMap(c);years.forEach(y=>map[String(y)]=status);persist(id,map);refreshAll(id);
+  }
+  function refreshAll(id){
+    try{window.renderFgts?.()}catch(e){}
+    setTimeout(()=>{if(document.getElementById('fgtsContractDetailV56')?.classList.contains('open'))renderDetail(id);decorateRows();decorateSummary();},30);
+  }
+
+  function annualDiscounts(){
+    const map={};
+    (window.getFgtsContracts?.()||[]).forEach(c=>{
+      if(c?._deleted)return;
+      schedule(c).filter(x=>x.status==='Pendente').forEach(x=>{map[x.year]=(map[x.year]||0)+x.value});
+    });
+    return map;
+  }
+  function birthdayMonth(){return activeProfile()==='Christian'?1:7}
+  function birthdayName(){return ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][birthdayMonth()-1]}
+  function nextSaqueYear(){const y=Number(typeof currentYear!=='undefined'?currentYear:new Date().getFullYear()),m=Number(typeof currentMonth!=='undefined'?currentMonth:new Date().getMonth()+1);return m>birthdayMonth()?y+1:y}
+  function faixa(balance){const s=Math.max(0,n(balance));if(s<=500)return{aliq:.50,parcela:0,faixa:'Até R$ 500,00'};if(s<=1000)return{aliq:.40,parcela:50,faixa:'De R$ 500,01 a R$ 1.000,00'};if(s<=5000)return{aliq:.30,parcela:150,faixa:'De R$ 1.000,01 a R$ 5.000,00'};if(s<=10000)return{aliq:.20,parcela:650,faixa:'De R$ 5.000,01 a R$ 10.000,00'};if(s<=15000)return{aliq:.15,parcela:1150,faixa:'De R$ 10.000,01 a R$ 15.000,00'};if(s<=20000)return{aliq:.10,parcela:1900,faixa:'De R$ 15.000,01 a R$ 20.000,00'};return{aliq:.05,parcela:2900,faixa:'Acima de R$ 20.000,00'}}
+  function saqueInfo(){const saldo=Math.max(0,n(typeof fgtsSummary!=='undefined'?fgtsSummary?.saldoAtual:0)),f=faixa(saldo),gross=saldo*f.aliq+f.parcela,year=nextSaqueYear(),discounts=annualDiscounts(),discount=n(discounts[year]||0);return{saldo,f,gross,year,discounts,discount,net:Math.max(0,gross-discount)}}
+
+  function ensureDetail(){
+    let m=document.getElementById('fgtsContractDetailV56');if(m)return m;
+    m=document.createElement('div');m.id='fgtsContractDetailV56';
+    m.innerHTML='<section class="v56-card"><button type="button" class="v56-close" aria-label="Fechar">×</button><div id="fgtsContractDetailBodyV56"></div></section>';
+    document.body.appendChild(m);m.querySelector('.v56-close').onclick=()=>m.classList.remove('open');m.onclick=e=>{if(e.target===m)m.classList.remove('open')};return m;
+  }
+  function renderDetail(id){
+    const c=liveContract(id);if(!c)return;
+    const rows=schedule(c),paid=rows.filter(x=>x.status==='Quitado'),pending=rows.filter(x=>x.status==='Pendente');
+    const next=pending[0],lastPaid=[...paid].sort((a,b)=>b.year-a.year)[0];
+    const body=ensureDetail().querySelector('#fgtsContractDetailBodyV56');
+    body.innerHTML=`<div class="v56-head"><div><h2>${escv(c.id)} · ${escv(c.banco||'FGTS')}</h2><p>Antecipação do saque-aniversário · contratação ${escv(c.contratacaoAno||'—')} · ${rows.length} parcela(s) anual(is)</p></div></div>
+      <div class="v56-summary"><div class="v56-mini"><span>Total do contrato</span><b>${money(c.total)}</b></div><div class="v56-mini"><span>Quitado · ${paid.length} parcela(s)</span><b style="color:#087443">${money(c.quitado)}</b></div><div class="v56-mini"><span>Pendente · ${pending.length} parcela(s)</span><b style="color:#b42318">${money(c.pendente)}</b></div><div class="v56-mini"><span>Status</span><b>${c.status}</b></div></div>
+      <div class="v56-actions">${next?`<button type="button" class="primary" data-v56-pay-next="${next.year}">${next.year>Number(typeof currentYear!=='undefined'?currentYear:new Date().getFullYear())?'Antecipar próxima':'Quitar próxima'} · ${next.year}</button>`:''}${pending.length>1?`<button type="button" data-v56-advance>Antecipar parcelas</button>`:''}${lastPaid?`<button type="button" class="reopen" data-v56-reopen-last="${lastPaid.year}">Reabrir última · ${lastPaid.year}</button>`:''}</div>
+      <div class="v56-table-wrap"><table><thead><tr><th>Parcela</th><th>Ano</th><th>Valor</th><th>Status</th><th>Ação</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td><b>${i+1}/${rows.length}</b></td><td>${r.year}</td><td>${money(r.value)}</td><td><span class="v56-status ${r.status==='Quitado'?'paid':'pending'}">${r.status}</span></td><td><button type="button" class="v56-row-action ${r.status==='Quitado'?'reopen':''}" data-v56-year="${r.year}" data-v56-action="${r.status==='Quitado'?'Pendente':'Quitado'}">${r.status==='Quitado'?'Reabrir':(r.year>Number(typeof currentYear!=='undefined'?currentYear:new Date().getFullYear())?'Antecipar':'Quitar')}</button></td></tr>`).join('')}</tbody></table></div>
+      <div class="v56-note">Cada valor anual cadastrado no contrato é tratado como uma parcela da antecipação. Quitar ou antecipar uma parcela retira aquele ano dos descontos futuros; reabrir volta a incluí-lo. Os valores originais do contrato não são apagados.</div>`;
+    body.querySelectorAll('[data-v56-year]').forEach(b=>b.onclick=()=>setInstallment(id,b.dataset.v56Year,b.dataset.v56Action));
+    body.querySelector('[data-v56-pay-next]')?.addEventListener('click',e=>setInstallment(id,e.currentTarget.dataset.v56PayNext,'Quitado'));
+    body.querySelector('[data-v56-reopen-last]')?.addEventListener('click',e=>setInstallment(id,e.currentTarget.dataset.v56ReopenLast,'Pendente'));
+    body.querySelector('[data-v56-advance]')?.addEventListener('click',()=>{
+      const max=pending.length;let qty=prompt(`Quantas parcelas pendentes deseja antecipar? (1 a ${max})`,'1');if(qty===null)return;qty=Math.max(1,Math.min(max,parseInt(qty,10)||1));
+      setMany(id,pending.slice(0,qty).map(x=>x.year),'Quitado');
+      try{toast(`${qty} parcela(s) antecipada(s) no contrato ${id}.`)}catch(e){}
+    });
+  }
+  window.openFgtsContractDetail=function(id){const m=ensureDetail();renderDetail(id);document.querySelectorAll('.modalback.open').forEach(x=>x.classList.remove('open'));m.classList.add('open')};
+
+  function decorateRows(){
+    const body=document.getElementById('fgtsBody');if(!body)return;
+    [...body.querySelectorAll('tr')].forEach(tr=>{
+      const id=tr.cells?.[0]?.textContent?.trim();if(!id||!/^(FG|FGTS_)/i.test(id))return;
+      tr.dataset.v56FgtsContract=id;tr.title='Clique para ver as parcelas deste contrato';tr.tabIndex=0;
+      tr.onclick=e=>{if(e.target.closest('button,a,select,input'))return;window.openFgtsContractDetail(id)};
+      tr.onkeydown=e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('button,a,select,input')){e.preventDefault();window.openFgtsContractDetail(id)}};
+    });
+  }
+  function decorateSummary(){
+    const sum=document.getElementById('fgtsSummary');if(!sum)return;
+    const info=saqueInfo();
+    const cards=[...sum.querySelectorAll('.mini')];
+    const saque=cards.find(x=>/saque-aniversário/i.test(x.textContent));
+    if(saque){const b=saque.querySelector('b');if(b)b.textContent=money(info.net);let small=saque.querySelector('small');if(!small){small=document.createElement('small');saque.appendChild(small)}small.className='saque-card-note';small.textContent=`Bruto ${money(info.gross)} − bloqueado ${money(info.discount)} em ${info.year}`;saque.onclick=e=>{e.preventDefault();window.openSaqueMemoryV56()}}
+  }
+
+  window.openFgtsBlockedMemory=function(){
+    const info=saqueInfo();let m=document.getElementById('fgtsBlockedModal');if(!m){m=document.createElement('div');m.className='modalback';m.id='fgtsBlockedModal';m.innerHTML='<div class="modal"><button type="button" class="pp-modal-close" id="fgtsBlockedClose">×</button><h2 style="margin:0">Saldo bloqueado · antecipações</h2><p style="color:#7b8797;margin:6px 0 0;font-size:11px">Somente parcelas pendentes dos contratos entram nos descontos futuros.</p><div id="fgtsBlockedBody"></div></div>';document.body.appendChild(m);document.getElementById('fgtsBlockedClose').onclick=()=>m.classList.remove('open');m.onclick=e=>{if(e.target===m)m.classList.remove('open')}}
+    const years=Object.keys(info.discounts).map(Number).filter(y=>y>=Number(typeof currentYear!=='undefined'?currentYear:new Date().getFullYear())).sort((a,b)=>a-b);
+    document.getElementById('fgtsBlockedBody').innerHTML=`<div class="fgts-blocked-summary"><div><span>Saldo bloqueado atual</span><b>${money(typeof fgtsSummary!=='undefined'?fgtsSummary?.saldoBloqueado:0)}</b></div><div><span>Próximo saque-aniversário</span><b>${birthdayName()} de ${info.year}</b></div><div><span>Desconto no saque de ${info.year}</span><b style="color:#b42318">${money(info.discount)}</b></div></div><div style="overflow:auto;border:1px solid #e7ecf2;border-radius:15px"><table class="fgts-year-table"><thead><tr><th>Ano</th><th>Parcelas pendentes</th></tr></thead><tbody>${years.length?years.map(y=>`<tr><td><b>${y}</b></td><td class="discount">− ${money(info.discounts[y])}</td></tr>`).join(''):'<tr><td colspan="2">Nenhuma parcela futura pendente.</td></tr>'}</tbody></table></div><div class="fgts-net-box"><span>Próximo saque-aniversário líquido estimado</span><b>${money(info.net)}</b></div>`;
+    document.querySelectorAll('.modalback.open').forEach(x=>{if(x!==m)x.classList.remove('open')});m.classList.add('open');
+  };
+  window.openSaqueMemoryV56=function(){
+    const info=saqueInfo();let m=document.getElementById('saqueMemoryModal');if(!m){m=document.createElement('div');m.className='modalback';m.id='saqueMemoryModal';m.innerHTML='<div class="modal"><div class="saque-mem-head"><div><h2>Memória de cálculo</h2><p>Saque-aniversário do FGTS</p></div><button type="button" class="saque-close" id="saqueMemoryClose">Fechar</button></div><div class="saque-mem-body" id="saqueMemoryBody"></div></div>';document.body.appendChild(m);document.getElementById('saqueMemoryClose').onclick=()=>m.classList.remove('open');m.onclick=e=>{if(e.target===m)m.classList.remove('open')}}
+    const base=info.saldo*info.f.aliq;document.getElementById('saqueMemoryBody').innerHTML=`<div class="saque-highlight"><div><span>Saldo considerado</span><b>${money(info.saldo)}</b></div><div><span>Perfil / aniversário</span><b>${activeProfile()} · ${birthdayName()}</b></div></div><div class="saque-formula"><h3>Como o valor foi calculado</h3><div class="saque-formula-line"><span>Faixa de saldo</span><b>${info.f.faixa}</b></div><div class="saque-formula-line"><span>Alíquota</span><b>${(info.f.aliq*100).toFixed(0)}%</b></div><div class="saque-formula-line"><span>${money(info.saldo)} × ${(info.f.aliq*100).toFixed(0)}%</span><b>${money(base)}</b></div><div class="saque-formula-line"><span>Parcela adicional</span><b>${money(info.f.parcela)}</b></div><div class="saque-formula-line"><span>Saque-aniversário bruto</span><b>${money(info.gross)}</b></div><div class="saque-formula-line"><span>Parcelas FGTS pendentes em ${info.year}</span><b style="color:#b42318">− ${money(info.discount)}</b></div></div><div class="saque-result"><span>Saque-aniversário líquido estimado de ${info.year}</span><b>${money(info.net)}</b></div>`;document.querySelectorAll('.modalback.open').forEach(x=>{if(x!==m)x.classList.remove('open')});m.classList.add('open');
+  };
+  window.openSaqueMemory=window.openSaqueMemoryV56;
+
+  const priorRenderV56=window.renderFgts;
+  window.renderFgts=function(){const r=typeof priorRenderV56==='function'?priorRenderV56.apply(this,arguments):undefined;setTimeout(()=>{decorateRows();decorateSummary()},0);return r};
+  try{renderFgts=window.renderFgts}catch(e){}
+  setTimeout(()=>{decorateRows();decorateSummary()},120);
+})();
+</script>
+
 </body></html>
 <style id="recurring-card-style">
 .recurring-note{margin-top:8px;padding:10px 12px;border-radius:12px;background:#fff8ee;border:1px solid #ffd6a7;color:#8a4b00;font-size:11px;line-height:1.45}
