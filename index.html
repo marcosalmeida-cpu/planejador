@@ -27533,3 +27533,75 @@ window.ppRepairCreditorsV40=ensureCreditorsV40;
 </script>
 
 <!-- Hub Pessoal V41: FGTS saldo rescisório ao vivo -> multa 40% na reserva de saída -->
+
+<style id="pp-v44-card-inline-calculator-style">
+#cardPurchaseModal .v44-card-calc-slot{grid-column:span 3!important;display:flex!important;flex-direction:column;min-width:0}
+#cardPurchaseModal .v44-card-calc-slot label{visibility:hidden}
+#cardPurchaseModal .v44-card-calc-btn{height:44px;border:1px solid #cfd9e7;border-radius:12px;background:#f5f8fc;color:#174784;font-weight:900;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:none;white-space:nowrap}
+#cardPurchaseModal .v44-card-calc-btn:hover{background:#edf4ff;border-color:#b9cbe5}
+#cardPurchaseModal .v44-card-calc-btn.active{background:#174a94;color:#fff;border-color:#174a94}
+#cardPurchaseModal .v44-card-calc-panel{display:none;grid-column:1/-1!important;padding:10px;border:1px solid #dbe3ee;border-radius:13px;background:#f8fafc;margin-top:-2px}
+#cardPurchaseModal .v44-card-calc-panel.open{display:block!important}
+#cardPurchaseModal .v44-card-calc-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+#cardPurchaseModal .v44-card-calc-title b{font-size:10px;color:#233a57}
+#cardPurchaseModal .v44-card-calc-title span{font-size:8.5px;color:#7a8798}
+#cardPurchaseModal .v44-card-calc-expression{width:100%;height:42px!important;font-size:14px!important;font-weight:700!important;letter-spacing:.01em}
+#cardPurchaseModal .v44-card-calc-result{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid #e3e8ef}
+#cardPurchaseModal .v44-card-calc-result span{font-size:9px;color:#6c7b8e}
+#cardPurchaseModal .v44-card-calc-result b{font-size:15px;color:#173d72}
+#cardPurchaseModal .v44-card-calc-actions{display:flex;gap:7px;justify-content:flex-end;margin-top:8px}
+#cardPurchaseModal .v44-card-calc-actions button{height:34px;padding:0 12px;border-radius:9px;font-size:9px;font-weight:850;cursor:pointer}
+#cardPurchaseModal .v44-card-calc-clear{border:1px solid #d8e0ea;background:#fff;color:#596a7f}
+#cardPurchaseModal .v44-card-calc-use{border:1px solid #174a94;background:#174a94;color:#fff}
+#cardPurchaseModal .v44-card-calc-error{color:#b4233b!important}
+@media(max-width:760px){#cardPurchaseModal .v44-card-calc-slot{grid-column:span 3!important}}
+@media(max-width:560px){#cardPurchaseModal .v44-card-calc-slot{grid-column:auto!important}#cardPurchaseModal .v44-card-calc-slot label{display:none}#cardPurchaseModal .v44-card-calc-title{align-items:flex-start;flex-direction:column;gap:2px}}
+</style>
+<script id="pp-v44-card-inline-calculator-script">
+(()=>{
+'use strict';
+function brl(v){return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function formatInput(v){return (Math.round((Number(v)||0)*100)/100).toFixed(2).replace('.',',')}
+function tokenize(raw){
+  const s=String(raw||'').replace(/R\$/gi,'').replace(/\s+/g,'').replace(/,/g,'.');
+  if(!s)return [];
+  const out=[];let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(/[0-9.]/.test(c)){
+      let j=i+1;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      const n=Number(s.slice(i,j));if(!Number.isFinite(n))throw new Error('Número inválido');out.push({t:'n',v:n});i=j;continue;
+    }
+    if('+-*/()'.includes(c)){out.push({t:c});i++;continue}
+    throw new Error('Use apenas números e + − × ÷');
+  }
+  return out;
+}
+function evaluate(raw){
+  const t=tokenize(raw);if(!t.length)return null;let i=0;
+  const peek=()=>t[i],take=()=>t[i++];
+  function factor(){const x=peek();if(!x)throw new Error('Expressão incompleta');if(x.t==='+'||x.t==='-'){take();const v=factor();return x.t==='-'?-v:v}if(x.t==='n'){take();return x.v}if(x.t==='('){take();const v=expr();if(peek()?.t!==')')throw new Error('Feche os parênteses');take();return v}throw new Error('Expressão inválida')}
+  function term(){let v=factor();while(peek()&&(peek().t==='*'||peek().t==='/')){const op=take().t,r=factor();if(op==='/'&&r===0)throw new Error('Divisão por zero');v=op==='*'?v*r:v/r}return v}
+  function expr(){let v=term();while(peek()&&(peek().t==='+'||peek().t==='-')){const op=take().t,r=term();v=op==='+'?v+r:v-r}return v}
+  const v=expr();if(i!==t.length)throw new Error('Expressão inválida');if(!Number.isFinite(v))throw new Error('Resultado inválido');return Math.round(v*100)/100;
+}
+function install(){
+  const modal=document.getElementById('cardPurchaseModal'),total=document.getElementById('cpTotal'),status=document.getElementById('cpStatus');
+  if(!modal||!total||!status||document.getElementById('v44CardCalcBtn'))return;
+  const grid=status.closest('.formgrid')||modal.querySelector('.formgrid'),statusField=status.closest('.field');if(!grid||!statusField)return;
+  const slot=document.createElement('div');slot.className='field v44-card-calc-slot';slot.id='v44CardCalcSlot';slot.innerHTML='<label>Calculadora</label><button type="button" class="v44-card-calc-btn" id="v44CardCalcBtn" title="Calculadora" aria-label="Abrir calculadora"><span>∑</span><span>Calculadora</span></button>';
+  statusField.insertAdjacentElement('afterend',slot);
+  const panel=document.createElement('div');panel.id='v44CardCalcPanel';panel.className='v44-card-calc-panel';panel.innerHTML=`<div class="v44-card-calc-title"><b>Somar itens da compra</b><span>Ex.: 125,90 + 48 + 32,50</span></div><input id="v44CardCalcExpression" class="v44-card-calc-expression" inputmode="decimal" autocomplete="off" placeholder="Digite a conta"><div class="v44-card-calc-result"><span id="v44CardCalcStatus">Resultado</span><b id="v44CardCalcResult">R$ 0,00</b></div><div class="v44-card-calc-actions"><button type="button" class="v44-card-calc-clear" id="v44CardCalcClear">Limpar</button><button type="button" class="v44-card-calc-use" id="v44CardCalcUse">Usar valor</button></div>`;
+  slot.insertAdjacentElement('afterend',panel);
+  const btn=slot.querySelector('#v44CardCalcBtn'),exp=panel.querySelector('#v44CardCalcExpression'),res=panel.querySelector('#v44CardCalcResult'),msg=panel.querySelector('#v44CardCalcStatus');let last=null;
+  function refresh(){try{last=evaluate(exp.value);msg.textContent='Resultado';msg.classList.remove('v44-card-calc-error');res.classList.remove('v44-card-calc-error');res.textContent=last==null?'R$ 0,00':brl(last)}catch(e){last=null;msg.textContent=e.message||'Conta inválida';msg.classList.add('v44-card-calc-error');res.classList.add('v44-card-calc-error');res.textContent='—'}}
+  btn.addEventListener('click',()=>{const open=!panel.classList.contains('open');panel.classList.toggle('open',open);btn.classList.toggle('active',open);if(open){const cur=String(total.value||'').trim();if(cur&&!exp.value)exp.value=cur;refresh();setTimeout(()=>exp.focus(),0)}});
+  exp.addEventListener('input',refresh);
+  exp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();panel.querySelector('#v44CardCalcUse').click()}else if(e.key==='Escape'){panel.classList.remove('open');btn.classList.remove('active')}});
+  panel.querySelector('#v44CardCalcClear').addEventListener('click',()=>{exp.value='';last=null;refresh();exp.focus()});
+  panel.querySelector('#v44CardCalcUse').addEventListener('click',()=>{refresh();if(last==null)return;total.value=formatInput(last);total.dispatchEvent(new Event('input',{bubbles:true}));total.dispatchEvent(new Event('change',{bubbles:true}));panel.classList.remove('open');btn.classList.remove('active');total.focus()});
+  modal.addEventListener('click',e=>{if(e.target.closest?.('[data-close="cardPurchaseModal"]')){panel.classList.remove('open');btn.classList.remove('active')}});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+})();
+</script>
