@@ -10778,7 +10778,83 @@ const oldRC=window.renderCards;if(typeof oldRC==='function'){window.renderCards=
 })();
 </script>
 </div>
-<script id="hub-cross-page-action-v7">(()=>{try{const q=new URLSearchParams(location.search);if(q.get('action')==='addtx'){const open=()=>{const b=document.querySelector('[data-addtx]');if(b){b.click();history.replaceState(null,'',location.pathname+location.hash);return true}return false};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(open,500),{once:true});else setTimeout(open,500)}}catch(e){}})();</script><script src="assets/fullscreen-v23.js?v=23"></script></body></html>
+<script id="hub-cross-page-action-v7">(()=>{try{const q=new URLSearchParams(location.search);if(q.get('action')==='addtx'){const open=()=>{const b=document.querySelector('[data-addtx]');if(b){b.click();history.replaceState(null,'',location.pathname+location.hash);return true}return false};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(open,500),{once:true});else setTimeout(open,500)}}catch(e){}})();</script><script src="assets/fullscreen-v23.js?v=23"></script>
+<style id="pp-v43-inline-calculator-style">
+#txModal .field:has(#fValue){position:relative}
+#txModal .v43-value-row{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px;align-items:center}
+#txModal .v43-calc-btn{height:44px;border:1px solid #cfd9e7;border-radius:12px;background:#f5f8fc;color:#174784;font-weight:900;font-size:17px;cursor:pointer;display:grid;place-items:center;box-shadow:none}
+#txModal .v43-calc-btn:hover{background:#edf4ff;border-color:#b9cbe5}
+#txModal .v43-calc-btn.active{background:#174a94;color:#fff;border-color:#174a94}
+#txModal .v43-calc-panel{display:none;margin-top:8px;padding:10px;border:1px solid #dbe3ee;border-radius:13px;background:#f8fafc}
+#txModal .v43-calc-panel.open{display:block}
+#txModal .v43-calc-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+#txModal .v43-calc-title b{font-size:10px;color:#233a57}
+#txModal .v43-calc-title span{font-size:8.5px;color:#7a8798}
+#txModal .v43-calc-expression{width:100%;height:42px!important;font-size:14px!important;font-weight:700!important;letter-spacing:.01em}
+#txModal .v43-calc-result{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid #e3e8ef}
+#txModal .v43-calc-result span{font-size:9px;color:#6c7b8e}
+#txModal .v43-calc-result b{font-size:15px;color:#173d72}
+#txModal .v43-calc-actions{display:flex;gap:7px;justify-content:flex-end;margin-top:8px}
+#txModal .v43-calc-actions button{height:34px;padding:0 12px;border-radius:9px;font-size:9px;font-weight:850;cursor:pointer}
+#txModal .v43-calc-clear{border:1px solid #d8e0ea;background:#fff;color:#596a7f}
+#txModal .v43-calc-use{border:1px solid #174a94;background:#174a94;color:#fff}
+#txModal .v43-calc-error{color:#b4233b!important}
+@media(max-width:560px){#txModal .v43-calc-title{align-items:flex-start;flex-direction:column;gap:2px}}
+</style>
+<script id="pp-v43-inline-calculator-script">
+(()=>{
+'use strict';
+function brl(v){return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function formatInput(v){return (Math.round((Number(v)||0)*100)/100).toFixed(2).replace('.',',')}
+function tokenize(raw){
+  const s=String(raw||'').replace(/R\$/gi,'').replace(/\s+/g,'').replace(/,/g,'.');
+  if(!s)return [];
+  const out=[];let i=0;
+  while(i<s.length){
+    const c=s[i];
+    if(/[0-9.]/.test(c)){
+      let j=i+1;while(j<s.length&&/[0-9.]/.test(s[j]))j++;
+      const n=Number(s.slice(i,j));if(!Number.isFinite(n))throw new Error('Número inválido');out.push({t:'n',v:n});i=j;continue;
+    }
+    if('+-*/()'.includes(c)){out.push({t:c});i++;continue}
+    throw new Error('Use apenas números e + − × ÷');
+  }
+  return out;
+}
+function evaluate(raw){
+  const t=tokenize(raw);if(!t.length)return null;let i=0;
+  const peek=()=>t[i];const take=()=>t[i++];
+  function factor(){
+    const x=peek();if(!x)throw new Error('Expressão incompleta');
+    if(x.t==='+'||x.t==='-'){take();const v=factor();return x.t==='-'?-v:v}
+    if(x.t==='n'){take();return x.v}
+    if(x.t==='('){take();const v=expr();if(peek()?.t!==')')throw new Error('Feche os parênteses');take();return v}
+    throw new Error('Expressão inválida');
+  }
+  function term(){let v=factor();while(peek()&&(peek().t==='*'||peek().t==='/')){const op=take().t,r=factor();if(op==='/'&&r===0)throw new Error('Divisão por zero');v=op==='*'?v*r:v/r}return v}
+  function expr(){let v=term();while(peek()&&(peek().t==='+'||peek().t==='-')){const op=take().t,r=term();v=op==='+'?v+r:v-r}return v}
+  const v=expr();if(i!==t.length)throw new Error('Expressão inválida');if(!Number.isFinite(v))throw new Error('Resultado inválido');return Math.round(v*100)/100;
+}
+function install(){
+  const value=document.getElementById('fValue');if(!value||document.getElementById('v43CalcBtn'))return;
+  const field=value.closest('.field');if(!field)return;
+  const row=document.createElement('div');row.className='v43-value-row';
+  value.parentNode.insertBefore(row,value);row.appendChild(value);
+  const btn=document.createElement('button');btn.type='button';btn.id='v43CalcBtn';btn.className='v43-calc-btn';btn.title='Calculadora';btn.setAttribute('aria-label','Abrir calculadora');btn.textContent='∑';row.appendChild(btn);
+  const panel=document.createElement('div');panel.id='v43CalcPanel';panel.className='v43-calc-panel';panel.innerHTML=`<div class="v43-calc-title"><b>Somar itens</b><span>Ex.: 125,90 + 48 + 32,50</span></div><input id="v43CalcExpression" class="v43-calc-expression" inputmode="decimal" autocomplete="off" placeholder="Digite a conta"><div class="v43-calc-result"><span id="v43CalcStatus">Resultado</span><b id="v43CalcResult">R$ 0,00</b></div><div class="v43-calc-actions"><button type="button" class="v43-calc-clear" id="v43CalcClear">Limpar</button><button type="button" class="v43-calc-use" id="v43CalcUse">Usar valor</button></div>`;field.appendChild(panel);
+  const exp=panel.querySelector('#v43CalcExpression'),res=panel.querySelector('#v43CalcResult'),status=panel.querySelector('#v43CalcStatus');let last=null;
+  function refresh(){try{last=evaluate(exp.value);status.textContent='Resultado';status.classList.remove('v43-calc-error');res.classList.remove('v43-calc-error');res.textContent=last==null?'R$ 0,00':brl(last)}catch(e){last=null;status.textContent=e.message||'Conta inválida';status.classList.add('v43-calc-error');res.classList.add('v43-calc-error');res.textContent='—'}}
+  btn.addEventListener('click',()=>{const open=!panel.classList.contains('open');panel.classList.toggle('open',open);btn.classList.toggle('active',open);if(open){const cur=String(value.value||'').trim();if(cur&&!exp.value)exp.value=cur;refresh();setTimeout(()=>exp.focus(),0)}});
+  exp.addEventListener('input',refresh);
+  exp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();panel.querySelector('#v43CalcUse').click()}else if(e.key==='Escape'){panel.classList.remove('open');btn.classList.remove('active')}});
+  panel.querySelector('#v43CalcClear').addEventListener('click',()=>{exp.value='';last=null;refresh();exp.focus()});
+  panel.querySelector('#v43CalcUse').addEventListener('click',()=>{refresh();if(last==null)return;value.value=formatInput(last);value.dispatchEvent(new Event('input',{bubbles:true}));value.dispatchEvent(new Event('change',{bubbles:true}));panel.classList.remove('open');btn.classList.remove('active');value.focus()});
+  document.getElementById('txModal')?.addEventListener('click',e=>{if(e.target.closest?.('[data-close="txModal"]')){panel.classList.remove('open');btn.classList.remove('active')}});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+})();
+</script>
+</body></html>
 <style id="recurring-card-style">
 .recurring-note{margin-top:8px;padding:10px 12px;border-radius:12px;background:#fff8ee;border:1px solid #ffd6a7;color:#8a4b00;font-size:11px;line-height:1.45}
 .recurring-tag{background:#fff2df!important;color:#c96c00!important}
