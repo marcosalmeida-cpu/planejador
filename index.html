@@ -1444,8 +1444,8 @@ body.v86-ready #dashboard{visibility:visible!important}
 <!-- Hub Pessoal Finanças V5: removidas fisicamente as áreas Educação, Saúde e Entretenimento.
      Nenhuma chave financeira de localStorage é apagada, renomeada ou migrada por esta versão. -->
 <link rel="stylesheet" href="assets/hub.css?v=12">
-<link rel="stylesheet" href="assets/shared-shell-v21.css?v=21">
-<link rel="stylesheet" href="assets/contrast-v22.css?v=22"><link rel="stylesheet" href="assets/fullscreen-v23.css?v=23"><link rel="stylesheet" href="assets/ui-fixes-v24.css?v=24">
+
+<link rel="stylesheet" href="assets/contrast-v22.css?v=22"><link rel="stylesheet" href="assets/ui-fixes-v24.css?v=24">
 
 
 <style id="pp-v62-critical-shell">
@@ -1463,7 +1463,20 @@ main>.view,main>.view.active,.main>.view,.main>.view.active{min-width:0!importan
 #ppHubV62{position:fixed;inset:0;z-index:5200;background:rgba(7,24,50,.46);display:none;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(6px)}#ppHubV62.open{display:flex}.v62-hub-card{width:min(620px,calc(100vw - 32px));background:#f9fbfd;border:1px solid #e0e6ee;border-radius:20px;padding:19px;color:#17243a;box-shadow:0 28px 80px rgba(5,23,49,.24)}.v62-hub-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.v62-hub-head h2{margin:0;font-size:23px}.v62-hub-head p{margin:5px 0 0;color:#708096;font-size:12px}.v62-hub-close{width:38px;height:38px;border:0;border-radius:11px;background:#e9eef4;cursor:pointer;font-size:20px}.v62-hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}.v62-hub-grid a{display:block;text-decoration:none;color:#17243a;border:1px solid #dfe6ee;border-radius:14px;padding:14px;background:#fff}.v62-hub-grid a:hover{background:#f4f7fb}.v62-hub-grid a.active{border-color:#7898bf;background:#eff5fc}.v62-hub-grid b{display:block;font-size:14px}.v62-hub-grid span{display:block;margin-top:4px;color:#728096;font-size:11px}
 @media(max-width:1080px){:root{--pp-v62-rail:54px;--pp-v62-content-left:70px}.v62-logo,.v62-btn{width:38px;height:38px;min-width:38px;min-height:38px}.app>.main,body>main.main,main.main,main.hub-content,.hub-content{padding-left:8px!important;padding-right:8px!important}.tablewrap th,.tablewrap td,#lancamentos .v63-tablewrap th,#lancamentos .v63-tablewrap td{padding:8px 6px!important;font-size:10px!important}}
 @media(max-width:700px){:root{--pp-v62-rail:50px;--pp-v62-content-left:64px}#ppBankRailV62{left:6px;top:6px;bottom:6px;border-radius:16px;padding:6px 4px}.v62-logo,.v62-btn{width:36px;height:36px;min-width:36px;min-height:36px;border-radius:10px;font-size:14px}.main>.view.active,main>.view.active{padding:10px!important;border-radius:16px}.v62-hub-grid{grid-template-columns:1fr}.filterbar>*{flex:1 1 100%!important}.tablewrap th,.tablewrap td,#lancamentos .v63-tablewrap th,#lancamentos .v63-tablewrap td{font-size:9.5px!important;padding:7px 4px!important}}
-</style></head>
+</style>
+<style id="pp-v64-one-navigation-only">
+/* V64 — única navegação visível: rail esquerda. Shells antigos foram removidos também das dependências externas. */
+html,body{overflow-x:clip!important;max-width:100%!important}
+header,.topbar,.topinner:not(#ppBankRailV62 .topinner),#nav,.nav,#v76FloatNav,#v76ProfilePod,#ppV57CornerMenu,#menuTrigger,.menu-trigger,.floating-nav,.floating-menu,.hub-floating-nav{display:none!important;visibility:hidden!important;pointer-events:none!important}
+#ppLegacyControlsV63{display:none!important;visibility:hidden!important;position:absolute!important;width:0!important;height:0!important;overflow:hidden!important}
+#ppBankRailV62{display:flex!important}
+body>.app{box-sizing:border-box!important;min-width:0!important;overflow-x:hidden!important}
+main.main,main.hub-content,.main,.hub-content{min-width:0!important;max-width:100%!important;overflow-x:hidden!important}
+main.main *,main.hub-content *{box-sizing:border-box}
+.section-tools,.hero,.filterbar,.tablewrap,[class*="grid"],[class*="Grid"]{min-width:0!important;max-width:100%!important}
+img,svg,canvas{max-width:100%}
+</style>
+</head>
 <body data-hub-area="financas"><aside id="ppBankRailV62" aria-label="Navegação principal"><button type="button" class="v62-logo" data-v62-hub data-tip="Hub Pessoal" aria-label="Abrir Hub Pessoal"></button><nav class="v62-nav" aria-label="Navegação"><button type="button" class="v62-btn" data-v62-view="dashboard" data-tip="Visão geral" aria-label="Visão geral">⌂</button><button type="button" class="v62-btn" data-v62-view="lancamentos" data-tip="Lançamentos" aria-label="Lançamentos">↕</button><button type="button" class="v62-btn" data-v62-view="cartoes" data-tip="Cartões" aria-label="Cartões">▣</button><button type="button" class="v62-btn" data-v62-view="dividas" data-tip="Dívidas" aria-label="Dívidas">◴</button><button type="button" class="v62-btn" data-v62-view="fgts" data-tip="FGTS" aria-label="FGTS">◇</button><button type="button" class="v62-btn" data-v62-view="previdencia" data-tip="Previdência" aria-label="Previdência">◎</button><button type="button" class="v62-btn" data-v62-view="investimentos" data-tip="Investimentos" aria-label="Investimentos">↗</button><button type="button" class="v62-btn" data-v62-view="patrimonio" data-tip="Patrimônio" aria-label="Patrimônio">⬡</button><button type="button" class="v62-btn" data-v62-view="veiculos" data-tip="Veículos" aria-label="Veículos">⚙</button><button type="button" class="v62-btn" data-v62-view="nuvem" data-tip="Calculadora" aria-label="Calculadora">∑</button></nav><div class="v62-foot"><button type="button" class="v62-btn" data-v62-backup data-tip="Backup" aria-label="Backup">↓</button><button type="button" class="v62-btn v62-add" data-v62-add data-tip="Novo lançamento" aria-label="Novo lançamento">＋</button><div class="v62-sep"></div><button type="button" class="v62-btn" data-v62-profile data-tip="Perfil" aria-label="Perfil"><span class="v62-dot">P</span></button><button type="button" class="v62-btn" data-v62-logout data-tip="Sair" aria-label="Sair">↪</button></div></aside><div id="ppHubV62" aria-hidden="true"><section class="v62-hub-card" role="dialog" aria-modal="true" aria-label="Hub Pessoal"><div class="v62-hub-head"><div><h2>Hub Pessoal</h2><p>Escolha a área que deseja abrir.</p></div><button type="button" class="v62-hub-close" aria-label="Fechar">×</button></div><div class="v62-hub-grid"><a data-v62-area="financas" href="index.html"><b>Finanças</b><span>Lançamentos, cartões, dívidas e patrimônio</span></a><a data-v62-area="educacao" href="educacao.html"><b>Educação</b><span>Formações e trajetória acadêmica</span></a><a data-v62-area="saude" href="saude.html"><b>Saúde</b><span>Acompanhamento pessoal</span></a><a data-v62-area="entretenimento" href="entretenimento.html"><b>Entretenimento</b><span>Filmes, séries, livros e viagens</span></a></div></section></div><div class="app">
 <div id="ppLegacyControlsV63" hidden aria-hidden="true" style="display:none!important"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button class="active" data-view="dashboard">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="veiculos">Veículos</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx="">+ Lançamento</button></div></div></div>
 <main class="main">
@@ -1858,13 +1871,7 @@ initV2();
 </script>
 <script id="pp-fintech-v4-script">
 (function(){
-function ensureMenu(){
- const top=document.querySelector('.topinner'); const nav=document.getElementById('nav'); const brand=document.querySelector('.brand'); if(!top||!nav)return;
- if(!document.getElementById('accountMini')){brand.insertAdjacentHTML('afterend','<div class="account-mini" id="accountMini"><div class="account-bank-dot">i</div><div><strong>Banco Inter</strong><small>Agência 0001 · C/C 1019930-6 · Banco 077 - Inter</small></div></div>')}
- if(!document.getElementById('menuTrigger')){const b=document.createElement('button');b.className='menu-trigger';b.id='menuTrigger';b.setAttribute('aria-label','Abrir menu');b.innerHTML='☰';top.appendChild(b);b.onclick=e=>{e.stopPropagation();nav.classList.toggle('open')}}
- nav.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>nav.classList.remove('open')));
- document.addEventListener('click',e=>{if(!nav.contains(e.target)&&e.target.id!=='menuTrigger')nav.classList.remove('open')});
-}
+function ensureMenu(){ return; }
 function cleanFgts(){
  const fgts=document.getElementById('fgts'); if(!fgts)return;
  fgts.innerHTML=fgts.innerHTML.replace(/saldos e contratos/ig,'').replace(/Saldos, valores livres e bloqueados, histórico e contratos\.?/ig,'');
@@ -10684,7 +10691,7 @@ const oldRC=window.renderCards;if(typeof oldRC==='function'){window.renderCards=
 })();
 </script>
 </div>
-<script id="hub-cross-page-action-v7">(()=>{try{const q=new URLSearchParams(location.search);if(q.get('action')==='addtx'){const open=()=>{const b=document.querySelector('[data-addtx]');if(b){b.click();history.replaceState(null,'',location.pathname+location.hash);return true}return false};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(open,500),{once:true});else setTimeout(open,500)}}catch(e){}})();</script><script src="assets/fullscreen-v23.js?v=23"></script>
+<script id="hub-cross-page-action-v7">(()=>{try{const q=new URLSearchParams(location.search);if(q.get('action')==='addtx'){const open=()=>{const b=document.querySelector('[data-addtx]');if(b){b.click();history.replaceState(null,'',location.pathname+location.hash);return true}return false};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(open,500),{once:true});else setTimeout(open,500)}}catch(e){}})();</script>
 <style id="pp-v43-inline-calculator-style">
 #txModal .field:has(#fValue){position:relative}
 #txModal .v43-value-row{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:8px;align-items:center}
@@ -26383,7 +26390,7 @@ html.hub-login-lock,body.hub-login-lock{overflow:hidden!important;height:100%!im
 }
 </style>
 <script src="assets/hub.js?v=12"></script>
-<script src="assets/shared-shell-v21.js?v=21"></script>
+
 
 
 <style id="pp-v32-stable-premium-finance-modals">
@@ -27931,35 +27938,6 @@ body.v76-split-header #nav{
 (()=>{
 'use strict';
 
-function ensureCornerMenu57(){
-  document.getElementById('ppV57CornerMenu')?.remove();
-  return null;
-}
-function syncCornerMenu57(){
-  const btn=ensureCornerMenu57();
-  const nav=document.getElementById('nav');
-  if(btn&&nav)btn.setAttribute('aria-expanded',nav.classList.contains('open')?'true':'false');
-}
-ensureCornerMenu57();
-window.addEventListener('scroll',()=>requestAnimationFrame(syncCornerMenu57),{passive:true});
-window.addEventListener('resize',syncCornerMenu57,{passive:true});
-document.addEventListener('click',e=>{
-  const nav=document.getElementById('nav');
-  const btn=document.getElementById('ppV57CornerMenu');
-  if(!nav||!btn)return;
-  if(e.target.closest?.('#ppV57CornerMenu,#nav'))return;
-  if(nav.classList.contains('open')){
-    nav.classList.remove('open');
-    btn.setAttribute('aria-expanded','false');
-  }
-},false);
-document.addEventListener('click',e=>{
-  if(e.target.closest?.('#nav button[data-view]'))setTimeout(()=>{
-    document.getElementById('nav')?.classList.remove('open');
-    syncCornerMenu57();
-  },0);
-},false);
-
 /* Corrige definitivamente o envio do líquido da Calculadora para Novo lançamento. */
 function parseMoney57(v){
   let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
@@ -28161,17 +28139,4 @@ th{font-size:9.5px!important;letter-spacing:.02em!important}.tablewrap button,td
 }
 </style>
 
-<script id="pp-v63-legacy-nav-guard">
-(()=>{
-  'use strict';
-  const legacySelector='#v76FloatNav,#v76ProfilePod,#ppV57CornerMenu,#ppV58BankSidebar,#ppBankSidebarV58,#ppBankShellV59,#ppBankShellV60,#ppBankRailV61,.floating-nav,.floating-menu,.hub-floating-nav,header.topbar,.topbar';
-  const purge=()=>document.querySelectorAll(legacySelector).forEach(el=>{if(el.id!=='ppLegacyControlsV63')el.remove()});
-  purge();
-  const hasLegacy=node=>node?.nodeType===1&&(node.matches?.(legacySelector)||node.querySelector?.(legacySelector));
-  const mo=new MutationObserver(records=>{
-    if(records.some(r=>[...r.addedNodes].some(hasLegacy))) purge();
-  });
-  mo.observe(document.documentElement,{childList:true,subtree:true});
-})();
-</script>
 </body></html>
