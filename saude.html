@@ -132,4 +132,137 @@ html,body{overflow-x:hidden!important}.topbar,header.topbar,#v76FloatNav,#v76Pro
 #ppBankRailV62{display:flex!important}.main,.hub-content{overflow-x:hidden!important}.main>* ,.hub-content>*{max-width:100%!important;min-width:0!important}.tablewrap,#lancamentos .v63-tablewrap,.rgps-tablewrap-v51{overflow-x:hidden!important}.tablewrap table,#lancamentos .v63-tablewrap table,.rgps-tablewrap-v51 table{min-width:0!important;width:100%!important;table-layout:fixed!important}
 </style>
 <script id="pp-v62-shell-script">(()=>{'use strict';const rail=document.getElementById('ppBankRailV62');if(!rail)return;const area=(document.body?.dataset?.hubArea||'financas').toLowerCase();const hub=document.getElementById('ppHubV62');const killLegacy=()=>{['v76FloatNav','v76ProfilePod','ppV57CornerMenu','ppV58BankSidebar','ppBankSidebarV58','ppBankShellV59','ppBankShellV60','ppBankRailV61'].forEach(id=>document.getElementById(id)?.remove());document.querySelectorAll('.floating-nav,.floating-menu,.hub-floating-nav').forEach(el=>el.remove());document.querySelectorAll('.topbar,header.topbar').forEach(el=>{el.hidden=true;el.style.setProperty('display','none','important')})};killLegacy();[80,350,1200].forEach(ms=>setTimeout(killLegacy,ms));const openHub=()=>{hub?.classList.add('open');hub?.setAttribute('aria-hidden','false')};const closeHub=()=>{hub?.classList.remove('open');hub?.setAttribute('aria-hidden','true')};rail.querySelector('[data-v62-hub]')?.addEventListener('click',openHub);hub?.querySelector('.v62-hub-close')?.addEventListener('click',closeHub);hub?.addEventListener('click',e=>{if(e.target===hub)closeHub()});hub?.querySelector(`[data-v62-area="${area}"]`)?.classList.add('active');const setActive=id=>rail.querySelectorAll('[data-v62-view]').forEach(b=>b.classList.toggle('active',b.dataset.v62View===id));function openView(id){if(area==='financas'&&typeof window.showView==='function'){window.showView(id);setActive(id);return}const target=document.getElementById(id);if(!target)return;document.querySelectorAll('main .view').forEach(v=>v.classList.toggle('active',v.id===id));setActive(id);window.scrollTo({top:0,behavior:'auto'});try{history.replaceState(null,'','#'+id)}catch(_){}}rail.querySelectorAll('[data-v62-view]').forEach(b=>b.addEventListener('click',()=>openView(b.dataset.v62View)));const current=document.querySelector('main .view.active')?.id||location.hash.replace('#','');if(current)setActive(current);else rail.querySelector('[data-v62-view]')?.classList.add('active');rail.querySelector('[data-v62-profile]')?.addEventListener('click',()=>{const el=document.querySelector('.profile-man,#profileButton,#profileBtn,[data-profile-open]');if(el){el.click();return}location.href='index.html'});rail.querySelector('[data-v62-add]')?.addEventListener('click',()=>{if(area==='financas'){document.querySelector('[data-addtx]')?.click()}else location.href='index.html?action=addtx'});rail.querySelector('[data-v62-backup]')?.addEventListener('click',()=>document.getElementById('backupBtn')?.click());rail.querySelector('[data-v62-logout]')?.addEventListener('click',()=>{const el=document.getElementById('logoutBtnV57')||document.querySelector('[data-logout]');if(el){el.click();return}location.href='index.html'});})();</script>
+
+<style id="pp-v63-clean-bank-shell">
+:root{
+  --pp-rail-w:52px;--pp-rail-left:8px;--pp-content-left:70px;
+  --pp-page-gap:10px;--pp-radius:14px;--pp-radius-lg:18px;
+  --pp-navy:#103a74;--pp-navy-2:#0b2d5b;--pp-bg:#edf2f7;
+  --pp-surface:#f8fafc;--pp-card:#fff;--pp-border:#dde5ee;--pp-text:#16233a;--pp-muted:#6d7b90;
+}
+html,body{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;overflow-x:hidden!important;background:var(--pp-bg)!important;color:var(--pp-text)!important}
+*,*::before,*::after{box-sizing:border-box}
+/* A navegação visível é somente a rail esquerda. */
+#v76FloatNav,#v76ProfilePod,#ppV57CornerMenu,#ppV58BankSidebar,#ppBankSidebarV58,#ppBankShellV59,#ppBankShellV60,#ppBankRailV61,
+.floating-nav,.floating-menu,.hub-floating-nav,.menu-trigger,#menuTrigger,header.topbar,.topbar{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+#ppLegacyControlsV63{display:none!important}
+#ppBankRailV62{
+  position:fixed!important;z-index:10000!important;left:var(--pp-rail-left)!important;top:8px!important;bottom:8px!important;
+  width:var(--pp-rail-w)!important;padding:7px 5px!important;display:flex!important;flex-direction:column!important;align-items:center!important;
+  background:linear-gradient(180deg,var(--pp-navy),var(--pp-navy-2))!important;border:1px solid rgba(255,255,255,.11)!important;
+  border-radius:16px!important;box-shadow:0 10px 26px rgba(12,39,79,.18)!important;overflow:visible!important
+}
+#ppBankRailV62 .v62-nav{width:100%!important;display:flex!important;flex:1 1 auto!important;min-height:0!important;flex-direction:column!important;align-items:center!important;gap:3px!important;overflow-y:auto!important;overflow-x:visible!important;scrollbar-width:none!important}
+#ppBankRailV62 .v62-nav::-webkit-scrollbar{display:none!important}
+#ppBankRailV62 .v62-foot{width:100%!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:3px!important}
+#ppBankRailV62 .v62-logo,#ppBankRailV62 .v62-btn{
+  width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;margin:0!important;padding:0!important;
+  border:0!important;border-radius:10px!important;background:transparent!important;color:rgba(255,255,255,.82)!important;
+  box-shadow:none!important;display:grid!important;place-items:center!important;font:800 14px/1 system-ui,Segoe UI,Arial,sans-serif!important;cursor:pointer!important
+}
+#ppBankRailV62 .v62-logo{margin-bottom:5px!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.13)!important}
+#ppBankRailV62 .v62-logo:before{width:14px!important;height:14px!important;border-width:1.5px!important;box-shadow:inset 0 0 0 3px rgba(255,255,255,.05)!important}
+#ppBankRailV62 .v62-btn:hover,#ppBankRailV62 .v62-logo:hover{background:rgba(255,255,255,.10)!important;color:#fff!important}
+#ppBankRailV62 .v62-btn.active{background:#fff!important;color:#123d78!important;box-shadow:0 4px 12px rgba(5,25,54,.18)!important}
+#ppBankRailV62 .v62-add{background:rgba(255,255,255,.94)!important;color:#123d78!important}
+#ppBankRailV62 .v62-sep{width:22px!important;margin:4px 0!important;background:rgba(255,255,255,.12)!important}
+#ppBankRailV62 .v62-dot{width:16px!important;height:16px!important;font-size:8px!important}
+#ppBankRailV62 [data-tip]:after{left:42px!important;border-radius:8px!important;font-size:11px!important;padding:7px 9px!important}
+
+/* Canvas: nunca ultrapassa a viewport. */
+body>.app,.app{
+  margin-left:var(--pp-content-left)!important;margin-right:var(--pp-page-gap)!important;
+  width:calc(100vw - var(--pp-content-left) - var(--pp-page-gap))!important;
+  max-width:calc(100vw - var(--pp-content-left) - var(--pp-page-gap))!important;min-width:0!important;overflow:visible!important
+}
+.app>.main,body>main.main,main.main,main.hub-content,.hub-content{
+  margin:0!important;width:100%!important;max-width:100%!important;min-width:0!important;
+  padding:10px!important;overflow-x:hidden!important;overflow-y:visible!important;background:transparent!important
+}
+body.hub-page>main.main,body.hub-page>main.hub-content{
+  margin-left:var(--pp-content-left)!important;margin-right:var(--pp-page-gap)!important;
+  width:calc(100vw - var(--pp-content-left) - var(--pp-page-gap))!important;
+  max-width:calc(100vw - var(--pp-content-left) - var(--pp-page-gap))!important
+}
+main>.view,.main>.view{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
+main>.view.active,.main>.view.active{
+  background:rgba(250,252,254,.78)!important;border:1px solid rgba(213,223,234,.92)!important;
+  border-radius:var(--pp-radius-lg)!important;padding:14px!important;box-shadow:0 7px 24px rgba(24,45,72,.04)!important;overflow:hidden!important
+}
+
+/* Superfícies orgânicas e discretas. */
+.card,.panel,.mini,.kpi,.tablewrap,.v63-tablewrap,.rgps-tablewrap-v51,.rgps-hero-v51,.rgps-card-v51,
+.debt-card,.invest-card,.asset-card,.credit-card,.month-card,.annual-card,.plan-card,.capacity-card,.six-month-card,
+.v120-prop-card,.clean-card,.modal,.vf-card,.v62-hub-card{border-radius:var(--pp-radius)!important;border-color:var(--pp-border)!important}
+input,select,textarea,.btn,button.primary,.iconbtn,.filterbar button{border-radius:11px!important}
+.section-tools,.hero,.filterbar,.summary-strip,.kpis,.card-summary,.grid2,.split,.asset-grid,.invest-grid,.card-deck,.month-cards,
+.rgps-grid-v51,.rgps-kpis-v51,.rgps-profile-v51,.rgps-benefits-v51,.rgps-rules-v51{min-width:0!important;max-width:100%!important;box-sizing:border-box!important}
+.section-tools,.hero,.filterbar{flex-wrap:wrap!important}.filterbar>*{min-width:0!important;max-width:100%!important}
+.kpis,.summary-strip,.card-summary,.rgps-kpis-v51{grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr))!important}
+.asset-grid,.invest-grid,.card-deck,.month-cards{grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr))!important}
+.grid2,.split,.rgps-grid-v51{grid-template-columns:repeat(auto-fit,minmax(min(310px,100%),1fr))!important}
+.rgps-profile-v51{grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr))!important}
+.rgps-benefits-v51,.rgps-rules-v51{grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr))!important}
+
+/* Tabelas contidas: a página nunca cria scroll horizontal. */
+.tablewrap,#lancamentos .v63-tablewrap,.rgps-tablewrap-v51,[class*="table-wrap"],[class*="tablewrap"]{
+  width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:hidden!important;box-sizing:border-box!important
+}
+table,.tablewrap table,#lancamentos .v63-tablewrap table,.rgps-tablewrap-v51 table{
+  width:100%!important;max-width:100%!important;min-width:0!important;table-layout:fixed!important;border-collapse:collapse!important
+}
+th,td,.tablewrap th,.tablewrap td,#lancamentos .v63-tablewrap th,#lancamentos .v63-tablewrap td,.rgps-tablewrap-v51 th,.rgps-tablewrap-v51 td{
+  min-width:0!important;max-width:none!important;white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important;
+  padding:9px 7px!important;font-size:11px!important;line-height:1.35!important
+}
+th{font-size:9.5px!important;letter-spacing:.02em!important}.tablewrap button,td button{max-width:100%!important;white-space:normal!important}
+#lancamentos .v63-tablewrap th:nth-child(1),#lancamentos .v63-tablewrap td:nth-child(1){width:9%!important}
+#lancamentos .v63-tablewrap th:nth-child(2),#lancamentos .v63-tablewrap td:nth-child(2){width:8%!important}
+#lancamentos .v63-tablewrap th:nth-child(3),#lancamentos .v63-tablewrap td:nth-child(3){width:24%!important}
+#lancamentos .v63-tablewrap th:nth-child(4),#lancamentos .v63-tablewrap td:nth-child(4){width:13%!important}
+#lancamentos .v63-tablewrap th:nth-child(5),#lancamentos .v63-tablewrap td:nth-child(5){width:15%!important}
+#lancamentos .v63-tablewrap th:nth-child(6),#lancamentos .v63-tablewrap td:nth-child(6){width:10%!important}
+#lancamentos .v63-tablewrap th:nth-child(7),#lancamentos .v63-tablewrap td:nth-child(7){width:13%!important}
+#lancamentos .v63-tablewrap th:nth-child(8),#lancamentos .v63-tablewrap td:nth-child(8){width:8%!important}
+
+/* Hub */
+#ppHubV62{padding:16px!important}.v62-hub-card{width:min(620px,calc(100vw - 32px))!important;border-radius:18px!important}.v62-hub-grid{gap:8px!important}.v62-hub-grid a{border-radius:12px!important}
+
+@media(max-width:1000px){
+  :root{--pp-content-left:66px;--pp-rail-w:48px}.v62-logo,.v62-btn{transform:scale(.96)}
+  main>.view.active,.main>.view.active{padding:11px!important}
+  .rgps-grid-v51,.grid2,.split{grid-template-columns:1fr!important}
+  th,td,.tablewrap th,.tablewrap td{font-size:10px!important;padding:8px 5px!important}
+}
+@media(max-width:720px){
+  :root{--pp-content-left:61px;--pp-rail-w:45px;--pp-page-gap:6px}
+  #ppBankRailV62{left:5px!important;top:5px!important;bottom:5px!important;padding:5px 4px!important;border-radius:14px!important}
+  #ppBankRailV62 .v62-logo,#ppBankRailV62 .v62-btn{width:33px!important;height:33px!important;min-width:33px!important;min-height:33px!important;border-radius:9px!important}
+  .app>.main,body>main.main,main.main,main.hub-content,.hub-content{padding:6px!important}
+  main>.view.active,.main>.view.active{padding:9px!important;border-radius:14px!important}
+  .filterbar{display:grid!important;grid-template-columns:1fr!important;width:100%!important}.filterbar>*{width:100%!important}
+  .kpis,.summary-strip,.card-summary,.rgps-kpis-v51,.asset-grid,.invest-grid,.card-deck,.month-cards{grid-template-columns:1fr!important}
+  .v62-hub-grid{grid-template-columns:1fr!important}
+  /* Em telas estreitas as tabelas viram cartões verticais; continua só scroll vertical. */
+  .tablewrap table,.v63-tablewrap table,.rgps-tablewrap-v51 table{display:block!important}
+  .tablewrap thead,.v63-tablewrap thead,.rgps-tablewrap-v51 thead{display:none!important}
+  .tablewrap tbody,.v63-tablewrap tbody,.rgps-tablewrap-v51 tbody{display:grid!important;gap:8px!important}
+  .tablewrap tr,.v63-tablewrap tr,.rgps-tablewrap-v51 tr{display:grid!important;grid-template-columns:1fr 1fr!important;gap:6px 10px!important;padding:10px!important;background:#fff!important;border:1px solid var(--pp-border)!important;border-radius:12px!important}
+  .tablewrap td,.v63-tablewrap td,.rgps-tablewrap-v51 td{display:block!important;width:auto!important;max-width:100%!important;border:0!important;padding:3px 0!important;font-size:11px!important}
+}
+</style>
+
+<script id="pp-v63-legacy-nav-guard">
+(()=>{
+  'use strict';
+  const legacySelector='#v76FloatNav,#v76ProfilePod,#ppV57CornerMenu,#ppV58BankSidebar,#ppBankSidebarV58,#ppBankShellV59,#ppBankShellV60,#ppBankRailV61,.floating-nav,.floating-menu,.hub-floating-nav,header.topbar,.topbar';
+  const purge=()=>document.querySelectorAll(legacySelector).forEach(el=>{if(el.id!=='ppLegacyControlsV63')el.remove()});
+  purge();
+  const hasLegacy=node=>node?.nodeType===1&&(node.matches?.(legacySelector)||node.querySelector?.(legacySelector));
+  const mo=new MutationObserver(records=>{
+    if(records.some(r=>[...r.addedNodes].some(hasLegacy))) purge();
+  });
+  mo.observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
 </body></html>
