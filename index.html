@@ -9409,7 +9409,6 @@ Os dados atuais deste navegador serão substituídos.`);
     return {
       profileData: p==='Marcos' ? {dob:'1994-07-17',sex:'M',affiliatedBeforeReform:true} : (p==='Christian'?{dob:'1993-01-24',sex:'M',affiliatedBeforeReform:true}:{dob:'',sex:'M',affiliatedBeforeReform:true}),
       contributions: JSON.parse(JSON.stringify(seed)),
-      futureSalary: p==='Marcos'?5932.13:(p==='Christian'?4382.81:MIN_2026),
       updatedAt:new Date().toISOString()
     };
   }
@@ -9422,7 +9421,6 @@ Os dados atuais deste navegador serão substituídos.`);
     const compact={
       version:55,
       profileData:s.profileData||{},
-      futureSalary:Number(s.futureSalary||0),
       updatedAt:new Date().toISOString(),
       overrides:{},
       deleted:[],
@@ -9444,7 +9442,6 @@ Os dados atuais deste navegador serão substituídos.`);
     const base=defaultState();
     if(!c||typeof c!=='object')return base;
     base.profileData=Object.assign({},base.profileData,c.profileData||{});
-    if(Number.isFinite(Number(c.futureSalary)))base.futureSalary=Number(c.futureSalary);
     const seed=profileSeed();
     if(seed.length){
       const deleted=new Set((c.deleted||[]).map(String));
@@ -9695,16 +9692,53 @@ Os dados atuais deste navegador serão substituídos.`);
     };
   }
 
+  function monthsUntilDateV68(d){
+    if(!d)return 0;
+    const now=new Date();
+    return Math.max(0,(d.getFullYear()-now.getFullYear())*12+(d.getMonth()-now.getMonth()));
+  }
+  function retirementCoefV68(sex,totalMonths){
+    const baseYears=sex==='F'?15:20;
+    const fullYears=Math.floor(Math.max(0,totalMonths)/12);
+    return .60+Math.max(0,fullYears-baseYears)*.02;
+  }
+  function retirementEstimateV68(s,r,key,date){
+    const last=latestContributionV66(s),rows=validRows(s);
+    if(!date||!last||!rows.length)return {available:false,value:0,avg:0,coef:0,futureMonths:0,base:0,label:'Sem base suficiente'};
+    const futureMonths=monthsUntilDateV68(date);
+    const base=Math.max(MIN_2026,Math.min(CEILING_2026,num(last.value)));
+    const historicalSum=rows.reduce((z,row)=>z+num(row.value)*factor(row),0);
+    const projectedAvg=(historicalSum+(base*futureMonths))/Math.max(1,rows.length+futureMonths);
+    const totalMonths=r.cm+futureMonths;
+    if(key==='ped50'){
+      return {available:false,factorDependent:true,value:0,avg:projectedAvg,coef:null,futureMonths,base,totalMonths,
+        label:`Média projetada ${money(projectedAvg)} × fator previdenciário vigente`};
+    }
+    const coef=key==='ped100'?1:retirementCoefV68(r.sex,totalMonths);
+    const raw=projectedAvg*coef;
+    const value=Math.max(MIN_2026,Math.min(CEILING_2026,raw));
+    const coefPct=(coef*100).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+    return {available:true,value,avg:projectedAvg,coef,futureMonths,base,totalMonths,
+      label:key==='ped100'?'100% da média projetada':`${coefPct}% da média projetada`};
+  }
+
   function retirementRulesHtml(s,r){
     if(!s.profileData.dob)return `<div class="rgps-rule-empty-v67">Informe a data de nascimento no Perfil previdenciário para calcular as regras.</div>`;
     const sex=r.sex,year=new Date().getFullYear(),bestKey=r.bestKey;
     const bestTag=key=>bestKey===key?'<span class="rgps-besttag-v67">mais cedo</span>':'';
     const eta=(key,date)=>date?`<div class="rgps-rule-eta-v67"><span>Previsão</span><b>${fmtDate(date)}</b><small>${ruleEtaLabel(date)}</small></div>`:`<div class="rgps-rule-eta-v67 muted"><span>Previsão</span><b>—</b><small>sem data calculável</small></div>`;
+    const benefit=(key,date)=>{
+      const e=retirementEstimateV68(s,r,key,date);
+      if(e.factorDependent)return `<div class="rgps-rule-benefit-v68 factor"><span>Benefício estimado</span><b>${money(e.avg)}</b><small>média projetada; valor final = média × fator previdenciário vigente na concessão</small></div>`;
+      if(!e.available)return `<div class="rgps-rule-benefit-v68 muted"><span>Benefício estimado</span><b>—</b><small>sem base suficiente</small></div>`;
+      return `<div class="rgps-rule-benefit-v68"><span>Benefício estimado</span><b>${money(e.value)}</b><small>${e.label} · valores de hoje</small></div>`;
+    };
+    const side=(key,date)=>`<div class="rgps-rule-side-v68">${benefit(key,date)}${eta(key,date)}</div>`;
     const band=(key,tone,icon,kicker,title,desc,stats,progress,date,extra='')=>`
       <div class="rgps-ruleband-v67 ${tone} ${bestKey===key?'best':''}">
         <div class="rgps-rule-id-v67"><span class="rgps-rule-icon-v67">${icon}</span><div><span class="rgps-rule-kicker-v67">${kicker}</span><b>${title}${bestTag(key)}</b><small>${desc}</small></div></div>
         <div class="rgps-rule-progress-v67"><div class="rgps-rule-stats-v67">${stats}</div><div class="rgps-rule-track-v67"><i style="width:${Math.max(0,Math.min(100,progress)).toFixed(1)}%"></i></div>${extra}</div>
-        ${eta(key,date)}
+        ${side(key,date)}
       </div>`;
 
     if(!r.affiliated){
@@ -9722,7 +9756,7 @@ Os dados atuais deste navegador serão substituídos.`);
     const ped50Progress=r.ped50Eligible?pct(r.cm,r.ped50Target):0;
     const threshold=sex==='F'?28:33;
     const p50extra=r.ped50Eligible
-      ? `<small class="rgps-rule-foot-v67">Na reforma faltavam <b>${contribLabel(Math.round(r.missing2019))}</b>; o pedágio estimado é de <b>${contribLabel(Math.round(r.missing2019*.5))}</b>. Sem idade mínima; no cálculo do benefício, aplica-se o fator previdenciário.</small>`
+      ? `<small class="rgps-rule-foot-v67">Na reforma faltavam <b>${contribLabel(Math.round(r.missing2019))}</b>; o pedágio estimado é de <b>${contribLabel(Math.round(r.missing2019*.5))}</b>. Sem idade mínima; o benefício corresponde à média legal multiplicada pelo fator previdenciário.</small>`
       : `<small class="rgps-rule-foot-v67 danger">Não se aplica: em 13/11/2019 o histórico computa <b>${contribLabel(r.pre)}</b>; a regra exige mais de <b>${threshold} anos</b> nessa data.</small>`;
 
     return [
@@ -9735,33 +9769,30 @@ Os dados atuais deste navegador serão substituídos.`);
       `<div class="rgps-ruleband-v67 amber ${r.ped50Eligible?'':'ineligible'} ${bestKey==='ped50'?'best':''}">
         <div class="rgps-rule-id-v67"><span class="rgps-rule-icon-v67">½</span><div><span class="rgps-rule-kicker-v67">Art. 17 · EC 103/2019</span><b>Pedágio de 50%${bestTag('ped50')}</b><small>${r.minYears} anos de contribuição + 50% do tempo que faltava em 13/11/2019. Só alcança quem já tinha mais de ${threshold} anos de contribuição na reforma.</small></div></div>
         <div class="rgps-rule-progress-v67"><div class="rgps-rule-stats-v67"><span>Na reforma <b>${contribLabel(r.pre)}</b></span><span>${r.ped50Eligible?'Alvo contributivo':'Corte de entrada'} <b>${r.ped50Eligible?contribLabel(Math.ceil(r.ped50Target)):`>${threshold}a`}</b></span></div><div class="rgps-rule-track-v67"><i style="width:${ped50Progress.toFixed(1)}%"></i></div>${p50extra}</div>
-        ${r.ped50Eligible?eta('ped50',r.ped50):`<div class="rgps-rule-eta-v67 blocked"><span>Status</span><b>Não aplicável</b><small>regra fechada pelo requisito de 13/11/2019</small></div>`}
+        ${r.ped50Eligible?side('ped50',r.ped50):`<div class="rgps-rule-side-v68 blocked"><div class="rgps-rule-benefit-v68 muted"><span>Benefício estimado</span><b>—</b><small>regra não aplicável ao histórico atual</small></div><div class="rgps-rule-eta-v67 blocked"><span>Status</span><b>Não aplicável</b><small>regra fechada pelo requisito de 13/11/2019</small></div></div>`}
       </div>`,
       band('age','green','◷','Art. 18 · EC 103/2019','Transição por idade',`${sex==='F'?62:65} anos de idade + 15 anos de contribuição, com carência de 180 contribuições.`,
         `<span>Idade <b>${ageLabel(s.profileData.dob)} / ${r.transitionAge}a</b></span><span>Contribuição <b>${contribLabel(r.cm)} / 15a</b></span>`,ageTransitionProg,r.age,
         `<small class="rgps-rule-foot-v67">Para homens a idade é 65 anos; para mulheres, a progressão chegou a 62 anos em 2023.</small>`),
       band('ped100','rose','100%','Art. 20 · EC 103/2019','Pedágio de 100%',`${r.pedAge} anos de idade + ${r.minYears} anos de contribuição + 100% do tempo que faltava na reforma.`,
         `<span>Faltava em 13/11/2019 <b>${contribLabel(r.missing2019)}</b></span><span>Alvo contributivo <b>${contribLabel(r.ped100Target)}</b></span>`,ped100Prog,r.ped100,
-        `<small class="rgps-rule-foot-v67">Nesta regra, cumpridos os requisitos, o benefício corresponde a 100% da média legal dos salários de contribuição.</small>`)
+        `<small class="rgps-rule-foot-v67">Cumpridos os requisitos, o benefício corresponde a 100% da média legal dos salários de contribuição.</small>`)
     ].join('');
   }
 
   function benefits(s,r){
     const avg=averageUpdated(s),last=last12Avg(s),months=uniqueMonths(s);
     const temp=Math.max(MIN_2026,Math.min(CEILING_2026,avg*.91,last||Infinity));
-    const baseYears=(s.profileData.sex||'M')==='F'?15:20;
-    const coef=Math.min(1,.60+Math.max(0,months/12-baseYears)*.02);
+    const coef=retirementCoefV68(s.profileData.sex||'M',months);
     const perm=Math.max(MIN_2026,Math.min(CEILING_2026,avg*coef));
-    let projected=0;
+    let projected=0,projectedLabel='Sem previsão';
     if(r.best){
-      const now=new Date(),d=r.best[2];
-      const future=Math.max(0,(d.getFullYear()-now.getFullYear())*12+d.getMonth()-now.getMonth());
-      const pm=months+future;
-      const pa=(avg*months+num(s.futureSalary)*future)/Math.max(1,pm);
-      const pc=r.bestKey==='ped100'?1:Math.min(1,.60+Math.max(0,pm/12-baseYears)*.02);
-      projected=Math.max(MIN_2026,Math.min(CEILING_2026,pa*pc));
+      const e=retirementEstimateV68(s,r,r.bestKey,r.best[2]);
+      if(e.available){projected=e.value;projectedLabel=e.label}
+      else if(e.factorDependent){projected=e.avg;projectedLabel='Média projetada antes do fator previdenciário'}
     }
-    return {avg,temp,perm,projected,coef};
+    const autoBase=latestContributionV66(s);
+    return {avg,temp,perm,projected,coef,projectedLabel,autoBase:autoBase?Math.min(CEILING_2026,num(autoBase.value)):0,autoBaseRow:autoBase};
   }
 
   function years(s){
@@ -9872,20 +9903,20 @@ Os dados atuais deste navegador serão substituídos.`);
                 <span>${new Date().getFullYear()} · ${pointReq(new Date().getFullYear(),r.sex)} pontos</span>
                 <span>idade progressiva · ${ageReqLabel(progAgeReq(new Date().getFullYear(),r.sex))}</span>
                 <span class="ok">${r.affiliated?'filiado antes da reforma':'filiação pós-reforma'}</span>
+                <span class="auto-v68">base futura auto · ${b.autoBase?money(b.autoBase):'sem contribuição'}</span>
               </div>
             </div>
             <div class="rgps-rulebands-v67">${retirementRulesHtml(s,r)}</div>
-            <div class="rgps-rules-legal-v67"><b>Como ler:</b> a barra compara os requisitos já cumpridos hoje; a data à direita projeta contribuição mensal contínua daqui em diante e já considera o aumento futuro das regras progressivas. O cálculo é estimativo por competências do CNIS — o INSS pode apurar períodos em dias, vínculos pendentes e tempo especial de forma diferente. <span>Não entram aqui regras específicas de professor, atividade especial, pessoa com deficiência ou trabalhador rural.</span><div class="rgps-rules-links-v67"><a href="https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc103.htm" target="_blank" rel="noopener noreferrer">EC 103/2019 · arts. 15 a 20</a><a href="https://www.gov.br/inss/pt-br/direitos-e-deveres/aposentadorias/regras-de-aposentadorias" target="_blank" rel="noopener noreferrer">INSS · Regras de aposentadorias</a></div></div>
+            <div class="rgps-rules-legal-v67"><b>Como ler:</b> a barra compara os requisitos já cumpridos hoje; cada faixa mostra a data projetada e o benefício mensal estimado em valores de hoje. As contribuições futuras usam automaticamente o último salário de contribuição válido do Hub (${b.autoBaseRow?`${String(b.autoBaseRow.month).padStart(2,'0')}/${b.autoBaseRow.year} · ${money(b.autoBase)}`:'sem base cadastrada'}). A média considera as competências válidas corrigidas pelo INPC; pontos, idade progressiva e transição por idade usam o coeficiente legal de 60% + 2 p.p. por ano completo excedente, e o pedágio de 100% usa 100% da média. O cálculo é estimativo por competências do CNIS — o INSS pode apurar períodos em dias, descartes legais, vínculos pendentes e tempo especial de forma diferente. <span>Não entram aqui regras específicas de professor, atividade especial, pessoa com deficiência ou trabalhador rural.</span><div class="rgps-rules-links-v67"><a href="https://www.planalto.gov.br/ccivil_03/constituicao/emendas/emc/emc103.htm" target="_blank" rel="noopener noreferrer">EC 103/2019 · arts. 15 a 20</a><a href="https://www.gov.br/inss/pt-br/direitos-e-deveres/aposentadorias/regras-de-aposentadorias" target="_blank" rel="noopener noreferrer">INSS · Regras de aposentadorias</a></div></div>
           </article>
           <article class="rgps-card-v51 rgps-benefits-card-v67">
-            <div class="rgps-card-head-v51"><div><h3>Estimativa de benefícios</h3><p>Valores atualizados automaticamente pelo INPC mensal; na falta de conexão, usa a base embutida.</p></div></div>
+            <div class="rgps-card-head-v51"><div><h3>Estimativa de benefícios</h3><p>Valores atualizados automaticamente pelo INPC mensal. Para projeções futuras, o Hub usa sozinho a última contribuição válida: <b>${b.autoBaseRow?money(b.autoBase):'—'}</b>${b.autoBaseRow?` (${String(b.autoBaseRow.month).padStart(2,'0')}/${b.autoBaseRow.year})`:''}.</p></div><span class="rgps-pill-v51">base automática</span></div>
             <div class="rgps-benefits-v51">
-              <div class="rgps-benefit-v51"><span>Salário de benefício</span><b>${money(b.avg)}</b><small>Média das competências válidas corrigidas.</small></div>
+              <div class="rgps-benefit-v51"><span>Salário de benefício atual</span><b>${money(b.avg)}</b><small>Média das competências válidas corrigidas.</small></div>
               <div class="rgps-benefit-v51"><span>Incapacidade temporária</span><b>${money(b.temp)}</b><small>Estimativa de 91%, respeitado o limite da média recente.</small></div>
               <div class="rgps-benefit-v51"><span>Incapacidade permanente comum</span><b>${money(b.perm)}</b><small>Coeficiente estimado atual: ${(b.coef*100).toFixed(0)}%.</small></div>
-              <div class="rgps-benefit-v51"><span>Aposentadoria projetada</span><b>${money(b.projected)}</b><small>Simulação na melhor regra encontrada.</small></div>
+              <div class="rgps-benefit-v51"><span>Aposentadoria na regra mais cedo</span><b>${b.projected?money(b.projected):'—'}</b><small>${esc(b.projectedLabel)}.</small></div>
             </div>
-            <div class="rgps-sim-v51"><label>Salário de contribuição futuro</label><div class="rgps-sim-row-v51"><input id="rgpsFutureV54" inputmode="decimal" value="${Number(s.futureSalary||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}"><div class="rgps-sim-out-v51"><span>Base futura em valores de hoje</span><b>${money(s.futureSalary)}</b></div></div></div>
           </article>
         </div>
 
@@ -9931,7 +9962,6 @@ Os dados atuais deste navegador serão substituídos.`);
       document.getElementById('rgpsDobV54').onchange=e=>{s.profileData.dob=e.target.value;save(s);render()};
       document.getElementById('rgpsSexV54').onchange=e=>{s.profileData.sex=e.target.value;save(s);render()};
       document.getElementById('rgpsBeforeV54').onchange=e=>{s.profileData.affiliatedBeforeReform=e.target.value==='1';save(s);render()};
-      document.getElementById('rgpsFutureV54').onchange=e=>{s.futureSalary=num(e.target.value);save(s);render()};
       const gpsBtn66=document.getElementById('rgpsGpsV66');
       if(gpsBtn66)gpsBtn66.onclick=()=>openGpsV66(gap66);
       document.getElementById('rgpsYearFilterV54').onchange=e=>{filterYear=e.target.value;renderRows(s)};
@@ -28351,7 +28381,7 @@ th{font-size:9.5px!important;letter-spacing:.02em!important}.tablewrap button,td
 </style>
 
 <style id="pp-v67-previdencia-regras-style">
-/* V67 — Previdência: regras de aposentadoria em faixas horizontais */
+/* V68 — Previdência: regras em faixas + benefício por regra + base futura automática */
 #previdencia .rgps-grid-rules-v67{grid-template-columns:1fr!important}
 #previdencia .rgps-rules-card-v67,#previdencia .rgps-benefits-card-v67{grid-column:1/-1!important}
 #previdencia .rgps-rules-card-v67{padding:18px!important;overflow:hidden;background:linear-gradient(180deg,#ffffff 0%,#fbfcff 100%)!important}
@@ -28401,13 +28431,28 @@ th{font-size:9.5px!important;letter-spacing:.02em!important}.tablewrap button,td
 #previdencia .rgps-rules-links-v67{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
 #previdencia .rgps-rules-links-v67 a{display:inline-flex;padding:5px 7px;border-radius:8px;background:#fff;border:1px solid #dfe7f1;color:#075985;text-decoration:none;font-size:8px;font-weight:900}
 #previdencia .rgps-rule-empty-v67{padding:22px;border:1px dashed #d7dee8;border-radius:14px;background:#f8fafc;color:#667085;font-size:10px;text-align:center}
+#previdencia .rgps-lawchips-v67 span.auto-v68{background:#fff7e7;border-color:#f3dca8;color:#8a5b00}
+#previdencia .rgps-ruleband-v67{grid-template-columns:minmax(210px,.9fr) minmax(315px,1.55fr) minmax(235px,.82fr)}
+#previdencia .rgps-rule-side-v68{min-width:0;display:grid;grid-template-columns:minmax(108px,1fr) minmax(102px,.9fr);gap:10px;align-items:stretch;padding-left:12px;border-left:1px solid #e8edf3}
+#previdencia .rgps-rule-benefit-v68{min-width:0;padding:8px 9px;border-radius:11px;background:color-mix(in srgb,var(--tone) 7%,#fff);border:1px solid color-mix(in srgb,var(--tone) 18%,#e8edf3)}
+#previdencia .rgps-rule-benefit-v68 span{display:block;font-size:7.3px;text-transform:uppercase;letter-spacing:.075em;font-weight:950;color:var(--tone)}
+#previdencia .rgps-rule-benefit-v68 b{display:block;margin-top:3px;font-size:15px;line-height:1.1;color:#172033;letter-spacing:-.03em;white-space:nowrap}
+#previdencia .rgps-rule-benefit-v68 small{display:block;margin-top:4px;font-size:7.7px;line-height:1.3;color:#667085}
+#previdencia .rgps-rule-benefit-v68.factor b{font-size:12px}
+#previdencia .rgps-rule-benefit-v68.muted span,#previdencia .rgps-rule-benefit-v68.muted b{color:#98a2b3}
+#previdencia .rgps-rule-side-v68 .rgps-rule-eta-v67{padding-left:0;border-left:0;text-align:right;align-self:center}
+#previdencia .rgps-rule-side-v68.blocked{grid-template-columns:1fr 1fr}
+#previdencia .rgps-benefits-card-v67 .rgps-card-head-v51 p b{color:#344054}
 @media(max-width:1040px){
   #previdencia .rgps-rules-title-v67{display:block}
   #previdencia .rgps-lawchips-v67{justify-content:flex-start;max-width:none;margin-top:9px}
-  #previdencia .rgps-ruleband-v67{grid-template-columns:minmax(190px,.9fr) minmax(260px,1.45fr) minmax(120px,.55fr);gap:10px}
+  #previdencia .rgps-ruleband-v67{grid-template-columns:minmax(190px,.85fr) minmax(250px,1.25fr) minmax(220px,.85fr);gap:10px}
 }
 @media(max-width:760px){
   #previdencia .rgps-ruleband-v67{grid-template-columns:1fr!important;padding:13px!important;background:linear-gradient(180deg,var(--tone-soft),#fff 45%)!important}
+  #previdencia .rgps-rule-side-v68{grid-template-columns:1fr 1fr;padding:9px 0 0;border-left:0;border-top:1px solid #e8edf3}
+  #previdencia .rgps-rule-side-v68 .rgps-rule-eta-v67{text-align:right;padding:4px 0 0;border:0}
+  #previdencia .rgps-rule-benefit-v68{padding:8px}
   #previdencia .rgps-rule-eta-v67{text-align:left;padding:9px 0 0;border-left:0;border-top:1px solid #e8edf3}
   #previdencia .rgps-rule-stats-v67 span{flex:1 1 150px;justify-content:space-between}
   #previdencia .rgps-lawchips-v67 span{white-space:normal}
