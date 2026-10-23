@@ -1492,9 +1492,82 @@ img,svg,canvas{max-width:100%}
 @media(max-width:980px){#previdencia .rgps-ceiling-grid-v66{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){#previdencia .rgps-ceiling-grid-v66{grid-template-columns:1fr}#previdencia .rgps-gps-actions-v66{grid-template-columns:1fr}#previdencia #rgpsGpsV66{width:100%}}
 </style>
+
+<style id="pp-v70-private-pension-style">
+.nav button[data-view="previdenciaPrivada"]:before{content:"◉"!important}
+#previdenciaPrivada{--ppv-navy:#112f5b;--ppv-blue:#1167e8;--ppv-sky:#eaf4ff;--ppv-green:#168a62;--ppv-mint:#e8f8f1;--ppv-violet:#7057d9;--ppv-lilac:#f1edff;--ppv-orange:#ed7a2b;--ppv-amber:#fff4df;--ppv-red:#c14949;--ppv-ink:#162033;--ppv-muted:#708096;--ppv-line:#dfe7f0;--ppv-bg:#f4f7fb}
+#previdenciaPrivada .ppv-wrap{display:grid;gap:14px;padding-bottom:18px}
+#previdenciaPrivada .ppv-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;padding:4px 2px 0}
+#previdenciaPrivada .ppv-kicker,#previdenciaPrivada .ppv-eyebrow{font-size:9px;line-height:1;text-transform:uppercase;letter-spacing:.12em;font-weight:900;color:#4f78aa}
+#previdenciaPrivada .ppv-head h2{font-size:29px;letter-spacing:-.035em;margin:5px 0 4px;color:var(--ppv-ink)}
+#previdenciaPrivada .ppv-head p{margin:0;max-width:720px;color:var(--ppv-muted);font-size:11px;line-height:1.55}
+#previdenciaPrivada .ppv-head-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+#previdenciaPrivada button{font-family:inherit}
+#previdenciaPrivada .ppv-primary,#previdenciaPrivada .ppv-soft{min-height:39px;border-radius:12px;padding:0 14px;font-size:10.5px;font-weight:850;cursor:pointer;transition:.18s ease}
+#previdenciaPrivada .ppv-primary{border:0;background:linear-gradient(135deg,#0d63e7,#1684ef);color:#fff;box-shadow:0 8px 20px rgba(17,103,232,.18)}
+#previdenciaPrivada .ppv-primary:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(17,103,232,.24)}
+#previdenciaPrivada .ppv-soft{border:1px solid #dbe5ef;background:#fff;color:#27415f}
+#previdenciaPrivada .ppv-soft:hover{background:#f7faff;border-color:#bed0e3}
+#previdenciaPrivada .ppv-marketbar{position:relative;display:grid;grid-template-columns:180px minmax(0,1fr) auto;gap:12px;align-items:center;padding:13px 14px;border-radius:20px;background:linear-gradient(135deg,#102e59 0%,#0d4f96 58%,#1167e8 100%);box-shadow:0 16px 35px rgba(12,52,98,.14);color:#fff;overflow:hidden}
+#previdenciaPrivada .ppv-marketbar:after{content:"";position:absolute;width:190px;height:190px;border-radius:50%;right:-70px;top:-110px;background:rgba(255,255,255,.08);pointer-events:none}
+#previdenciaPrivada .ppv-market-title{position:relative;z-index:1}.ppv-market-title span{display:block;font-size:11px;font-weight:900}.ppv-market-title small{display:block;margin-top:4px;color:rgba(255,255,255,.66);font-size:8.5px;line-height:1.35}
+#previdenciaPrivada .ppv-market-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;position:relative;z-index:1}
+#previdenciaPrivada .ppv-market-card{min-width:0;padding:9px 10px;border-radius:13px;background:rgba(255,255,255,.105);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(5px)}
+#previdenciaPrivada .ppv-market-card span{display:block;font-size:8px;font-weight:800;color:rgba(255,255,255,.70);text-transform:uppercase;letter-spacing:.055em}
+#previdenciaPrivada .ppv-market-card b{display:block;margin-top:2px;font-size:17px;letter-spacing:-.025em;color:#fff}
+#previdenciaPrivada .ppv-market-card small{display:block;margin-top:1px;font-size:7.8px;color:rgba(255,255,255,.62);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#previdenciaPrivada .ppv-refresh{position:relative;z-index:2;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;border-radius:11px;height:35px;padding:0 11px;font-size:9px;font-weight:850;cursor:pointer;white-space:nowrap}
+#previdenciaPrivada .ppv-refresh:hover{background:rgba(255,255,255,.20)}
+#previdenciaPrivada .ppv-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+#previdenciaPrivada .ppv-summary-card{background:#fff;border:1px solid var(--ppv-line);border-radius:17px;padding:13px;min-width:0;box-shadow:0 8px 24px rgba(28,55,88,.055)}
+#previdenciaPrivada .ppv-summary-card span{display:block;color:#75849a;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.045em}
+#previdenciaPrivada .ppv-summary-card b{display:block;margin-top:5px;color:#172033;font-size:18px;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#previdenciaPrivada .ppv-summary-card small{display:block;margin-top:4px;color:#8b98a9;font-size:8px;line-height:1.35}
+#previdenciaPrivada .ppv-summary-card.green{background:linear-gradient(145deg,#f6fffb,#eaf8f1);border-color:#ceeadd}#previdenciaPrivada .ppv-summary-card.green b{color:#137957}
+#previdenciaPrivada .ppv-summary-card.blue{background:linear-gradient(145deg,#f7fbff,#eaf4ff);border-color:#cfdef1}#previdenciaPrivada .ppv-summary-card.blue b{color:#0b5cc7}
+#previdenciaPrivada .ppv-summary-card.violet{background:linear-gradient(145deg,#fbfaff,#f0edff);border-color:#ddd7f7}#previdenciaPrivada .ppv-summary-card.violet b{color:#6249c3}
+#previdenciaPrivada .ppv-main-grid{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(340px,.88fr);gap:12px}
+#previdenciaPrivada .ppv-card{background:#fff;border:1px solid var(--ppv-line);border-radius:21px;padding:16px;box-shadow:0 10px 28px rgba(28,55,88,.055);min-width:0}
+#previdenciaPrivada .ppv-card-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px}
+#previdenciaPrivada .ppv-card-head h3{margin:4px 0 0;color:var(--ppv-ink);font-size:17px;letter-spacing:-.025em}
+#previdenciaPrivada .ppv-card-head p{margin:4px 0 0;color:#8290a2;font-size:9px}
+#previdenciaPrivada .ppv-plan-chip{padding:7px 9px;border-radius:11px;background:#eef5ff;color:#175fae;font-size:8.5px;font-weight:850;white-space:nowrap}
+#previdenciaPrivada .ppv-mini-note{font-size:8px;color:#8794a5;text-align:right;max-width:150px}
+#previdenciaPrivada .ppv-proj-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+#previdenciaPrivada label>span{display:block;margin-bottom:5px;color:#66778d;font-size:8.2px;font-weight:800}
+#previdenciaPrivada input,#previdenciaPrivada select{width:100%;height:38px;border:1px solid #dce5ee;border-radius:11px;background:#fbfcfe;color:#223148;padding:0 10px;font:700 10px inherit;outline:none}
+#previdenciaPrivada input:focus,#previdenciaPrivada select:focus{border-color:#7fb3f3;box-shadow:0 0 0 3px rgba(17,103,232,.08);background:#fff}
+#previdenciaPrivada .ppv-money-input,#previdenciaPrivada .ppv-percent-input{position:relative}.ppv-money-input i,.ppv-percent-input i{position:absolute;top:50%;transform:translateY(-50%);font-style:normal;color:#8190a3;font-size:8px;font-weight:850;pointer-events:none}.ppv-money-input i{left:10px}.ppv-money-input input{padding-left:28px}.ppv-percent-input i{right:9px}.ppv-percent-input input{padding-right:42px}
+#previdenciaPrivada .ppv-proj-result{display:grid;grid-template-columns:1.1fr .9fr;gap:10px;margin-top:13px}
+#previdenciaPrivada .ppv-big-result,#previdenciaPrivada .ppv-real-result{padding:15px;border-radius:17px}.ppv-big-result{background:linear-gradient(140deg,#0d4f96,#1167e8);color:#fff}.ppv-real-result{background:linear-gradient(140deg,#edf9f4,#dcf4e9);color:#155f48;border:1px solid #c8eadc}
+#previdenciaPrivada .ppv-big-result span,#previdenciaPrivada .ppv-real-result span{display:block;font-size:8.5px;font-weight:850;text-transform:uppercase;letter-spacing:.045em;opacity:.76}
+#previdenciaPrivada .ppv-big-result b,#previdenciaPrivada .ppv-real-result b{display:block;margin:4px 0 2px;font-size:25px;letter-spacing:-.035em}
+#previdenciaPrivada .ppv-big-result small,#previdenciaPrivada .ppv-real-result small{font-size:8px;opacity:.73;line-height:1.35}
+#previdenciaPrivada .ppv-growth-track{height:7px;background:#eaf0f6;border-radius:999px;overflow:hidden;margin-top:11px}.ppv-growth-track i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#1167e8,#24bb85);transition:.35s ease}
+#previdenciaPrivada .ppv-proj-foot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.ppv-proj-foot>div{border-radius:12px;background:#f6f8fb;padding:9px}.ppv-proj-foot span{display:block;font-size:7.5px;color:#7d8a9b;text-transform:uppercase;font-weight:850}.ppv-proj-foot b{display:block;margin-top:3px;color:#24364e;font-size:11px}
+#previdenciaPrivada .ppv-compare-list{display:grid;gap:7px}
+#previdenciaPrivada .ppv-compare-row{position:relative;display:grid;grid-template-columns:minmax(116px,.8fr) minmax(0,1.25fr) auto;gap:9px;align-items:center;padding:10px;border:1px solid #e3e9f0;border-radius:14px;background:#fbfcfe;overflow:hidden}
+#previdenciaPrivada .ppv-compare-row.best{background:linear-gradient(135deg,#f2fbf7,#e7f8f0);border-color:#cce8db}.ppv-compare-row.best:after{content:"maior valor real";position:absolute;right:8px;top:6px;font-size:6.8px;text-transform:uppercase;letter-spacing:.05em;color:#168a62;font-weight:900}
+#previdenciaPrivada .ppv-compare-name span{display:block;font-size:8px;color:#7c899a}.ppv-compare-name b{display:block;font-size:10.5px;color:#24364e;margin-top:2px}
+#previdenciaPrivada .ppv-compare-bar{height:6px;background:#e7edf4;border-radius:99px;overflow:hidden}.ppv-compare-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#5a8ee2,#1167e8)}.ppv-compare-row.best .ppv-compare-bar i{background:linear-gradient(90deg,#4fc796,#168a62)}
+#previdenciaPrivada .ppv-compare-val{text-align:right;padding-top:7px}.ppv-compare-val b{display:block;font-size:12px;color:#172033;white-space:nowrap}.ppv-compare-val small{display:block;font-size:7.4px;color:#8290a2;margin-top:1px;white-space:nowrap}
+#previdenciaPrivada .ppv-compare-note{margin-top:9px;padding:8px 9px;border-radius:11px;background:#fff9ed;color:#8a682e;font-size:7.8px;line-height:1.4;border:1px solid #f2dfb8}
+#previdenciaPrivada .ppv-insight-grid{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:12px}
+#previdenciaPrivada .ppv-inter-ref{background:radial-gradient(circle at 96% 0%,rgba(237,122,43,.12),transparent 32%),#fff}.ppv-inter-ref .ppv-card-head a{font-size:8.5px;font-weight:850;color:#1266d6;text-decoration:none}.ppv-inter-ref>p{font-size:9px;line-height:1.55;color:#69788d;margin:-3px 0 12px}
+#previdenciaPrivada .ppv-risk-presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.ppv-risk-presets button{border:1px solid #e2e7ee;border-radius:13px;background:#fbfcfe;padding:10px;text-align:left;cursor:pointer;transition:.18s}.ppv-risk-presets button:hover{transform:translateY(-1px);border-color:#bed5ef;background:#f5faff}.ppv-risk-presets span{display:block;font-size:7.5px;color:#7c8999;font-weight:850;text-transform:uppercase}.ppv-risk-presets b{display:block;margin-top:3px;font-size:12px;color:#26394f}.ppv-risk-presets small{display:block;margin-top:2px;font-size:7px;color:#8b97a7}
+#previdenciaPrivada .ppv-inter-note{margin-top:9px;padding:9px 10px;border-radius:12px;background:#f7f8fc;border:1px solid #e6e9f0;color:#68768a;font-size:7.9px;line-height:1.45}
+#previdenciaPrivada .ppv-chart{height:185px;display:grid;place-items:center;position:relative;border-radius:14px;background:linear-gradient(180deg,#fbfdff,#f6f9fc);border:1px solid #edf1f5;overflow:hidden}.ppv-chart-empty{font-size:9px;color:#8a98a9;text-align:center;padding:20px}.ppv-chart svg{width:100%;height:100%;display:block}.ppv-chart-grid{stroke:#e8edf3;stroke-width:1}.ppv-chart-area{fill:url(#ppvGrad)}.ppv-chart-line{fill:none;stroke:#1167e8;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.ppv-chart-dot{fill:#fff;stroke:#1167e8;stroke-width:2}.ppv-chart text{font:700 7px Roboto,Arial,sans-serif;fill:#8593a4}
+#previdenciaPrivada .ppv-ledger{padding-bottom:10px}.ppv-table-wrap{overflow:auto;border:1px solid #e7ecf2;border-radius:14px}.ppv-table{width:100%;border-collapse:collapse;min-width:820px}.ppv-table th{background:#f6f8fb;color:#758296;font-size:7.5px;text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:9px 10px}.ppv-table td{border-top:1px solid #edf1f5;padding:9px 10px;font-size:9px;color:#33445a;vertical-align:middle}.ppv-table td b{color:#1c2d43}.ppv-table .pos{color:#14835e;font-weight:850}.ppv-table .neg{color:#c45454;font-weight:850}.ppv-table .ppv-row-actions{display:flex;gap:4px;justify-content:flex-end}.ppv-table .ppv-row-actions button{width:27px;height:27px;border-radius:9px;border:1px solid #dfe6ee;background:#fff;cursor:pointer;color:#5f7087;font-size:10px}.ppv-table .ppv-row-actions button:hover{background:#f4f8fc}.ppv-empty-row{text-align:center!important;padding:22px!important;color:#8b98a8!important}
+#previdenciaPrivada .ppv-modalback{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(9,20,38,.62);backdrop-filter:blur(10px);z-index:3500}.ppv-modalback.open{display:flex}.ppv-modal{position:relative;width:min(760px,calc(100vw - 26px));max-height:92dvh;overflow:auto;border-radius:24px;background:#fff;border:1px solid #dce5ee;padding:20px;box-shadow:0 35px 90px rgba(6,18,37,.32)}.ppv-modal h3{font-size:21px;letter-spacing:-.03em;color:#172033;margin:5px 0 15px}.ppv-x{position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:11px;border:1px solid #dfe6ed;background:#f7f9fc;color:#54667d;font-size:20px;cursor:pointer}.ppv-formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.ppv-formgrid .wide{grid-column:1/-1}.ppv-modal-hint{margin-top:11px;padding:10px 11px;border-radius:12px;background:#f6f9fd;border:1px solid #e1e8f0;color:#69798e;font-size:8.2px;line-height:1.5}.ppv-modal-foot{display:flex;justify-content:flex-end;gap:7px;margin-top:13px}
+#veiculos>.vehicle-grid-v101{margin-top:0!important}
+@media(max-width:1180px){#previdenciaPrivada .ppv-summary{grid-template-columns:repeat(3,1fr)}#previdenciaPrivada .ppv-marketbar{grid-template-columns:1fr auto}.ppv-market-title{grid-column:1/-1}#previdenciaPrivada .ppv-main-grid,#previdenciaPrivada .ppv-insight-grid{grid-template-columns:1fr}}
+@media(max-width:860px){#previdenciaPrivada .ppv-market-grid{grid-template-columns:repeat(2,1fr)}#previdenciaPrivada .ppv-proj-controls{grid-template-columns:repeat(2,1fr)}#previdenciaPrivada .ppv-summary{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){#previdenciaPrivada .ppv-head{align-items:flex-start;flex-direction:column}.ppv-head-actions{width:100%}.ppv-head-actions button{flex:1}#previdenciaPrivada .ppv-marketbar{grid-template-columns:1fr}.ppv-refresh{width:100%}#previdenciaPrivada .ppv-summary{grid-template-columns:1fr}#previdenciaPrivada .ppv-proj-controls,#previdenciaPrivada .ppv-proj-result,#previdenciaPrivada .ppv-proj-foot,#previdenciaPrivada .ppv-risk-presets,#previdenciaPrivada .ppv-formgrid{grid-template-columns:1fr}#previdenciaPrivada .ppv-formgrid .wide{grid-column:auto}#previdenciaPrivada .ppv-compare-row{grid-template-columns:1fr auto}.ppv-compare-bar{grid-column:1/-1;grid-row:2}.ppv-compare-val{grid-column:2;grid-row:1}#previdenciaPrivada .ppv-market-grid{grid-template-columns:1fr 1fr}}
+</style>
+
 </head>
-<body data-hub-area="financas"><aside id="ppBankRailV62" aria-label="Navegação principal"><button type="button" class="v62-logo" data-v62-hub data-tip="Hub Pessoal" aria-label="Abrir Hub Pessoal"></button><nav class="v62-nav" aria-label="Navegação"><button type="button" class="v62-btn" data-v62-view="dashboard" data-tip="Visão geral" aria-label="Visão geral">⌂</button><button type="button" class="v62-btn" data-v62-view="lancamentos" data-tip="Lançamentos" aria-label="Lançamentos">↕</button><button type="button" class="v62-btn" data-v62-view="cartoes" data-tip="Cartões" aria-label="Cartões">▣</button><button type="button" class="v62-btn" data-v62-view="dividas" data-tip="Dívidas" aria-label="Dívidas">◴</button><button type="button" class="v62-btn" data-v62-view="fgts" data-tip="FGTS" aria-label="FGTS">◇</button><button type="button" class="v62-btn" data-v62-view="previdencia" data-tip="Previdência" aria-label="Previdência">◎</button><button type="button" class="v62-btn" data-v62-view="investimentos" data-tip="Investimentos" aria-label="Investimentos">↗</button><button type="button" class="v62-btn" data-v62-view="patrimonio" data-tip="Patrimônio" aria-label="Patrimônio">⬡</button><button type="button" class="v62-btn" data-v62-view="veiculos" data-tip="Veículos" aria-label="Veículos">⚙</button><button type="button" class="v62-btn" data-v62-view="nuvem" data-tip="Calculadora" aria-label="Calculadora">∑</button></nav><div class="v62-foot"><button type="button" class="v62-btn" data-v62-backup data-tip="Backup" aria-label="Backup">↓</button><button type="button" class="v62-btn v62-add" data-v62-add data-tip="Novo lançamento" aria-label="Novo lançamento">＋</button><div class="v62-sep"></div><button type="button" class="v62-btn" data-v62-profile data-tip="Perfil" aria-label="Perfil"><span class="v62-dot">P</span></button><button type="button" class="v62-btn" data-v62-logout data-tip="Sair" aria-label="Sair">↪</button></div></aside><div id="ppHubV62" aria-hidden="true"><section class="v62-hub-card" role="dialog" aria-modal="true" aria-label="Hub Pessoal"><div class="v62-hub-head"><div><h2>Hub Pessoal</h2><p>Escolha a área que deseja abrir.</p></div><button type="button" class="v62-hub-close" aria-label="Fechar">×</button></div><div class="v62-hub-grid"><a data-v62-area="financas" href="index.html"><b>Finanças</b><span>Lançamentos, cartões, dívidas e patrimônio</span></a><a data-v62-area="educacao" href="educacao.html"><b>Educação</b><span>Formações e trajetória acadêmica</span></a><a data-v62-area="saude" href="saude.html"><b>Saúde</b><span>Acompanhamento pessoal</span></a><a data-v62-area="entretenimento" href="entretenimento.html"><b>Entretenimento</b><span>Filmes, séries, livros e viagens</span></a></div></section></div><div class="app">
-<div id="ppLegacyControlsV63" hidden aria-hidden="true" style="display:none!important"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button class="active" data-view="dashboard">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="veiculos">Veículos</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx="">+ Lançamento</button></div></div></div>
+<body data-hub-area="financas"><aside id="ppBankRailV62" aria-label="Navegação principal"><button type="button" class="v62-logo" data-v62-hub data-tip="Hub Pessoal" aria-label="Abrir Hub Pessoal"></button><nav class="v62-nav" aria-label="Navegação"><button type="button" class="v62-btn" data-v62-view="dashboard" data-tip="Visão geral" aria-label="Visão geral">⌂</button><button type="button" class="v62-btn" data-v62-view="lancamentos" data-tip="Lançamentos" aria-label="Lançamentos">↕</button><button type="button" class="v62-btn" data-v62-view="cartoes" data-tip="Cartões" aria-label="Cartões">▣</button><button type="button" class="v62-btn" data-v62-view="dividas" data-tip="Dívidas" aria-label="Dívidas">◴</button><button type="button" class="v62-btn" data-v62-view="fgts" data-tip="FGTS" aria-label="FGTS">◇</button><button type="button" class="v62-btn" data-v62-view="previdencia" data-tip="Previdência" aria-label="Previdência">◎</button><button type="button" class="v62-btn" data-v62-view="previdenciaPrivada" data-tip="Previdência privada" aria-label="Previdência privada">◉</button><button type="button" class="v62-btn" data-v62-view="investimentos" data-tip="Investimentos" aria-label="Investimentos">↗</button><button type="button" class="v62-btn" data-v62-view="patrimonio" data-tip="Patrimônio" aria-label="Patrimônio">⬡</button><button type="button" class="v62-btn" data-v62-view="veiculos" data-tip="Veículos" aria-label="Veículos">⚙</button><button type="button" class="v62-btn" data-v62-view="nuvem" data-tip="Calculadora" aria-label="Calculadora">∑</button></nav><div class="v62-foot"><button type="button" class="v62-btn" data-v62-backup data-tip="Backup" aria-label="Backup">↓</button><button type="button" class="v62-btn v62-add" data-v62-add data-tip="Novo lançamento" aria-label="Novo lançamento">＋</button><div class="v62-sep"></div><button type="button" class="v62-btn" data-v62-profile data-tip="Perfil" aria-label="Perfil"><span class="v62-dot">P</span></button><button type="button" class="v62-btn" data-v62-logout data-tip="Sair" aria-label="Sair">↪</button></div></aside><div id="ppHubV62" aria-hidden="true"><section class="v62-hub-card" role="dialog" aria-modal="true" aria-label="Hub Pessoal"><div class="v62-hub-head"><div><h2>Hub Pessoal</h2><p>Escolha a área que deseja abrir.</p></div><button type="button" class="v62-hub-close" aria-label="Fechar">×</button></div><div class="v62-hub-grid"><a data-v62-area="financas" href="index.html"><b>Finanças</b><span>Lançamentos, cartões, dívidas e patrimônio</span></a><a data-v62-area="educacao" href="educacao.html"><b>Educação</b><span>Formações e trajetória acadêmica</span></a><a data-v62-area="saude" href="saude.html"><b>Saúde</b><span>Acompanhamento pessoal</span></a><a data-v62-area="entretenimento" href="entretenimento.html"><b>Entretenimento</b><span>Filmes, séries, livros e viagens</span></a></div></section></div><div class="app">
+<div id="ppLegacyControlsV63" hidden aria-hidden="true" style="display:none!important"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button class="active" data-view="dashboard">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="previdenciaPrivada">Previdência privada</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="veiculos">Veículos</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx="">+ Lançamento</button></div></div></div>
 <main class="main">
 <section class="view active" id="dashboard">
 <div class="hero"><div><h1>Olá, Marcos.</h1><p id="periodText">Receitas e despesas realizadas, sem misturar projeções futuras.</p></div><div class="filterbar"><select id="yearFilter"></select><select id="monthFilter"></select></div></div>
@@ -1529,6 +1602,146 @@ img,svg,canvas{max-width:100%}
 <div><b>Previdência Social</b><span>Carregando seu histórico contributivo…</span></div>
 </div>
 </section>
+
+<section class="view" id="previdenciaPrivada">
+  <div class="ppv-wrap">
+    <div class="ppv-head">
+      <div>
+        <div class="ppv-kicker">planejamento de longo prazo</div>
+        <h2>Previdência privada</h2>
+        <p>Registre a evolução mês a mês, acompanhe juros e poder de compra e compare o mesmo fluxo com CDB e Tesouro Direto.</p>
+      </div>
+      <div class="ppv-head-actions">
+        <button class="ppv-soft" id="ppvSettingsBtn" type="button">⚙ Configurar plano</button>
+        <button class="ppv-primary" id="ppvAddMonthBtn" type="button">＋ Lançar mês</button>
+      </div>
+    </div>
+
+    <div class="ppv-marketbar">
+      <div class="ppv-market-title"><span>Indicadores de referência</span><small id="ppvMarketStamp">Base econômica da projeção</small></div>
+      <div class="ppv-market-grid">
+        <div class="ppv-market-card selic"><span>Selic meta</span><b id="ppvSelic">13,75%</b><small id="ppvSelicRef">desde 17/09/2026</small></div>
+        <div class="ppv-market-card cdi"><span>CDI</span><b id="ppvCdi">13,65%</b><small id="ppvCdiRef">21/10/2026</small></div>
+        <div class="ppv-market-card ipca"><span>IPCA · 12 meses</span><b id="ppvIpca">4,58%</b><small id="ppvIpcaRef">set/2026</small></div>
+        <div class="ppv-market-card real"><span>Juro real Selic</span><b id="ppvRealRate">8,77%</b><small>Selic descontada do IPCA</small></div>
+      </div>
+      <button class="ppv-refresh" id="ppvRefreshMarket" type="button" title="Tenta buscar Selic, CDI e IPCA nas séries públicas do Banco Central">↻ Atualizar</button>
+    </div>
+
+    <div class="ppv-summary" id="ppvSummary"></div>
+
+    <div class="ppv-main-grid">
+      <article class="ppv-card ppv-projection">
+        <div class="ppv-card-head">
+          <div><span class="ppv-eyebrow">projeção</span><h3>Quanto isso pode virar?</h3></div>
+          <div class="ppv-plan-chip" id="ppvPlanChip">Banco Inter · VGBL</div>
+        </div>
+        <div class="ppv-proj-controls">
+          <label><span>Data objetivo</span><input id="ppvTargetDate" type="date"></label>
+          <label><span>Aporte mensal futuro</span><div class="ppv-money-input"><i>R$</i><input id="ppvMonthlyContribution" inputmode="decimal"></div></label>
+          <label><span>Rentabilidade esperada</span><div class="ppv-percent-input"><input id="ppvAnnualReturn" inputmode="decimal"><i>% a.a.</i></div></label>
+          <label><span>Taxa de administração</span><div class="ppv-percent-input"><input id="ppvAdminFee" inputmode="decimal"><i>% a.a.</i></div></label>
+        </div>
+        <div class="ppv-proj-result">
+          <div class="ppv-big-result">
+            <span>Patrimônio projetado</span>
+            <b id="ppvFutureNominal">R$ 0,00</b>
+            <small id="ppvFutureMeta">—</small>
+          </div>
+          <div class="ppv-real-result">
+            <span>Em dinheiro de hoje</span>
+            <b id="ppvFutureReal">R$ 0,00</b>
+            <small>valor deflacionado pelo IPCA usado na simulação</small>
+          </div>
+        </div>
+        <div class="ppv-growth-track"><i id="ppvGrowthBar"></i></div>
+        <div class="ppv-proj-foot" id="ppvProjectionFoot"></div>
+      </article>
+
+      <article class="ppv-card ppv-compare">
+        <div class="ppv-card-head">
+          <div><span class="ppv-eyebrow">comparador</span><h3>Mesmo dinheiro, caminhos diferentes</h3></div>
+          <span class="ppv-mini-note">mesmo saldo inicial + mesmo aporte mensal</span>
+        </div>
+        <div class="ppv-compare-list" id="ppvCompareList"></div>
+        <div class="ppv-compare-note">CDB e Tesouro exibem IR estimado de renda fixa. Previdência usa a modalidade e regime definidos no plano. Valores são simulações, não garantia de rentabilidade.</div>
+      </article>
+    </div>
+
+    <div class="ppv-insight-grid">
+      <article class="ppv-card ppv-inter-ref">
+        <div class="ppv-card-head"><div><span class="ppv-eyebrow">referência Banco Inter</span><h3>Use um cenário próximo ao perfil do fundo</h3></div><a href="https://www.inter.co/pra-voce/investimentos/previdencia-privada/" target="_blank" rel="noopener">Fonte ↗</a></div>
+        <p>O Inter distribui previdência em parceria com a Icatu e divulga faixas históricas anuais por nível de risco. Clique em uma faixa para usar o ponto médio como cenário de projeção.</p>
+        <div class="ppv-risk-presets">
+          <button type="button" data-ppv-rate="6.25"><span>Baixo risco</span><b>5,2%–7,3%</b><small>usar 6,25% a.a.</small></button>
+          <button type="button" data-ppv-rate="8.30"><span>Moderado</span><b>7,2%–9,4%</b><small>usar 8,30% a.a.</small></button>
+          <button type="button" data-ppv-rate="11.35"><span>Alto risco</span><b>9,6%–13,1%</b><small>usar 11,35% a.a.</small></button>
+        </div>
+        <div class="ppv-inter-note"><b>PGBL × VGBL:</b> no PGBL, a dedução pode chegar a 12% da renda bruta tributável para quem atende às condições; no VGBL, o IR no resgate incide sobre os rendimentos. Rentabilidade passada não garante resultado futuro.</div>
+      </article>
+
+      <article class="ppv-card ppv-chart-card">
+        <div class="ppv-card-head"><div><span class="ppv-eyebrow">evolução</span><h3>Saldo mês a mês</h3></div><span class="ppv-mini-note" id="ppvChartLabel">sem lançamentos</span></div>
+        <div class="ppv-chart" id="ppvChart"></div>
+      </article>
+    </div>
+
+    <article class="ppv-card ppv-ledger">
+      <div class="ppv-card-head">
+        <div><span class="ppv-eyebrow">histórico</span><h3>Movimentação mensal</h3><p>Aporte, retirada, rentabilidade e saldo informado pelo banco em uma única competência.</p></div>
+        <button class="ppv-soft" id="ppvAddMonthBtn2" type="button">＋ Novo mês</button>
+      </div>
+      <div class="ppv-table-wrap">
+        <table class="ppv-table"><thead><tr><th>Competência</th><th>Banco / plano</th><th>Aportes</th><th>Retiradas</th><th>Rentab.</th><th>Juros / ajuste</th><th>Saldo final</th><th></th></tr></thead><tbody id="ppvLedgerBody"></tbody></table>
+      </div>
+    </article>
+  </div>
+
+  <div class="ppv-modalback" id="ppvMonthModal" aria-hidden="true">
+    <div class="ppv-modal">
+      <button class="ppv-x" type="button" data-ppv-close="ppvMonthModal">×</button>
+      <span class="ppv-eyebrow">movimentação</span><h3 id="ppvMonthModalTitle">Lançar mês</h3>
+      <input id="ppvRecordId" type="hidden">
+      <div class="ppv-formgrid">
+        <label><span>Competência</span><input id="ppvRecordMonth" type="month"></label>
+        <label><span>Banco / instituição</span><input id="ppvRecordBank" list="ppvBanks" placeholder="Banco Inter"></label>
+        <label class="wide"><span>Plano / fundo</span><input id="ppvRecordPlan" placeholder="Ex.: Previdência Inter / Icatu"></label>
+        <label><span>Aporte no mês</span><div class="ppv-money-input"><i>R$</i><input id="ppvRecordContribution" inputmode="decimal" placeholder="0,00"></div></label>
+        <label><span>Retirada / resgate</span><div class="ppv-money-input"><i>R$</i><input id="ppvRecordWithdrawal" inputmode="decimal" placeholder="0,00"></div></label>
+        <label><span>Rentabilidade do mês</span><div class="ppv-percent-input"><input id="ppvRecordReturn" inputmode="decimal" placeholder="opcional"><i>%</i></div></label>
+        <label><span>Saldo final informado</span><div class="ppv-money-input"><i>R$</i><input id="ppvRecordBalance" inputmode="decimal" placeholder="opcional"></div></label>
+        <label class="wide"><span>Observação</span><input id="ppvRecordNote" placeholder="Ex.: aporte extraordinário, portabilidade, resgate parcial..."></label>
+      </div>
+      <div class="ppv-modal-hint">Se você informar o <b>saldo final do banco</b>, ele prevalece sobre o cálculo e o sistema trata a diferença como rendimento/ajuste do mês. Se deixar vazio, o saldo é calculado usando a rentabilidade mensal informada — ou a taxa anual do plano quando também estiver vazia.</div>
+      <div class="ppv-modal-foot"><button class="ppv-soft" type="button" data-ppv-close="ppvMonthModal">Cancelar</button><button class="ppv-primary" id="ppvSaveMonth" type="button">Salvar mês</button></div>
+    </div>
+  </div>
+
+  <div class="ppv-modalback" id="ppvSettingsModal" aria-hidden="true">
+    <div class="ppv-modal">
+      <button class="ppv-x" type="button" data-ppv-close="ppvSettingsModal">×</button>
+      <span class="ppv-eyebrow">premissas</span><h3>Configurar plano e comparação</h3>
+      <div class="ppv-formgrid">
+        <label><span>Banco principal</span><input id="ppvSetBank" list="ppvBanks"></label>
+        <label><span>Nome do plano</span><input id="ppvSetPlan"></label>
+        <label><span>Modalidade</span><select id="ppvSetType"><option>VGBL</option><option>PGBL</option></select></label>
+        <label><span>Tributação</span><select id="ppvSetTax"><option value="regressiva">Regressiva</option><option value="progressiva">Progressiva</option></select></label>
+        <label><span>Rentabilidade esperada</span><div class="ppv-percent-input"><input id="ppvSetReturn" inputmode="decimal"><i>% a.a.</i></div></label>
+        <label><span>Taxa de administração</span><div class="ppv-percent-input"><input id="ppvSetFee" inputmode="decimal"><i>% a.a.</i></div></label>
+        <label><span>Data objetivo</span><input id="ppvSetTarget" type="date"></label>
+        <label><span>Aporte mensal futuro</span><div class="ppv-money-input"><i>R$</i><input id="ppvSetMonthly" inputmode="decimal"></div></label>
+        <label><span>CDB de referência</span><div class="ppv-percent-input"><input id="ppvSetCdbPct" inputmode="decimal"><i>% CDI</i></div></label>
+        <label><span>Tesouro Selic 2031</span><div class="ppv-percent-input"><input id="ppvSetTesouroSelic" inputmode="decimal"><i>+ % a.a.</i></div></label>
+        <label><span>Tesouro IPCA+ ref.</span><div class="ppv-percent-input"><input id="ppvSetTesouroIpca" inputmode="decimal"><i>+ % a.a.</i></div></label>
+        <label><span>IR progressivo estimado</span><div class="ppv-percent-input"><input id="ppvSetProgressiveTax" inputmode="decimal"><i>%</i></div></label>
+      </div>
+      <div class="ppv-modal-hint">Referências iniciais: CDB a 100% do CDI; Tesouro Selic 2031 em Selic + 0,0987% a.a.; Tesouro IPCA+ de longo prazo em IPCA + 6,55% a.a. A custódia B3 de 0,20% a.a. é considerada de forma conservadora nas simulações do Tesouro.</div>
+      <div class="ppv-modal-foot"><button class="ppv-soft" type="button" data-ppv-close="ppvSettingsModal">Cancelar</button><button class="ppv-primary" id="ppvSaveSettings" type="button">Salvar configuração</button></div>
+    </div>
+  </div>
+  <datalist id="ppvBanks"><option>Banco Inter</option><option>Nubank</option><option>Itaú</option><option>Bradesco</option><option>Banco do Brasil</option><option>Caixa Econômica Federal</option><option>Santander</option><option>BTG Pactual</option><option>XP Investimentos</option><option>Icatu</option></datalist>
+</section>
+
 <section class="view" id="investimentos">
 <div class="section-tools"><div><h2>Investimentos</h2></div><div class="filterbar"><select id="invYear"></select><select id="invType"><option value="all">Todos os tipos</option><option>CDB</option><option>LCI/LCA</option><option>Previdência privada</option><option>Tesouro Direto</option><option>Ações</option><option>Fundos</option><option>Caixinha / Reserva</option><option>A classificar</option></select><input class="search" id="invSearch" placeholder="Buscar produto ou banco"/><button class="primary" id="addInvestmentBtn">+ Novo investimento</button></div></div>
 <div class="split"><article class="card panel ringbox"><div class="ring"><div class="pig">🐷</div></div><div class="yieldnote" style="text-align:center;margin-top:14px">Guarde com estratégia e acompanhe seu <b id="invYieldRate">0,00%</b><br/><span style="color:var(--muted)">rendimento sobre o capital exibido</span></div></article><div class="right-stack"><div class="summary-strip" id="invSummary"></div><article class="card panel"><div class="panelhead"><div><h2>Composição por tipo</h2><span>similar à visão de produto do banco</span></div></div><div class="list" id="invTypes"></div></article></div></div>
@@ -1541,17 +1754,6 @@ img,svg,canvas{max-width:100%}
 <div class="asset-grid" id="assetGrid"></div>
 </section>
 <section class="view" id="veiculos">
-<div class="garage-hero-v101">
-<div>
-<div class="garage-eyebrow-v101">garagem financeira</div>
-<h2>Oficina virtual</h2>
-<p>Manutenção, quilometragem, óleo e valor de mercado em um único lugar.</p>
-</div>
-<div class="garage-hero-badge-v101">
-<span>2 veículos</span>
-<b id="vehicleGarageStatusV101">Garagem monitorada</b>
-</div>
-</div>
 <div class="vehicle-grid-v101" id="vehicleGridV101"></div>
 </section>
 <section class="view" id="nuvem"><div class="section-tools"><div><h2>Nuvem</h2></div></div><article class="card cloudbox"><div><h3 style="margin-top:0">Pronto para sincronizar depois</h3><p style="color:var(--muted)">Esta versão já está estruturada para evoluir para uma base em nuvem. Por enquanto, ela funciona localmente no navegador e você pode exportar backup sempre que quiser.</p><div class="codehint">Próxima etapa sugerida:
@@ -10978,7 +11180,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script id="pp-v52-menu-without-projection">
 (()=>{
   'use strict';
-  const allowed=new Set(['dashboard','lancamentos','cartoes','credores','dividas','fgts','previdencia','investimentos','patrimonio','veiculos','nuvem']);
+  const allowed=new Set(['dashboard','lancamentos','cartoes','credores','dividas','fgts','previdencia','previdenciaPrivada','investimentos','patrimonio','veiculos','nuvem']);
   const dead='projecao';
   function sanitizeMenu(){
     document.getElementById(dead)?.remove();
@@ -26542,7 +26744,7 @@ window.ppMenuAuditV122=()=>['dashboard','lancamentos','cartoes','credores','divi
 const dynamicRender123={
  dashboard:()=>window.renderDashboard?.(),lancamentos:()=>window.renderLancamentos?.(),cartoes:()=>window.renderCards?.(),
  credores:()=>window.renderCreditors?.(),dividas:()=>window.renderDebts?.(),fgts:()=>window.renderFgts?.(),
- previdencia:()=>window.renderPrevidencia?.(),investimentos:()=>window.renderInvestments?.(),
+ previdencia:()=>window.renderPrevidencia?.(),previdenciaPrivada:()=>window.renderPrivatePension?.(),investimentos:()=>window.renderInvestments?.(),
  patrimonio:()=>{window.renderAssets?.();window.ppPropertiesV120?.render?.()},veiculos:()=>window.ppVehicleV101?.render?.(),
  nuvem:()=>window.renderNuvem?.()
 };
@@ -28588,5 +28790,60 @@ th{font-size:9.5px!important;letter-spacing:.02em!important}.tablewrap button,td
   #cartoes .v112-carousel-card{height:106px!important;min-height:106px!important}
 }
 </style>
+
+
+<script id="pp-v70-private-pension-script">
+(()=>{'use strict';
+const PPV_KEY='planejador_private_pension_v70';
+const PPV_SYNC_ID='I_PREV_PRIVATE_SYNC_V70';
+const $p=id=>document.getElementById(id);
+const nval=v=>{if(typeof num==='function')return num(v);let s=String(v??'').replace(/[^0-9,.-]/g,'');if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');let n=Number(s);return Number.isFinite(n)?n:0};
+const money=v=>typeof brl==='function'?brl(v):Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const pct=v=>`${Number(v||0).toFixed(2).replace('.',',')}%`;
+const todayISO=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const addYearsISO=y=>{const d=new Date();d.setFullYear(d.getFullYear()+y);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+const defaults={settings:{bank:'Banco Inter',plan:'Previdência Inter / Icatu',type:'VGBL',tax:'regressiva',annualReturn:8.30,adminFee:0,targetDate:addYearsISO(20),monthlyContribution:500,cdbPct:100,tesouroSelicPremium:.0987,tesouroIpcaReal:6.55,progressiveTax:15},indicators:{selic:13.75,selicRef:'desde 17/09/2026',cdi:13.65,cdiRef:'21/10/2026',ipca:4.58,ipcaRef:'set/2026',updated:'23/10/2026'},records:[]};
+function deepDefault(raw){raw=raw&&typeof raw==='object'?raw:{};return {settings:{...defaults.settings,...(raw.settings||{})},indicators:{...defaults.indicators,...(raw.indicators||{})},records:Array.isArray(raw.records)?raw.records:[]}}
+let state=deepDefault((()=>{try{return JSON.parse(localStorage.getItem(PPV_KEY)||'null')}catch(e){return null}})());
+function saveState(){localStorage.setItem(PPV_KEY,JSON.stringify(state));syncInvestment();}
+function annualToMonthly(r){return Math.pow(1+Math.max(-.99,Number(r||0))/100,1/12)-1}
+function ymLabel(ym){if(!ym)return '—';const [y,m]=ym.split('-').map(Number);const names=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];return `${names[(m||1)-1]}/${String(y).slice(-2)}`}
+function parseNullable(el){const s=String(el?.value??'').trim();return s===''?null:nval(s)}
+function history(){let balance=0;const annualNet=Math.max(-99,state.settings.annualReturn-state.settings.adminFee);const fallbackRate=annualToMonthly(annualNet)*100;return state.records.slice().sort((a,b)=>String(a.month).localeCompare(String(b.month))).map(r=>{const opening=balance,contribution=Math.max(0,nval(r.contribution)),withdrawal=Math.max(0,nval(r.withdrawal)),base=Math.max(0,opening+contribution-withdrawal);const usedRate=r.returnPct===null||r.returnPct===''||!Number.isFinite(Number(r.returnPct))?fallbackRate:Number(r.returnPct);let calculated=Math.max(0,base*(1+usedRate/100));const reported=(r.reportedBalance===null||r.reportedBalance===''||!Number.isFinite(Number(r.reportedBalance)))?null:Math.max(0,Number(r.reportedBalance));const closing=reported===null?calculated:reported;const interest=closing-base;balance=closing;return {...r,opening,contribution,withdrawal,usedRate,interest,closing,reported};})}
+function monthsToTarget(){const t=new Date(state.settings.targetDate+'T12:00:00');const d=new Date();if(!Number.isFinite(t.getTime())||t<=d)return 0;let m=(t.getFullYear()-d.getFullYear())*12+(t.getMonth()-d.getMonth());if(t.getDate()>d.getDate())m++;return Math.max(0,m)}
+function simulate(start,monthly,annual,months){let b=Math.max(0,start);const mr=annualToMonthly(annual);for(let i=0;i<months;i++)b=(b+monthly)*(1+mr);return b}
+function rfTaxRate(months){const days=months*30.4375;if(days<=180)return 22.5;if(days<=360)return 20;if(days<=720)return 17.5;return 15}
+function pensionRegressiveRate(months){const years=months/12;if(years<2)return 35;if(years<4)return 30;if(years<6)return 25;if(years<8)return 20;if(years<10)return 15;return 10}
+function metrics(){const h=history(),last=h[h.length-1],balance=last?last.closing:0,contrib=h.reduce((a,r)=>a+r.contribution,0),withdraw=h.reduce((a,r)=>a+r.withdrawal,0),netContrib=Math.max(0,contrib-withdraw),earn=balance-netContrib,months=monthsToTarget(),monthly=Math.max(0,nval(state.settings.monthlyContribution)),infl=state.indicators.ipca/100,years=months/12,annualNet=Math.max(-99,state.settings.annualReturn-state.settings.adminFee),future=simulate(balance,monthly,annualNet,months),real=future/Math.pow(1+infl,years),principalFuture=balance+monthly*months,realRate=((1+annualNet/100)/(1+infl)-1)*100;
+ const penRate=state.settings.tax==='regressiva'?pensionRegressiveRate(months):Math.max(0,Math.min(27.5,nval(state.settings.progressiveTax)));const penBase=state.settings.type==='PGBL'?future:Math.max(0,future-principalFuture);const penLiquid=Math.max(0,future-penBase*penRate/100);
+ const cdbAnnual=state.indicators.cdi*(state.settings.cdbPct/100),cdbGross=simulate(balance,monthly,cdbAnnual,months),rfTax=rfTaxRate(months),cdbLiquid=principalFuture+Math.max(0,cdbGross-principalFuture)*(1-rfTax/100);
+ const tesouroSelicAnnual=Math.max(0,state.indicators.selic+nval(state.settings.tesouroSelicPremium)-.20),tesSelGross=simulate(balance,monthly,tesouroSelicAnnual,months),tesSelLiquid=principalFuture+Math.max(0,tesSelGross-principalFuture)*(1-rfTax/100);
+ const tesIpcaAnnual=((1+state.indicators.ipca/100)*(1+nval(state.settings.tesouroIpcaReal)/100)-1)*100-.20,tesIpGross=simulate(balance,monthly,tesIpcaAnnual,months),tesIpLiquid=principalFuture+Math.max(0,tesIpGross-principalFuture)*(1-rfTax/100);
+ const def=v=>v/Math.pow(1+infl,years);
+ return {h,balance,contrib,withdraw,netContrib,earn,months,monthly,years,annualNet,future,real,principalFuture,realRate,penRate,penLiquid,rfTax,cdbAnnual,cdbGross,cdbLiquid,tesouroSelicAnnual,tesSelGross,tesSelLiquid,tesIpcaAnnual,tesIpGross,tesIpLiquid,def};}
+function syncInvestment(){try{if(typeof investments==='undefined'||typeof persist!=='function')return;const m=metrics();const i=investments.findIndex(x=>x.id===PPV_SYNC_ID);if(m.balance<=0&&!state.records.length){if(i>=0){investments.splice(i,1);persist()}return}const banks=[...new Set(state.records.map(r=>r.bank).filter(Boolean))];const inst=banks.length>1?'Múltiplas instituições':(banks[0]||state.settings.bank||'Previdência privada');const item={id:PPV_SYNC_ID,year:new Date().getFullYear(),institution:inst,product:`${state.settings.plan||'Previdência privada'} · sincronizado`,type:'Previdência privada',principal:Math.max(0,m.netContrib),currentValue:Math.max(0,m.balance),yieldValue:m.balance-m.netContrib,status:'Ativo',note:'Sincronizado automaticamente pela página Previdência Privada. Edite os movimentos nessa página.'};if(i>=0)investments[i]=item;else investments.push(item);persist()}catch(e){}}
+function renderIndicators(){const i=state.indicators;$p('ppvSelic').textContent=pct(i.selic);$p('ppvCdi').textContent=pct(i.cdi);$p('ppvIpca').textContent=pct(i.ipca);$p('ppvSelicRef').textContent=i.selicRef;$p('ppvCdiRef').textContent=i.cdiRef;$p('ppvIpcaRef').textContent=i.ipcaRef;const real=((1+i.selic/100)/(1+i.ipca/100)-1)*100;$p('ppvRealRate').textContent=pct(real);$p('ppvMarketStamp').textContent=`Atualizado: ${i.updated||'referência incorporada'}`}
+function renderSummary(m){const monthsRecorded=m.h.length,last=m.h[m.h.length-1];$p('ppvSummary').innerHTML=`<div class="ppv-summary-card blue"><span>Saldo atual calculado</span><b>${money(m.balance)}</b><small>${last?'fechamento de '+ymLabel(last.month):'adicione o primeiro mês'}</small></div><div class="ppv-summary-card"><span>Aportes registrados</span><b>${money(m.contrib)}</b><small>entradas acumuladas</small></div><div class="ppv-summary-card"><span>Retiradas</span><b>${money(m.withdraw)}</b><small>resgates registrados</small></div><div class="ppv-summary-card green"><span>Rendimento / ajuste</span><b>${money(m.earn)}</b><small>${m.netContrib?`${pct(m.earn/m.netContrib*100)} sobre aporte líquido`:'ainda sem base de aporte'}</small></div><div class="ppv-summary-card violet"><span>Histórico</span><b>${monthsRecorded} ${monthsRecorded===1?'mês':'meses'}</b><small>${state.settings.bank||'instituição não definida'}</small></div>`}
+function renderProjection(m){$p('ppvTargetDate').value=state.settings.targetDate;$p('ppvMonthlyContribution').value=Number(state.settings.monthlyContribution||0).toFixed(2).replace('.',',');$p('ppvAnnualReturn').value=Number(state.settings.annualReturn||0).toFixed(2).replace('.',',');$p('ppvAdminFee').value=Number(state.settings.adminFee||0).toFixed(2).replace('.',',');$p('ppvPlanChip').textContent=`${state.settings.bank||'Banco'} · ${state.settings.type}`;$p('ppvFutureNominal').textContent=money(m.future);$p('ppvFutureReal').textContent=money(m.real);$p('ppvFutureMeta').textContent=m.months?`${m.months} meses · ${pct(m.annualNet)} a.a. líquida de taxa administrativa`:'Escolha uma data futura';const growth=m.principalFuture>0?Math.max(0,(m.future/m.principalFuture-1)*100):0;$p('ppvGrowthBar').style.width=`${Math.min(100,growth)}%`;$p('ppvProjectionFoot').innerHTML=`<div><span>Total colocado até o objetivo</span><b>${money(m.principalFuture)}</b></div><div><span>Juro real projetado</span><b>${pct(m.realRate)} a.a.</b></div><div><span>Líquido estimado no resgate</span><b>${money(m.penLiquid)}</b></div>`}
+function renderCompare(m){const rows=[{name:'Previdência',sub:`${state.settings.type} · ${state.settings.tax}`,nom:m.penLiquid,annual:m.annualNet},{name:'CDB',sub:`${state.settings.cdbPct}% do CDI`,nom:m.cdbLiquid,annual:m.cdbAnnual},{name:'Tesouro Selic',sub:`Selic + ${Number(state.settings.tesouroSelicPremium).toFixed(2).replace('.',',')}%`,nom:m.tesSelLiquid,annual:m.tesouroSelicAnnual},{name:'Tesouro IPCA+',sub:`IPCA + ${Number(state.settings.tesouroIpcaReal).toFixed(2).replace('.',',')}%`,nom:m.tesIpLiquid,annual:m.tesIpcaAnnual}].map(x=>({...x,real:m.def(x.nom)}));const max=Math.max(1,...rows.map(x=>x.real)),best=Math.max(...rows.map(x=>x.real));$p('ppvCompareList').innerHTML=rows.map(r=>`<div class="ppv-compare-row ${Math.abs(r.real-best)<.01?'best':''}"><div class="ppv-compare-name"><span>${r.sub}</span><b>${r.name}</b></div><div class="ppv-compare-bar"><i style="width:${Math.max(3,r.real/max*100)}%"></i></div><div class="ppv-compare-val"><b>${money(r.real)}</b><small>${money(r.nom)} nominal · ${pct(r.annual)} a.a.</small></div></div>`).join('')}
+function renderChart(m){const el=$p('ppvChart');if(!m.h.length){el.innerHTML='<div class="ppv-chart-empty">Lance o primeiro mês para visualizar a evolução do saldo.</div>';$p('ppvChartLabel').textContent='sem lançamentos';return}const data=m.h.slice(-18),w=760,h=180,pad=24,max=Math.max(1,...data.map(x=>x.closing)),min=Math.min(0,...data.map(x=>x.closing)),range=Math.max(1,max-min),pts=data.map((r,i)=>({x:pad+(w-pad*2)*(i/Math.max(1,data.length-1)),y:h-pad-(h-pad*2)*((r.closing-min)/range),r}));const line=pts.map((p,i)=>`${i?'L':'M'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '),area=`M${pts[0].x},${h-pad} ${line} L${pts[pts.length-1].x},${h-pad} Z`;const grids=[.25,.5,.75,1].map(q=>{const y=h-pad-(h-pad*2)*q;return `<line class="ppv-chart-grid" x1="${pad}" y1="${y}" x2="${w-pad}" y2="${y}"/>`}).join('');const dots=pts.map((p,i)=>`<circle class="ppv-chart-dot" cx="${p.x}" cy="${p.y}" r="${i===pts.length-1?4:2.4}"><title>${ymLabel(p.r.month)} · ${money(p.r.closing)}</title></circle>`).join('');const labels=pts.map((p,i)=>i===0||i===pts.length-1||i%Math.ceil(data.length/5)===0?`<text x="${p.x}" y="${h-7}" text-anchor="middle">${ymLabel(p.r.month)}</text>`:'').join('');el.innerHTML=`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><defs><linearGradient id="ppvGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5ea4ff" stop-opacity=".25"/><stop offset="1" stop-color="#5ea4ff" stop-opacity="0"/></linearGradient></defs>${grids}<path class="ppv-chart-area" d="${area}"/><path class="ppv-chart-line" d="${line}"/>${dots}${labels}</svg>`;$p('ppvChartLabel').textContent=`${ymLabel(data[0].month)} → ${ymLabel(data[data.length-1].month)}`}
+function renderLedger(m){const body=$p('ppvLedgerBody');if(!m.h.length){body.innerHTML='<tr><td class="ppv-empty-row" colspan="8">Nenhum mês lançado ainda. Use “Lançar mês” para começar.</td></tr>';return}body.innerHTML=m.h.slice().reverse().map(r=>`<tr><td><b>${ymLabel(r.month)}</b></td><td><b>${escapeHtml(r.bank||state.settings.bank)}</b><br><small>${escapeHtml(r.plan||state.settings.plan)}</small></td><td class="pos">${r.contribution?'+ '+money(r.contribution):'—'}</td><td class="neg">${r.withdrawal?'− '+money(r.withdrawal):'—'}</td><td>${pct(r.usedRate)}</td><td class="${r.interest>=0?'pos':'neg'}">${r.interest>=0?'+ ':'− '}${money(Math.abs(r.interest))}</td><td><b>${money(r.closing)}</b>${r.reported!==null?'<br><small>saldo informado</small>':''}</td><td><div class="ppv-row-actions"><button type="button" data-ppv-edit="${r.id}" title="Editar">✎</button><button type="button" data-ppv-delete="${r.id}" title="Excluir">×</button></div></td></tr>`).join('')}
+function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function render(){if(!$p('previdenciaPrivada'))return;const m=metrics();renderIndicators();renderSummary(m);renderProjection(m);renderCompare(m);renderChart(m);renderLedger(m);syncInvestment()}
+window.renderPrivatePension=render;
+function openModal(id){const el=$p(id);if(el){el.classList.add('open');el.setAttribute('aria-hidden','false')}}function closeModal(id){const el=$p(id);if(el){el.classList.remove('open');el.setAttribute('aria-hidden','true')}}
+function openRecord(id){const r=state.records.find(x=>x.id===id);$p('ppvRecordId').value=r?.id||'';$p('ppvMonthModalTitle').textContent=r?'Editar mês':'Lançar mês';const now=new Date();const cur=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;$p('ppvRecordMonth').value=r?.month||cur;$p('ppvRecordBank').value=r?.bank||state.settings.bank;$p('ppvRecordPlan').value=r?.plan||state.settings.plan;$p('ppvRecordContribution').value=r?.contribution?String(r.contribution).replace('.',','):'';$p('ppvRecordWithdrawal').value=r?.withdrawal?String(r.withdrawal).replace('.',','):'';$p('ppvRecordReturn').value=r?.returnPct!==null&&r?.returnPct!==undefined?String(r.returnPct).replace('.',','):'';$p('ppvRecordBalance').value=r?.reportedBalance!==null&&r?.reportedBalance!==undefined?String(r.reportedBalance).replace('.',','):'';$p('ppvRecordNote').value=r?.note||'';openModal('ppvMonthModal')}
+function saveRecord(){const month=$p('ppvRecordMonth').value;if(!month){typeof toast==='function'&&toast('Informe a competência.');return}const id=$p('ppvRecordId').value||`PPV_${Date.now()}`;const obj={id,month,bank:$p('ppvRecordBank').value.trim()||state.settings.bank,plan:$p('ppvRecordPlan').value.trim()||state.settings.plan,contribution:Math.max(0,nval($p('ppvRecordContribution').value)),withdrawal:Math.max(0,nval($p('ppvRecordWithdrawal').value)),returnPct:parseNullable($p('ppvRecordReturn')),reportedBalance:parseNullable($p('ppvRecordBalance')),note:$p('ppvRecordNote').value.trim()};const ix=state.records.findIndex(x=>x.id===id);if(ix>=0)state.records[ix]=obj;else{const same=state.records.findIndex(x=>x.month===month&&x.bank===obj.bank&&x.plan===obj.plan);if(same>=0){obj.id=state.records[same].id;state.records[same]=obj}else state.records.push(obj)}saveState();closeModal('ppvMonthModal');render();typeof toast==='function'&&toast('Previdência atualizada e sincronizada em Investimentos.')}
+function deleteRecord(id){if(!confirm('Excluir esta competência da previdência privada?'))return;state.records=state.records.filter(x=>x.id!==id);saveState();render();typeof toast==='function'&&toast('Competência excluída.')}
+function openSettings(){$p('ppvSetBank').value=state.settings.bank;$p('ppvSetPlan').value=state.settings.plan;$p('ppvSetType').value=state.settings.type;$p('ppvSetTax').value=state.settings.tax;$p('ppvSetReturn').value=String(state.settings.annualReturn).replace('.',',');$p('ppvSetFee').value=String(state.settings.adminFee).replace('.',',');$p('ppvSetTarget').value=state.settings.targetDate;$p('ppvSetMonthly').value=String(state.settings.monthlyContribution).replace('.',',');$p('ppvSetCdbPct').value=String(state.settings.cdbPct).replace('.',',');$p('ppvSetTesouroSelic').value=String(state.settings.tesouroSelicPremium).replace('.',',');$p('ppvSetTesouroIpca').value=String(state.settings.tesouroIpcaReal).replace('.',',');$p('ppvSetProgressiveTax').value=String(state.settings.progressiveTax).replace('.',',');openModal('ppvSettingsModal')}
+function saveSettings(){state.settings={...state.settings,bank:$p('ppvSetBank').value.trim()||'Banco Inter',plan:$p('ppvSetPlan').value.trim()||'Previdência privada',type:$p('ppvSetType').value,tax:$p('ppvSetTax').value,annualReturn:nval($p('ppvSetReturn').value),adminFee:nval($p('ppvSetFee').value),targetDate:$p('ppvSetTarget').value||addYearsISO(20),monthlyContribution:Math.max(0,nval($p('ppvSetMonthly').value)),cdbPct:Math.max(0,nval($p('ppvSetCdbPct').value)),tesouroSelicPremium:nval($p('ppvSetTesouroSelic').value),tesouroIpcaReal:nval($p('ppvSetTesouroIpca').value),progressiveTax:Math.max(0,Math.min(27.5,nval($p('ppvSetProgressiveTax').value)))};saveState();closeModal('ppvSettingsModal');render();typeof toast==='function'&&toast('Premissas da previdência atualizadas.')}
+function saveQuickProjection(){state.settings.targetDate=$p('ppvTargetDate').value||state.settings.targetDate;state.settings.monthlyContribution=Math.max(0,nval($p('ppvMonthlyContribution').value));state.settings.annualReturn=nval($p('ppvAnnualReturn').value);state.settings.adminFee=Math.max(0,nval($p('ppvAdminFee').value));saveState();render()}
+async function refreshMarket(){const btn=$p('ppvRefreshMarket');if(btn){btn.disabled=true;btn.textContent='↻ Atualizando…'}try{const get=async u=>{const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error('http');return r.json()};const [s,c,ip]=await Promise.all([get('https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json'),get('https://api.bcb.gov.br/dados/serie/bcdata.sgs.4389/dados/ultimos/1?formato=json'),get('https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados/ultimos/12?formato=json')]);const val=x=>Number(String(x).replace(',','.'));if(s?.[0]){state.indicators.selic=val(s[0].valor);state.indicators.selicRef=s[0].data}if(c?.[0]){state.indicators.cdi=val(c[0].valor);state.indicators.cdiRef=c[0].data}if(Array.isArray(ip)&&ip.length){state.indicators.ipca=(ip.reduce((a,x)=>a*(1+val(x.valor)/100),1)-1)*100;state.indicators.ipcaRef=`12m até ${ip[ip.length-1].data}`}state.indicators.updated=new Date().toLocaleDateString('pt-BR');saveState();render();typeof toast==='function'&&toast('Indicadores atualizados pelo Banco Central.')}catch(e){typeof toast==='function'&&toast('Não foi possível consultar o BC agora. Mantive a última referência salva.')}finally{if(btn){btn.disabled=false;btn.textContent='↻ Atualizar'}}}
+function bind(){if(!$p('previdenciaPrivada')||$p('previdenciaPrivada').dataset.ppvBound)return;$p('previdenciaPrivada').dataset.ppvBound='1';$p('ppvAddMonthBtn').addEventListener('click',()=>openRecord());$p('ppvAddMonthBtn2').addEventListener('click',()=>openRecord());$p('ppvSettingsBtn').addEventListener('click',openSettings);$p('ppvSaveMonth').addEventListener('click',saveRecord);$p('ppvSaveSettings').addEventListener('click',saveSettings);$p('ppvRefreshMarket').addEventListener('click',refreshMarket);['ppvTargetDate','ppvMonthlyContribution','ppvAnnualReturn','ppvAdminFee'].forEach(id=>$p(id).addEventListener('change',saveQuickProjection));document.querySelectorAll('[data-ppv-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.ppvClose)));document.querySelectorAll('.ppv-modalback').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));document.querySelectorAll('[data-ppv-rate]').forEach(b=>b.addEventListener('click',()=>{state.settings.annualReturn=Number(b.dataset.ppvRate);saveState();render();typeof toast==='function'&&toast(`Cenário alterado para ${String(state.settings.annualReturn).replace('.',',')}% a.a.`)}));$p('ppvLedgerBody').addEventListener('click',e=>{const edit=e.target.closest('[data-ppv-edit]'),del=e.target.closest('[data-ppv-delete]');if(edit)openRecord(edit.dataset.ppvEdit);if(del)deleteRecord(del.dataset.ppvDelete)})}
+bind();render();
+// Automatic refresh at most once per calendar day; fallback values remain available offline.
+try{const last=localStorage.getItem('planejador_private_pension_market_refresh_v70');if(last!==todayISO()){localStorage.setItem('planejador_private_pension_market_refresh_v70',todayISO());setTimeout(refreshMarket,450)}}catch(e){}
+})();
+</script>
 
 </body></html>
