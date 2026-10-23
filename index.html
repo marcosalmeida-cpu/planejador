@@ -28459,4 +28459,134 @@ th{font-size:9.5px!important;letter-spacing:.02em!important}.tablewrap button,td
 }
 </style>
 
+
+<style id="pp-v69-cards-single-row">
+/* v69 — cartões compactos em linha única, sem carrossel/setas */
+#cartoes .v112-carousel-shell{
+  padding:10px!important;
+  overflow:visible!important;
+  border-radius:20px!important;
+  background:
+    radial-gradient(circle at 8% 0%,rgba(15,99,246,.065),transparent 24%),
+    linear-gradient(180deg,#fff 0%,#f7f9fc 100%)!important;
+}
+#cartoes .v112-arrow{display:none!important}
+#cartoes .v112-carousel-track{
+  display:grid!important;
+  grid-auto-flow:column!important;
+  grid-auto-columns:minmax(0,1fr)!important;
+  grid-template-columns:none!important;
+  gap:8px!important;
+  width:100%!important;
+  overflow:visible!important;
+  scroll-snap-type:none!important;
+  padding:0!important;
+}
+#cartoes .v112-carousel-card{
+  width:auto!important;
+  min-width:0!important;
+  max-width:none!important;
+  flex:none!important;
+  height:108px!important;
+  min-height:108px!important;
+  border-radius:16px!important;
+  box-shadow:0 5px 14px rgba(15,23,42,.05)!important;
+}
+#cartoes .v112-carousel-card:hover{
+  transform:translateY(-2px)!important;
+  box-shadow:0 10px 22px rgba(15,23,42,.085)!important;
+}
+#cartoes .v112-carousel-card.active{
+  border:1.5px solid #0b63f6!important;
+  box-shadow:0 0 0 2px rgba(11,99,246,.08),0 9px 20px rgba(11,99,246,.11)!important;
+}
+#cartoes .v112-card-select{
+  padding:9px 9px 8px!important;
+}
+#cartoes .v112-card-top{gap:5px!important}
+#cartoes .v112-card-category{
+  padding:2px 5px!important;
+  font-size:6px!important;
+  letter-spacing:.055em!important;
+  max-width:62%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#cartoes .v112-card-limit{
+  font-size:7.8px!important;
+  white-space:nowrap!important;
+}
+#cartoes .v112-card-name{
+  margin-top:6px!important;
+  padding-right:20px!important;
+  font-size:11.3px!important;
+  line-height:1.05!important;
+}
+#cartoes .v112-card-meta{
+  margin-top:1px!important;
+  padding-right:18px!important;
+  font-size:6.9px!important;
+}
+#cartoes .v112-card-track{
+  height:5px!important;
+  margin-top:auto!important;
+}
+#cartoes .v112-card-foot{
+  gap:4px!important;
+  margin-top:5px!important;
+}
+#cartoes .v112-card-foot small{
+  min-width:0!important;
+  font-size:5.9px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+}
+#cartoes .v112-card-foot small:last-child{text-align:right!important}
+#cartoes .v112-card-foot b{
+  display:block!important;
+  margin:1px 0 0!important;
+  font-size:7.2px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#cartoes .v112-more{
+  right:6px!important;
+  top:31px!important;
+  width:22px!important;
+  height:22px!important;
+  border-radius:8px!important;
+  font-size:14px!important;
+}
+/* resumo selecionado: um pouco mais baixo para acompanhar a nova linguagem visual */
+#cartoes .v112-selected-summary{
+  margin-top:8px!important;
+  padding:9px 12px!important;
+  border-radius:16px!important;
+  min-height:0!important;
+}
+#cartoes .v112-summary-head h3{font-size:14px!important}
+#cartoes .v112-summary-track{height:6px!important}
+#cartoes .v112-summary-values{margin-top:6px!important}
+
+/* Notebook/telas médias: continua sem setas e sem rolagem horizontal; quebra em grade limpa. */
+@media(max-width:1050px){
+  #cartoes .v112-carousel-track{
+    grid-auto-flow:row!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+@media(max-width:700px){
+  #cartoes .v112-carousel-track{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  #cartoes .v112-carousel-card{height:112px!important;min-height:112px!important}
+}
+@media(max-width:430px){
+  #cartoes .v112-carousel-track{grid-template-columns:1fr!important}
+  #cartoes .v112-carousel-card{height:106px!important;min-height:106px!important}
+}
+</style>
+
 </body></html>
