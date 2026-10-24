@@ -40,3 +40,7 @@ Para que os dados locais já existentes apareçam, publique no **mesmo domínio/
 - Seleção de temas movida para painel de personalização; sem chips no topo.
 - Cards pessoais removidos da Visão Geral.
 - Navegação Currículo/Formações/Publicações corrigida com fallback inline independente dos scripts externos.
+
+
+## Educação v82 — conteúdo ao vivo
+A pasta `api/` agora faz parte do projeto e deve ser publicada junto com os HTMLs. Em Vercel, `api/educacao-feed.js` funciona como endpoint serverless de mesma origem para evitar bloqueios de CORS e alimentar a Revista Educação com Agência FAPESP, Agência Brasil, GDELT e SciELO Brasil. A página mantém conteúdo brasileiro de fallback caso as fontes estejam temporariamente indisponíveis.
