@@ -3421,7 +3421,7 @@ setTimeout(init,50);
   function ensureProfilePanel(){
     if(document.getElementById('profilePanelModal'))return;
     const m=document.createElement('div');m.className='modalback';m.id='profilePanelModal';
-    m.innerHTML=`<div class="modal"><div class="profile-panel-head"><div><h2>Perfil</h2><p>Gerencie o acesso deste perfil.</p></div><button type="button" id="profilePanelClose" aria-label="Fechar">×</button></div><div class="profile-panel-body"><div class="profile-current" id="profileCurrent"></div><div class="profile-actions"><button class="btn" id="switchProfileBtn">Trocar perfil</button><button class="primary" id="togglePasswordBtn">Alterar senha</button></div><div class="password-box" id="passwordBox"><h3>Alterar senha</h3><p>A nova senha será usada neste navegador para o perfil selecionado.</p><div class="password-grid"><label>Senha atual<input type="password" id="oldProfilePass" inputmode="numeric" maxlength="20"></label><label>Nova senha<input type="password" id="newProfilePass" inputmode="numeric" maxlength="20"></label><label>Confirmar nova senha<input type="password" id="confirmProfilePass" inputmode="numeric" maxlength="20"></label></div><div class="password-hint">Use pelo menos 6 caracteres.</div><div class="password-error" id="profilePasswordMessage"></div><div class="modalfoot"><button class="primary" id="saveProfilePass">Salvar nova senha</button></div></div></div></div>`;
+    m.innerHTML=`<div class="modal"><div class="profile-panel-head"><div><span class="profile-premium-kicker">HUB PESSOAL</span><h2>Seu perfil</h2><p>Gerencie acesso e segurança sem sair do Hub.</p></div><button type="button" id="profilePanelClose" aria-label="Fechar">×</button></div><div class="profile-panel-body"><div class="profile-section-label">Perfil em uso</div><div class="profile-current" id="profileCurrent"></div><div class="profile-actions"><button class="btn" id="switchProfileBtn"><span>⇄</span><b>Trocar perfil</b><small>Marcos ou Christian</small></button><button class="primary" id="togglePasswordBtn"><span>⌁</span><b>Alterar senha</b><small>Segurança do acesso</small></button></div><div class="password-box" id="passwordBox"><h3>Alterar senha</h3><p>A nova senha será usada neste navegador para o perfil selecionado.</p><div class="password-grid"><label>Senha atual<input type="password" id="oldProfilePass" inputmode="numeric" maxlength="20"></label><label>Nova senha<input type="password" id="newProfilePass" inputmode="numeric" maxlength="20"></label><label>Confirmar nova senha<input type="password" id="confirmProfilePass" inputmode="numeric" maxlength="20"></label></div><div class="password-hint">Use pelo menos 6 caracteres.</div><div class="password-error" id="profilePasswordMessage"></div><div class="modalfoot"><button class="primary" id="saveProfilePass">Salvar nova senha</button></div></div><div class="profile-security-note"><span>✓</span><div><b>Perfis independentes</b><small>Cada perfil mantém seus próprios dados e preferências.</small></div></div></div></div>`;
     document.body.appendChild(m);
     m.onclick=e=>{if(e.target===m)m.classList.remove('open')};
     document.getElementById('profilePanelClose').onclick=()=>m.classList.remove('open');
@@ -6054,9 +6054,11 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     ov.id='profileSwitchOverlay';
     ov.innerHTML=`<div class="switch-card">
       <div class="switch-head">
-        <div><h2>Trocar perfil</h2><p>Escolha o perfil e informe a senha correspondente.</p></div>
+        <div class="switch-title-wrap"><span class="switch-premium-kicker">ACESSO PESSOAL</span><h2>Trocar perfil</h2><p>Escolha quem está usando o Hub e confirme o acesso.</p></div>
         <button type="button" class="switch-close" aria-label="Fechar">×</button>
       </div>
+      <div class="switch-body">
+      <div class="switch-section-label"><span>Perfis disponíveis</span><em>2 perfis</em></div>
       <div class="switch-profiles">
         <button type="button" class="switch-profile ${selected==='Marcos'?'active':''}" data-profile="Marcos">
           <span class="switch-avatar">M</span><span><b>Marcos</b><small>Perfil principal</small></span>
@@ -6065,9 +6067,11 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
           <span class="switch-avatar">C</span><span><b>Christian</b><small>Perfil pessoal</small></span>
         </button>
       </div>
-      <div class="switch-pass"><label>Senha</label><input id="profileSwitchPassword" type="password" autocomplete="current-password" placeholder="Digite a senha"></div>
+      <div class="switch-pass"><label>Senha do perfil</label><div class="switch-input-wrap"><span class="switch-lock">●</span><input id="profileSwitchPassword" type="password" autocomplete="current-password" placeholder="Digite a senha"></div></div>
       <div class="switch-error" id="profileSwitchError"></div>
-      <div class="switch-actions"><button type="button" class="switch-login" id="profileSwitchConfirm">Entrar neste perfil</button></div>
+      <div class="switch-actions"><button type="button" class="switch-login" id="profileSwitchConfirm"><span>Entrar neste perfil</span><b>→</b></button></div>
+      <div class="switch-security"><span>✓</span><p><b>Acesso local protegido</b><small>As informações deste perfil permanecem separadas neste navegador.</small></p></div>
+      </div>
     </div>`;
     document.body.appendChild(ov);
 
@@ -28797,13 +28801,11 @@ try{const last=localStorage.getItem('planejador_private_pension_market_refresh_v
 html,body{scroll-behavior:auto}
 body:not(.ppv-modal-open){overscroll-behavior-y:auto}
 #ppBankRailV62 [data-v62-profile]{
-  background:linear-gradient(145deg,#ffffff,#edf4ff)!important;
-  border:1px solid rgba(91,132,187,.32)!important;
-  box-shadow:0 7px 18px rgba(20,65,120,.12)!important;
+  background:transparent!important;border:0!important;box-shadow:none!important;
 }
+#ppBankRailV62 [data-v62-profile]:hover{background:rgba(255,255,255,.10)!important}
 #ppBankRailV62 [data-v62-profile] .v62-dot{
-  background:linear-gradient(135deg,#0b63f6,#45a7ff)!important;color:#fff!important;
-  border:2px solid rgba(255,255,255,.95)!important;box-shadow:0 0 0 2px rgba(11,99,246,.14)!important;
+  background:#fff!important;color:#153f78!important;border:0!important;box-shadow:none!important;
 }
 #ppBankRailV62 [data-v62-logout]{
   color:#fff!important;background:linear-gradient(145deg,#ef4444,#b91c1c)!important;
@@ -28980,9 +28982,75 @@ setTimeout(releaseScroll,350);setTimeout(releaseScroll,1400);
 document.addEventListener('click',e=>{if(e.target.closest?.('[data-close],.switch-close,.v62-hub-close'))setTimeout(releaseScroll,30)},true);
 
 // Premium rail and profile routing.
-function paintProfile(){const name=localStorage.getItem('planejador_active_profile')||'Marcos';document.querySelectorAll('#ppBankRailV62 [data-v62-profile] .v62-dot').forEach(x=>x.textContent=name.slice(0,1).toUpperCase())}
+function paintProfile(){document.querySelectorAll('#ppBankRailV62 [data-v62-profile] .v62-dot').forEach(x=>x.textContent='P')}
 paintProfile();
 const params=new URLSearchParams(location.search);if(params.get('action')==='profile'){setTimeout(()=>{try{window.openProfileSwitcher?.()}catch(e){}history.replaceState(null,'',location.pathname+location.hash)},500)}
 })();
 </script>
+
+<style id="pp-v73-profile-screen-premium-style">
+/* v73 — o atalho de Perfil volta a ser discreto; o premium fica na experiência aberta. */
+#ppBankRailV62 [data-v62-profile]{background:transparent!important;border:0!important;box-shadow:none!important}
+#ppBankRailV62 [data-v62-profile]:hover{background:rgba(255,255,255,.10)!important}
+#ppBankRailV62 [data-v62-profile] .v62-dot{background:#fff!important;color:#153f78!important;border:0!important;box-shadow:none!important;width:16px!important;height:16px!important;border-radius:50%!important;font-size:8px!important}
+
+#profilePanelModal{background:rgba(4,13,29,.70)!important;backdrop-filter:blur(18px) saturate(118%)!important}
+#profilePanelModal .modal{width:min(590px,calc(100vw - 28px))!important;border-radius:30px!important;border:1px solid rgba(186,205,229,.76)!important;background:linear-gradient(180deg,#fff,#f6f9fd)!important;box-shadow:0 44px 120px rgba(1,14,36,.44)!important}
+#profilePanelModal .profile-panel-head{position:relative!important;padding:31px 27px 25px!important;background:radial-gradient(circle at 88% -10%,rgba(108,190,255,.34),transparent 37%),linear-gradient(135deg,#071c3b 0%,#0a4285 62%,#087cca 100%)!important;align-items:flex-start!important}
+#profilePanelModal .profile-premium-kicker{display:block;margin-bottom:8px;font-size:8px;font-weight:950;letter-spacing:.19em;color:rgba(255,255,255,.62)}
+#profilePanelModal .profile-panel-head h2{font-size:26px!important;letter-spacing:-.04em!important;margin:0!important;color:#fff!important}
+#profilePanelModal .profile-panel-head p{margin-top:6px!important;font-size:11px!important;color:rgba(255,255,255,.73)!important}
+#profilePanelModal #profilePanelClose{width:38px!important;height:38px!important;border-radius:13px!important;border:1px solid rgba(255,255,255,.18)!important;background:rgba(255,255,255,.10)!important;color:#fff!important}
+#profilePanelModal .profile-panel-body{padding:20px 22px 22px!important}
+#profilePanelModal .profile-section-label{margin:0 2px 8px;font-size:9px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;color:#78879b}
+#profilePanelModal .profile-current{position:relative!important;padding:15px 16px!important;border-radius:20px!important;border:1px solid #dce6f2!important;background:linear-gradient(145deg,#fff,#eef5fc)!important;box-shadow:0 8px 22px rgba(20,58,104,.06)!important}
+#profilePanelModal .profile-current:after{content:'ATIVO';position:absolute;right:15px;top:50%;transform:translateY(-50%);padding:5px 8px;border-radius:999px;background:#e7f7ee;color:#087a41;font-size:8px;font-weight:950;letter-spacing:.08em}
+#profilePanelModal .profile-current .avatar{width:46px!important;height:46px!important;border-radius:15px!important;background:linear-gradient(135deg,#0b63f6,#55b7ff)!important;box-shadow:0 8px 18px rgba(11,99,246,.22)!important}
+#profilePanelModal .profile-current b{font-size:15px!important;color:#17263d!important}#profilePanelModal .profile-current span{font-size:10px!important}
+#profilePanelModal .profile-actions{grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:12px!important}
+#profilePanelModal .profile-actions button{min-height:74px!important;border-radius:18px!important;padding:12px 14px!important;display:grid!important;grid-template-columns:28px 1fr!important;grid-template-rows:auto auto!important;column-gap:9px!important;align-items:center!important;text-align:left!important;border:1px solid #dce5ef!important;box-shadow:0 7px 18px rgba(18,51,91,.055)!important;transition:.18s ease!important}
+#profilePanelModal .profile-actions button>span{grid-row:1/3;width:28px;height:28px;border-radius:10px;display:grid;place-items:center;background:#e8f2ff;color:#0b63f6;font-size:15px}
+#profilePanelModal .profile-actions button>b{font-size:12px;line-height:1.2}#profilePanelModal .profile-actions button>small{font-size:9px;font-weight:650;opacity:.68}
+#profilePanelModal #switchProfileBtn,#profilePanelModal #togglePasswordBtn{background:linear-gradient(155deg,#fff,#f5f8fc)!important;color:#1b385d!important;border:1px solid #dce5ef!important}
+#profilePanelModal .profile-actions button:hover{transform:translateY(-2px)!important;border-color:#bcd1ea!important;box-shadow:0 12px 25px rgba(18,67,126,.10)!important}
+#profilePanelModal .password-box{border-radius:20px!important;border:1px solid #dae4ef!important;background:#fff!important;box-shadow:0 8px 22px rgba(21,54,94,.05)!important}
+#profilePanelModal .profile-security-note{display:flex;gap:9px;align-items:center;margin-top:13px;padding:11px 13px;border-radius:15px;background:#eef6ff;border:1px solid #d8eaff;color:#244a76}
+#profilePanelModal .profile-security-note>span{width:23px;height:23px;border-radius:8px;display:grid;place-items:center;background:#d8ebff;color:#0867c5;font-weight:950;font-size:11px}
+#profilePanelModal .profile-security-note b{display:block;font-size:10px}.profile-security-note small{display:block;margin-top:2px;font-size:9px;color:#69809a}
+
+#profileSwitchOverlay{background:rgba(4,13,29,.72)!important;backdrop-filter:blur(20px) saturate(122%)!important}
+#profileSwitchOverlay .switch-card{width:min(610px,calc(100vw - 28px))!important;border-radius:31px!important;border:1px solid rgba(181,205,233,.76)!important;background:linear-gradient(180deg,#fff,#f5f9fd)!important;box-shadow:0 46px 124px rgba(1,14,36,.46)!important}
+#profileSwitchOverlay .switch-head{padding:31px 28px 24px!important;background:radial-gradient(circle at 88% -10%,rgba(108,190,255,.34),transparent 37%),linear-gradient(135deg,#071c3b 0%,#0a4285 62%,#087cca 100%)!important}
+#profileSwitchOverlay .switch-head:before{display:none!important}
+#profileSwitchOverlay .switch-premium-kicker{display:block;margin-bottom:8px;font-size:8px;font-weight:950;letter-spacing:.19em;color:rgba(255,255,255,.62)}
+#profileSwitchOverlay .switch-head h2{margin:0!important;font-size:27px!important;letter-spacing:-.045em!important}
+#profileSwitchOverlay .switch-head p{margin:6px 0 0!important;font-size:11px!important;color:rgba(255,255,255,.73)!important}
+#profileSwitchOverlay .switch-close{width:38px!important;height:38px!important;border-radius:13px!important}
+#profileSwitchOverlay .switch-body{padding:19px 22px 21px!important}
+#profileSwitchOverlay .switch-section-label{display:flex;align-items:center;justify-content:space-between;margin:0 2px 9px;font-size:9px;font-weight:950;letter-spacing:.11em;text-transform:uppercase;color:#78879b}
+#profileSwitchOverlay .switch-section-label em{font-style:normal;letter-spacing:0;text-transform:none;font-size:9px;color:#9aa6b6}
+#profileSwitchOverlay .switch-profiles{padding:0!important;margin:0!important;gap:10px!important}
+#profileSwitchOverlay .switch-profile{position:relative!important;min-height:90px!important;padding:14px 15px!important;border-radius:20px!important;background:linear-gradient(155deg,#fff,#f3f6fa)!important;border:1px solid #dfe7f0!important;box-shadow:0 8px 21px rgba(17,50,91,.055)!important}
+#profileSwitchOverlay .switch-profile:after{content:'Selecionar';position:absolute;right:13px;bottom:11px;font-size:8px;font-weight:850;color:#a0acba}
+#profileSwitchOverlay .switch-profile.active{background:linear-gradient(145deg,#eaf5ff,#e1efff)!important;border:1.5px solid #1680e8!important;box-shadow:0 0 0 3px rgba(22,128,232,.08),0 12px 26px rgba(18,78,145,.10)!important}
+#profileSwitchOverlay .switch-profile.active:after{content:'Selecionado';color:#0b68c5}
+#profileSwitchOverlay .switch-avatar{width:47px!important;height:47px!important;border-radius:16px!important;font-size:16px!important;background:#e9eef5!important;color:#27405f!important}
+#profileSwitchOverlay .switch-profile.active .switch-avatar{background:linear-gradient(135deg,#0b63f6,#55b7ff)!important;box-shadow:0 8px 18px rgba(11,99,246,.22)!important}
+#profileSwitchOverlay .switch-profile b{font-size:13px!important;color:#1d2f48}#profileSwitchOverlay .switch-profile.active b{color:#084f9c!important}#profileSwitchOverlay .switch-profile small{font-size:9px!important}
+#profileSwitchOverlay .switch-pass{margin:15px 0 0!important}
+#profileSwitchOverlay .switch-pass label{font-size:9px!important;letter-spacing:.08em;text-transform:uppercase;margin:0 0 6px 2px!important}
+#profileSwitchOverlay .switch-input-wrap{display:grid;grid-template-columns:35px 1fr;align-items:center;border:1px solid #d7e1ee;border-radius:15px;background:#fff;overflow:hidden;box-shadow:inset 0 1px 2px rgba(18,44,76,.035)}
+#profileSwitchOverlay .switch-input-wrap:focus-within{border-color:#1680e8!important;box-shadow:0 0 0 4px rgba(22,128,232,.09)!important}
+#profileSwitchOverlay .switch-lock{display:grid;place-items:center;color:#8aa0b9;font-size:7px}
+#profileSwitchOverlay .switch-pass input{min-height:47px!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding-left:0!important;background:transparent!important}
+#profileSwitchOverlay .switch-pass input:focus{box-shadow:none!important;border:0!important;outline:none!important}
+#profileSwitchOverlay .switch-error{margin:6px 2px 0!important}
+#profileSwitchOverlay .switch-actions{padding:0!important;margin:9px 0 0!important}
+#profileSwitchOverlay .switch-login{width:100%!important;min-height:47px!important;padding:0 15px!important;border-radius:15px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;background:linear-gradient(135deg,#0a55ae,#087fd5)!important;box-shadow:0 10px 22px rgba(8,93,176,.20)!important}
+#profileSwitchOverlay .switch-login b{font-size:17px;font-weight:500}
+#profileSwitchOverlay .switch-security{display:flex;gap:9px;align-items:center;margin-top:12px;padding:10px 12px;border-radius:14px;background:#eef6ff;border:1px solid #d8eaff;color:#244a76}
+#profileSwitchOverlay .switch-security>span{width:23px;height:23px;border-radius:8px;display:grid;place-items:center;background:#d8ebff;color:#0867c5;font-weight:950;font-size:11px}
+#profileSwitchOverlay .switch-security p{margin:0}#profileSwitchOverlay .switch-security b{display:block;font-size:10px}#profileSwitchOverlay .switch-security small{display:block;margin-top:2px;font-size:9px;color:#69809a}
+@media(max-width:560px){#profilePanelModal .profile-actions{grid-template-columns:1fr!important}#profileSwitchOverlay .switch-profiles{grid-template-columns:1fr!important}#profileSwitchOverlay .switch-head,#profilePanelModal .profile-panel-head{padding:27px 20px 21px!important}#profileSwitchOverlay .switch-body,#profilePanelModal .profile-panel-body{padding:16px!important}}
+</style>
 </body></html>
