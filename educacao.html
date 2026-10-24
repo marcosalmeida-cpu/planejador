@@ -736,4 +736,117 @@ new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true});
 [0,80,280,800].forEach(ms=>setTimeout(enhance,ms));
 })();
 </script>
+
+<style id="pp-v84-academic-responsive-fix">
+/* V84 — histórico acadêmico sem overflow horizontal */
+#edu-formacoes,
+#edu-formacoes.active,
+#edu-formacoes #v117FormationRoot,
+#edu-formacoes .v121-formation-deck,
+#edu-formacoes .v121-detail,
+#edu-formacoes .v119-detail-kicker,
+#edu-formacoes .v119-summary-grid,
+#edu-formacoes .v119-history-wrap,
+#edu-formacoes .edu83-history-tools{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+#edu-formacoes.active{overflow-x:clip!important}
+#edu-formacoes .v117-form-head{
+  width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;
+  display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:14px!important;
+}
+#edu-formacoes .v117-form-head>div{min-width:0!important}
+#edu-formacoes .v117-form-head h1,#edu-formacoes .v117-form-head p{max-width:100%!important;overflow-wrap:anywhere!important}
+#edu-formacoes .v117-add-btn{max-width:100%!important;justify-self:end!important}
+#edu-formacoes .v119-detail-kicker{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:12px!important}
+#edu-formacoes .v119-detail-kicker .left{min-width:0!important}
+#edu-formacoes .v119-detail-kicker .left h2,#edu-formacoes .v119-detail-kicker .left p{max-width:100%!important;overflow-wrap:anywhere!important}
+#edu-formacoes .v119-detail-actions{display:flex!important;flex-wrap:wrap!important;gap:6px!important;justify-content:flex-end!important}
+#edu-formacoes .v119-summary-grid{grid-template-columns:repeat(auto-fit,minmax(145px,1fr))!important}
+#edu-formacoes .v119-summary-grid>div{min-width:0!important;overflow:hidden!important}
+#edu-formacoes .v119-summary-grid b{white-space:normal!important;overflow-wrap:anywhere!important}
+#edu-formacoes .edu83-history-tools{grid-template-columns:minmax(0,1.4fr) minmax(150px,.65fr) max-content!important}
+#edu-formacoes .edu83-history-search,#edu-formacoes .edu83-period-select{min-width:0!important;max-width:100%!important}
+#edu-formacoes .v119-history-wrap{overflow-x:hidden!important;overflow-y:visible!important}
+#edu-formacoes .v119-history-table{
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  table-layout:fixed!important;
+}
+#edu-formacoes .v119-history-table th,#edu-formacoes .v119-history-table td{
+  min-width:0!important;max-width:none!important;white-space:normal!important;
+  overflow-wrap:anywhere!important;word-break:normal!important;
+}
+#edu-formacoes .v119-history-table td.name{min-width:0!important}
+/* 7-colunas do histórico tradicional */
+#edu-formacoes .v119-history-table th:nth-child(1),#edu-formacoes .v119-history-table td:nth-child(1){width:9%!important}
+#edu-formacoes .v119-history-table th:nth-child(2),#edu-formacoes .v119-history-table td:nth-child(2){width:28%!important}
+#edu-formacoes .v119-history-table th:nth-child(3),#edu-formacoes .v119-history-table td:nth-child(3){width:8%!important}
+#edu-formacoes .v119-history-table th:nth-child(4),#edu-formacoes .v119-history-table td:nth-child(4){width:10%!important}
+#edu-formacoes .v119-history-table th:nth-child(5),#edu-formacoes .v119-history-table td:nth-child(5){width:13%!important}
+#edu-formacoes .v119-history-table th:nth-child(6),#edu-formacoes .v119-history-table td:nth-child(6){width:14%!important}
+#edu-formacoes .v119-history-table th:nth-child(7),#edu-formacoes .v119-history-table td:nth-child(7){width:18%!important}
+/* currículo de Ciências Contábeis: 9 colunas compactas */
+#edu-formacoes .v119-history-table:has(th:nth-child(9)){min-width:0!important;table-layout:fixed!important}
+#edu-formacoes .v119-history-table:has(th:nth-child(9)) th:nth-child(1),#edu-formacoes .v119-history-table:has(th:nth-child(9)) td:nth-child(1){width:5%!important}
+#edu-formacoes .v119-history-table:has(th:nth-child(9)) th:nth-child(2),#edu-formacoes .v119-history-table:has(th:nth-child(9)) td:nth-child(2){width:8%!important}
+#edu-formacoes .v119-history-table:has(th:nth-child(9)) th:nth-child(3),#edu-formacoes .v119-history-table:has(th:nth-child(9)) td:nth-child(3){width:29%!important;min-width:0!important}
+#edu-formacoes .v119-history-table:has(th:nth-child(9)) th:nth-child(4),#edu-formacoes .v119-history-table:has(th:nth-child(9)) td:nth-child(4){width:7%!important}
+#edu-formacoes .v119-history-table:has(th:nth-child(9)) th:nth-child(5),#edu-formacoes .v119-history-table:has(th:nth-child(9)) td:nth-child(5){width:6%!important}
+#edu-formacoes .v119-history-table:has(th:nth-child(9)) th:nth-child(6),#edu-formacoes .v119-history-table:has(th:nth-child(9)) td:nth-child(6){width:8%!important}
+#edu-formacoes .v119-history-table:has(th:nth-child(9)) th:nth-child(7),#edu-formacoes .v119-history-table:has(th:nth-child(9)) td:nth-child(7){width:13%!important}
+#edu-formacoes .v119-history-table:has(th:nth-child(9)) th:nth-child(8),#edu-formacoes .v119-history-table:has(th:nth-child(9)) td:nth-child(8){width:12%!important}
+#edu-formacoes .v119-history-table:has(th:nth-child(9)) th:nth-child(9),#edu-formacoes .v119-history-table:has(th:nth-child(9)) td:nth-child(9){width:12%!important}
+
+/* Notebook / desktop comum: prioriza o histórico e transforma a lateral em seletor */
+@media(max-width:1500px){
+  #edu-formacoes #v117FormationRoot{display:block!important}
+  #edu-formacoes .v121-formation-deck{
+    position:relative!important;top:auto!important;margin:0 0 10px!important;padding:10px 12px!important;
+  }
+  #edu-formacoes .v121-deck-head{
+    display:grid!important;grid-template-columns:minmax(0,1fr) minmax(220px,340px)!important;
+    gap:12px!important;align-items:center!important;margin:0!important;padding:0!important;border:0!important;
+  }
+  #edu-formacoes .v121-deck-head p{margin-bottom:0!important}
+  #edu-formacoes .v121-deck-tools{display:none!important}
+  #edu-formacoes .edu83-course-select{display:block!important;width:100%!important;max-width:340px!important;justify-self:end!important}
+  #edu-formacoes .v121-formation-track,#edu-formacoes .v121-legend{display:none!important}
+  #edu-formacoes .v121-detail{width:100%!important}
+}
+@media(max-width:1050px){
+  #edu-formacoes .v117-form-head{grid-template-columns:1fr!important}
+  #edu-formacoes .v117-add-btn{justify-self:start!important}
+  #edu-formacoes .v121-deck-head{grid-template-columns:1fr!important}
+  #edu-formacoes .edu83-course-select{max-width:none!important;justify-self:stretch!important}
+  #edu-formacoes .edu83-history-tools{grid-template-columns:1fr 210px!important}
+  #edu-formacoes .edu83-history-count{grid-column:1/-1!important}
+  #edu-formacoes .v119-history-table th,#edu-formacoes .v119-history-table td{font-size:8.5px!important;padding:7px 5px!important}
+}
+@media(max-width:760px){
+  #edu-formacoes .v119-detail-kicker{grid-template-columns:1fr!important}
+  #edu-formacoes .v119-detail-actions{justify-content:flex-start!important}
+  #edu-formacoes .v119-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #edu-formacoes .edu83-history-tools{grid-template-columns:1fr!important}
+  #edu-formacoes .edu83-history-count{grid-column:auto!important}
+  #edu-formacoes .v119-history-wrap{border:0!important;overflow:visible!important}
+  #edu-formacoes .v119-history-table,#edu-formacoes .v119-history-table tbody{display:block!important;width:100%!important}
+  #edu-formacoes .v119-history-table thead{display:none!important}
+  #edu-formacoes .v119-history-table tr{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px 10px!important;margin:0 0 8px!important;padding:10px!important;border:1px solid #e1e8ef!important;border-radius:12px!important;background:#fff!important}
+  #edu-formacoes .v119-history-table td{display:block!important;width:auto!important;border:0!important;padding:2px 0!important;font-size:10px!important;min-width:0!important}
+  #edu-formacoes .v119-history-table td.name{grid-column:1/-1!important;width:auto!important;font-size:11px!important}
+  #edu-formacoes .v119-history-table:has(th:nth-child(9)) td:nth-child(3){grid-column:1/-1!important}
+}
+@media(max-width:480px){
+  #edu-formacoes.active{padding:6px!important}
+  #edu-formacoes .v117-form-head{padding:14px!important}
+  #edu-formacoes .v117-add-btn{width:100%!important;justify-self:stretch!important}
+  #edu-formacoes .v119-summary-grid{grid-template-columns:1fr!important}
+  #edu-formacoes .v119-history-table tr{grid-template-columns:1fr!important}
+  #edu-formacoes .v119-history-table td.name,#edu-formacoes .v119-history-table:has(th:nth-child(9)) td:nth-child(3){grid-column:auto!important}
+}
+</style>
+
 </body></html>
