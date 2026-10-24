@@ -22,3 +22,12 @@ Para que os dados locais já existentes apareçam, publique no **mesmo domínio/
 - Rotinas repetitivas de sincronização e atualização visual tiveram a frequência reduzida para melhorar a resposta de listas e formulários.
 - Tela de troca de perfil recebeu acabamento premium; ação Sair ganhou destaque vermelho.
 - Perfil/Sair e comportamento de rolagem padronizados também nas páginas Educação, Saúde e Entretenimento.
+
+## Ajustes v80 — Educação editorial
+- Visão Geral de Educação redesenhada como home editorial independente das subpáginas pessoais.
+- Curadoria por temas escolhidos pelo usuário, salva no navegador.
+- Notícias recentes via GDELT DOC 2.0, com filtro para imprensa brasileira em português e atualização em intervalos moderados.
+- Artigos acadêmicos recentes via Crossref REST API.
+- Cache local para reduzir chamadas externas e preservar desempenho.
+- Currículo, Formações e Publicações receberam nova identidade visual e regras responsivas.
+- O conteúdo ao vivo depende de conexão com a internet; se a API estiver indisponível, o Hub mantém o conteúdo já armazenado no navegador e os estados locais da página.
