@@ -29093,20 +29093,80 @@ const params=new URLSearchParams(location.search);if(params.get('action')==='pro
 </style>
 
 <style id="pp-v76-profile-standalone-style">
-/* v76 — fluxo de perfil independente dos painéis legados */
-#profilePanelV76,#profileSwitchV76,#profileCreateV76,#profilePasswordV76{position:fixed;inset:0;z-index:30000;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(2,7,16,.84);backdrop-filter:blur(22px) saturate(112%)}
+/* v79 — Perfil premium limpo: layout independente, sem colisões com estilos legados */
+#profilePanelV76,#profileSwitchV76,#profileCreateV76,#profilePasswordV76{
+  position:fixed;inset:0;z-index:30000;display:none;align-items:center;justify-content:center;
+  padding:20px;background:rgba(2,7,15,.84);backdrop-filter:blur(24px) saturate(115%);
+  -webkit-backdrop-filter:blur(24px) saturate(115%);overflow:auto
+}
 #profilePanelV76.open,#profileSwitchV76.open,#profileCreateV76.open,#profilePasswordV76.open{display:flex}
-.v76-profile-card{width:min(570px,calc(100vw - 24px));max-height:none;overflow:hidden;border-radius:24px;background:linear-gradient(180deg,#081827 0%,#071421 100%);border:1px solid rgba(86,141,199,.24);box-shadow:0 32px 90px rgba(0,0,0,.56);color:#edf6ff}
-.v76-profile-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:17px 20px;background:radial-gradient(circle at 91% -20%,rgba(45,145,255,.22),transparent 42%),linear-gradient(135deg,#0a1a2d,#0a2744);border-bottom:1px solid rgba(92,149,207,.15)}
-.v76-profile-kicker{display:block;color:#75c5ff;font-size:7px;font-weight:950;letter-spacing:.20em;text-transform:uppercase}.v76-profile-head h2{margin:5px 0 0;color:#f7fbff;font-size:22px;line-height:1;letter-spacing:-.03em}.v76-profile-head p{margin:5px 0 0;color:#9ab0c6;font-size:9.5px;line-height:1.25}
-.v76-close{flex:0 0 34px;width:34px;height:34px;border-radius:11px;border:1px solid rgba(104,160,219,.24);background:#102640;color:#e5f2ff;font-size:18px;font-weight:800;cursor:pointer}.v76-close:hover{background:#173555;border-color:rgba(113,180,248,.42)}
-.v76-profile-body{padding:15px 18px 17px}.v76-label{margin:0 1px 7px;color:#86a0b9;font-size:8px;font-weight:950;letter-spacing:.13em;text-transform:uppercase}
-.v76-current{position:relative;display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:16px;background:linear-gradient(145deg,#0d2138,#0a1b2f);border:1px solid rgba(99,153,209,.22)}.v76-current:after{content:'ATIVO';position:absolute;right:13px;top:50%;transform:translateY(-50%);padding:4px 8px;border-radius:999px;background:rgba(22,167,111,.14);border:1px solid rgba(35,207,142,.22);color:#73e6b7;font-size:7px;font-weight:950;letter-spacing:.08em}.v76-avatar{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#176ff0,#42afff);box-shadow:0 7px 18px rgba(25,115,238,.23);font-size:15px;font-weight:900;color:#fff}.v76-current b{display:block;color:#f6fbff;font-size:12.5px}.v76-current small{display:block;margin-top:3px;color:#91a6bb;font-size:8.6px;white-space:nowrap}
-.v76-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.v76-action{appearance:none;min-width:0;min-height:54px;padding:9px 11px;border-radius:15px;border:1px solid rgba(93,145,202,.22)!important;background:linear-gradient(145deg,#0d2137,#0a192b)!important;color:#edf6ff!important;display:flex!important;align-items:center;gap:9px;text-align:left;cursor:pointer;transition:.16s ease}.v76-action:hover{transform:translateY(-1px);border-color:rgba(92,171,255,.42)!important;background:linear-gradient(145deg,#102a47,#0b2037)!important}.v76-action.primary{background:linear-gradient(135deg,#0d4f8f,#0a3768)!important;border-color:rgba(66,158,255,.40)!important}.v76-action.primary:hover{background:linear-gradient(135deg,#1263aa,#0c467f)!important}.v76-action.wide{grid-column:1/-1;min-height:50px}.v76-action-icon{flex:0 0 30px;width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:rgba(45,139,235,.14);border:1px solid rgba(69,156,246,.18);color:#82c8ff;font-size:13px;font-weight:950}.v76-action.password .v76-action-icon{background:rgba(141,106,255,.10);border-color:rgba(157,127,255,.15);color:#b9a2ff}.v76-action.create .v76-action-icon{background:rgba(36,190,201,.09);border-color:rgba(60,207,218,.13);color:#73dce4}.v76-action-copy{display:block;min-width:0;flex:1}.v76-action-copy b{display:block;color:#f5faff!important;font-size:10.5px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v76-action-copy small{display:block;margin-top:3px;color:#8ea5bb!important;font-size:7.9px;font-weight:650;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v76-chevron{margin-left:auto;color:#6f8ba7!important;font-size:15px}
-.v76-security{display:flex;align-items:center;gap:8px;margin-top:9px;padding:8px 10px;border-radius:13px;background:rgba(40,123,205,.075);border:1px solid rgba(68,145,220,.14)}.v76-security>span{flex:0 0 22px;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:rgba(37,137,234,.14);color:#74c1ff;font-size:10px;font-weight:950}.v76-security b{display:block;color:#d2e5f7!important;font-size:8.8px;white-space:nowrap}.v76-security small{display:block;margin-top:1px;color:#89a0b7!important;font-size:7.7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.v76-password-box{display:none;margin-top:12px;padding:15px;border-radius:18px;background:#0a1a2c;border:1px solid rgba(93,145,202,.18)}.v76-password-box.open{display:block}.v76-password-box h3{margin:0;color:#eef6ff;font-size:13px}.v76-password-box p{margin:5px 0 13px;color:#7189a2;font-size:9.5px}.v76-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.v76-field{display:flex;flex-direction:column;gap:6px}.v76-field.full{grid-column:1/-1}.v76-field label{color:#91a7be;font-size:9px;font-weight:800}.v76-field input{height:43px;border-radius:12px;border:1px solid rgba(102,151,201,.22);background:#06121e;color:#eef6ff;padding:0 12px;outline:none}.v76-field input:focus{border-color:#3c9cf4;box-shadow:0 0 0 3px rgba(60,156,244,.10)}.v76-error{min-height:16px;margin-top:8px;color:#ff8793;font-size:9px;font-weight:700}.v76-success{color:#5ed7a0}.v76-form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.v76-btn{min-height:41px;padding:0 15px;border-radius:12px;border:1px solid rgba(98,150,203,.18);background:#0e2239;color:#bad0e6;font-weight:800;cursor:pointer}.v76-btn.primary{border:0;background:linear-gradient(135deg,#1569ca,#2b93eb);color:#fff}
+.v76-profile-card{
+  width:min(520px,calc(100vw - 28px));max-height:calc(100vh - 36px);overflow:auto;
+  border-radius:26px;background:linear-gradient(180deg,#0a1727 0%,#07131f 100%);
+  border:1px solid rgba(104,153,203,.20);box-shadow:0 34px 100px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.025);
+  color:#edf6ff;scrollbar-width:none
+}
+.v76-profile-card::-webkit-scrollbar{display:none}
+.v76-profile-head{
+  display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:18px;
+  padding:25px 26px 20px!important;background:radial-gradient(circle at 92% -30%,rgba(45,145,255,.21),transparent 44%),linear-gradient(135deg,#0b1c30,#0a2847)!important;
+  border-bottom:1px solid rgba(91,148,207,.14)!important
+}
+.v76-profile-head>div{min-width:0}
+.v76-profile-kicker{display:block;color:#70baff;font-size:8px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+.v76-profile-head h2{margin:7px 0 0!important;color:#f7fbff!important;font-size:25px!important;line-height:1.05!important;letter-spacing:-.035em!important;white-space:nowrap}
+.v76-profile-head p{margin:7px 0 0!important;color:#9bb0c5!important;font-size:10.5px!important;line-height:1.4!important;white-space:normal!important}
+.v76-close{flex:0 0 38px;width:38px;height:38px;border-radius:13px;border:1px solid rgba(107,164,223,.22);background:rgba(18,45,75,.78);color:#e8f4ff;font-size:20px;font-weight:800;cursor:pointer;display:grid;place-items:center;line-height:1}
+.v76-close:hover{background:#173957;border-color:rgba(113,180,248,.46)}
+.v76-profile-body{padding:20px 22px 22px!important}
+
+/* Perfil atual */
+.v76-current{
+  position:relative;display:flex;align-items:center;gap:13px;padding:14px 15px;border-radius:18px;
+  background:linear-gradient(145deg,#10253e,#0b1e33);border:1px solid rgba(93,153,214,.22)
+}
+.v76-current:after{content:'ATIVO';position:absolute;right:14px;top:50%;transform:translateY(-50%);padding:5px 9px;border-radius:999px;background:rgba(22,167,111,.13);border:1px solid rgba(35,207,142,.20);color:#70e3b3;font-size:7.5px;font-weight:900;letter-spacing:.08em}
+.v76-avatar{flex:0 0 42px;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,#1777f3,#48afff);box-shadow:0 8px 20px rgba(25,115,238,.24);font-size:16px;font-weight:900;color:#fff}
+.v76-current>span:last-child{display:block;min-width:0;padding-right:72px}
+.v76-current b{display:block;color:#f7fbff;font-size:13.5px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v76-current small{display:block;margin-top:4px;color:#91a6bb;font-size:9px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Lista única de ações */
+.v79-profile-menu{margin-top:14px;border-radius:18px;overflow:hidden;border:1px solid rgba(91,145,201,.18);background:#0a1a2b}
+.v76-actions{display:block!important;margin:0!important}
+.v76-action{
+  appearance:none;width:100%!important;min-width:0!important;min-height:66px!important;margin:0!important;padding:0 15px!important;border:0!important;border-bottom:1px solid rgba(91,145,201,.13)!important;border-radius:0!important;
+  background:transparent!important;color:#edf6ff!important;display:flex!important;align-items:center!important;gap:12px!important;text-align:left!important;cursor:pointer!important;box-shadow:none!important;transform:none!important;transition:background .16s ease!important
+}
+.v76-action:last-child{border-bottom:0!important}
+.v76-action:hover{background:rgba(46,129,216,.085)!important;transform:none!important}
+.v76-action.primary{background:linear-gradient(90deg,rgba(24,103,186,.17),rgba(24,103,186,.035))!important}
+.v76-action.primary:hover{background:linear-gradient(90deg,rgba(28,121,216,.25),rgba(28,121,216,.07))!important}
+.v76-action.wide{min-height:66px!important}
+.v76-action-icon{flex:0 0 36px;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(45,139,235,.13);border:1px solid rgba(69,156,246,.16);color:#78c3ff;font-size:15px;font-weight:900}
+.v76-action.password .v76-action-icon{background:rgba(141,106,255,.10);border-color:rgba(157,127,255,.15);color:#b9a2ff}
+.v76-action.create .v76-action-icon{background:rgba(36,190,201,.09);border-color:rgba(60,207,218,.13);color:#73dce4}
+.v76-action-copy{display:block;min-width:0;flex:1}
+.v76-action-copy b{display:block;color:#f4f9ff!important;font-size:11.5px!important;line-height:1.2!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.v76-action-copy small{display:block;margin-top:4px;color:#859bb2!important;font-size:8.7px!important;font-weight:600!important;line-height:1.2!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.v76-chevron{flex:0 0 auto;margin-left:auto;color:#67849f!important;font-size:18px!important;line-height:1}
+.v79-profile-note{margin:13px 2px 0;color:#71889f;font-size:8.8px;line-height:1.45;text-align:center}
+
+/* Formulários auxiliares: troca, criação e senha */
+.v76-password-box{display:none}.v76-password-box.open{display:block}
+.v76-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.v76-field{display:flex;flex-direction:column;gap:6px}.v76-field.full{grid-column:1/-1}.v76-field label{color:#93a8bd;font-size:9px;font-weight:800}.v76-field input{height:45px;border-radius:13px;border:1px solid rgba(102,151,201,.22);background:#06121e;color:#eef6ff;padding:0 12px;outline:none}.v76-field input:focus{border-color:#3c9cf4;box-shadow:0 0 0 3px rgba(60,156,244,.10)}
+.v76-error{min-height:16px;margin-top:9px;color:#ff8793;font-size:9px;font-weight:700}.v76-success{color:#5ed7a0}.v76-form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:11px}.v76-btn{min-height:42px;padding:0 16px;border-radius:12px;border:1px solid rgba(98,150,203,.18);background:#0e2239;color:#bad0e6;font-weight:800;cursor:pointer}.v76-btn.primary{border:0;background:linear-gradient(135deg,#1569ca,#2b93eb);color:#fff}
 .v76-switch-list{display:grid;gap:10px}.v76-switch-option{width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:17px;border:1px solid rgba(94,147,201,.18);background:#0b1d31;color:#edf6ff;text-align:left;cursor:pointer}.v76-switch-option.active{background:linear-gradient(145deg,#103861,#0d2948);border-color:#328ff0;box-shadow:0 0 0 2px rgba(50,143,240,.08)}.v76-switch-option .v76-avatar{width:40px;height:40px;border-radius:12px;box-shadow:none;background:#13263e;color:#9ab6d2;font-size:14px}.v76-switch-option.active .v76-avatar{background:linear-gradient(135deg,#1777f3,#45a9ff);color:#fff}.v76-switch-option b{display:block;color:#eef6ff;font-size:12px}.v76-switch-option small{display:block;margin-top:3px;color:#7289a3;font-size:8.7px}.v76-switch-check{margin-left:auto;color:#62baff;font-size:15px;font-weight:900}
-@media(max-width:560px){#profilePanelV76,#profileSwitchV76,#profileCreateV76,#profilePasswordV76{padding:10px;overflow-y:auto}.v76-profile-card{width:min(100%,540px)}.v76-profile-head{padding:15px 16px}.v76-profile-body{padding:13px}.v76-actions{grid-template-columns:1fr 1fr}.v76-grid{grid-template-columns:1fr}.v76-field.full{grid-column:1}.v76-current:after{position:static;transform:none;margin-left:auto}.v76-form-actions{flex-direction:column-reverse}.v76-btn{width:100%}}@media(max-width:420px){.v76-actions{grid-template-columns:1fr}.v76-action.wide{grid-column:1}.v76-security small{white-space:normal}.v76-profile-head p{display:none}}
+
+@media(max-width:560px){
+  #profilePanelV76,#profileSwitchV76,#profileCreateV76,#profilePasswordV76{padding:10px}
+  .v76-profile-card{width:min(100%,520px);max-height:calc(100vh - 20px);border-radius:22px}
+  .v76-profile-head{padding:20px 18px 17px!important}.v76-profile-head h2{font-size:23px!important}.v76-profile-head p{font-size:9.8px!important}
+  .v76-profile-body{padding:16px!important}.v76-current{padding:12px}.v76-current>span:last-child{padding-right:58px}.v76-current:after{right:10px}
+  .v76-action{min-height:62px!important;padding:0 12px!important}.v76-action.wide{min-height:62px!important}
+  .v76-grid{grid-template-columns:1fr}.v76-field.full{grid-column:1}.v76-form-actions{flex-direction:column-reverse}.v76-btn{width:100%}
+}
+@media(max-width:380px){.v76-profile-head p{display:none}.v76-current small{white-space:normal}.v76-action-copy small{white-space:normal!important}.v76-action{min-height:68px!important}}
 </style>
 <script id="pp-v76-profile-standalone-script">
 (function(){
@@ -29160,7 +29220,7 @@ function openCreate(){
 }
 function openPanel(){
  closeLegacy();document.getElementById('profilePanelV76')?.remove();const x=shell('profilePanelV76','Seu perfil','Gerencie acesso e segurança sem sair do Hub.');const p=active();
- x.body.innerHTML='<div class="v76-label">Perfil em uso</div><div class="v76-current"><span class="v76-avatar">'+esc(p.charAt(0).toUpperCase())+'</span><span><b>'+esc(p)+'</b><small>Perfil financeiro independente</small></span></div><div class="v76-actions"><button type="button" class="v76-action primary" id="v76Switch"><span class="v76-action-icon">⇄</span><span class="v76-action-copy"><b>Trocar perfil</b><small>Escolher outro perfil</small></span><span class="v76-chevron">›</span></button><button type="button" class="v76-action password" id="v76Password"><span class="v76-action-icon">⌁</span><span class="v76-action-copy"><b>Alterar senha</b><small>Segurança do acesso</small></span><span class="v76-chevron">›</span></button><button type="button" class="v76-action create wide" id="v76Create"><span class="v76-action-icon">+</span><span class="v76-action-copy"><b>Novo perfil</b><small>Criar espaço independente</small></span><span class="v76-chevron">›</span></button></div><div class="v76-security"><span>✓</span><span><b>Perfis independentes</b><small>Cada perfil mantém seus próprios dados e preferências.</small></span></div>';
+ x.body.innerHTML='<div class="v76-current"><span class="v76-avatar">'+esc(p.charAt(0).toUpperCase())+'</span><span><b>'+esc(p)+'</b><small>Perfil ativo neste dispositivo</small></span></div><div class="v79-profile-menu"><div class="v76-actions"><button type="button" class="v76-action primary" id="v76Switch"><span class="v76-action-icon">⇄</span><span class="v76-action-copy"><b>Trocar perfil</b><small>Alternar entre os perfis do Hub</small></span><span class="v76-chevron">›</span></button><button type="button" class="v76-action password" id="v76Password"><span class="v76-action-icon">⌁</span><span class="v76-action-copy"><b>Alterar senha</b><small>Atualizar a senha deste perfil</small></span><span class="v76-chevron">›</span></button><button type="button" class="v76-action create wide" id="v76Create"><span class="v76-action-icon">+</span><span class="v76-action-copy"><b>Novo perfil</b><small>Criar um espaço separado no Hub</small></span><span class="v76-chevron">›</span></button></div></div><div class="v79-profile-note">Cada perfil mantém dados, preferências e senha independentes.</div>';
  document.getElementById('v76Switch').onclick=()=>{x.close();openSwitch()};document.getElementById('v76Create').onclick=()=>{x.close();openCreate()};document.getElementById('v76Password').onclick=()=>{x.close();openPassword(p)};
 }
 /* Acesso único: o P abre este painel e bloqueia os fluxos legados. */
@@ -29405,13 +29465,3 @@ window.ppOpenProfileV76=openPanel;
 })();
 </script>
 
-<style id="pp-v78-profile-compact-fix">
-#profilePanelV76 .v76-profile-card{overflow:hidden!important;max-height:none!important}
-#profilePanelV76 .v76-action,#profilePanelV76 .v76-action.primary{color:#edf6ff!important}
-#profilePanelV76 .v76-action-copy b{color:#f5faff!important}
-#profilePanelV76 .v76-action-copy small{color:#8ea5bb!important}
-#profilePanelV76 .v76-security b{color:#d2e5f7!important}
-#profilePanelV76 .v76-security small{color:#89a0b7!important}
-#profilePanelV76 .v76-action.primary{background:linear-gradient(135deg,#0d4f8f,#0a3768)!important}
-#profilePanelV76 .v76-action.password,#profilePanelV76 .v76-action.create{background:linear-gradient(145deg,#0d2137,#0a192b)!important}
-</style>
