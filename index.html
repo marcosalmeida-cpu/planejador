@@ -29054,3 +29054,207 @@ const params=new URLSearchParams(location.search);if(params.get('action')==='pro
 @media(max-width:560px){#profilePanelModal .profile-actions{grid-template-columns:1fr!important}#profileSwitchOverlay .switch-profiles{grid-template-columns:1fr!important}#profileSwitchOverlay .switch-head,#profilePanelModal .profile-panel-head{padding:27px 20px 21px!important}#profileSwitchOverlay .switch-body,#profilePanelModal .profile-panel-body{padding:16px!important}}
 </style>
 </body></html>
+
+
+<style id="pp-v74-profile-dark-premium-style">
+/* v74 — Perfil dark premium. Corrige duplicação/quebra dos botões da v73. */
+#profilePanelModal,
+#profileSwitchOverlay,
+#profileCreateV46,
+#profileSwitchV46{
+  background:rgba(2,8,18,.80)!important;
+  backdrop-filter:blur(24px) saturate(125%)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(125%)!important;
+}
+
+/* Painel principal */
+#profilePanelModal .modal{
+  width:min(600px,calc(100vw - 28px))!important;
+  border-radius:30px!important;
+  overflow:hidden!important;
+  border:1px solid rgba(111,151,197,.24)!important;
+  background:
+    radial-gradient(circle at 88% 0%,rgba(37,130,255,.13),transparent 34%),
+    linear-gradient(160deg,#08121f 0%,#0a1728 55%,#0b1b2e 100%)!important;
+  box-shadow:0 38px 120px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.035)!important;
+  color:#eef6ff!important;
+}
+#profilePanelModal .profile-panel-head{
+  padding:29px 28px 24px!important;
+  background:
+    radial-gradient(circle at 92% 2%,rgba(37,145,255,.20),transparent 31%),
+    linear-gradient(135deg,rgba(10,29,52,.98),rgba(10,36,65,.94))!important;
+  border-bottom:1px solid rgba(127,165,207,.15)!important;
+}
+#profilePanelModal .profile-panel-head:after{
+  content:"";position:absolute;left:28px;right:28px;bottom:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(67,157,255,.48),transparent)
+}
+#profilePanelModal .profile-premium-kicker{
+  color:#72b8ff!important;font-size:8px!important;letter-spacing:.20em!important
+}
+#profilePanelModal .profile-panel-head h2{color:#f6fbff!important;font-size:27px!important}
+#profilePanelModal .profile-panel-head p{color:#91a7bf!important;font-size:11px!important}
+#profilePanelModal #profilePanelClose{
+  width:38px!important;height:38px!important;border-radius:13px!important;
+  border:1px solid rgba(150,183,220,.18)!important;background:rgba(255,255,255,.045)!important;
+  color:#dcecff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important
+}
+#profilePanelModal #profilePanelClose:hover{background:rgba(255,255,255,.09)!important;border-color:rgba(106,171,243,.35)!important}
+#profilePanelModal .profile-panel-body{padding:21px 22px 23px!important;background:transparent!important}
+#profilePanelModal .profile-section-label{color:#71869e!important}
+#profilePanelModal .profile-current{
+  min-height:58px!important;padding:14px 16px!important;border-radius:19px!important;
+  border:1px solid rgba(111,151,197,.20)!important;
+  background:linear-gradient(145deg,rgba(18,39,65,.92),rgba(12,27,47,.96))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 13px 30px rgba(0,0,0,.16)!important
+}
+#profilePanelModal .profile-current:after{
+  background:rgba(26,200,121,.12)!important;border:1px solid rgba(51,214,139,.20)!important;
+  color:#5ee8a6!important;padding:5px 9px!important
+}
+#profilePanelModal .profile-current .avatar{
+  width:45px!important;height:45px!important;border-radius:14px!important;
+  background:linear-gradient(135deg,#1677ff,#4fb3ff)!important;
+  color:#fff!important;box-shadow:0 9px 24px rgba(22,119,255,.27)!important
+}
+#profilePanelModal .profile-current b{color:#f4f9ff!important;font-size:14px!important}
+#profilePanelModal .profile-current span{color:#8499b0!important;font-size:9.5px!important}
+
+/* Ações — corrige o bug da v73: o botão legado escondido voltava por causa de display:grid!important */
+#profilePanelModal #switchProfileLegacyV46{display:none!important}
+#profilePanelModal .profile-actions{
+  display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important;margin-top:12px!important
+}
+#profilePanelModal .profile-actions button{
+  min-width:0!important;min-height:70px!important;margin:0!important;padding:12px 13px!important;
+  border-radius:17px!important;border:1px solid rgba(111,151,197,.20)!important;
+  background:linear-gradient(145deg,rgba(16,35,59,.96),rgba(11,26,45,.96))!important;
+  color:#eaf4ff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 9px 24px rgba(0,0,0,.12)!important;
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;
+  text-align:left!important;white-space:normal!important;line-height:1.15!important;overflow:hidden!important;
+  transition:transform .17s ease,border-color .17s ease,background .17s ease,box-shadow .17s ease!important
+}
+#profilePanelModal .profile-actions button:hover{
+  transform:translateY(-2px)!important;border-color:rgba(73,151,241,.48)!important;
+  background:linear-gradient(145deg,rgba(19,45,76,.98),rgba(12,31,54,.98))!important;
+  box-shadow:0 14px 31px rgba(0,0,0,.20),0 0 0 1px rgba(42,129,230,.06)!important
+}
+#profilePanelModal .profile-actions button .v74-action-icon{
+  flex:0 0 34px;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;
+  background:rgba(44,131,235,.12);border:1px solid rgba(73,151,241,.14);color:#69b4ff;font-size:15px;font-weight:900
+}
+#profilePanelModal .profile-actions button .v74-action-copy{display:block;min-width:0;flex:1}
+#profilePanelModal .profile-actions button .v74-action-copy b{display:block;color:#eef6ff;font-size:11.5px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#profilePanelModal .profile-actions button .v74-action-copy small{display:block;margin-top:4px;color:#70869f;font-size:8.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#profilePanelModal #switchProfileBtnV46{border-color:rgba(55,143,247,.28)!important}
+#profilePanelModal #createProfileBtnV46{grid-column:1/-1!important;min-height:58px!important}
+#profilePanelModal #createProfileBtnV46 .v74-action-icon{background:rgba(57,183,255,.10);color:#68d1ff}
+#profilePanelModal #togglePasswordBtn .v74-action-icon{background:rgba(142,104,255,.10);color:#b59aff;border-color:rgba(154,120,255,.14)}
+
+/* Alteração de senha dentro do painel */
+#profilePanelModal .password-box{
+  margin-top:13px!important;padding:15px!important;border-radius:18px!important;
+  border:1px solid rgba(111,151,197,.18)!important;
+  background:rgba(7,19,34,.86)!important;box-shadow:none!important;color:#eaf4ff!important
+}
+#profilePanelModal .password-box h3{color:#f1f7ff!important}
+#profilePanelModal .password-box p,#profilePanelModal .password-hint{color:#71869f!important}
+#profilePanelModal .password-grid label{color:#95a9bf!important}
+#profilePanelModal .password-grid input{
+  background:#091726!important;border:1px solid rgba(111,151,197,.23)!important;color:#eef6ff!important;border-radius:12px!important;
+  outline:none!important
+}
+#profilePanelModal .password-grid input:focus{border-color:#378fe8!important;box-shadow:0 0 0 3px rgba(55,143,232,.10)!important}
+#profilePanelModal #saveProfilePass{background:linear-gradient(135deg,#176fd6,#2c96ef)!important;color:white!important;border:0!important}
+#profilePanelModal .profile-security-note{
+  margin-top:13px!important;background:rgba(33,121,219,.075)!important;border:1px solid rgba(65,145,231,.14)!important;color:#bbd9f8!important
+}
+#profilePanelModal .profile-security-note>span{background:rgba(38,137,239,.13)!important;color:#65b8ff!important}
+#profilePanelModal .profile-security-note b{color:#bdd9f6!important}
+#profilePanelModal .profile-security-note small{color:#7189a2!important}
+
+/* Fluxo de troca / criação de perfis v46 */
+#profileSwitchV46 .pp-profile-v46-card,#profileCreateV46 .pp-profile-v46-card{
+  width:min(560px,calc(100vw - 28px))!important;max-height:90vh!important;padding:22px!important;border-radius:28px!important;
+  border:1px solid rgba(111,151,197,.22)!important;
+  background:radial-gradient(circle at 92% -8%,rgba(39,137,255,.13),transparent 31%),linear-gradient(160deg,#08121f,#0b1a2d)!important;
+  color:#edf6ff!important;box-shadow:0 38px 120px rgba(0,0,0,.62)!important
+}
+#profileSwitchV46 .pp-profile-v46-head,#profileCreateV46 .pp-profile-v46-head{padding:2px 1px 14px!important;border-bottom:1px solid rgba(111,151,197,.13)!important}
+#profileSwitchV46 .pp-profile-v46-head h2,#profileCreateV46 .pp-profile-v46-head h2{color:#f4f9ff!important;font-size:24px!important}
+#profileSwitchV46 .pp-profile-v46-head p,#profileCreateV46 .pp-profile-v46-head p{color:#7e94ad!important}
+#profileSwitchV46 .pp-profile-v46-close,#profileCreateV46 .pp-profile-v46-close{
+  background:rgba(255,255,255,.045)!important;color:#dcecff!important;border:1px solid rgba(142,174,210,.15)!important;border-radius:12px!important
+}
+#profileSwitchV46 .pp-profile-v46-list{gap:10px!important;margin-top:16px!important}
+#profileSwitchV46 .pp-profile-v46-option{
+  min-height:76px!important;border-radius:17px!important;border:1px solid rgba(111,151,197,.18)!important;
+  background:linear-gradient(145deg,rgba(16,35,59,.92),rgba(10,25,43,.96))!important;color:#eaf4ff!important
+}
+#profileSwitchV46 .pp-profile-v46-option.active{
+  border:1px solid rgba(54,146,255,.62)!important;background:linear-gradient(145deg,rgba(18,63,106,.90),rgba(11,39,70,.96))!important;
+  box-shadow:0 0 0 3px rgba(39,129,231,.08)!important
+}
+#profileSwitchV46 .pp-profile-v46-avatar{background:#13263e!important;color:#9ab6d2!important;border-radius:12px!important}
+#profileSwitchV46 .pp-profile-v46-option.active .pp-profile-v46-avatar{background:linear-gradient(135deg,#1777f3,#45a9ff)!important;color:white!important}
+#profileSwitchV46 .pp-profile-v46-option b{color:#eef6ff!important}
+#profileSwitchV46 .pp-profile-v46-option small{color:#7289a3!important}
+#profileSwitchV46 .pp-profile-v46-field label,#profileCreateV46 .pp-profile-v46-field label{color:#8fa5bd!important}
+#profileSwitchV46 .pp-profile-v46-field input,#profileCreateV46 .pp-profile-v46-field input{
+  min-height:46px!important;background:#081522!important;border:1px solid rgba(111,151,197,.22)!important;color:#eef6ff!important;border-radius:13px!important;outline:none!important
+}
+#profileSwitchV46 .pp-profile-v46-field input:focus,#profileCreateV46 .pp-profile-v46-field input:focus{border-color:#378fe8!important;box-shadow:0 0 0 3px rgba(55,143,232,.10)!important}
+#profileSwitchV46 .pp-profile-v46-secondary,#profileCreateV46 .pp-profile-v46-secondary{background:#12243a!important;color:#bcd1e7!important;border:1px solid rgba(111,151,197,.16)!important}
+#profileSwitchV46 .pp-profile-v46-primary,#profileCreateV46 .pp-profile-v46-primary{background:linear-gradient(135deg,#176fd6,#2b97f1)!important;color:#fff!important;box-shadow:0 9px 21px rgba(20,112,214,.18)!important}
+
+/* Overlay alternativo v18, caso seja acionado por rota/atalho */
+#profileSwitchOverlay .switch-card{
+  border:1px solid rgba(111,151,197,.22)!important;
+  background:radial-gradient(circle at 92% -8%,rgba(39,137,255,.13),transparent 31%),linear-gradient(160deg,#08121f,#0b1a2d)!important;
+  color:#edf6ff!important;box-shadow:0 38px 120px rgba(0,0,0,.62)!important
+}
+#profileSwitchOverlay .switch-head{background:linear-gradient(135deg,#09182b,#0c2b4b)!important;border-bottom:1px solid rgba(111,151,197,.14)!important}
+#profileSwitchOverlay .switch-head h2{color:#f4f9ff!important}
+#profileSwitchOverlay .switch-section-label{color:#70869e!important}
+#profileSwitchOverlay .switch-profile{background:linear-gradient(145deg,#10233b,#0a192b)!important;border-color:rgba(111,151,197,.18)!important;color:#eaf4ff!important}
+#profileSwitchOverlay .switch-profile.active{background:linear-gradient(145deg,#123e69,#0b2747)!important;border-color:#328ff0!important}
+#profileSwitchOverlay .switch-profile b,#profileSwitchOverlay .switch-profile.active b{color:#eff7ff!important}
+#profileSwitchOverlay .switch-profile small{color:#748ba5!important}
+#profileSwitchOverlay .switch-input-wrap{background:#081522!important;border-color:rgba(111,151,197,.22)!important}
+#profileSwitchOverlay .switch-pass input{color:#eef6ff!important}
+#profileSwitchOverlay .switch-security{background:rgba(33,121,219,.075)!important;border-color:rgba(65,145,231,.14)!important;color:#bcd9f7!important}
+
+@media(max-width:560px){
+  #profilePanelModal .profile-actions{grid-template-columns:1fr!important}
+  #profilePanelModal #createProfileBtnV46{grid-column:1!important}
+  #profilePanelModal .profile-actions button{min-height:62px!important}
+  #profilePanelModal .profile-panel-head{padding:25px 20px 21px!important}
+  #profilePanelModal .profile-panel-body{padding:17px!important}
+  #profileSwitchV46 .pp-profile-v46-card,#profileCreateV46 .pp-profile-v46-card{padding:17px!important;border-radius:22px!important}
+}
+</style>
+<script id="pp-v74-profile-actions-normalizer">
+(function(){
+  function actionMarkup(icon,title,sub){
+    return '<span class="v74-action-icon" aria-hidden="true">'+icon+'</span><span class="v74-action-copy"><b>'+title+'</b><small>'+sub+'</small></span>';
+  }
+  function normalize(){
+    const modal=document.getElementById('profilePanelModal');
+    if(!modal)return;
+    const legacy=document.getElementById('switchProfileLegacyV46');
+    if(legacy)legacy.style.setProperty('display','none','important');
+    const sw=document.getElementById('switchProfileBtnV46')||document.getElementById('switchProfileBtn');
+    const pwd=document.getElementById('togglePasswordBtn');
+    const create=document.getElementById('createProfileBtnV46');
+    if(sw&&!sw.dataset.v74done){sw.innerHTML=actionMarkup('⇄','Trocar perfil','Escolher outro perfil');sw.dataset.v74done='1'}
+    if(pwd&&!pwd.dataset.v74done){pwd.innerHTML=actionMarkup('⌁','Alterar senha','Segurança do acesso');pwd.dataset.v74done='1'}
+    if(create&&!create.dataset.v74done){create.innerHTML=actionMarkup('+','Novo perfil','Criar espaço independente');create.dataset.v74done='1'}
+  }
+  normalize();
+  setTimeout(normalize,100);setTimeout(normalize,600);setTimeout(normalize,1500);
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.('[data-v62-profile],.profile-man,#profilePanelModal'))setTimeout(normalize,25);
+  },true);
+})();
+</script>
