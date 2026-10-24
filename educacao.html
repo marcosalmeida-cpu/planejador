@@ -93,8 +93,8 @@ main>.view,main>.view.active,.main>.view,.main>.view.active{min-width:0!importan
 <div class="v117-form-head">
 <div>
 <div class="v115-site-kicker">educação · formações</div>
-<h1>Formações</h1>
-<p>Sua trajetória acadêmica organizada por grau, com histórico e dados de cada formação.</p>
+<h1>Histórico acadêmico</h1>
+<p>Uma leitura universitária da sua trajetória: cursos, vínculos, períodos, disciplinas, notas e carga horária.</p>
 </div>
 <button class="v117-add-btn" id="v117AddFormation" type="button">+ Nova formação</button>
 </div>
@@ -484,4 +484,256 @@ const initial=VALID.includes(location.hash.slice(1))?location.hash.slice(1):'edu
 })();
 </script>
 
+
+<style id="pp-v83-education-refine-style">
+/* V83 — destaque editorial compacto + histórico acadêmico universitário */
+
+/* Home: mais informação por dobra, menos texto no destaque */
+#edu-overview .edu82-shell{padding:clamp(6px,.8vw,12px)!important}
+#edu-overview .edu82-masthead{margin-bottom:9px!important;padding-bottom:9px!important}
+#edu-overview .edu82-feature{
+  min-height:clamp(260px,25vw,330px)!important;
+  max-height:350px!important;
+  border-radius:22px!important;
+}
+#edu-overview .edu82-feature-copy{
+  max-width:min(760px,66%)!important;
+  padding:clamp(24px,3vw,40px)!important;
+}
+#edu-overview .edu82-feature-meta{font-size:8px!important;gap:7px!important}
+#edu-overview .edu82-topic-badge{padding:6px 9px!important}
+#edu-overview .edu82-feature h1{
+  margin:12px 0 8px!important;
+  font-size:clamp(28px,3.15vw,46px)!important;
+  line-height:1.02!important;
+  letter-spacing:-.045em!important;
+  max-width:720px!important;
+}
+#edu-overview #edu82FeatureSummary{
+  max-width:670px!important;
+  font-size:clamp(11px,.9vw,13.5px)!important;
+  line-height:1.45!important;
+  display:-webkit-box!important;
+  -webkit-box-orient:vertical!important;
+  -webkit-line-clamp:3!important;
+  overflow:hidden!important;
+}
+#edu-overview .edu82-read{margin-top:15px!important;height:38px!important;padding:0 13px!important}
+#edu-overview .edu82-feature-art{right:3%!important;top:8%!important;width:31%!important;height:84%!important}
+#edu-overview .edu82-feature-art i:nth-child(1){width:min(23vw,285px)!important}
+#edu-overview .edu82-feature-art i:nth-child(2){width:min(15vw,185px)!important}
+#edu-overview .edu82-feature-side{top:22px!important;right:28px!important}
+#edu-overview .edu82-feature-side b{font-size:30px!important}
+#edu-overview .edu82-feature-controls{right:14px!important;bottom:14px!important}
+#edu-overview .edu82-radar,#edu-overview .edu82-science{margin-top:18px!important}
+#edu-overview .edu82-news-summary,#edu-overview .edu82-science-card p{
+  display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:3!important;overflow:hidden!important;
+}
+
+/* Formações: canvas universitário de verdade */
+#edu-formacoes.active{
+  padding:12px!important;
+  overflow:visible!important;
+  background:linear-gradient(180deg,#f6f9fc 0%,#eef3f8 100%)!important;
+}
+#edu-formacoes .v117-form-head{
+  margin:0 0 12px!important;
+  padding:18px 20px!important;
+  border-radius:20px!important;
+  background:linear-gradient(120deg,#092a4d,#124d85 64%,#1b66a9)!important;
+  color:#fff!important;
+  align-items:center!important;
+  box-shadow:0 14px 34px rgba(9,42,77,.14)!important;
+}
+#edu-formacoes .v117-form-head .v115-site-kicker{color:#9bd6ff!important;font-size:9px!important;letter-spacing:.13em!important}
+#edu-formacoes .v117-form-head h1{color:#fff!important;margin:5px 0 3px!important;font-size:clamp(26px,2.3vw,34px)!important}
+#edu-formacoes .v117-form-head p{color:#d7e9f8!important;margin:0!important;max-width:760px!important;font-size:12px!important}
+#edu-formacoes .v117-add-btn{
+  flex:0 0 auto!important;background:#cbed5a!important;color:#102b46!important;border:0!important;border-radius:12px!important;
+  padding:11px 14px!important;font-weight:950!important;box-shadow:0 8px 18px rgba(8,28,47,.12)!important;
+}
+#edu-formacoes #v117FormationRoot{
+  width:100%!important;max-width:none!important;min-width:0!important;
+  display:grid!important;grid-template-columns:minmax(220px,260px) minmax(0,1fr)!important;
+  gap:12px!important;align-items:start!important;
+}
+
+/* Coluna de cursos / vínculos acadêmicos */
+#edu-formacoes .v121-formation-deck{
+  position:sticky!important;top:10px!important;
+  width:100%!important;min-width:0!important;margin:0!important;padding:12px!important;
+  border:1px solid #d9e3ed!important;border-radius:18px!important;
+  background:#fff!important;box-shadow:0 10px 28px rgba(27,49,73,.055)!important;overflow:visible!important;
+}
+#edu-formacoes .v121-deck-head{display:block!important;margin:0 0 9px!important;padding:3px 3px 9px!important;border-bottom:1px solid #e7edf3!important}
+#edu-formacoes .v121-deck-head h2{margin:0!important;font-size:14px!important;color:#132b44!important;letter-spacing:-.02em!important}
+#edu-formacoes .v121-deck-head p{margin:3px 0 0!important;font-size:10px!important;line-height:1.35!important;color:#78889a!important}
+#edu-formacoes .v121-deck-tools{margin-top:7px!important;justify-content:flex-start!important}
+#edu-formacoes .v121-deck-tools>span{background:#edf3f8!important;color:#54667a!important;padding:5px 7px!important;font-size:9px!important}
+#edu-formacoes .v121-arrow{display:none!important}
+#edu-formacoes .v121-formation-track{
+  display:grid!important;grid-template-columns:1fr!important;gap:6px!important;
+  overflow:visible!important;padding:0!important;scroll-snap-type:none!important;
+}
+#edu-formacoes .v121-formation-card{
+  width:100%!important;min-width:0!important;min-height:0!important;max-width:none!important;
+  padding:10px 10px 9px 12px!important;border-radius:13px!important;border:1px solid #e0e8f0!important;
+  background:#fbfdff!important;box-shadow:none!important;text-align:left!important;position:relative!important;overflow:hidden!important;
+  transition:transform .15s ease,border-color .15s ease,background .15s ease,box-shadow .15s ease!important;
+}
+#edu-formacoes .v121-formation-card:before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--v121-accent,#2f6df6)}
+#edu-formacoes .v121-formation-card:hover{transform:translateX(2px)!important;border-color:#c9d8e7!important;background:#f7fbff!important}
+#edu-formacoes .v121-formation-card.active{background:#edf6ff!important;border-color:#9dc3ea!important;box-shadow:0 0 0 2px rgba(36,111,185,.08)!important}
+#edu-formacoes .v121-card-head{align-items:center!important;gap:5px!important}
+#edu-formacoes .v121-level,#edu-formacoes .v121-status{font-size:7.5px!important;padding:3px 5px!important}
+#edu-formacoes .v121-degree{margin-top:7px!important;font-size:7.5px!important}
+#edu-formacoes .v121-formation-card h3{margin:3px 0!important;font-size:13px!important;line-height:1.15!important;color:#17304b!important}
+#edu-formacoes .v121-formation-card p{min-height:0!important;margin:0!important;font-size:9.5px!important;line-height:1.3!important;color:#6d7e91!important;display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important}
+#edu-formacoes .v121-card-bottom{margin-top:7px!important;font-size:8px!important;align-items:center!important}
+#edu-formacoes .v121-card-line{height:3px!important;margin-top:7px!important}
+#edu-formacoes .v121-legend{display:none!important}
+#edu-formacoes .edu83-course-select{display:none;width:100%;height:40px;border:1px solid #d5e1ec;border-radius:11px;background:#fff;color:#17304b;padding:0 10px;font-size:12px;font-weight:800}
+
+/* Histórico / boletim */
+#edu-formacoes .v121-detail{
+  width:100%!important;min-width:0!important;margin:0!important;padding:18px!important;
+  border:1px solid #d9e3ed!important;border-radius:18px!important;background:#fff!important;
+  box-shadow:0 10px 28px rgba(27,49,73,.055)!important;overflow:hidden!important;
+}
+#edu-formacoes .v119-detail-kicker{padding-bottom:13px!important;margin-bottom:12px!important;border-bottom:1px solid #e5ebf1!important;align-items:center!important}
+#edu-formacoes .v119-detail-kicker .left small{font-size:8.5px!important;color:#2467a7!important;letter-spacing:.09em!important}
+#edu-formacoes .v119-detail-kicker .left h2{font-size:clamp(23px,2vw,30px)!important;margin:5px 0 3px!important;color:#102b46!important}
+#edu-formacoes .v119-detail-kicker .left p{font-size:11px!important;color:#6f8092!important;margin:0!important}
+#edu-formacoes .v119-detail-actions button{padding:8px 10px!important;border-radius:10px!important;font-size:10px!important}
+#edu-formacoes .v119-detail-actions .edit{background:#164f88!important}
+#edu-formacoes .v119-summary-grid{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important;margin:0 0 12px!important;
+}
+#edu-formacoes .v119-summary-grid>div{padding:10px!important;border-radius:11px!important;background:#f1f6fa!important;border:1px solid #e4ebf2!important;min-width:0!important}
+#edu-formacoes .v119-summary-grid span{font-size:7.5px!important;color:#7d8da0!important;letter-spacing:.05em!important}
+#edu-formacoes .v119-summary-grid b{font-size:10.5px!important;color:#223a53!important;overflow-wrap:anywhere!important}
+#edu-formacoes .v119-notes{margin:0 0 12px!important;padding:10px 12px!important;border-radius:11px!important;background:#fff8e8!important;color:#6e5a31!important;border:1px solid #f0dfb9!important;font-size:10px!important}
+#edu-formacoes .v119-history-title{margin:0!important;padding:11px 0 7px!important;border-top:1px solid #e7edf3!important}
+#edu-formacoes .v119-history-title h3{font-size:15px!important;color:#18334f!important}
+#edu-formacoes .v119-history-title span{font-size:9px!important;color:#7c8b9d!important}
+
+/* Barra interativa de histórico */
+#edu-formacoes .edu83-history-tools{
+  display:grid;grid-template-columns:minmax(180px,1.4fr) minmax(150px,.7fr) auto;gap:7px;align-items:center;
+  padding:8px;margin:0 0 8px;border:1px solid #e0e8f0;border-radius:12px;background:#f7fafc;
+}
+#edu-formacoes .edu83-history-search,#edu-formacoes .edu83-period-select{
+  width:100%;height:36px;border:1px solid #d8e2ec;border-radius:9px;background:#fff;color:#253b52;padding:0 10px;font-size:11px!important;outline:none;
+}
+#edu-formacoes .edu83-history-search:focus,#edu-formacoes .edu83-period-select:focus{border-color:#6aa8e3;box-shadow:0 0 0 3px rgba(46,126,201,.10)}
+#edu-formacoes .edu83-history-count{font-size:9px;color:#617389;font-weight:900;white-space:nowrap;padding:0 4px}
+#edu-formacoes .edu83-academic-metrics{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 8px}
+#edu-formacoes .edu83-academic-metrics span{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:#edf4fb;border:1px solid #dce7f1;color:#38546e;font-size:9px;font-weight:800}
+#edu-formacoes .edu83-academic-metrics b{color:#123f70}
+
+#edu-formacoes .v119-history-wrap{
+  width:100%!important;max-width:100%!important;max-height:none!important;overflow:auto!important;border:1px solid #e0e7ef!important;border-radius:12px!important;background:#fff!important;
+}
+#edu-formacoes .v119-history-table{width:100%!important;min-width:0!important;table-layout:auto!important;border-collapse:separate!important;border-spacing:0!important}
+#edu-formacoes .v119-history-table th{
+  position:sticky!important;top:0!important;z-index:2!important;background:#eef4f8!important;color:#52687c!important;
+  font-size:8px!important;text-transform:uppercase!important;letter-spacing:.045em!important;padding:8px 7px!important;white-space:nowrap!important;
+}
+#edu-formacoes .v119-history-table td{font-size:9.5px!important;line-height:1.3!important;color:#334b62!important;padding:8px 7px!important;border-top:1px solid #edf1f5!important;white-space:normal!important;overflow-wrap:anywhere!important}
+#edu-formacoes .v119-history-table td.name{font-weight:800!important;color:#173551!important;min-width:170px!important}
+#edu-formacoes .v119-history-table tbody tr{transition:background .12s ease!important}
+#edu-formacoes .v119-history-table tbody tr:hover{background:#f6fbff!important}
+#edu-formacoes .v119-history-table tbody tr[hidden]{display:none!important}
+
+@media(max-width:1120px){
+  #edu-formacoes #v117FormationRoot{grid-template-columns:220px minmax(0,1fr)!important}
+  #edu-formacoes .v119-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #edu-formacoes .v119-history-table th,#edu-formacoes .v119-history-table td{font-size:8.5px!important;padding:7px 5px!important}
+  #edu-overview .edu82-feature-copy{max-width:70%!important}
+}
+@media(max-width:820px){
+  #edu-overview .edu82-feature{min-height:300px!important;max-height:none!important}
+  #edu-overview .edu82-feature-copy{max-width:100%!important;padding:24px 22px 58px!important}
+  #edu-overview .edu82-feature-art{opacity:.28!important;width:45%!important}
+  #edu-overview .edu82-feature h1{font-size:clamp(28px,7vw,38px)!important;max-width:90%!important}
+  #edu-overview #edu82FeatureSummary{-webkit-line-clamp:2!important;max-width:86%!important}
+  #edu-formacoes #v117FormationRoot{display:block!important}
+  #edu-formacoes .v121-formation-deck{position:relative!important;top:auto!important;margin-bottom:9px!important;padding:10px!important}
+  #edu-formacoes .v121-deck-head{display:grid!important;grid-template-columns:1fr!important;gap:7px!important}
+  #edu-formacoes .edu83-course-select{display:block!important}
+  #edu-formacoes .v121-formation-track{display:none!important}
+  #edu-formacoes .v119-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #edu-formacoes .edu83-history-tools{grid-template-columns:1fr 1fr!important}.edu83-history-count{grid-column:1/-1!important}
+}
+@media(max-width:560px){
+  #edu-formacoes.active{padding:7px!important}
+  #edu-formacoes .v117-form-head{padding:15px!important;align-items:flex-start!important;flex-direction:column!important}
+  #edu-formacoes .v117-add-btn{width:100%!important}
+  #edu-formacoes .v121-detail{padding:12px!important}
+  #edu-formacoes .v119-detail-kicker{align-items:flex-start!important;flex-direction:column!important}
+  #edu-formacoes .v119-detail-actions{width:100%!important}.v119-detail-actions button{flex:1!important}
+  #edu-formacoes .v119-summary-grid{grid-template-columns:1fr 1fr!important}
+  #edu-formacoes .edu83-history-tools{grid-template-columns:1fr!important}
+  #edu-formacoes .edu83-history-count{grid-column:auto!important}
+  #edu-formacoes .v119-history-wrap{border:0!important;overflow:visible!important}
+  #edu-formacoes .v119-history-table,#edu-formacoes .v119-history-table tbody{display:block!important;width:100%!important}
+  #edu-formacoes .v119-history-table thead{display:none!important}
+  #edu-formacoes .v119-history-table tr{display:grid!important;grid-template-columns:1fr 1fr!important;gap:5px 8px!important;margin:0 0 7px!important;padding:9px!important;border:1px solid #e1e8ef!important;border-radius:11px!important;background:#fff!important}
+  #edu-formacoes .v119-history-table td{display:block!important;border:0!important;padding:2px 0!important;font-size:9.5px!important;min-width:0!important}
+  #edu-formacoes .v119-history-table td.name{grid-column:1/-1!important;font-size:11px!important;min-width:0!important}
+}
+</style>
+
+<script id="pp-v83-education-refine-script">
+(()=>{'use strict';
+const ROOT=document.getElementById('v117FormationRoot'); if(!ROOT)return;
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let busy=false;
+function enhance(){
+  if(busy)return; busy=true;
+  try{
+    const deck=ROOT.querySelector('.v121-formation-deck');
+    const detail=ROOT.querySelector('.v121-detail');
+    if(!deck||!detail)return;
+    const title=deck.querySelector('.v121-deck-head h2'); if(title)title.textContent='Cursos & formações';
+    const desc=deck.querySelector('.v121-deck-head p'); if(desc)desc.textContent='Selecione um vínculo acadêmico para consultar o histórico.';
+
+    const cards=[...deck.querySelectorAll('[data-v121-open]')];
+    let sel=deck.querySelector('.edu83-course-select');
+    if(!sel&&cards.length){
+      sel=document.createElement('select'); sel.className='edu83-course-select'; sel.setAttribute('aria-label','Selecionar formação');
+      cards.forEach((c,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=(c.querySelector('h3')?.textContent||'Formação').trim();if(c.classList.contains('active'))o.selected=true;sel.appendChild(o)});
+      sel.addEventListener('change',()=>cards[Number(sel.value)]?.click());
+      deck.querySelector('.v121-deck-head')?.appendChild(sel);
+    }
+
+    const wrap=detail.querySelector('.v119-history-wrap'); const table=wrap?.querySelector('table'); if(!table)return;
+    const rows=[...table.querySelectorAll('tbody tr')];
+    const titleRow=detail.querySelector('.v119-history-title');
+    let metrics=detail.querySelector('.edu83-academic-metrics');
+    if(!metrics&&titleRow){
+      const numeric=rows.map(r=>parseFloat((r.children[5]?.textContent||r.children[3]?.textContent||'').replace(',','.'))).filter(Number.isFinite).filter(n=>n<=100);
+      const approved=rows.filter(r=>/aprov|cumpr|liberada/i.test(r.textContent||'')).length;
+      const avg=numeric.length?(numeric.reduce((a,b)=>a+b,0)/numeric.length).toFixed(1):'—';
+      metrics=document.createElement('div');metrics.className='edu83-academic-metrics';
+      metrics.innerHTML=`<span><b>${rows.length}</b> registros</span><span><b>${approved}</b> concluídos/aprovados</span><span><b>${avg}</b> média registrada</span>`;
+      titleRow.insertAdjacentElement('afterend',metrics);
+    }
+    let tools=detail.querySelector('.edu83-history-tools');
+    if(!tools&&titleRow){
+      const periods=[...new Set(rows.map(r=>(r.children[0]?.textContent||'').trim()).filter(Boolean).filter(x=>x!=='—'))];
+      tools=document.createElement('div');tools.className='edu83-history-tools';
+      tools.innerHTML=`<input class="edu83-history-search" type="search" placeholder="Buscar disciplina, docente ou situação…" aria-label="Buscar no histórico"><select class="edu83-period-select" aria-label="Filtrar período"><option value="">Todos os períodos</option>${periods.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}</select><span class="edu83-history-count">${rows.length} registros</span>`;
+      metrics?.insertAdjacentElement('afterend',tools);
+      const q=tools.querySelector('.edu83-history-search'), per=tools.querySelector('.edu83-period-select'), count=tools.querySelector('.edu83-history-count');
+      const apply=()=>{const term=(q.value||'').trim().toLowerCase(),pv=per.value;let n=0;rows.forEach(r=>{const p=(r.children[0]?.textContent||'').trim();const ok=(!pv||p===pv)&&(!term||(r.textContent||'').toLowerCase().includes(term));r.hidden=!ok;if(ok)n++});count.textContent=`${n} de ${rows.length} registros`};
+      q.addEventListener('input',apply);per.addEventListener('change',apply);
+    }
+  } finally {busy=false}
+}
+let timer=0;const schedule=()=>{clearTimeout(timer);timer=setTimeout(enhance,30)};
+new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true});
+[0,80,280,800].forEach(ms=>setTimeout(enhance,ms));
+})();
+</script>
 </body></html>

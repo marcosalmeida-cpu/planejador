@@ -44,3 +44,7 @@ Para que os dados locais já existentes apareçam, publique no **mesmo domínio/
 
 ## Educação v82 — conteúdo ao vivo
 A pasta `api/` agora faz parte do projeto e deve ser publicada junto com os HTMLs. Em Vercel, `api/educacao-feed.js` funciona como endpoint serverless de mesma origem para evitar bloqueios de CORS e alimentar a Revista Educação com Agência FAPESP, Agência Brasil, GDELT e SciELO Brasil. A página mantém conteúdo brasileiro de fallback caso as fontes estejam temporariamente indisponíveis.
+
+
+## v83 — Educação
+Destaque editorial compacto e novo layout responsivo de Formações em formato de histórico acadêmico universitário, com seletor de cursos, filtros por período e busca no histórico.
