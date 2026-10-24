@@ -6681,15 +6681,53 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     const modal=backdrop.querySelector(':scope > .modal');
     if(!modal)return;
 
-    if(!modal.querySelector(':scope > .pp-modal-close')){
-      const close=document.createElement('button');
-      close.type='button';
-      close.className='pp-modal-close';
-      close.setAttribute('aria-label','Fechar');
-      close.textContent='×';
-      close.onclick=e=>{e.preventDefault();e.stopPropagation();closeModal(backdrop)};
-      modal.prepend(close);
+    const exactCloseText=b=>/^(fechar|×|✕|x)$/i.test((b.textContent||'').trim());
+    const markedClose=b=>{
+      const a=(b.getAttribute('aria-label')||'').toLowerCase();
+      const c=String(b.className||'').toLowerCase();
+      const id=(b.id||'').toLowerCase();
+      return a==='fechar'||/close|fechar/.test(c)||/close|fechar/.test(id)||b.classList.contains('pp-modal-close');
+    };
+    const footerLike=b=>!!b.closest('.modalfoot,.ppv-modal-foot,.invoice-actions,.vehicle-modal-actions-v101,.v120-save,.modal-actions,.dialog-actions,.footer-actions');
+    const candidates=[...modal.querySelectorAll('button')].filter(b=>{
+      const t=(b.textContent||'').trim();
+      if(/^fechar$/i.test(t))return true;
+      if(/^[×✕x]$/i.test(t)&&markedClose(b))return true;
+      return b.classList.contains('pp-modal-close');
+    });
+
+    let keeper=modal.querySelector(':scope > .pp-modal-close');
+    if(!keeper){
+      // Reaproveita um botão de fechar já existente no cabeçalho. Assim o handler original é preservado.
+      keeper=candidates.find(b=>!footerLike(b))||null;
+      if(keeper){
+        keeper.classList.add('pp-modal-close');
+        keeper.setAttribute('aria-label','Fechar');
+        keeper.textContent='×';
+      }
     }
+    if(!keeper){
+      keeper=document.createElement('button');
+      keeper.type='button';
+      keeper.className='pp-modal-close';
+      keeper.setAttribute('aria-label','Fechar');
+      keeper.textContent='×';
+      keeper.onclick=e=>{e.preventDefault();e.stopPropagation();closeModal(backdrop)};
+      modal.prepend(keeper);
+    }
+
+    // Uma janela deve ter apenas um controle dedicado de fechar.
+    [...modal.querySelectorAll('button')].forEach(b=>{
+      if(b===keeper)return;
+      const t=(b.textContent||'').trim();
+      const duplicate=/^fechar$/i.test(t)||(/^[×✕x]$/i.test(t)&&markedClose(b))||b.classList.contains('pp-modal-close');
+      if(duplicate){
+        b.dataset.ppDuplicateClose='1';
+        b.style.setProperty('display','none','important');
+        b.setAttribute('aria-hidden','true');
+        b.tabIndex=-1;
+      }
+    });
 
     // clicking the backdrop closes too
     if(!backdrop.dataset.ppCloseReady){
@@ -29056,19 +29094,19 @@ const params=new URLSearchParams(location.search);if(params.get('action')==='pro
 
 <style id="pp-v76-profile-standalone-style">
 /* v76 — fluxo de perfil independente dos painéis legados */
-#profilePanelV76,#profileSwitchV76,#profileCreateV76{position:fixed;inset:0;z-index:30000;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(2,7,16,.84);backdrop-filter:blur(22px) saturate(112%)}
-#profilePanelV76.open,#profileSwitchV76.open,#profileCreateV76.open{display:flex}
-.v76-profile-card{width:min(590px,calc(100vw - 28px));max-height:calc(100vh - 38px);overflow:auto;border-radius:28px;background:linear-gradient(180deg,#081827 0%,#071421 100%);border:1px solid rgba(86,141,199,.24);box-shadow:0 38px 110px rgba(0,0,0,.58);color:#edf6ff}
-.v76-profile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:27px 28px 23px;background:radial-gradient(circle at 91% -20%,rgba(45,145,255,.24),transparent 42%),linear-gradient(135deg,#0a1a2d,#0a2744);border-bottom:1px solid rgba(92,149,207,.15)}
-.v76-profile-kicker{display:block;color:#69bcff;font-size:8px;font-weight:950;letter-spacing:.22em;text-transform:uppercase}.v76-profile-head h2{margin:8px 0 0;color:#f7fbff;font-size:27px;line-height:1;letter-spacing:-.035em}.v76-profile-head p{margin:8px 0 0;color:#8ca4bc;font-size:11px;line-height:1.4}
-.v76-close{flex:0 0 38px;width:38px;height:38px;border-radius:13px;border:1px solid rgba(104,160,219,.22);background:#102640;color:#d9ecff;font-size:20px;font-weight:800;cursor:pointer}.v76-close:hover{background:#173555;border-color:rgba(113,180,248,.42)}
-.v76-profile-body{padding:21px 22px 23px}.v76-label{margin:0 1px 9px;color:#6f879f;font-size:8.5px;font-weight:950;letter-spacing:.14em;text-transform:uppercase}
-.v76-current{position:relative;display:flex;align-items:center;gap:12px;padding:15px 16px;border-radius:19px;background:linear-gradient(145deg,#0d2138,#0a1b2f);border:1px solid rgba(99,153,209,.22)}.v76-current:after{content:'ATIVO';position:absolute;right:16px;top:50%;transform:translateY(-50%);padding:5px 9px;border-radius:999px;background:rgba(22,167,111,.14);border:1px solid rgba(35,207,142,.22);color:#62dda9;font-size:8px;font-weight:950;letter-spacing:.08em}.v76-avatar{width:45px;height:45px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#176ff0,#42afff);box-shadow:0 8px 22px rgba(25,115,238,.25);font-size:17px;font-weight:900;color:#fff}.v76-current b{display:block;color:#f3f8ff;font-size:14px}.v76-current small{display:block;margin-top:4px;color:#7f96ae;font-size:9.5px}
-.v76-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.v76-action{appearance:none;min-width:0;min-height:68px;padding:12px 13px;border-radius:17px;border:1px solid rgba(93,145,202,.20);background:linear-gradient(145deg,#0d2137,#0a192b);color:#edf6ff;display:flex;align-items:center;gap:11px;text-align:left;cursor:pointer;transition:.16s ease}.v76-action:hover{transform:translateY(-1px);border-color:rgba(92,171,255,.42);background:linear-gradient(145deg,#102a47,#0b2037)}.v76-action.primary{background:linear-gradient(135deg,#0e417a,#0b2e57);border-color:rgba(52,150,252,.38)}.v76-action.primary:hover{background:linear-gradient(135deg,#125291,#0d3967)}.v76-action.wide{grid-column:1/-1;min-height:58px}.v76-action-icon{flex:0 0 34px;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:rgba(45,139,235,.12);border:1px solid rgba(69,156,246,.16);color:#70bdff;font-size:15px;font-weight:950}.v76-action.password .v76-action-icon{background:rgba(141,106,255,.10);border-color:rgba(157,127,255,.15);color:#b9a2ff}.v76-action.create .v76-action-icon{background:rgba(36,190,201,.09);border-color:rgba(60,207,218,.13);color:#73dce4}.v76-action-copy{display:block;min-width:0;flex:1}.v76-action-copy b{display:block;color:#eef6ff;font-size:11.5px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v76-action-copy small{display:block;margin-top:4px;color:#728aa3;font-size:8.7px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v76-chevron{margin-left:auto;color:#526e89;font-size:17px}
-.v76-security{display:flex;align-items:center;gap:9px;margin-top:13px;padding:11px 13px;border-radius:15px;background:rgba(40,123,205,.07);border:1px solid rgba(68,145,220,.13)}.v76-security>span{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:rgba(37,137,234,.12);color:#61b9ff;font-size:11px;font-weight:950}.v76-security b{display:block;color:#bed9f4;font-size:10px}.v76-security small{display:block;margin-top:2px;color:#7088a1;font-size:8.8px}
+#profilePanelV76,#profileSwitchV76,#profileCreateV76,#profilePasswordV76{position:fixed;inset:0;z-index:30000;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(2,7,16,.84);backdrop-filter:blur(22px) saturate(112%)}
+#profilePanelV76.open,#profileSwitchV76.open,#profileCreateV76.open,#profilePasswordV76.open{display:flex}
+.v76-profile-card{width:min(570px,calc(100vw - 24px));max-height:none;overflow:hidden;border-radius:24px;background:linear-gradient(180deg,#081827 0%,#071421 100%);border:1px solid rgba(86,141,199,.24);box-shadow:0 32px 90px rgba(0,0,0,.56);color:#edf6ff}
+.v76-profile-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:17px 20px;background:radial-gradient(circle at 91% -20%,rgba(45,145,255,.22),transparent 42%),linear-gradient(135deg,#0a1a2d,#0a2744);border-bottom:1px solid rgba(92,149,207,.15)}
+.v76-profile-kicker{display:block;color:#75c5ff;font-size:7px;font-weight:950;letter-spacing:.20em;text-transform:uppercase}.v76-profile-head h2{margin:5px 0 0;color:#f7fbff;font-size:22px;line-height:1;letter-spacing:-.03em}.v76-profile-head p{margin:5px 0 0;color:#9ab0c6;font-size:9.5px;line-height:1.25}
+.v76-close{flex:0 0 34px;width:34px;height:34px;border-radius:11px;border:1px solid rgba(104,160,219,.24);background:#102640;color:#e5f2ff;font-size:18px;font-weight:800;cursor:pointer}.v76-close:hover{background:#173555;border-color:rgba(113,180,248,.42)}
+.v76-profile-body{padding:15px 18px 17px}.v76-label{margin:0 1px 7px;color:#86a0b9;font-size:8px;font-weight:950;letter-spacing:.13em;text-transform:uppercase}
+.v76-current{position:relative;display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:16px;background:linear-gradient(145deg,#0d2138,#0a1b2f);border:1px solid rgba(99,153,209,.22)}.v76-current:after{content:'ATIVO';position:absolute;right:13px;top:50%;transform:translateY(-50%);padding:4px 8px;border-radius:999px;background:rgba(22,167,111,.14);border:1px solid rgba(35,207,142,.22);color:#73e6b7;font-size:7px;font-weight:950;letter-spacing:.08em}.v76-avatar{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#176ff0,#42afff);box-shadow:0 7px 18px rgba(25,115,238,.23);font-size:15px;font-weight:900;color:#fff}.v76-current b{display:block;color:#f6fbff;font-size:12.5px}.v76-current small{display:block;margin-top:3px;color:#91a6bb;font-size:8.6px;white-space:nowrap}
+.v76-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.v76-action{appearance:none;min-width:0;min-height:54px;padding:9px 11px;border-radius:15px;border:1px solid rgba(93,145,202,.22)!important;background:linear-gradient(145deg,#0d2137,#0a192b)!important;color:#edf6ff!important;display:flex!important;align-items:center;gap:9px;text-align:left;cursor:pointer;transition:.16s ease}.v76-action:hover{transform:translateY(-1px);border-color:rgba(92,171,255,.42)!important;background:linear-gradient(145deg,#102a47,#0b2037)!important}.v76-action.primary{background:linear-gradient(135deg,#0d4f8f,#0a3768)!important;border-color:rgba(66,158,255,.40)!important}.v76-action.primary:hover{background:linear-gradient(135deg,#1263aa,#0c467f)!important}.v76-action.wide{grid-column:1/-1;min-height:50px}.v76-action-icon{flex:0 0 30px;width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:rgba(45,139,235,.14);border:1px solid rgba(69,156,246,.18);color:#82c8ff;font-size:13px;font-weight:950}.v76-action.password .v76-action-icon{background:rgba(141,106,255,.10);border-color:rgba(157,127,255,.15);color:#b9a2ff}.v76-action.create .v76-action-icon{background:rgba(36,190,201,.09);border-color:rgba(60,207,218,.13);color:#73dce4}.v76-action-copy{display:block;min-width:0;flex:1}.v76-action-copy b{display:block;color:#f5faff!important;font-size:10.5px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v76-action-copy small{display:block;margin-top:3px;color:#8ea5bb!important;font-size:7.9px;font-weight:650;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v76-chevron{margin-left:auto;color:#6f8ba7!important;font-size:15px}
+.v76-security{display:flex;align-items:center;gap:8px;margin-top:9px;padding:8px 10px;border-radius:13px;background:rgba(40,123,205,.075);border:1px solid rgba(68,145,220,.14)}.v76-security>span{flex:0 0 22px;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:rgba(37,137,234,.14);color:#74c1ff;font-size:10px;font-weight:950}.v76-security b{display:block;color:#d2e5f7!important;font-size:8.8px;white-space:nowrap}.v76-security small{display:block;margin-top:1px;color:#89a0b7!important;font-size:7.7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .v76-password-box{display:none;margin-top:12px;padding:15px;border-radius:18px;background:#0a1a2c;border:1px solid rgba(93,145,202,.18)}.v76-password-box.open{display:block}.v76-password-box h3{margin:0;color:#eef6ff;font-size:13px}.v76-password-box p{margin:5px 0 13px;color:#7189a2;font-size:9.5px}.v76-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.v76-field{display:flex;flex-direction:column;gap:6px}.v76-field.full{grid-column:1/-1}.v76-field label{color:#91a7be;font-size:9px;font-weight:800}.v76-field input{height:43px;border-radius:12px;border:1px solid rgba(102,151,201,.22);background:#06121e;color:#eef6ff;padding:0 12px;outline:none}.v76-field input:focus{border-color:#3c9cf4;box-shadow:0 0 0 3px rgba(60,156,244,.10)}.v76-error{min-height:16px;margin-top:8px;color:#ff8793;font-size:9px;font-weight:700}.v76-success{color:#5ed7a0}.v76-form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}.v76-btn{min-height:41px;padding:0 15px;border-radius:12px;border:1px solid rgba(98,150,203,.18);background:#0e2239;color:#bad0e6;font-weight:800;cursor:pointer}.v76-btn.primary{border:0;background:linear-gradient(135deg,#1569ca,#2b93eb);color:#fff}
 .v76-switch-list{display:grid;gap:10px}.v76-switch-option{width:100%;display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:17px;border:1px solid rgba(94,147,201,.18);background:#0b1d31;color:#edf6ff;text-align:left;cursor:pointer}.v76-switch-option.active{background:linear-gradient(145deg,#103861,#0d2948);border-color:#328ff0;box-shadow:0 0 0 2px rgba(50,143,240,.08)}.v76-switch-option .v76-avatar{width:40px;height:40px;border-radius:12px;box-shadow:none;background:#13263e;color:#9ab6d2;font-size:14px}.v76-switch-option.active .v76-avatar{background:linear-gradient(135deg,#1777f3,#45a9ff);color:#fff}.v76-switch-option b{display:block;color:#eef6ff;font-size:12px}.v76-switch-option small{display:block;margin-top:3px;color:#7289a3;font-size:8.7px}.v76-switch-check{margin-left:auto;color:#62baff;font-size:15px;font-weight:900}
-@media(max-width:560px){#profilePanelV76,#profileSwitchV76,#profileCreateV76{padding:12px}.v76-profile-head{padding:24px 20px 20px}.v76-profile-body{padding:17px}.v76-actions,.v76-grid{grid-template-columns:1fr}.v76-action.wide,.v76-field.full{grid-column:1}.v76-current:after{position:static;transform:none;margin-left:auto}.v76-form-actions{flex-direction:column-reverse}.v76-btn{width:100%}}
+@media(max-width:560px){#profilePanelV76,#profileSwitchV76,#profileCreateV76,#profilePasswordV76{padding:10px;overflow-y:auto}.v76-profile-card{width:min(100%,540px)}.v76-profile-head{padding:15px 16px}.v76-profile-body{padding:13px}.v76-actions{grid-template-columns:1fr 1fr}.v76-grid{grid-template-columns:1fr}.v76-field.full{grid-column:1}.v76-current:after{position:static;transform:none;margin-left:auto}.v76-form-actions{flex-direction:column-reverse}.v76-btn{width:100%}}@media(max-width:420px){.v76-actions{grid-template-columns:1fr}.v76-action.wide{grid-column:1}.v76-security small{white-space:normal}.v76-profile-head p{display:none}}
 </style>
 <script id="pp-v76-profile-standalone-script">
 (function(){
@@ -29110,6 +29148,11 @@ function blankState(){
  const PM=window.__ppV41Profile;if(PM&&typeof PM.blankChristian==='function')return PM.blankChristian();
  return {'financeiro_marcos_custom_tx_v3':'[]','financeiro_marcos_debt_edits_v3':'{}','financeiro_marcos_debt_archived_v3':'[]','financeiro_marcos_debt_deleted_v3':'[]','financeiro_marcos_assets_v3':'[]','financeiro_marcos_fgts_summary_v3':'{"saldoAtual":0,"saldoBloqueado":0,"saldoRescisao":0,"saldoDisponivel":0}','financeiro_marcos_cards_v3':'[]','financeiro_marcos_card_purchases_v3':'[]','financeiro_marcos_investments_v3':'[]','planejador_creditores_v1':'[]','planejador_tx_edits_v1':'{}','planejador_tx_deleted_v1':'[]','planejador_fgts_item_edits_v1':'{}','planejador_invoice_item_overrides_v2':'{}','planejador_purchase_overrides_v2':'{}','planejador_asset_financings_v27':'{}'};
 }
+function openPassword(p){
+ closeLegacy();const x=shell('profilePasswordV76','Alterar senha','Atualize a senha do perfil '+p+'.');
+ x.body.innerHTML='<div class="v76-grid"><div class="v76-field full"><label>Senha atual</label><input id="v76OldPass" type="password" autocomplete="current-password"></div><div class="v76-field"><label>Nova senha</label><input id="v76NewPass" type="password" autocomplete="new-password" placeholder="Mínimo de 6 caracteres"></div><div class="v76-field"><label>Confirmar nova senha</label><input id="v76ConfirmPass" type="password" autocomplete="new-password"></div></div><div class="v76-error" id="v76PassMsg"></div><div class="v76-form-actions"><button type="button" class="v76-btn" id="v76PassCancel">Cancelar</button><button type="button" class="v76-btn primary" id="v76SavePass">Salvar nova senha</button></div>';
+ document.getElementById('v76PassCancel').onclick=x.close;document.getElementById('v76SavePass').onclick=()=>{const old=document.getElementById('v76OldPass').value||'',nw=document.getElementById('v76NewPass').value||'',cf=document.getElementById('v76ConfirmPass').value||'',msg=document.getElementById('v76PassMsg');msg.className='v76-error';if(old!==passFor(p)){msg.textContent='A senha atual está incorreta.';return}if(nw.length<6){msg.textContent='A nova senha precisa ter pelo menos 6 caracteres.';return}if(nw!==cf){msg.textContent='A confirmação não corresponde à nova senha.';return}try{localStorage.setItem(PASS(p),nw)}catch(e){};msg.textContent='Senha alterada com sucesso.';msg.className='v76-error v76-success';setTimeout(x.close,450)};setTimeout(()=>document.getElementById('v76OldPass')?.focus(),40);
+}
 function openCreate(){
  closeLegacy();const x=shell('profileCreateV76','Novo perfil','Crie um espaço independente, com dados e senha próprios.');
  x.body.innerHTML='<div class="v76-grid"><div class="v76-field full"><label>Nome do perfil</label><input id="v76CreateName" maxlength="24" placeholder="Ex.: Ana"></div><div class="v76-field"><label>Senha</label><input id="v76CreatePass" type="password" autocomplete="new-password" placeholder="Mínimo de 6 caracteres"></div><div class="v76-field"><label>Confirmar senha</label><input id="v76CreatePass2" type="password" autocomplete="new-password"></div></div><div class="v76-error" id="v76CreateError"></div><div class="v76-form-actions"><button type="button" class="v76-btn" id="v76CreateCancel">Cancelar</button><button type="button" class="v76-btn primary" id="v76CreateGo">Criar perfil</button></div>';
@@ -29117,8 +29160,8 @@ function openCreate(){
 }
 function openPanel(){
  closeLegacy();document.getElementById('profilePanelV76')?.remove();const x=shell('profilePanelV76','Seu perfil','Gerencie acesso e segurança sem sair do Hub.');const p=active();
- x.body.innerHTML='<div class="v76-label">Perfil em uso</div><div class="v76-current"><span class="v76-avatar">'+esc(p.charAt(0).toUpperCase())+'</span><span><b>'+esc(p)+'</b><small>Perfil financeiro independente</small></span></div><div class="v76-actions"><button type="button" class="v76-action primary" id="v76Switch"><span class="v76-action-icon">⇄</span><span class="v76-action-copy"><b>Trocar perfil</b><small>Escolher outro perfil</small></span><span class="v76-chevron">›</span></button><button type="button" class="v76-action password" id="v76Password"><span class="v76-action-icon">⌁</span><span class="v76-action-copy"><b>Alterar senha</b><small>Segurança do acesso</small></span><span class="v76-chevron">›</span></button><button type="button" class="v76-action create wide" id="v76Create"><span class="v76-action-icon">+</span><span class="v76-action-copy"><b>Novo perfil</b><small>Criar espaço independente</small></span><span class="v76-chevron">›</span></button></div><div class="v76-password-box" id="v76PasswordBox"><h3>Alterar senha</h3><p>A nova senha será aplicada ao perfil '+esc(p)+'.</p><div class="v76-grid"><div class="v76-field full"><label>Senha atual</label><input id="v76OldPass" type="password" autocomplete="current-password"></div><div class="v76-field"><label>Nova senha</label><input id="v76NewPass" type="password" autocomplete="new-password"></div><div class="v76-field"><label>Confirmar nova senha</label><input id="v76ConfirmPass" type="password" autocomplete="new-password"></div></div><div class="v76-error" id="v76PassMsg"></div><div class="v76-form-actions"><button type="button" class="v76-btn primary" id="v76SavePass">Salvar nova senha</button></div></div><div class="v76-security"><span>✓</span><span><b>Perfis independentes</b><small>Cada perfil mantém seus próprios dados e preferências.</small></span></div>';
- document.getElementById('v76Switch').onclick=()=>{x.close();openSwitch()};document.getElementById('v76Create').onclick=()=>{x.close();openCreate()};document.getElementById('v76Password').onclick=()=>document.getElementById('v76PasswordBox').classList.toggle('open');document.getElementById('v76SavePass').onclick=()=>{const old=document.getElementById('v76OldPass').value||'',nw=document.getElementById('v76NewPass').value||'',cf=document.getElementById('v76ConfirmPass').value||'',msg=document.getElementById('v76PassMsg');msg.className='v76-error';if(old!==passFor(p)){msg.textContent='A senha atual está incorreta.';return}if(nw.length<6){msg.textContent='A nova senha precisa ter pelo menos 6 caracteres.';return}if(nw!==cf){msg.textContent='A confirmação não corresponde à nova senha.';return}try{localStorage.setItem(PASS(p),nw)}catch(e){};msg.textContent='Senha alterada com sucesso.';msg.className='v76-error v76-success';['v76OldPass','v76NewPass','v76ConfirmPass'].forEach(id=>document.getElementById(id).value='')};
+ x.body.innerHTML='<div class="v76-label">Perfil em uso</div><div class="v76-current"><span class="v76-avatar">'+esc(p.charAt(0).toUpperCase())+'</span><span><b>'+esc(p)+'</b><small>Perfil financeiro independente</small></span></div><div class="v76-actions"><button type="button" class="v76-action primary" id="v76Switch"><span class="v76-action-icon">⇄</span><span class="v76-action-copy"><b>Trocar perfil</b><small>Escolher outro perfil</small></span><span class="v76-chevron">›</span></button><button type="button" class="v76-action password" id="v76Password"><span class="v76-action-icon">⌁</span><span class="v76-action-copy"><b>Alterar senha</b><small>Segurança do acesso</small></span><span class="v76-chevron">›</span></button><button type="button" class="v76-action create wide" id="v76Create"><span class="v76-action-icon">+</span><span class="v76-action-copy"><b>Novo perfil</b><small>Criar espaço independente</small></span><span class="v76-chevron">›</span></button></div><div class="v76-security"><span>✓</span><span><b>Perfis independentes</b><small>Cada perfil mantém seus próprios dados e preferências.</small></span></div>';
+ document.getElementById('v76Switch').onclick=()=>{x.close();openSwitch()};document.getElementById('v76Create').onclick=()=>{x.close();openCreate()};document.getElementById('v76Password').onclick=()=>{x.close();openPassword(p)};
 }
 /* Acesso único: o P abre este painel e bloqueia os fluxos legados. */
 document.addEventListener('click',e=>{const hit=e.target.closest?.('[data-v62-profile],.profile-man');if(!hit)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openPanel()},true);
@@ -29127,6 +29170,33 @@ document.addEventListener('keydown',e=>{const hit=e.target.closest?.('[data-v62-
 function route(){try{const q=new URLSearchParams(location.search);if(q.get('action')==='profile'){setTimeout(()=>{closeLegacy();openPanel();history.replaceState(null,'',location.pathname+location.hash)},650)}}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',route,{once:true});else route();
 window.ppOpenProfileV76=openPanel;
+})();
+</script>
+
+<style id="pp-v77-single-close-style">
+[data-pp-duplicate-close="1"],[data-v77-duplicate-close="1"]{display:none!important}
+</style>
+<script id="pp-v77-single-close-guard">
+(()=>{'use strict';
+ const isX=t=>/^[×✕x]$/i.test(t);
+ const isMarked=b=>{const a=(b.getAttribute('aria-label')||'').toLowerCase(),c=String(b.className||'').toLowerCase(),id=(b.id||'').toLowerCase();return a==='fechar'||/close|fechar/.test(c)||/close|fechar/.test(id)||b.hasAttribute('data-close')||b.hasAttribute('data-ppv-close')};
+ const candidates=root=>[...root.querySelectorAll('button')].filter(b=>{const t=(b.textContent||'').trim();return /^fechar$/i.test(t)||(isX(t)&&isMarked(b))});
+ function normalize(root){
+  if(!root||root.dataset?.v77CloseChecked==='working')return;
+  const list=candidates(root);if(list.length<2)return;
+  root.dataset.v77CloseChecked='working';
+  let keep=list.find(b=>b.classList.contains('pp-modal-close'))||list.find(b=>isX((b.textContent||'').trim())&&(b.getAttribute('aria-label')||'').toLowerCase()==='fechar')||list.find(b=>isX((b.textContent||'').trim()))||list[0];
+  list.forEach(b=>{if(b===keep)return;b.dataset.v77DuplicateClose='1';b.style.setProperty('display','none','important');b.setAttribute('aria-hidden','true');b.tabIndex=-1});
+  root.dataset.v77CloseChecked='1';
+ }
+ function roots(scope=document){
+  const sel='.modalback>.modal,.ppv-modal,[role="dialog"],.switch-card,.pp-profile-v46-card,.v120-modal';
+  if(scope.matches?.(sel))normalize(scope);scope.querySelectorAll?.(sel).forEach(normalize);
+ }
+ roots();
+ const mo=new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType===1)roots(n)})));
+ mo.observe(document.documentElement,{childList:true,subtree:true});
+ window.ppNormalizeCloseButtonsV77=()=>roots();
 })();
 </script>
 </body></html>
@@ -29334,3 +29404,14 @@ window.ppOpenProfileV76=openPanel;
   },true);
 })();
 </script>
+
+<style id="pp-v78-profile-compact-fix">
+#profilePanelV76 .v76-profile-card{overflow:hidden!important;max-height:none!important}
+#profilePanelV76 .v76-action,#profilePanelV76 .v76-action.primary{color:#edf6ff!important}
+#profilePanelV76 .v76-action-copy b{color:#f5faff!important}
+#profilePanelV76 .v76-action-copy small{color:#8ea5bb!important}
+#profilePanelV76 .v76-security b{color:#d2e5f7!important}
+#profilePanelV76 .v76-security small{color:#89a0b7!important}
+#profilePanelV76 .v76-action.primary{background:linear-gradient(135deg,#0d4f8f,#0a3768)!important}
+#profilePanelV76 .v76-action.password,#profilePanelV76 .v76-action.create{background:linear-gradient(145deg,#0d2137,#0a192b)!important}
+</style>
