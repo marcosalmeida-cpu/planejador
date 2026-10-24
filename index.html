@@ -8109,10 +8109,10 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     }
   }
   function startLoops(){
-    if(!monitorTimer)monitorTimer=setInterval(scan,150);
+    if(!monitorTimer)monitorTimer=setInterval(scan,1000);
     if(!pollTimer)pollTimer=setInterval(()=>{
       if(!document.hidden&&currentUser&&initialized)syncCycle({reload:true});
-    },2500);
+    },30000);
     if(!presenceTimer)presenceTimer=setInterval(touchPresence,30000);
   }
   function subscribeRealtime(){
@@ -8236,9 +8236,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
   document.addEventListener('visibilitychange',()=>{
     if(!document.hidden&&currentUser&&initialized)setTimeout(()=>syncCycle({reload:true}),100);
   });
-  window.addEventListener('focus',()=>{
-    if(currentUser&&initialized)setTimeout(()=>syncCycle({reload:true}),100);
-  });
+  /* v72: o realtime já sincroniza alterações; evitamos recarregar toda a aplicação a cada foco. */
   window.addEventListener('online',()=>{
     if(currentUser&&initialized)setTimeout(()=>syncCycle({reload:true}),120);
   });
@@ -8634,9 +8632,8 @@ Os dados atuais deste navegador serão substituídos.`);
   function captureWorkspace(){
     try{
       const draft={view:currentView(),scrollY:window.scrollY||0,openModals:[],fields:{},savedAt:Date.now()};
-      document.querySelectorAll('.modalback.open,#profilePanelModal.open').forEach(x=>{
-        if(x.id)draft.openModals.push(x.id);
-      });
+      /* v72: modais não fazem parte da restauração da sessão.
+         Reabrir overlays antigos podia bloquear a rolagem no primeiro carregamento. */
       document.querySelectorAll('input,select,textarea').forEach(el=>{
         if(!el.id||el.type==='password'||el.type==='file')return;
         if(el.closest('#loginOverlay,#sessionLockV45,#cloudAuthV40,#profileCreateV46,#profileSwitchV46'))return;
@@ -8683,7 +8680,10 @@ Os dados atuais deste navegador serão substituídos.`);
         else if(v&&Object.prototype.hasOwnProperty.call(v,'value'))el.value=v.value;
       });
 
-      (d.openModals||[]).forEach(id=>document.getElementById(id)?.classList.add('open'));
+      /* v72: sempre iniciar sem overlays restaurados. */
+      document.querySelectorAll('.modalback.open,#profilePanelModal.open,#profileSwitchOverlay.open').forEach(el=>{
+        if(!el.closest('#loginOverlay,#sessionLockV45')){el.classList.remove('open');el.setAttribute?.('aria-hidden','true')}
+      });
       if(Number.isFinite(Number(d.scrollY)))window.scrollTo(0,Number(d.scrollY));
       return true;
     }catch(e){
@@ -17470,7 +17470,7 @@ mirror();
 window.addEventListener('pagehide',mirror,{capture:true});
 window.addEventListener('beforeunload',mirror,{capture:true});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)mirror()});
-const timer=setInterval(mirror,1200);
+const timer=setInterval(mirror,5000);
 // Single verified switch function for explicit profile UI paths.
 const switchProfile=window.ppV46SwitchProfile||window.ppV41SwitchProfile;
 if(typeof switchProfile==='function'){
@@ -17803,7 +17803,7 @@ function start(){
 document.addEventListener('visibilitychange',()=>{
   if(!document.hidden)setTimeout(()=>safeSync(true),120);
 });
-window.addEventListener('focus',()=>setTimeout(()=>safeSync(true),160));
+/* v72: sincronização duplicada por foco removida. */
 window.addEventListener('online',()=>setTimeout(()=>safeSync(true),200));
 
 /* Antes de sair não é seguro depender de uma requisição assíncrona longa,
@@ -17838,7 +17838,7 @@ if(document.readyState==='loading'){
 
 /* Como status() da rotina antiga pode recriar elementos, fazemos apenas
    uma correção visual periódica leve, sem renderizar páginas ou alterar dados. */
-setInterval(removeExtra,4000);
+setInterval(removeExtra,15000);
 
 window.ppCloudSafetyV59={
   syncNow:()=>safeSync(true),
@@ -18397,7 +18397,7 @@ if(document.body)obs.observe(document.body,{childList:true,subtree:true});
 else document.addEventListener('DOMContentLoaded',()=>obs.observe(document.body,{childList:true,subtree:true}),{once:true});
 
 /* Fallback leve: só confere a existência dos botões; não redesenha nada. */
-setInterval(patchAll61,1500);
+setInterval(patchAll61,10000);
 
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',()=>setTimeout(patchAll61,250),{once:true});
@@ -23524,7 +23524,7 @@ document.addEventListener('click',e=>{
 
 /* Faz cache dos perfis após a nuvem terminar de autenticar. */
 setTimeout(hydrateInactiveProfiles88,4500);
-window.addEventListener('focus',()=>setTimeout(hydrateInactiveProfiles88,500));
+/* v72: hidratação por foco removida para evitar trabalho repetido ao abrir listas/campos. */
 window.addEventListener('online',()=>setTimeout(hydrateInactiveProfiles88,700));
 
 /* Segurança periódica: não altera a tela, só mantém os perfis inativos
@@ -28792,4 +28792,197 @@ function bind(){if(!$p('previdenciaPrivada')||$p('previdenciaPrivada').dataset.p
 bind();render();
 try{const last=localStorage.getItem('planejador_private_pension_market_refresh_v70');if(last!==todayISO()){localStorage.setItem('planejador_private_pension_market_refresh_v70',todayISO());setTimeout(refreshMarket,450)}}catch(e){}
 })();</script>
+<style id="pp-v72-stability-premium-style">
+/* v72 — estabilidade, perfil premium e ações globais */
+html,body{scroll-behavior:auto}
+body:not(.ppv-modal-open){overscroll-behavior-y:auto}
+#ppBankRailV62 [data-v62-profile]{
+  background:linear-gradient(145deg,#ffffff,#edf4ff)!important;
+  border:1px solid rgba(91,132,187,.32)!important;
+  box-shadow:0 7px 18px rgba(20,65,120,.12)!important;
+}
+#ppBankRailV62 [data-v62-profile] .v62-dot{
+  background:linear-gradient(135deg,#0b63f6,#45a7ff)!important;color:#fff!important;
+  border:2px solid rgba(255,255,255,.95)!important;box-shadow:0 0 0 2px rgba(11,99,246,.14)!important;
+}
+#ppBankRailV62 [data-v62-logout]{
+  color:#fff!important;background:linear-gradient(145deg,#ef4444,#b91c1c)!important;
+  border:1px solid #b91c1c!important;box-shadow:0 8px 20px rgba(185,28,28,.25)!important;
+}
+#ppBankRailV62 [data-v62-logout]:hover{transform:translateY(-1px)!important;filter:brightness(1.04);box-shadow:0 11px 24px rgba(185,28,28,.32)!important}
+#ppBankRailV62 [data-v62-logout]::after{background:#991b1b!important;color:#fff!important}
+
+/* Troca de perfil: visual premium alinhado ao Hub atual. */
+#profileSwitchOverlay{background:rgba(5,15,31,.72)!important;backdrop-filter:blur(18px) saturate(120%)!important}
+#profileSwitchOverlay .switch-card{
+  width:min(590px,calc(100vw - 28px))!important;padding:0!important;overflow:hidden!important;
+  border-radius:30px!important;border:1px solid rgba(183,205,232,.72)!important;
+  background:linear-gradient(180deg,#fff 0%,#f7faff 100%)!important;
+  box-shadow:0 42px 110px rgba(2,16,40,.42)!important;
+}
+#profileSwitchOverlay .switch-head{
+  position:relative!important;margin:0!important;padding:25px 26px 22px!important;
+  background:radial-gradient(circle at 90% 0%,rgba(97,183,255,.30),transparent 34%),linear-gradient(135deg,#071f42,#0a4f9e 65%,#087bd3)!important;
+  color:#fff!important;
+}
+#profileSwitchOverlay .switch-head:before{content:'HUB PESSOAL';display:block;position:absolute;left:26px;top:12px;font-size:8px;font-weight:900;letter-spacing:.17em;color:rgba(255,255,255,.62)}
+#profileSwitchOverlay .switch-head h2{margin-top:7px!important;color:#fff!important;font-size:24px!important;letter-spacing:-.035em!important}
+#profileSwitchOverlay .switch-head p{color:rgba(255,255,255,.72)!important;font-size:11px!important}
+#profileSwitchOverlay .switch-close{border:1px solid rgba(255,255,255,.18)!important;background:rgba(255,255,255,.12)!important;color:#fff!important;box-shadow:none!important}
+#profileSwitchOverlay .switch-profiles{padding:18px 22px 0!important;gap:10px!important}
+#profileSwitchOverlay .switch-profile{
+  min-height:84px!important;padding:13px!important;border-radius:19px!important;
+  border:1px solid #e1e8f2!important;background:linear-gradient(155deg,#fff,#f4f7fb)!important;
+  box-shadow:0 8px 20px rgba(17,50,91,.06)!important;transition:.18s ease!important;
+}
+#profileSwitchOverlay .switch-profile:hover{transform:translateY(-2px)!important;border-color:#bfd3ee!important;box-shadow:0 13px 27px rgba(17,67,126,.11)!important}
+#profileSwitchOverlay .switch-profile.active{background:linear-gradient(145deg,#edf6ff,#e2f0ff)!important;border:1.5px solid #1680e8!important;box-shadow:0 0 0 3px rgba(22,128,232,.09)!important;color:#084f9c!important}
+#profileSwitchOverlay .switch-avatar{width:43px!important;height:43px!important;border-radius:15px!important;font-size:15px!important;background:#e9eef5!important;color:#27405f!important}
+#profileSwitchOverlay .switch-profile.active .switch-avatar{background:linear-gradient(135deg,#0b63f6,#52b9ff)!important;color:#fff!important;box-shadow:0 7px 16px rgba(11,99,246,.24)!important}
+#profileSwitchOverlay .switch-pass{margin:17px 22px 0!important}
+#profileSwitchOverlay .switch-pass input{min-height:46px!important;border-radius:14px!important;border:1px solid #d7e1ee!important;background:#fff!important;box-shadow:inset 0 1px 2px rgba(18,44,76,.04)!important}
+#profileSwitchOverlay .switch-pass input:focus{outline:none!important;border-color:#1680e8!important;box-shadow:0 0 0 4px rgba(22,128,232,.10)!important}
+#profileSwitchOverlay .switch-error{margin-left:22px!important;margin-right:22px!important}
+#profileSwitchOverlay .switch-actions{padding:0 22px 22px!important;margin-top:12px!important}
+#profileSwitchOverlay .switch-login{min-height:44px!important;border-radius:14px!important;background:linear-gradient(135deg,#0b63f6,#168cdf)!important;box-shadow:0 9px 20px rgba(11,99,246,.22)!important}
+
+/* Credor criado dentro do lançamento aparece como uma etapa sobreposta, sem desmontar o formulário de lançamento. */
+#creditorModal.v72-from-tx{z-index:3400!important}
+#txModal.v72-under-creditor{z-index:3300!important}
+
+/* Evita estados de body presos por overlays legados. */
+body.v72-scroll-safe{overflow-y:auto!important;min-height:100%!important}
+html.v72-scroll-safe{overflow-y:auto!important;height:auto!important}
+</style>
+<script id="pp-v72-stability-flow-script">
+(()=>{'use strict';
+const CRED_KEY='planejador_creditores_v1';
+const q=id=>document.getElementById(id);
+const html=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const parseMoney=v=>{try{if(typeof num==='function')return num(v)}catch(e){}let x=String(v??'').trim();if(x.includes(',')&&x.includes('.'))x=x.replace(/\./g,'').replace(',','.');else if(x.includes(','))x=x.replace(',','.');x=x.replace(/[^0-9.-]/g,'');const n=Number(x);return Number.isFinite(n)?n:0};
+function readCreds(){try{const a=JSON.parse(localStorage.getItem(CRED_KEY)||'[]');return Array.isArray(a)?a:[]}catch(e){return []}}
+function writeCreds(a){localStorage.setItem(CRED_KEY,JSON.stringify(a));window.creditors=a}
+function activeCreds(){return readCreds().filter(c=>c.status!=='Arquivado').sort((a,b)=>String(a.name).localeCompare(String(b.name),'pt-BR'))}
+function fillCreditorSelect(selected=''){
+  const opts=activeCreds();
+  const sel=q('fOriginSelect');
+  if(sel){sel.innerHTML='<option value="">Selecione</option>'+opts.map(c=>`<option value="${html(c.name)}">${html(c.name)}</option>`).join('');if(selected)sel.value=selected}
+  const parent=q('crParentSelect');
+  if(parent){parent.innerHTML='<option value="">Sem vínculo</option>'+opts.map(c=>`<option value="${html(c.name)}">${html(c.name)}</option>`).join('')}
+}
+function renderCredsSafe(){
+  const all=readCreds(),filter=q('credFilter')?.value||'all',search=(q('credSearch')?.value||'').toLowerCase();
+  const rows=all.filter(c=>(filter==='all'||c.type===filter)&&(!search||[c.name,c.type,c.notes].join(' ').toLowerCase().includes(search))).sort((a,b)=>String(a.name).localeCompare(String(b.name),'pt-BR'));
+  const sm=q('credSummary');if(sm)sm.innerHTML=`<div class="card mini"><span>Total cadastrados</span><b>${all.length}</b></div><div class="card mini"><span>Ativos</span><b>${all.filter(c=>c.status==='Ativo').length}</b></div><div class="card mini"><span>PF</span><b>${all.filter(c=>c.type==='PF'||c.type==='Pessoa').length}</b></div><div class="card mini"><span>PJ</span><b>${all.filter(c=>c.type==='PJ'||c.type==='Empresa'||c.type==='Pessoa / empresa').length}</b></div><div class="card mini"><span>Arquivados</span><b>${all.filter(c=>c.status==='Arquivado').length}</b></div>`;
+  const body=q('credBody');if(body)body.innerHTML=rows.map(c=>`<tr><td><b>${html(c.name)}</b></td><td><span class="tag blue">${html(c.type||'PJ')}</span></td><td><span class="tag ${c.status==='Ativo'?'green':'amber'}">${html(c.status||'Ativo')}</span></td><td>${html(c.source||'Site')}</td><td>${html(c.notes||'—')}</td><td class="actioncell"><button class="dots" onclick="window.openCreditorMenu(event,'${String(c.id).replace(/'/g,'')}')">⋯</button></td></tr>`).join('')||'<tr><td colspan="6" class="empty">Nenhum credor encontrado.</td></tr>';
+}
+window.renderCreditors=renderCredsSafe;
+
+let creditorReturnToTx=false;
+function openCreditorSafe(id=''){
+  const c=readCreds().find(x=>String(x.id)===String(id));
+  if(q('crId'))q('crId').value=c?.id||'';
+  if(q('creditorModalTitle'))q('creditorModalTitle').textContent=c?'Editar credor':'Novo credor';
+  if(q('crName'))q('crName').value=c?.name||'';
+  if(q('crType')){
+    if(![...q('crType').options].some(o=>o.value==='PF'))q('crType').innerHTML='<option>PF</option><option>PJ</option>';
+    q('crType').value=c?.type||'PJ';
+  }
+  if(q('crStatus'))q('crStatus').value=c?.status||'Ativo';
+  if(q('crNotes'))q('crNotes').value=c?.notes||'';
+  const m=q('creditorModal');if(m){m.classList.toggle('v72-from-tx',creditorReturnToTx);m.classList.add('open');m.setAttribute('aria-hidden','false')}
+  q('txModal')?.classList.toggle('v72-under-creditor',creditorReturnToTx);
+  setTimeout(()=>q('crName')?.focus(),20);
+}
+function saveCreditorSafe(){
+  const name=(q('crName')?.value||'').trim();if(!name){toast?.('Informe o nome do credor.');return}
+  let all=readCreds();const id=q('crId')?.value||('CR'+Date.now());
+  if(all.some(c=>String(c.id)!==String(id)&&String(c.name).toLowerCase()===name.toLowerCase())){toast?.('Este credor já está cadastrado.');return}
+  const obj={id,name,type:q('crType')?.value||'PJ',status:q('crStatus')?.value||'Ativo',notes:(q('crNotes')?.value||'').trim(),source:'Site'};
+  const i=all.findIndex(c=>String(c.id)===String(id));if(i>=0)all[i]=obj;else all.push(obj);
+  try{writeCreds(all)}catch(e){toast?.('Não foi possível salvar o credor neste navegador.');return}
+  fillCreditorSelect(name);renderCredsSafe();
+  const m=q('creditorModal');m?.classList.remove('open','v72-from-tx');m?.setAttribute('aria-hidden','true');q('txModal')?.classList.remove('v72-under-creditor');
+  if(creditorReturnToTx){creditorReturnToTx=false;q('txModal')?.classList.add('open');setTimeout(()=>q('fOriginSelect')?.focus(),20);toast?.('Credor salvo e selecionado no lançamento.')}else toast?.('Credor salvo.');
+}
+window.openCreditorV61=openCreditorSafe;
+
+// Capture phase guarantees that old handlers do not also fire.
+document.addEventListener('click',e=>{
+  const quick=e.target.closest?.('#quickCreditorBtn');
+  if(quick){e.preventDefault();e.stopImmediatePropagation();creditorReturnToTx=true;openCreditorSafe();return}
+  const save=e.target.closest?.('#saveCreditor');
+  if(save){e.preventDefault();e.stopImmediatePropagation();saveCreditorSafe();return}
+},true);
+
+function payrollInfo(cat,tipo){
+  if(tipo!=='entrada'||!['Salário','13º salário'].includes(cat))return {value:null,payroll:null};
+  const g=parseMoney(q('payGross')?.value),a=parseMoney(q('payAdd')?.value),b=parseMoney(q('payBenefits')?.value),ins=parseMoney(q('payInss')?.value),ir=parseMoney(q('payIrrf')?.value),vt=parseMoney(q('payVt')?.value),h=parseMoney(q('payHealth')?.value),loan=parseMoney(q('payLoan')?.value),other=parseMoney(q('payOther')?.value);
+  const net=Math.max(0,g+a+b-ins-ir-vt-h-loan-other);
+  if(q('fValue')&&net>0)q('fValue').value=String(net).replace('.',',');
+  return {value:net||null,payroll:{gross:g,additions:a,benefits:b,inss:ins,irrf:ir,vt,health:h,loan,other}};
+}
+function persistTarget(key,data){localStorage.setItem(key,JSON.stringify(data))}
+function afterTxSave(msg,card=false){
+  q('txModal')?.classList.remove('open');
+  try{if(card)window.renderCards?.();window.renderLancamentos?.();window.renderDashboard?.();window.renderNuvem?.()}catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  releaseScroll();toast?.(msg);
+}
+function nextYM(y,m){let i=(+y)*12+(+m-1)+1;return {year:Math.floor(i/12),month:(i%12)+1}}
+function saveNewTxStable(){
+  const tipo=q('fType')?.value||'saida',cat=q('fCategory')?.value||(tipo==='entrada'?'Receita':''),pay=q('fPayMethod')?.value||'padrao';
+  let desc=(q('fDesc')?.value||'').trim();const pi=payrollInfo(cat,tipo);let val=pi.value||parseMoney(q('fValue')?.value);
+  if(!desc&&pi.payroll)desc=cat;if(!val||!desc){toast?.('Informe descrição e valor.');return}
+  const origin=(q('fOriginSelect')?.value||'').trim();if(tipo==='saida'&&!origin){toast?.('Selecione a origem / credor.');return}
+  let y=+q('fYear')?.value||new Date().getFullYear(),m=+q('fMonth')?.value||new Date().getMonth()+1;
+  const base={id:'U'+Date.now(),tipo,ano:y,mesNum:m,descricao:desc,valor:val,categoria:cat,classificacao:tipo==='entrada'?'Entrada':(q('fClass')?.value||'Variável'),origem:origin,status:q('fStatus')?.value||'Quitado',origemDados:'Site',payroll:pi.payroll,createdAt:new Date().toISOString()};
+
+  if(tipo==='saida'&&pay==='cartao'){
+    const cardId=q('fCardId')?.value;if(!cardId){toast?.('Selecione o cartão.');return}
+    if(q('fCardStart')?.value==='next'){const nm=nextYM(y,m);y=nm.year;m=nm.month}
+    const mode=q('fCardMode')?.value||'avista';const installments=mode==='avista'?1:Math.max(1,+q('fCardInstallments')?.value||1);
+    const obj={id:'CP'+Date.now(),cardId,date:new Date().toISOString().slice(0,10),description:desc,category:cat,mode,total:val,installments,paidInstallments:0,startYear:y,startMonth:m,status:'Ativo',creditor:origin};
+    cardPurchases.push(obj);
+    try{persistTarget(cardPurchasesKey,cardPurchases);try{persist()}catch(_){}}catch(e){cardPurchases=cardPurchases.filter(x=>x.id!==obj.id);toast?.('Não foi possível salvar a compra. Verifique o armazenamento do navegador.');return}
+    afterTxSave('Compra lançada no cartão.',true);return;
+  }
+
+  const mode=q('standardRecurringMode')?.value||'unico';
+  if(mode==='recorrente')Object.assign(base,{standardRecurring:true,paymentMethod:'padrao',recurringStartYear:y,recurringStartMonth:m,recurringMode:'mensal',recurringOverrides:{}});
+  else if(mode==='parcelado'){
+    const count=Math.max(1,Math.min(120,parseInt(String(q('standardInstallmentQty')?.value||2).split(/[,.]/)[0].replace(/\D/g,''),10)||2));
+    const sy=+q('standardInstallmentYear')?.value||y,sm=+q('standardInstallmentMonth')?.value||m;
+    Object.assign(base,{ano:sy,mesNum:sm,standardInstallment:true,standardRecurring:false,paymentMethod:'padrao',installmentTotal:val,installmentCount:count,installmentStartYear:sy,installmentStartMonth:sm,installmentOverrides:{}});
+  } else Object.assign(base,{standardRecurring:false,paymentMethod:'padrao'});
+  custom.push(base);
+  try{persistTarget(txKey,custom);try{persist()}catch(_){}}catch(e){custom=custom.filter(x=>x.id!==base.id);toast?.('Não foi possível salvar o lançamento. O armazenamento local pode estar cheio.');return}
+  try{saveSelectOptions?.()}catch(e){}
+  afterTxSave(mode==='parcelado'?'Parcelamento salvo.':mode==='recorrente'?'Lançamento recorrente salvo.':'Lançamento salvo.');
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('#saveTx');if(!b)return;
+  const editing=!!(q('txEditId')?.value||'').trim();if(editing)return; // mantém a lógica avançada de edição existente.
+  e.preventDefault();e.stopImmediatePropagation();saveNewTxStable();
+},true);
+
+function modalReallyOpen(){return [...document.querySelectorAll('.modalback.open,#profilePanelModal.open,#profileSwitchOverlay.open')].some(el=>{const cs=getComputedStyle(el);return cs.display!=='none'&&cs.visibility!=='hidden'&&Number(cs.opacity||1)>0})}
+function releaseScroll(){
+  const login=q('loginOverlay'),lock=q('sessionLockV45');
+  if(login||lock||modalReallyOpen())return;
+  document.documentElement.classList.remove('hub-login-lock');document.body.classList.remove('hub-login-lock','ppv-modal-open');
+  document.documentElement.classList.add('v72-scroll-safe');document.body.classList.add('v72-scroll-safe');
+  document.documentElement.style.removeProperty('overflow');document.documentElement.style.removeProperty('height');document.body.style.removeProperty('overflow');document.body.style.removeProperty('height');
+}
+window.ppReleaseScrollV72=releaseScroll;
+['DOMContentLoaded','pageshow'].forEach(ev=>window.addEventListener(ev,()=>setTimeout(releaseScroll,80),{once:ev==='DOMContentLoaded'}));
+setTimeout(releaseScroll,350);setTimeout(releaseScroll,1400);
+document.addEventListener('click',e=>{if(e.target.closest?.('[data-close],.switch-close,.v62-hub-close'))setTimeout(releaseScroll,30)},true);
+
+// Premium rail and profile routing.
+function paintProfile(){const name=localStorage.getItem('planejador_active_profile')||'Marcos';document.querySelectorAll('#ppBankRailV62 [data-v62-profile] .v62-dot').forEach(x=>x.textContent=name.slice(0,1).toUpperCase())}
+paintProfile();
+const params=new URLSearchParams(location.search);if(params.get('action')==='profile'){setTimeout(()=>{try{window.openProfileSwitcher?.()}catch(e){}history.replaceState(null,'',location.pathname+location.hash)},500)}
+})();
+</script>
 </body></html>

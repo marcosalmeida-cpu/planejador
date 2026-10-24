@@ -287,4 +287,17 @@ th{font-size:9.5px!important;letter-spacing:.02em!important}.tablewrap button,td
 }
 </style>
 
+
+<style id="pp-v72-global-premium-style">
+html,body{overflow-y:auto!important;height:auto!important;min-height:100%!important;scroll-behavior:auto!important}
+#ppBankRailV62 [data-v62-profile]{background:linear-gradient(145deg,#fff,#edf4ff)!important;border:1px solid rgba(91,132,187,.32)!important;box-shadow:0 7px 18px rgba(20,65,120,.12)!important}
+#ppBankRailV62 [data-v62-profile] .v62-dot{background:linear-gradient(135deg,#0b63f6,#45a7ff)!important;color:#fff!important;border:2px solid #fff!important;box-shadow:0 0 0 2px rgba(11,99,246,.14)!important}
+#ppBankRailV62 [data-v62-logout]{color:#fff!important;background:linear-gradient(145deg,#ef4444,#b91c1c)!important;border:1px solid #b91c1c!important;box-shadow:0 8px 20px rgba(185,28,28,.25)!important}
+#ppBankRailV62 [data-v62-logout]:hover{transform:translateY(-1px)!important;filter:brightness(1.04);box-shadow:0 11px 24px rgba(185,28,28,.32)!important}
+</style>
+<script id="pp-v72-global-premium-script">(()=>{'use strict';
+const rail=document.getElementById('ppBankRailV62');if(!rail)return;const active=localStorage.getItem('planejador_active_profile')||'Marcos';rail.querySelectorAll('[data-v62-profile] .v62-dot').forEach(x=>x.textContent=active.slice(0,1).toUpperCase());
+document.addEventListener('click',e=>{const p=e.target.closest?.('#ppBankRailV62 [data-v62-profile]');if(p){e.preventDefault();e.stopImmediatePropagation();location.href='index.html?action=profile';return}const l=e.target.closest?.('#ppBankRailV62 [data-v62-logout]');if(l){e.preventDefault();e.stopImmediatePropagation();['pp_secure_session_v45','pp_secure_workspace_v45','pp_v42_authed_profile','pp_v41_authed_profile','pp_session_v44_authed_profile'].forEach(k=>{try{sessionStorage.removeItem(k)}catch(_){}});location.href='index.html';}},true);
+window.addEventListener('pageshow',()=>{document.documentElement.style.removeProperty('overflow');document.body.style.removeProperty('overflow')});
+})();</script>
 </body></html>

@@ -14,3 +14,11 @@ Envie **todos os arquivos e a pasta `assets` para a mesma pasta do repositório*
 A versão mantém as chaves de `localStorage` usadas nas versões anteriores para Finanças, Saúde e Entretenimento. Educação usa uma chave por perfil e, para Marcos, lê a chave antiga como fallback para recuperar os registros existentes, sem apagá-la.
 
 Para que os dados locais já existentes apareçam, publique no **mesmo domínio/origem do GitHub Pages** que você já utilizava.
+
+## Ajustes v72 — estabilidade e interface
+- Novo lançamento com salvamento estabilizado para lançamento único, recorrente, parcelado e compra no cartão.
+- Cadastro rápido de credor retorna imediatamente ao lançamento e já seleciona o novo credor.
+- Modais não são mais restaurados automaticamente entre recargas, evitando bloqueio de rolagem ao abrir o Hub.
+- Rotinas repetitivas de sincronização e atualização visual tiveram a frequência reduzida para melhorar a resposta de listas e formulários.
+- Tela de troca de perfil recebeu acabamento premium; ação Sair ganhou destaque vermelho.
+- Perfil/Sair e comportamento de rolagem padronizados também nas páginas Educação, Saúde e Entretenimento.
