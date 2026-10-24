@@ -31,3 +31,12 @@ Para que os dados locais já existentes apareçam, publique no **mesmo domínio/
 - Cache local para reduzir chamadas externas e preservar desempenho.
 - Currículo, Formações e Publicações receberam nova identidade visual e regras responsivas.
 - O conteúdo ao vivo depende de conexão com a internet; se a API estiver indisponível, o Hub mantém o conteúdo já armazenado no navegador e os estados locais da página.
+
+
+## v81 — Educação revista editorial em português
+- Visão Geral transformada em revista/blog: destaque rotativo, radar interativo e pesquisa & descobertas.
+- Conteúdo ao vivo limitado a fontes originalmente publicadas em português.
+- Crossref removido da home para impedir títulos acadêmicos em inglês.
+- Seleção de temas movida para painel de personalização; sem chips no topo.
+- Cards pessoais removidos da Visão Geral.
+- Navegação Currículo/Formações/Publicações corrigida com fallback inline independente dos scripts externos.
