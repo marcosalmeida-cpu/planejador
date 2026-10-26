@@ -850,98 +850,254 @@ new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true});
 </style>
 
 
-<style id="pp-v85-education-viewport-responsiveness">
-/* V85 — a largura da Educação é sempre o espaço REAL restante da viewport. */
-html,body{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
-body.hub-page{margin:0!important;min-width:0!important;max-width:100%!important;overflow-x:hidden!important}
-body.hub-page>main.main,body.hub-page>main.hub-content,
-body.hub-page .main,body.hub-page .hub-content{
-  margin-left:64px!important;
-  margin-right:0!important;
-  width:calc(100% - 64px)!important;
-  max-width:calc(100% - 64px)!important;
-  min-width:0!important;
-  padding-left:10px!important;
-  padding-right:16px!important;
+
+<style id="pp-v86-education-true-responsive">
+/* V86 — Formações: responsividade pela área útil real, sem cortar conteúdo. */
+
+/* A regra antiga de education-premium-v15 usa width:100% com alta especificidade.
+   Aqui usamos a MESMA origem estrutural (:has + id) e width:auto, de modo que
+   margem esquerda + margem direita façam parte do cálculo normal do navegador. */
+body.hub-page:has(#edu-formacoes.active)>main.hub-content,
+body.hub-page:has(#edu-formacoes.active)>main.main,
+body.hub-page:has(#edu-formacoes.active) main.hub-content,
+body.hub-page:has(#edu-formacoes.active) .main{
   box-sizing:border-box!important;
-  overflow-x:hidden!important;
-}
-body.hub-page main.hub-content>.view,
-body.hub-page main.hub-content>.view.active{
-  width:100%!important;
-  max-width:100%!important;
+  width:auto!important;
+  max-width:none!important;
   min-width:0!important;
+  margin-left:var(--pp-v62-content-left,74px)!important;
+  margin-right:10px!important;
+  padding:8px!important;
+  overflow-x:visible!important;
+}
+
+body.hub-page:has(#edu-formacoes.active),
+body.hub-page:has(#edu-formacoes.active) #edu-formacoes,
+body.hub-page:has(#edu-formacoes.active) #edu-formacoes.active{
+  min-width:0!important;
+  max-width:100%!important;
   box-sizing:border-box!important;
 }
 #edu-formacoes.active{
   width:100%!important;
+  margin:0!important;
+  padding:12px!important;
+  overflow:visible!important;
+}
+
+/* Cabeçalho: nunca corta Nova formação. Se o espaço cair, ele quebra a linha. */
+#edu-formacoes .v117-form-head{
+  width:100%!important;
   max-width:100%!important;
   min-width:0!important;
-  overflow-x:hidden!important;
   box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:14px!important;
+  overflow:visible!important;
 }
-#edu-formacoes .v117-form-head,
+#edu-formacoes .v117-form-head>div{min-width:0!important}
+#edu-formacoes .v117-add-btn{
+  width:auto!important;
+  max-width:none!important;
+  min-width:max-content!important;
+  justify-self:end!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+
+/* O seletor superior sempre cabe no painel. */
 #edu-formacoes #v117FormationRoot,
 #edu-formacoes .v121-formation-deck,
-#edu-formacoes .v121-detail{
+#edu-formacoes .v121-detail,
+#edu-formacoes .v121-deck-head,
+#edu-formacoes .v119-detail-kicker,
+#edu-formacoes .v119-summary-grid,
+#edu-formacoes .edu83-history-tools,
+#edu-formacoes .v119-history-wrap{
   width:100%!important;
   max-width:100%!important;
   min-width:0!important;
   box-sizing:border-box!important;
 }
-#edu-formacoes .v117-form-head{
-  grid-template-columns:minmax(0,1fr) max-content!important;
-  overflow:hidden!important;
+#edu-formacoes .v121-deck-head{
+  grid-template-columns:minmax(0,1fr) minmax(240px,320px)!important;
+  overflow:visible!important;
 }
-#edu-formacoes .v117-add-btn{
-  width:auto!important;
-  max-width:190px!important;
+#edu-formacoes .edu83-course-select{
+  width:100%!important;
+  max-width:320px!important;
   min-width:0!important;
-  white-space:nowrap!important;
-  overflow:hidden!important;
-  text-overflow:ellipsis!important;
+  justify-self:end!important;
 }
-#edu-formacoes .v121-deck-head{min-width:0!important;max-width:100%!important}
-#edu-formacoes .edu83-course-select{min-width:0!important;max-width:100%!important}
-#edu-formacoes .v119-detail-kicker{min-width:0!important;max-width:100%!important;overflow:hidden!important}
-#edu-formacoes .v119-detail-actions{min-width:0!important;max-width:100%!important}
-#edu-formacoes .v119-detail-actions button{white-space:nowrap!important}
-#edu-formacoes .v119-summary-grid{width:100%!important;max-width:100%!important;grid-template-columns:repeat(auto-fit,minmax(min(150px,100%),1fr))!important}
-#edu-formacoes .edu83-history-tools{width:100%!important;max-width:100%!important;min-width:0!important;overflow:hidden!important}
-#edu-formacoes .edu83-history-search,#edu-formacoes .edu83-period-select{min-width:0!important;width:100%!important;max-width:100%!important}
-#edu-formacoes .v119-history-wrap{width:100%!important;max-width:100%!important;min-width:0!important;overflow-x:auto!important;overscroll-behavior-x:contain!important}
-#edu-formacoes .v119-history-table{width:100%!important;max-width:100%!important;min-width:0!important;table-layout:fixed!important}
-#edu-formacoes .v119-history-table th,#edu-formacoes .v119-history-table td{min-width:0!important;max-width:none!important;overflow-wrap:anywhere!important;word-break:break-word!important}
 
-/* Nessa faixa de notebook, nada disputa espaço em 3 colunas. */
-@media(max-width:1500px){
-  body.hub-page>main.main,body.hub-page>main.hub-content,
-  body.hub-page .main,body.hub-page .hub-content{
-    margin-left:64px!important;width:calc(100% - 64px)!important;max-width:calc(100% - 64px)!important;padding-right:14px!important
-  }
-  #edu-formacoes .v121-deck-head{grid-template-columns:minmax(0,1fr) minmax(210px,330px)!important}
-  #edu-formacoes .edu83-history-tools{grid-template-columns:minmax(0,1fr) minmax(180px,320px)!important}
-  #edu-formacoes .edu83-history-count{grid-column:1/-1!important;justify-self:end!important;padding-right:2px!important}
+/* Cabeçalho do curso: ações sempre visíveis. */
+#edu-formacoes .v119-detail-kicker{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:12px!important;
+  overflow:visible!important;
 }
-@media(max-width:1050px){
+#edu-formacoes .v119-detail-kicker .left{min-width:0!important}
+#edu-formacoes .v119-detail-actions{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:6px!important;
+  justify-content:flex-end!important;
+  min-width:max-content!important;
+  overflow:visible!important;
+}
+#edu-formacoes .v119-detail-actions button{
+  width:auto!important;
+  max-width:none!important;
+  min-width:max-content!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+}
+
+/* Resumo acadêmico: distribui pela largura disponível e quebra de verdade. */
+#edu-formacoes .v119-summary-grid{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(145px,1fr))!important;
+  gap:7px!important;
+}
+#edu-formacoes .v119-summary-grid>div{min-width:0!important;max-width:100%!important;overflow:visible!important}
+#edu-formacoes .v119-summary-grid b{white-space:normal!important;overflow-wrap:anywhere!important}
+
+/* Ferramentas do histórico. */
+#edu-formacoes .edu83-history-tools{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(190px,300px) auto!important;
+  gap:7px!important;
+  overflow:visible!important;
+}
+#edu-formacoes .edu83-history-search,
+#edu-formacoes .edu83-period-select{width:100%!important;max-width:100%!important;min-width:0!important}
+#edu-formacoes .edu83-history-count{min-width:max-content!important;white-space:nowrap!important}
+
+/* CRÍTICO: sobrepõe a regra antiga mais específica que mantinha 820/900px. */
+#edu-formacoes .v121-detail .v119-history-wrap{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow-x:hidden!important;
+}
+#edu-formacoes .v121-detail .v119-history-table,
+#edu-formacoes .v121-detail .v119-history-wrap .v119-history-table{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  table-layout:fixed!important;
+}
+#edu-formacoes .v121-detail .v119-history-table th,
+#edu-formacoes .v121-detail .v119-history-table td{
+  min-width:0!important;
+  max-width:none!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+}
+#edu-formacoes .v121-detail .v119-history-table td.name{min-width:0!important}
+
+/* Histórico tradicional — 7 colunas. */
+#edu-formacoes .v121-detail .v119-history-table th:nth-child(1),#edu-formacoes .v121-detail .v119-history-table td:nth-child(1){width:9%!important}
+#edu-formacoes .v121-detail .v119-history-table th:nth-child(2),#edu-formacoes .v121-detail .v119-history-table td:nth-child(2){width:28%!important}
+#edu-formacoes .v121-detail .v119-history-table th:nth-child(3),#edu-formacoes .v121-detail .v119-history-table td:nth-child(3){width:8%!important}
+#edu-formacoes .v121-detail .v119-history-table th:nth-child(4),#edu-formacoes .v121-detail .v119-history-table td:nth-child(4){width:10%!important}
+#edu-formacoes .v121-detail .v119-history-table th:nth-child(5),#edu-formacoes .v121-detail .v119-history-table td:nth-child(5){width:13%!important}
+#edu-formacoes .v121-detail .v119-history-table th:nth-child(6),#edu-formacoes .v121-detail .v119-history-table td:nth-child(6){width:14%!important}
+#edu-formacoes .v121-detail .v119-history-table th:nth-child(7),#edu-formacoes .v121-detail .v119-history-table td:nth-child(7){width:18%!important}
+
+/* Ciências Contábeis — 9 colunas, sem min-width herdado. */
+#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)){min-width:0!important;table-layout:fixed!important}
+#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) th:nth-child(1),#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) td:nth-child(1){width:5%!important}
+#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) th:nth-child(2),#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) td:nth-child(2){width:8%!important}
+#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) th:nth-child(3),#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) td:nth-child(3){width:29%!important;min-width:0!important}
+#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) th:nth-child(4),#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) td:nth-child(4){width:7%!important}
+#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) th:nth-child(5),#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) td:nth-child(5){width:6%!important}
+#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) th:nth-child(6),#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) td:nth-child(6){width:8%!important}
+#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) th:nth-child(7),#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) td:nth-child(7){width:13%!important}
+#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) th:nth-child(8),#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) td:nth-child(8){width:12%!important}
+#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) th:nth-child(9),#edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) td:nth-child(9){width:12%!important}
+
+/* A partir de notebook compacto: linhas passam a se reorganizar; nada é cortado. */
+@media(max-width:1180px){
   #edu-formacoes .v117-form-head{grid-template-columns:1fr!important}
-  #edu-formacoes .v117-add-btn{justify-self:start!important;max-width:100%!important}
+  #edu-formacoes .v117-add-btn{justify-self:start!important;min-width:0!important}
   #edu-formacoes .v121-deck-head{grid-template-columns:1fr!important}
-  #edu-formacoes .edu83-history-tools{grid-template-columns:1fr!important}
-  #edu-formacoes .edu83-history-count{justify-self:start!important}
+  #edu-formacoes .edu83-course-select{max-width:none!important;justify-self:stretch!important}
+  #edu-formacoes .v119-detail-kicker{grid-template-columns:1fr!important}
+  #edu-formacoes .v119-detail-actions{justify-content:flex-start!important;min-width:0!important}
+  #edu-formacoes .edu83-history-tools{grid-template-columns:minmax(0,1fr) minmax(180px,260px)!important}
+  #edu-formacoes .edu83-history-count{grid-column:1/-1!important;justify-self:start!important;min-width:0!important}
 }
-@media(max-width:820px){
-  body.hub-page>main.main,body.hub-page>main.hub-content,
-  body.hub-page .main,body.hub-page .hub-content{
-    margin-left:58px!important;width:calc(100% - 58px)!important;max-width:calc(100% - 58px)!important;padding-left:7px!important;padding-right:9px!important
+
+/* Em tablet/celular, o histórico vira fichas verticais — sem tabela comprimida. */
+@media(max-width:860px){
+  body.hub-page:has(#edu-formacoes.active)>main.hub-content,
+  body.hub-page:has(#edu-formacoes.active)>main.main,
+  body.hub-page:has(#edu-formacoes.active) main.hub-content,
+  body.hub-page:has(#edu-formacoes.active) .main{
+    margin-left:var(--pp-v62-content-left,64px)!important;
+    margin-right:6px!important;
+    padding:5px!important;
   }
+  #edu-formacoes.active{padding:7px!important}
+  #edu-formacoes .v119-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #edu-formacoes .edu83-history-tools{grid-template-columns:1fr!important}
+  #edu-formacoes .edu83-history-count{grid-column:auto!important}
+  #edu-formacoes .v121-detail .v119-history-wrap{border:0!important;overflow:visible!important}
+  #edu-formacoes .v121-detail .v119-history-table,
+  #edu-formacoes .v121-detail .v119-history-table tbody{display:block!important;width:100%!important}
+  #edu-formacoes .v121-detail .v119-history-table thead{display:none!important}
+  #edu-formacoes .v121-detail .v119-history-table tr{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px 10px!important;
+    width:100%!important;margin:0 0 8px!important;padding:10px!important;border:1px solid #e1e8ef!important;
+    border-radius:12px!important;background:#fff!important;box-sizing:border-box!important
+  }
+  #edu-formacoes .v121-detail .v119-history-table td{
+    display:block!important;width:auto!important;max-width:100%!important;border:0!important;padding:2px 0!important;font-size:10px!important
+  }
+  #edu-formacoes .v121-detail .v119-history-table td.name{grid-column:1/-1!important;width:auto!important;font-size:11px!important}
+  #edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) td:nth-child(3){grid-column:1/-1!important}
 }
-@media(max-width:620px){
-  #edu-formacoes.active{padding:5px!important}
-  #edu-formacoes .v117-form-head{padding:13px!important;border-radius:15px!important}
-  #edu-formacoes .v121-detail{padding:10px!important}
+@media(max-width:520px){
+  #edu-formacoes .v117-add-btn{width:100%!important;justify-self:stretch!important}
   #edu-formacoes .v119-summary-grid{grid-template-columns:1fr!important}
+  #edu-formacoes .v121-detail .v119-history-table tr{grid-template-columns:1fr!important}
+  #edu-formacoes .v121-detail .v119-history-table td.name,
+  #edu-formacoes .v121-detail .v119-history-table:has(th:nth-child(9)) td:nth-child(3){grid-column:auto!important}
 }
 </style>
+<script id="pp-v86-education-width-guard">
+(()=>{'use strict';
+ const main=document.querySelector('main.hub-content');
+ const view=document.getElementById('edu-formacoes');
+ if(!main||!view)return;
+ function normalize(){
+   if(!view.classList.contains('active'))return;
+   /* Inline !important vence as regras antigas específicas carregadas no CSS externo. */
+   main.style.setProperty('width','auto','important');
+   main.style.setProperty('max-width','none','important');
+   main.style.setProperty('min-width','0','important');
+   main.style.setProperty('margin-left','var(--pp-v62-content-left,74px)','important');
+   main.style.setProperty('margin-right','10px','important');
+   view.style.setProperty('width','100%','important');
+   view.style.setProperty('max-width','100%','important');
+   view.style.setProperty('min-width','0','important');
+   view.querySelectorAll('.v121-detail .v119-history-table').forEach(t=>{
+     t.style.setProperty('width','100%','important');
+     t.style.setProperty('max-width','100%','important');
+     t.style.setProperty('min-width','0','important');
+     t.style.setProperty('table-layout','fixed','important');
+   });
+ }
+ normalize();
+ window.addEventListener('resize',normalize,{passive:true});
+ new MutationObserver(normalize).observe(view,{childList:true,subtree:true});
+ document.querySelectorAll('#ppBankRailV62 [data-v62-view="edu-formacoes"]').forEach(b=>b.addEventListener('click',()=>setTimeout(normalize,0)));
+})();
+</script>
 
 </body></html>

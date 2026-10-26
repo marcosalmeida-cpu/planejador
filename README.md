@@ -48,3 +48,7 @@ A pasta `api/` agora faz parte do projeto e deve ser publicada junto com os HTML
 
 ## v83 — Educação
 Destaque editorial compacto e novo layout responsivo de Formações em formato de histórico acadêmico universitário, com seletor de cursos, filtros por período e busca no histórico.
+
+
+## v86 — responsividade de Formações
+Correção estrutural de largura: remove o `width:100%` conflitante com a margem do menu, neutraliza `min-width` legado da tabela e impede truncamento de ações.
