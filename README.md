@@ -52,3 +52,6 @@ Destaque editorial compacto e novo layout responsivo de Formações em formato d
 
 ## v86 — responsividade de Formações
 Correção estrutural de largura: remove o `width:100%` conflitante com a margem do menu, neutraliza `min-width` legado da tabela e impede truncamento de ações.
+
+## Educação v87 — repertório estudado
+Na Visão Geral de Educação, notícias e leituras podem ser marcadas como "assunto estudado". O registro é salvo por perfil e pode ser exibido no Currículo, com anotação opcional e vínculos sugeridos com disciplinas das formações de ensino superior cadastradas.
