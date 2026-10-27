@@ -1,4 +1,61 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hub Pessoal — Educação</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/hub.css?v=12"><link rel="stylesheet" href="assets/page.css"><link rel="stylesheet" href="assets/education.css"><link rel="stylesheet" href="assets/education-premium-v15.css?v=15"><link rel="stylesheet" href="assets/contrast-v22.css?v=22"><link rel="stylesheet" href="assets/ui-fixes-v24.css?v=24"><style id="pp-v62-critical-shell">
+<!doctype html><html lang="pt-BR"><head>
+<style id="pp-v110-stable-views-critical">
+/* V110 — primeiro frame estável em todos os hubs. O menu continua visível; só o conteúdo aguarda a montagem final. */
+html.pp-v110-boot main.main,
+html.pp-v110-boot main.hub-content,
+body.pp-v110-switching main.main,
+body.pp-v110-switching main.hub-content{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+html.pp-v110-boot body,
+body.pp-v110-switching{
+  background:#f4f7fa!important;
+}
+</style>
+<script id="pp-v110-stable-views-arm">
+(()=>{'use strict';
+ const root=document.documentElement;
+ root.classList.add('pp-v110-boot');
+ let switchTimer=0,hardSwitchTimer=0,observer=null,lastMutation=Date.now();
+ const main=()=>document.querySelector('main.hub-content,main.main,.hub-content,.main');
+ function show(){root.classList.remove('pp-v110-boot');document.body?.classList.remove('pp-v110-switching')}
+ function armSwitch(){
+   if(!document.body)return;
+   document.body.classList.add('pp-v110-switching');
+   lastMutation=Date.now();
+   clearTimeout(switchTimer);clearTimeout(hardSwitchTimer);
+   const settle=()=>{
+     const quiet=Date.now()-lastMutation;
+     if(quiet>=135){requestAnimationFrame(()=>requestAnimationFrame(()=>document.body?.classList.remove('pp-v110-switching')));return}
+     switchTimer=setTimeout(settle,Math.max(45,140-quiet));
+   };
+   switchTimer=setTimeout(settle,170);
+   hardSwitchTimer=setTimeout(()=>document.body?.classList.remove('pp-v110-switching'),780);
+ }
+ document.addEventListener('click',e=>{
+   const b=e.target.closest?.('[data-v62-view],[data-view]');
+   if(!b)return;
+   const target=b.dataset.v62View||b.dataset.view||'';
+   const active=document.querySelector('main .view.active,.main .view.active')?.id||'';
+   if(target&&target!==active)armSwitch();
+ },true);
+ window.addEventListener('hashchange',armSwitch);
+ document.addEventListener('DOMContentLoaded',()=>{
+   const m=main()||document.body;
+   if(m){observer=new MutationObserver(()=>{lastMutation=Date.now()});observer.observe(m,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']})}
+   const started=Date.now();
+   const waitStable=()=>{
+     const elapsed=Date.now()-started,quiet=Date.now()-lastMutation;
+     if((elapsed>=620&&quiet>=140)||elapsed>=1150){show();return}
+     setTimeout(waitStable,55);
+   };
+   waitStable();
+ });
+ window.addEventListener('load',()=>setTimeout(show,1200),{once:true});
+})();
+</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hub Pessoal — Educação</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/hub.css?v=12"><link rel="stylesheet" href="assets/page.css"><link rel="stylesheet" href="assets/education.css"><link rel="stylesheet" href="assets/education-premium-v15.css?v=15"><link rel="stylesheet" href="assets/contrast-v22.css?v=22"><link rel="stylesheet" href="assets/ui-fixes-v24.css?v=24"><style id="pp-v62-critical-shell">
 :root{--pp-v62-rail:56px;--pp-v62-left:8px;--pp-v62-content-left:74px;--pp-v62-bg:#eef2f6;--pp-v62-border:#dfe6ee;--pp-v62-navy:#113a72}
 html,body{margin:0!important;width:100%!important;max-width:100%!important;overflow-x:hidden!important;background:var(--pp-v62-bg)!important}
 [hidden]{display:none!important}
@@ -15,32 +72,6 @@ main>.view,main>.view.active,.main>.view,.main>.view.active{min-width:0!importan
 @media(max-width:700px){:root{--pp-v62-rail:50px;--pp-v62-content-left:64px}#ppBankRailV62{left:6px;top:6px;bottom:6px;border-radius:16px;padding:6px 4px}.v62-logo,.v62-btn{width:36px;height:36px;min-width:36px;min-height:36px;border-radius:10px;font-size:14px}.main>.view.active,main>.view.active{padding:10px!important;border-radius:16px}.v62-hub-grid{grid-template-columns:1fr}.filterbar>*{flex:1 1 100%!important}.tablewrap th,.tablewrap td,#lancamentos .v63-tablewrap th,#lancamentos .v63-tablewrap td{font-size:9.5px!important;padding:7px 4px!important}}
 </style>
 <style id="pp-v64-one-navigation-only">html,body{overflow-x:clip!important;max-width:100%!important}header,.topbar,.topinner,#nav,.nav,#v76FloatNav,#v76ProfilePod,#ppV57CornerMenu,#menuTrigger,.menu-trigger,.floating-nav,.floating-menu,.hub-floating-nav{display:none!important;visibility:hidden!important;pointer-events:none!important}#ppBankRailV62{display:flex!important}main.main,main.hub-content,.main,.hub-content{min-width:0!important;max-width:100%!important;overflow-x:hidden!important}main.main *,main.hub-content *{box-sizing:border-box}.section-tools,.hero,.filterbar,.tablewrap,[class*="grid"],[class*="Grid"]{min-width:0!important;max-width:100%!important}img,svg,canvas{max-width:100%}</style>
-
-<style id="pp-v107-no-flash-critical">
-/* V107 — evita exibir versões intermediárias enquanto Currículo/Formações são hidratados */
-html[data-pp-v107-target="edu-curriculo"] #edu-curriculo,
-html[data-pp-v107-target="edu-formacoes"] #edu-formacoes{
-  visibility:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
-}
-/* Componentes legados do Currículo jamais devem aparecer durante a montagem */
-#edu-curriculo .v115-content-grid,
-#edu-curriculo .edu103-cv,
-#edu-curriculo .edu89-cv-formations,
-#edu-curriculo .edu98-career,
-#edu-curriculo .edu87-curriculum{display:none!important}
-</style>
-<script id="pp-v107-no-flash-arm-education">
-(()=>{'use strict';
- const allowed=new Set(['edu-curriculo','edu-formacoes']);
- const root=document.documentElement;
- function arm(id){if(!allowed.has(id))return;root.dataset.ppV107Target=id;root.dataset.ppV107Armed=String(Date.now());}
- const h=(location.hash||'').replace(/^#/,'');if(allowed.has(h))arm(h);
- document.addEventListener('click',e=>{const b=e.target.closest?.('[data-v62-view]');if(b)arm(b.dataset.v62View)},true);
- window.addEventListener('hashchange',()=>{const id=(location.hash||'').replace(/^#/,'');if(allowed.has(id))arm(id)});
-})();
-</script>
 
 </head><body class="hub-page" data-hub-area="educacao"><aside id="ppBankRailV62" aria-label="Navegação principal"><button type="button" class="v62-logo" data-v62-hub data-tip="Hub Pessoal" aria-label="Abrir Hub Pessoal"></button><nav class="v62-nav" aria-label="Navegação"><button type="button" class="v62-btn" data-v62-view="edu-overview" data-tip="Visão geral" aria-label="Visão geral">⌂</button><button type="button" class="v62-btn" data-v62-view="edu-curriculo" data-tip="Currículo" aria-label="Currículo">≡</button><button type="button" class="v62-btn" data-v62-view="edu-formacoes" data-tip="Formações" aria-label="Formações">◇</button><button type="button" class="v62-btn" data-v62-view="edu-publicacoes" data-tip="Publicações" aria-label="Publicações">✎</button></nav><div class="v62-foot"><div class="v62-sep"></div><button type="button" class="v62-btn" data-v62-profile data-tip="Perfil" aria-label="Perfil"><span class="v62-dot">P</span></button><button type="button" class="v62-btn" data-v62-logout data-tip="Sair" aria-label="Sair">↪</button></div></aside><div id="ppHubV62" aria-hidden="true"><section class="v62-hub-card" role="dialog" aria-modal="true" aria-label="Hub Pessoal"><div class="v62-hub-head"><div><h2>Hub Pessoal</h2><p>Escolha a área que deseja abrir.</p></div><button type="button" class="v62-hub-close" aria-label="Fechar">×</button></div><div class="v62-hub-grid"><a data-v62-area="financas" href="index.html"><b>Finanças</b><span>Lançamentos, cartões, dívidas e patrimônio</span></a><a data-v62-area="educacao" href="educacao.html"><b>Educação</b><span>Formações e trajetória acadêmica</span></a><a data-v62-area="saude" href="saude.html"><b>Saúde</b><span>Acompanhamento pessoal</span></a><a data-v62-area="entretenimento" href="entretenimento.html"><b>Entretenimento</b><span>Filmes, séries, livros e viagens</span></a></div></section></div><main class="main hub-content"><section class="view v115-life-view edu82-overview active" data-v115-site-view="educacao" id="edu-overview">
 <div class="edu82-shell">
@@ -2950,42 +2981,6 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
 </script>
 
 
-<script id="pp-v107-no-flash-settle-education">
-(()=>{'use strict';
- const root=document.documentElement;
- let quietTimer=0, fallbackTimer=0, lastTarget='';
- function isReady(id){
-   if(id==='edu-curriculo'){
-     const host=document.getElementById('edu104Curriculum');
-     return !!(host && host.querySelector('.edu104-section'));
-   }
-   if(id==='edu-formacoes'){
-     const formRoot=document.getElementById('v117FormationRoot');
-     return !!(formRoot && formRoot.querySelector('.v121-detail') && formRoot.querySelector('.edu101-academic-header'));
-   }
-   return true;
- }
- function reveal(id){
-   if(root.dataset.ppV107Target!==id)return;
-   delete root.dataset.ppV107Target;delete root.dataset.ppV107Armed;
- }
- function assess(){
-   const id=root.dataset.ppV107Target;if(!id)return;
-   const sec=document.getElementById(id);if(!sec||!sec.classList.contains('active'))return;
-   if(!isReady(id))return;
-   clearTimeout(quietTimer);
-   quietTimer=setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>reveal(id))),85);
-   if(lastTarget!==id){lastTarget=id;clearTimeout(fallbackTimer);fallbackTimer=setTimeout(()=>reveal(id),900)}
- }
- const mo=new MutationObserver(assess);
- mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','data-pp-v107-target','data-pp-v107-armed']});
- document.addEventListener('click',()=>setTimeout(assess,0),true);
- window.addEventListener('hashchange',()=>setTimeout(assess,0));
- [0,80,180,350,700].forEach(ms=>setTimeout(assess,ms));
-})();
-</script>
-
-
 <style id="pp-v109-curriculo-career-fit-no-scroll">
 /* V109 — mais espaço para a trajetória de cargos e sem barra horizontal no desktop */
 #edu-curriculo .edu103-exp-item{
@@ -3065,4 +3060,80 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
 }
 </style>
 
+
+<style id="pp-v110-curriculo-career-fit-real">
+/* V110 — estrutura ativa do currículo: empresa compacta + cargos sem rolagem horizontal */
+#edu-curriculo .edu104-company-row{
+  grid-template-columns:minmax(135px,.30fr) minmax(0,1.70fr)!important;
+  gap:10px!important;
+  align-items:stretch!important;
+}
+#edu-curriculo .edu104-company-id{
+  min-width:0!important;
+  padding-right:10px!important;
+  border-right:1px solid #e7eef4!important;
+}
+#edu-curriculo .edu104-company-id h3{
+  font-size:14px!important;
+  line-height:1.15!important;
+  overflow-wrap:anywhere!important;
+}
+#edu-curriculo .edu104-company-id p{
+  margin-top:5px!important;
+  font-size:8.7px!important;
+  line-height:1.3!important;
+}
+#edu-curriculo .edu104-company-period{
+  min-height:24px!important;
+  margin-top:8px!important;
+  padding:0 7px!important;
+  font-size:7.8px!important;
+}
+#edu-curriculo .edu104-career-track{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(135px,1fr))!important;
+  gap:8px!important;
+  align-items:stretch!important;
+  overflow:visible!important;
+  min-width:0!important;
+  padding:4px 0 2px!important;
+  scroll-snap-type:none!important;
+  scrollbar-width:none!important;
+}
+#edu-curriculo .edu104-career-track::-webkit-scrollbar{display:none!important}
+#edu-curriculo .edu104-career-track:before{
+  left:8px!important;
+  right:8px!important;
+  top:16px!important;
+}
+#edu-curriculo .edu104-career-step{
+  min-width:0!important;
+  width:auto!important;
+  max-width:none!important;
+  flex:none!important;
+  padding:10px!important;
+  gap:6px!important;
+}
+#edu-curriculo .edu104-career-step time{
+  min-height:23px!important;
+  padding:0 7px!important;
+  font-size:7.5px!important;
+  white-space:nowrap!important;
+}
+#edu-curriculo .edu104-career-step strong{
+  font-size:10.5px!important;
+  line-height:1.22!important;
+  overflow-wrap:anywhere!important;
+}
+@media(max-width:980px){
+  #edu-curriculo .edu104-company-row{grid-template-columns:minmax(120px,.27fr) minmax(0,1.73fr)!important}
+  #edu-curriculo .edu104-career-track{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))!important}
+}
+@media(max-width:760px){
+  #edu-curriculo .edu104-company-row{grid-template-columns:1fr!important}
+  #edu-curriculo .edu104-company-id{padding-right:0!important;padding-bottom:10px!important;border-right:0!important;border-bottom:1px solid #e7eef4!important}
+  #edu-curriculo .edu104-career-track{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:520px){#edu-curriculo .edu104-career-track{grid-template-columns:1fr!important}}
+</style>
 </body></html>

@@ -2,6 +2,63 @@
 
 <html lang="pt-BR">
 <head>
+<style id="pp-v110-stable-views-critical">
+/* V110 — primeiro frame estável em todos os hubs. O menu continua visível; só o conteúdo aguarda a montagem final. */
+html.pp-v110-boot main.main,
+html.pp-v110-boot main.hub-content,
+body.pp-v110-switching main.main,
+body.pp-v110-switching main.hub-content{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+html.pp-v110-boot body,
+body.pp-v110-switching{
+  background:#f4f7fa!important;
+}
+</style>
+<script id="pp-v110-stable-views-arm">
+(()=>{'use strict';
+ const root=document.documentElement;
+ root.classList.add('pp-v110-boot');
+ let switchTimer=0,hardSwitchTimer=0,observer=null,lastMutation=Date.now();
+ const main=()=>document.querySelector('main.hub-content,main.main,.hub-content,.main');
+ function show(){root.classList.remove('pp-v110-boot');document.body?.classList.remove('pp-v110-switching')}
+ function armSwitch(){
+   if(!document.body)return;
+   document.body.classList.add('pp-v110-switching');
+   lastMutation=Date.now();
+   clearTimeout(switchTimer);clearTimeout(hardSwitchTimer);
+   const settle=()=>{
+     const quiet=Date.now()-lastMutation;
+     if(quiet>=135){requestAnimationFrame(()=>requestAnimationFrame(()=>document.body?.classList.remove('pp-v110-switching')));return}
+     switchTimer=setTimeout(settle,Math.max(45,140-quiet));
+   };
+   switchTimer=setTimeout(settle,170);
+   hardSwitchTimer=setTimeout(()=>document.body?.classList.remove('pp-v110-switching'),780);
+ }
+ document.addEventListener('click',e=>{
+   const b=e.target.closest?.('[data-v62-view],[data-view]');
+   if(!b)return;
+   const target=b.dataset.v62View||b.dataset.view||'';
+   const active=document.querySelector('main .view.active,.main .view.active')?.id||'';
+   if(target&&target!==active)armSwitch();
+ },true);
+ window.addEventListener('hashchange',armSwitch);
+ document.addEventListener('DOMContentLoaded',()=>{
+   const m=main()||document.body;
+   if(m){observer=new MutationObserver(()=>{lastMutation=Date.now()});observer.observe(m,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']})}
+   const started=Date.now();
+   const waitStable=()=>{
+     const elapsed=Date.now()-started,quiet=Date.now()-lastMutation;
+     if((elapsed>=620&&quiet>=140)||elapsed>=1150){show();return}
+     setTimeout(waitStable,55);
+   };
+   waitStable();
+ });
+ window.addEventListener('load',()=>setTimeout(show,1200),{once:true});
+})();
+</script>
+
 <style id="pp-critical-blue-shell-v10">
 /* Primeiro frame do Financeiro já nasce azul: evita flash do tema laranja legado. */
 .topinner{background:linear-gradient(135deg,#123f82,#0c2f66 52%,#0a2450)!important;border-color:rgba(255,255,255,.10)!important;box-shadow:0 18px 42px rgba(10,36,80,.24)!important}
@@ -1574,24 +1631,6 @@ img,svg,canvas{max-width:100%}
 @media(max-width:860px){#previdenciaPrivada .ppv-market-grid{grid-template-columns:repeat(2,1fr)}#previdenciaPrivada .ppv-proj-controls{grid-template-columns:repeat(2,1fr)}#previdenciaPrivada .ppv-summary{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:620px){#previdenciaPrivada .ppv-head{align-items:flex-start;flex-direction:column}.ppv-head-actions{width:100%}.ppv-head-actions button{flex:1}#previdenciaPrivada .ppv-marketbar{grid-template-columns:1fr}.ppv-refresh{width:100%}#previdenciaPrivada .ppv-summary{grid-template-columns:1fr}#previdenciaPrivada .ppv-proj-controls,#previdenciaPrivada .ppv-proj-result,#previdenciaPrivada .ppv-proj-foot,#previdenciaPrivada .ppv-risk-presets,#previdenciaPrivada .ppv-formgrid{grid-template-columns:1fr}#previdenciaPrivada .ppv-formgrid .wide{grid-column:auto}#previdenciaPrivada .ppv-compare-row{grid-template-columns:1fr auto}.ppv-compare-bar{grid-column:1/-1;grid-row:2}.ppv-compare-val{grid-column:2;grid-row:1}#previdenciaPrivada .ppv-market-grid{grid-template-columns:1fr 1fr}}
 </style>
-
-<style id="pp-v107-no-flash-critical-previdencia">
-/* V107 — Previdência fica oculta somente durante a remontagem final */
-html[data-pp-v107-target="previdencia"] #previdencia{
-  visibility:hidden!important;
-  opacity:0!important;
-  pointer-events:none!important;
-}
-</style>
-<script id="pp-v107-no-flash-arm-previdencia">
-(()=>{'use strict';
- const root=document.documentElement;
- function arm(){root.dataset.ppV107Target='previdencia';root.dataset.ppV107Armed=String(Date.now())}
- if((location.hash||'').replace(/^#/,'')==='previdencia')arm();
- document.addEventListener('click',e=>{const b=e.target.closest?.('#nav [data-view="previdencia"],#v76FloatNav [data-view="previdencia"]');if(b)arm()},true);
- window.addEventListener('hashchange',()=>{if((location.hash||'').replace(/^#/,'')==='previdencia')arm()});
-})();
-</script>
 
 </head>
 <body data-hub-area="financas"><aside aria-label="Navegação principal" id="ppBankRailV62"><button aria-label="Abrir Hub Pessoal" class="v62-logo" data-tip="Hub Pessoal" data-v62-hub="" type="button"></button><nav aria-label="Navegação" class="v62-nav"><button aria-label="Visão geral" class="v62-btn" data-tip="Visão geral" data-v62-view="dashboard" type="button">⌂</button><button aria-label="Lançamentos" class="v62-btn" data-tip="Lançamentos" data-v62-view="lancamentos" type="button">↕</button><button aria-label="Cartões" class="v62-btn" data-tip="Cartões" data-v62-view="cartoes" type="button">▣</button><button aria-label="Dívidas" class="v62-btn" data-tip="Dívidas" data-v62-view="dividas" type="button">◴</button><button aria-label="FGTS" class="v62-btn" data-tip="FGTS" data-v62-view="fgts" type="button">◇</button><button aria-label="Previdência" class="v62-btn" data-tip="Previdência" data-v62-view="previdencia" type="button">◎</button><button aria-label="Previdência privada" class="v62-btn" data-tip="Previdência privada" data-v62-view="previdenciaPrivada" type="button">◉</button><button aria-label="Investimentos" class="v62-btn" data-tip="Investimentos" data-v62-view="investimentos" type="button">↗</button><button aria-label="Patrimônio" class="v62-btn" data-tip="Patrimônio" data-v62-view="patrimonio" type="button">⬡</button><button aria-label="Veículos" class="v62-btn" data-tip="Veículos" data-v62-view="veiculos" type="button">⚙</button><button aria-label="Calculadora" class="v62-btn" data-tip="Calculadora" data-v62-view="nuvem" type="button">∑</button></nav><div class="v62-foot"><button aria-label="Backup" class="v62-btn" data-tip="Backup" data-v62-backup="" type="button">↓</button><button aria-label="Novo lançamento" class="v62-btn v62-add" data-tip="Novo lançamento" data-v62-add="" type="button">＋</button><div class="v62-sep"></div><button aria-label="Perfil" class="v62-btn" data-tip="Perfil" data-v62-profile="" type="button"><span class="v62-dot">P</span></button><button aria-label="Sair" class="v62-btn" data-tip="Sair" data-v62-logout="" type="button">↪</button></div></aside><div aria-hidden="true" id="ppHubV62"><section aria-label="Hub Pessoal" aria-modal="true" class="v62-hub-card" role="dialog"><div class="v62-hub-head"><div><h2>Hub Pessoal</h2><p>Escolha a área que deseja abrir.</p></div><button aria-label="Fechar" class="v62-hub-close" type="button">×</button></div><div class="v62-hub-grid"><a data-v62-area="financas" href="index.html"><b>Finanças</b><span>Lançamentos, cartões, dívidas e patrimônio</span></a><a data-v62-area="educacao" href="educacao.html"><b>Educação</b><span>Formações e trajetória acadêmica</span></a><a data-v62-area="saude" href="saude.html"><b>Saúde</b><span>Acompanhamento pessoal</span></a><a data-v62-area="entretenimento" href="entretenimento.html"><b>Entretenimento</b><span>Filmes, séries, livros e viagens</span></a></div></section></div><div class="app">
@@ -29602,19 +29641,6 @@ body:has(#previdencia.active) .hub-content{
    }
  },true);
  [0,250,800].forEach(ms=>setTimeout(fix,ms));
-})();
-</script>
-
-
-<script id="pp-v107-no-flash-settle-previdencia">
-(()=>{'use strict';
- const root=document.documentElement;let quietTimer=0,fallbackTimer=0,lastArm='';
- function ready(){const s=document.getElementById('previdencia');return !!(s?.classList.contains('active')&&s.querySelector('.rgps-hero-v51')&&s.querySelector('.rgps-table-v51'))}
- function reveal(){if(root.dataset.ppV107Target!=='previdencia')return;delete root.dataset.ppV107Target;delete root.dataset.ppV107Armed}
- function assess(){if(root.dataset.ppV107Target!=='previdencia')return;if(!ready())return;clearTimeout(quietTimer);quietTimer=setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(reveal)),100);const arm=root.dataset.ppV107Armed||'';if(arm!==lastArm){lastArm=arm;clearTimeout(fallbackTimer);fallbackTimer=setTimeout(reveal,1100)}}
- new MutationObserver(assess).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','data-pp-v107-target','data-pp-v107-armed']});
- document.addEventListener('click',()=>setTimeout(assess,0),true);window.addEventListener('hashchange',()=>setTimeout(assess,0));
- [0,100,250,500,900].forEach(ms=>setTimeout(assess,ms));
 })();
 </script>
 

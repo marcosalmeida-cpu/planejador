@@ -1,4 +1,61 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hub Pessoal — Entretenimento</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/hub.css?v=12"><link rel="stylesheet" href="assets/page.css"><link rel="stylesheet" href="assets/entertainment.css"><link rel="stylesheet" href="assets/entertainment-tmdb-v16.css?v=16"><link rel="stylesheet" href="assets/entertainment-premium-v18.css?v=18"><link rel="stylesheet" href="assets/entertainment-toolbar-v19.css?v=19"><link rel="stylesheet" href="assets/entertainment-v21.css?v=21"><link rel="stylesheet" href="assets/contrast-v22.css?v=22"><link rel="stylesheet" href="assets/ui-fixes-v24.css?v=24"><style id="pp-v62-critical-shell">
+<!doctype html><html lang="pt-BR"><head>
+<style id="pp-v110-stable-views-critical">
+/* V110 — primeiro frame estável em todos os hubs. O menu continua visível; só o conteúdo aguarda a montagem final. */
+html.pp-v110-boot main.main,
+html.pp-v110-boot main.hub-content,
+body.pp-v110-switching main.main,
+body.pp-v110-switching main.hub-content{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+html.pp-v110-boot body,
+body.pp-v110-switching{
+  background:#f4f7fa!important;
+}
+</style>
+<script id="pp-v110-stable-views-arm">
+(()=>{'use strict';
+ const root=document.documentElement;
+ root.classList.add('pp-v110-boot');
+ let switchTimer=0,hardSwitchTimer=0,observer=null,lastMutation=Date.now();
+ const main=()=>document.querySelector('main.hub-content,main.main,.hub-content,.main');
+ function show(){root.classList.remove('pp-v110-boot');document.body?.classList.remove('pp-v110-switching')}
+ function armSwitch(){
+   if(!document.body)return;
+   document.body.classList.add('pp-v110-switching');
+   lastMutation=Date.now();
+   clearTimeout(switchTimer);clearTimeout(hardSwitchTimer);
+   const settle=()=>{
+     const quiet=Date.now()-lastMutation;
+     if(quiet>=135){requestAnimationFrame(()=>requestAnimationFrame(()=>document.body?.classList.remove('pp-v110-switching')));return}
+     switchTimer=setTimeout(settle,Math.max(45,140-quiet));
+   };
+   switchTimer=setTimeout(settle,170);
+   hardSwitchTimer=setTimeout(()=>document.body?.classList.remove('pp-v110-switching'),780);
+ }
+ document.addEventListener('click',e=>{
+   const b=e.target.closest?.('[data-v62-view],[data-view]');
+   if(!b)return;
+   const target=b.dataset.v62View||b.dataset.view||'';
+   const active=document.querySelector('main .view.active,.main .view.active')?.id||'';
+   if(target&&target!==active)armSwitch();
+ },true);
+ window.addEventListener('hashchange',armSwitch);
+ document.addEventListener('DOMContentLoaded',()=>{
+   const m=main()||document.body;
+   if(m){observer=new MutationObserver(()=>{lastMutation=Date.now()});observer.observe(m,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']})}
+   const started=Date.now();
+   const waitStable=()=>{
+     const elapsed=Date.now()-started,quiet=Date.now()-lastMutation;
+     if((elapsed>=620&&quiet>=140)||elapsed>=1150){show();return}
+     setTimeout(waitStable,55);
+   };
+   waitStable();
+ });
+ window.addEventListener('load',()=>setTimeout(show,1200),{once:true});
+})();
+</script>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hub Pessoal — Entretenimento</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><link rel="stylesheet" href="assets/hub.css?v=12"><link rel="stylesheet" href="assets/page.css"><link rel="stylesheet" href="assets/entertainment.css"><link rel="stylesheet" href="assets/entertainment-tmdb-v16.css?v=16"><link rel="stylesheet" href="assets/entertainment-premium-v18.css?v=18"><link rel="stylesheet" href="assets/entertainment-toolbar-v19.css?v=19"><link rel="stylesheet" href="assets/entertainment-v21.css?v=21"><link rel="stylesheet" href="assets/contrast-v22.css?v=22"><link rel="stylesheet" href="assets/ui-fixes-v24.css?v=24"><style id="pp-v62-critical-shell">
 :root{--pp-v62-rail:56px;--pp-v62-left:8px;--pp-v62-content-left:74px;--pp-v62-bg:#eef2f6;--pp-v62-border:#dfe6ee;--pp-v62-navy:#113a72}
 html,body{margin:0!important;width:100%!important;max-width:100%!important;overflow-x:hidden!important;background:var(--pp-v62-bg)!important}
 [hidden]{display:none!important}
