@@ -1686,4 +1686,278 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
 })();
 </script>
 
+
+<style id="pp-v93-formation-header-integrated">
+/* V93 — cabeçalho das formações integrado, horizontal e mais compacto */
+#edu-formacoes .edu89-hero,
+#edu-formacoes .v121-detail .edu89-hero{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(260px,360px) auto!important;
+  align-items:center!important;
+  gap:12px!important;
+  margin:0 0 8px!important;
+  padding:6px 0 10px!important;
+  border-bottom:1px solid #e6edf4!important;
+}
+#edu-formacoes .edu89-headline{
+  min-width:0!important;
+  display:grid!important;
+  gap:4px!important;
+  align-content:center!important;
+}
+#edu-formacoes .edu89-kicker{margin-bottom:2px!important}
+#edu-formacoes .edu89-headline h2{
+  font-size:21px!important;
+  line-height:1.06!important;
+  margin:0!important;
+}
+#edu-formacoes .edu89-headline p{
+  font-size:11px!important;
+  line-height:1.28!important;
+}
+#edu-formacoes .edu89-degree-card{
+  min-width:260px!important;
+  max-width:360px!important;
+  width:100%!important;
+  min-height:84px!important;
+  padding:12px 14px!important;
+  border-radius:18px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-areas:
+    "label sem"
+    "title sem"
+    "status sem"!important;
+  gap:3px 12px!important;
+  align-items:center!important;
+}
+#edu-formacoes .edu89-degree-card small{grid-area:label!important;margin:0!important}
+#edu-formacoes .edu89-degree-card b{grid-area:title!important;font-size:14px!important;line-height:1.08!important;margin:0!important}
+#edu-formacoes .edu89-degree-card > span:not(.edu89-sem-chip){grid-area:status!important;margin:0!important;font-size:9.5px!important;line-height:1.25!important}
+#edu-formacoes .edu89-degree-card .edu89-sem-chip{grid-area:sem!important;justify-self:end!important;align-self:center!important;margin:0!important}
+#edu-formacoes .v119-detail-actions,
+#edu-formacoes .edu89-actions{
+  margin-left:auto!important;
+  align-self:center!important;
+  justify-self:end!important;
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:7px!important;
+  min-width:max-content!important;
+}
+#edu-formacoes .v119-detail-actions button,
+#edu-formacoes .edu89-actions button{
+  min-width:auto!important;
+  flex:0 0 auto!important;
+  padding:7px 11px!important;
+  border-radius:10px!important;
+  font-size:10px!important;
+  line-height:1!important;
+}
+#edu-formacoes .v121-detail{
+  padding-top:14px!important;
+}
+@media(max-width:1120px){
+  #edu-formacoes .edu89-hero,
+  #edu-formacoes .v121-detail .edu89-hero{
+    grid-template-columns:minmax(0,1fr) minmax(230px,320px) auto!important;
+    gap:10px!important;
+  }
+  #edu-formacoes .edu89-degree-card{min-width:230px!important;max-width:320px!important}
+}
+@media(max-width:920px){
+  #edu-formacoes .edu89-hero,
+  #edu-formacoes .v121-detail .edu89-hero{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:
+      "headline actions"
+      "badge badge"!important;
+    align-items:start!important;
+  }
+  #edu-formacoes .edu89-headline{grid-area:headline!important}
+  #edu-formacoes .v119-detail-actions,
+  #edu-formacoes .edu89-actions{grid-area:actions!important}
+  #edu-formacoes .edu89-degree-card{grid-area:badge!important;min-width:0!important;max-width:none!important;width:100%!important}
+}
+@media(max-width:640px){
+  #edu-formacoes .edu89-hero,
+  #edu-formacoes .v121-detail .edu89-hero{
+    grid-template-columns:1fr!important;
+    grid-template-areas:
+      "headline"
+      "actions"
+      "badge"!important;
+    gap:10px!important;
+  }
+  #edu-formacoes .v119-detail-actions,
+  #edu-formacoes .edu89-actions{
+    width:100%!important;
+    justify-self:stretch!important;
+    justify-content:flex-end!important;
+  }
+  #edu-formacoes .edu89-degree-card{
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-areas:"label" "title" "status" "sem"!important;
+    gap:6px!important;
+  }
+  #edu-formacoes .edu89-degree-card .edu89-sem-chip{justify-self:start!important}
+}
+</style>
+
+
+<style id="pp-v94-ava-academic-header-clean">
+/* V94 — formação com estética de ambiente virtual acadêmico */
+#edu-formacoes .v121-detail{padding-top:12px!important}
+#edu-formacoes .v119-detail-kicker{display:none!important}
+#edu-formacoes .edu89-hero,
+#edu-formacoes .v121-detail .edu89-hero{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto auto!important;
+  align-items:center!important;
+  gap:14px!important;
+  width:100%!important;
+  min-width:0!important;
+  margin:0 0 10px!important;
+  padding:12px 14px 12px 18px!important;
+  border:1px solid #d8e5f1!important;
+  border-radius:18px!important;
+  background:
+    radial-gradient(circle at 78% -30%,rgba(99,77,255,.10),transparent 38%),
+    linear-gradient(115deg,#f7fbff 0%,#ffffff 54%,#f8f6ff 100%)!important;
+  box-shadow:0 9px 24px rgba(20,61,101,.055)!important;
+  overflow:hidden!important;
+}
+#edu-formacoes .edu89-hero:before{
+  content:""!important;position:absolute!important;left:0!important;top:0!important;bottom:0!important;width:5px!important;
+  background:linear-gradient(180deg,#4969ff,#1fa6df,#28c49a)!important;
+}
+#edu-formacoes .edu89-headline{min-width:0!important;display:grid!important;gap:3px!important;align-content:center!important}
+#edu-formacoes .edu89-kicker{margin:0!important;display:flex!important;align-items:center!important;gap:6px!important;flex-wrap:wrap!important}
+#edu-formacoes .edu89-kicker .edu89-level{font-size:8px!important;letter-spacing:.11em!important;font-weight:950!important;color:#32669c!important}
+#edu-formacoes .edu89-kicker .edu89-semester{display:none!important}
+#edu-formacoes .edu89-headline h2{margin:0!important;font-size:20px!important;line-height:1.08!important;color:#102f4b!important;letter-spacing:-.025em!important}
+#edu-formacoes .edu89-headline p{margin:0!important;font-size:10.5px!important;line-height:1.25!important;color:#708398!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+
+/* O antigo card do grau passa a ser uma régua de metadados, integrada ao cabeçalho */
+#edu-formacoes .edu89-degree-card{
+  min-width:0!important;max-width:none!important;width:auto!important;min-height:0!important;
+  padding:0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;
+  display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important;flex-wrap:wrap!important;
+  color:#173b5c!important;
+}
+#edu-formacoes .edu89-degree-card small{display:none!important}
+#edu-formacoes .edu89-degree-card b,
+#edu-formacoes .edu89-degree-card > span:not(.edu89-sem-chip),
+#edu-formacoes .edu89-degree-card .edu89-sem-chip{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  min-height:30px!important;margin:0!important;padding:6px 9px!important;border-radius:999px!important;
+  white-space:nowrap!important;font-size:9px!important;line-height:1!important;font-weight:900!important;
+}
+#edu-formacoes .edu89-degree-card b{
+  color:#5534c9!important;background:#f0ecff!important;border:1px solid #ddd5ff!important;
+}
+#edu-formacoes .edu89-degree-card > span:not(.edu89-sem-chip){
+  color:#087052!important;background:#e9f8f2!important;border:1px solid #ccecdf!important;
+}
+#edu-formacoes .edu89-degree-card .edu89-sem-chip{
+  color:#235f96!important;background:#eaf4ff!important;border:1px solid #d2e5f8!important;
+}
+#edu-formacoes .v119-detail-actions,
+#edu-formacoes .edu89-actions{
+  min-width:max-content!important;width:auto!important;margin:0 0 0 auto!important;
+  display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:6px!important;flex-wrap:nowrap!important;
+}
+#edu-formacoes .v119-detail-actions button,
+#edu-formacoes .edu89-actions button{
+  flex:0 0 auto!important;min-width:auto!important;padding:7px 10px!important;border-radius:9px!important;font-size:9px!important;line-height:1!important;
+}
+/* Histórico reduzido a cinco colunas: mais espaço para a disciplina */
+#edu-formacoes .v119-history-table{table-layout:fixed!important;width:100%!important;min-width:0!important}
+#edu-formacoes .v119-history-table th,#edu-formacoes .v119-history-table td{min-width:0!important;max-width:none!important;overflow-wrap:anywhere!important}
+#edu-formacoes .v119-history-table th:nth-child(1),#edu-formacoes .v119-history-table td:nth-child(1){width:11%!important}
+#edu-formacoes .v119-history-table th:nth-child(2),#edu-formacoes .v119-history-table td:nth-child(2){width:51%!important}
+#edu-formacoes .v119-history-table th:nth-child(3),#edu-formacoes .v119-history-table td:nth-child(3){width:10%!important}
+#edu-formacoes .v119-history-table th:nth-child(4),#edu-formacoes .v119-history-table td:nth-child(4){width:13%!important}
+#edu-formacoes .v119-history-table th:nth-child(5),#edu-formacoes .v119-history-table td:nth-child(5){width:15%!important}
+#edu-formacoes .v119-history-table td.name{min-width:0!important;font-size:10px!important}
+@media(max-width:980px){
+  #edu-formacoes .edu89-hero,#edu-formacoes .v121-detail .edu89-hero{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:"headline actions" "meta meta"!important;
+    gap:9px 12px!important;
+  }
+  #edu-formacoes .edu89-headline{grid-area:headline!important}
+  #edu-formacoes .edu89-degree-card{grid-area:meta!important;justify-content:flex-start!important}
+  #edu-formacoes .v119-detail-actions,#edu-formacoes .edu89-actions{grid-area:actions!important}
+}
+@media(max-width:640px){
+  #edu-formacoes .edu89-hero,#edu-formacoes .v121-detail .edu89-hero{
+    grid-template-columns:1fr!important;
+    grid-template-areas:"headline" "meta" "actions"!important;
+    padding:12px!important;
+  }
+  #edu-formacoes .edu89-headline p{white-space:normal!important}
+  #edu-formacoes .edu89-degree-card{justify-content:flex-start!important}
+  #edu-formacoes .v119-detail-actions,#edu-formacoes .edu89-actions{justify-self:stretch!important;width:100%!important;justify-content:flex-end!important}
+  #edu-formacoes .v119-history-table,#edu-formacoes .v119-history-table tbody{display:block!important}
+  #edu-formacoes .v119-history-table thead{display:none!important}
+  #edu-formacoes .v119-history-table tr{display:grid!important;grid-template-columns:1fr 1fr!important;gap:5px 8px!important}
+  #edu-formacoes .v119-history-table td{width:auto!important;display:block!important}
+  #edu-formacoes .v119-history-table td:nth-child(2){grid-column:1/-1!important;font-size:11px!important}
+}
+</style>
+<script id="pp-v94-ava-academic-cleanup-script">
+(()=>{'use strict';
+ const ROOT=document.getElementById('v117FormationRoot'); if(!ROOT)return;
+ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+ function activeFormation(){
+   const id=ROOT.querySelector('[data-v121-open].active')?.dataset.v121Open||'';
+   const p=localStorage.getItem('planejador_active_profile')||'Marcos';
+   let list=null;try{list=JSON.parse(localStorage.getItem(`planejador_education_formations_v117_${p.toLowerCase()}`)||'null')}catch(_){}
+   if(!Array.isArray(list)&&p==='Marcos'){try{list=JSON.parse(localStorage.getItem('planejador_education_formations_v117')||'[]')}catch(_){list=[]}}
+   return (Array.isArray(list)?list:[]).find(f=>String(f.id||'')===String(id))||null;
+ }
+ function removeColumns(table){
+   if(!table)return;
+   const heads=$$('thead th',table); const remove=[];
+   heads.forEach((th,i)=>{const t=norm(th.textContent);if(/observ/.test(t)||/docente|professor/.test(t))remove.push(i)});
+   remove.sort((a,b)=>b-a).forEach(idx=>table.querySelectorAll('tr').forEach(tr=>{const c=Array.from(tr.children)[idx];if(c)c.remove()}));
+ }
+ function buildHeader(){
+   const detail=$('.v121-detail',ROOT), f=activeFormation(); if(!detail||!f)return;
+   const hero=$('.edu89-hero',detail); if(!hero)return;
+   const old=$('.v119-detail-kicker',detail); if(old){
+     const actions=$('.v119-detail-actions',old); if(actions&&actions.parentNode!==hero)hero.appendChild(actions);
+     old.remove();
+   }
+   const head=$('.edu89-headline',hero), badge=$('.edu89-degree-card',hero);
+   if(head){
+     const course=String(f.course||'Formação'),inst=String(f.institution||'');
+     const level=String(f.level||'Formação').toUpperCase();
+     head.innerHTML=`<div class="edu89-kicker"><span class="edu89-level">${level}</span></div><h2>${course.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}</h2><p>${inst.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}</p>`;
+   }
+   if(badge){
+     const degree=String(f.degree||f.level||'Formação');
+     const status=String(f.status||'Cadastrada');
+     const end=String(f.end||f.completionDate||'');
+     const y=(end.match(/(19|20)\d{2}/)||[])[0]||'';
+     let sem=''; const dm=end.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); if(dm)sem=(Number(dm[2])<=6?'1º':'2º')+' semestre de '+dm[3]; else if(y)sem='Conclusão em '+y; else if(/andamento|cursando/i.test(status))sem='Em andamento';
+     badge.innerHTML=`<b>${degree}</b><span>${status}</span><span class="edu89-sem-chip">${sem||'Período acadêmico'}</span>`;
+   }
+ }
+ function clean(){
+   ROOT.querySelectorAll('.v119-history-table').forEach(removeColumns);
+   buildHeader();
+ }
+ let queued=false;const schedule=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;clean()})};
+ new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+ [0,80,220,600,1200].forEach(ms=>setTimeout(clean,ms));
+ window.addEventListener('resize',schedule,{passive:true});
+})();
+</script>
+
 </body></html>
