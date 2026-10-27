@@ -2985,4 +2985,84 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
 })();
 </script>
 
+
+<style id="pp-v109-curriculo-career-fit-no-scroll">
+/* V109 — mais espaço para a trajetória de cargos e sem barra horizontal no desktop */
+#edu-curriculo .edu103-exp-item{
+  grid-template-columns:minmax(150px,.42fr) minmax(0,1.58fr)!important;
+  gap:12px!important;
+}
+#edu-curriculo .edu103-company{
+  padding-right:8px!important;
+  border-right:1px solid #e4ebf3!important;
+}
+#edu-curriculo .edu103-company h4{
+  font-size:15px!important;
+  line-height:1.15!important;
+}
+#edu-curriculo .edu103-company p{
+  font-size:9px!important;
+  line-height:1.35!important;
+}
+#edu-curriculo .edu103-company .edu103-company-badges{
+  margin-top:8px!important;
+  gap:5px!important;
+}
+#edu-curriculo .edu103-company .edu103-company-badges span{
+  min-height:24px!important;
+  padding:0 7px!important;
+  font-size:7.8px!important;
+}
+#edu-curriculo .edu103-track{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr))!important;
+  gap:8px!important;
+  overflow:visible!important;
+  padding:4px 0 2px!important;
+  scroll-snap-type:none!important;
+  scrollbar-width:none!important;
+  min-width:0!important;
+}
+#edu-curriculo .edu103-track::-webkit-scrollbar{display:none!important}
+#edu-curriculo .edu103-track:before{
+  left:8px!important;
+  right:8px!important;
+  top:17px!important;
+}
+#edu-curriculo .edu103-step{
+  min-width:0!important;
+  width:auto!important;
+  max-width:none!important;
+  flex:none!important;
+  padding:10px 10px!important;
+  gap:6px!important;
+}
+#edu-curriculo .edu103-step small{
+  min-height:24px!important;
+  padding:0 7px!important;
+  font-size:7.7px!important;
+  white-space:nowrap!important;
+}
+#edu-curriculo .edu103-step b{
+  font-size:10.5px!important;
+  line-height:1.22!important;
+}
+#edu-curriculo .edu103-step span{
+  font-size:8px!important;
+  line-height:1.28!important;
+}
+@media(max-width:1050px){
+  #edu-curriculo .edu103-exp-item{grid-template-columns:minmax(135px,.36fr) minmax(0,1.64fr)!important}
+  #edu-curriculo .edu103-track{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))!important}
+}
+@media(max-width:820px){
+  #edu-curriculo .edu103-exp-item{grid-template-columns:1fr!important}
+  #edu-curriculo .edu103-company{padding-right:0!important;padding-bottom:10px!important;border-right:0!important;border-bottom:1px solid #e4ebf3!important}
+  #edu-curriculo .edu103-track{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:540px){
+  #edu-curriculo .edu103-track{grid-template-columns:1fr!important}
+}
+</style>
+
 </body></html>
