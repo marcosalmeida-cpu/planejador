@@ -3640,7 +3640,7 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
  const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\u00a0/g,' ').toLowerCase().replace(/\s+/g,' ').trim();
  const small=new Set(['de','da','das','do','dos','e','em','na','nas','no','nos','para','por','com','sem','a','o','as','os']); const acr=new Set(['TCC','EAD','AVA','SUS','SUAS','LGPD','IA','TI','RH','MEI','INSS','FGTS','CLT','PIB','IR','ISS','ICMS','LIBRAS']);
- function titleCase(s){return String(s||'').toLowerCase().split(/(\s+|[-–—:/])/).map((w,i)=>{if(/^\s+$|^[-–—:/]$/.test(w))return w;const up=w.toUpperCase();if(acr.has(up)||/^(i|ii|iii|iv|v|vi|vii|viii|ix|x)$/i.test(w))return up;if(i>0&&small.has(w))return w;return w.charAt(0).toUpperCase()+w.slice(1)}).join('')}
+ function titleCase(s){const t=String(s||'').trim().toLocaleLowerCase('pt-BR');if(!t)return'';return t.charAt(0).toLocaleUpperCase('pt-BR')+t.slice(1)}
  function load(){let x=null;try{x=JSON.parse(localStorage.getItem(key())||'null')}catch(_){}if(!Array.isArray(x)&&profile()==='Marcos'){try{x=JSON.parse(localStorage.getItem('planejador_education_formations_v117')||'[]')}catch(_){x=[]}}return Array.isArray(x)?x:[]}
  function save(list){localStorage.setItem(key(),JSON.stringify(list));if(profile()==='Marcos')localStorage.setItem('planejador_education_formations_v117',JSON.stringify(list));try{window.ppCloudV66?.save?.()}catch(_){} }
  function activeId(){return ROOT.querySelector('[data-v121-open].active')?.dataset.v121Open||ROOT.querySelector('.edu92-course-select')?.value||ROOT.querySelector('.edu83-course-select')?.value||''}
@@ -3664,6 +3664,108 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
  window.ppEduFormationsFinal={edit:openEditor,remove:removeFormation,render};
  ROOT.addEventListener('click',e=>{if(e.target.closest('[data-v121-open]'))setTimeout(render,30)},false);ROOT.addEventListener('change',e=>{if(e.target.matches('.edu92-course-select,.edu83-course-select'))setTimeout(render,30)},false);
  let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(()=>{const f=active();const host=$('.edu115-detail',ROOT);if(!host||String(host.dataset.id)!==String(f?.id||''))render()},45)};new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});[0,100,350,900,1600].forEach(ms=>setTimeout(render,ms));
+})();
+</script>
+
+
+<style id="pp-v116-formacoes-refino-final-style">
+/* V116 — progresso claro, período no cabeçalho e ações definitivas */
+#edu-formacoes .edu115-progress{
+  background:
+    radial-gradient(circle at 95% 0%,rgba(52,132,232,.08),transparent 30%),
+    linear-gradient(115deg,#ffffff 0%,#f6faff 58%,#f1fbf8 100%)!important;
+  border:1px solid #d9e7f1!important;
+  box-shadow:0 10px 24px rgba(17,48,78,.055)!important;
+  color:#173553!important;
+}
+#edu-formacoes .edu115-progress-main small{color:#4c7ba6!important}
+#edu-formacoes .edu115-progress-main strong{color:#123552!important}
+#edu-formacoes .edu115-progress-main span{color:#6f8497!important}
+#edu-formacoes .edu115-progress-bar{
+  background:#e3edf3!important;
+  box-shadow:inset 0 1px 2px rgba(35,70,98,.10)!important;
+}
+#edu-formacoes .edu115-progress-legend span{color:#4e677d!important}
+
+/* O período assume a faixa de cabeçalho das colunas */
+#edu-formacoes .edu115-period-head{display:none!important}
+#edu-formacoes .edu115-columns{
+  min-height:58px!important;
+  padding:8px 14px!important;
+  border-bottom:0!important;
+  background:linear-gradient(105deg,#153758 0%,#276991 58%,#35a49c 100%)!important;
+  color:#fff!important;
+  border-radius:17px 17px 0 0!important;
+  text-transform:none!important;
+}
+#edu-formacoes .edu115-period:nth-child(4n+2) .edu115-columns{background:linear-gradient(105deg,#382e7d,#5360b7 60%,#458fc2)!important}
+#edu-formacoes .edu115-period:nth-child(4n+3) .edu115-columns{background:linear-gradient(105deg,#17605b,#269481 60%,#4dafaa)!important}
+#edu-formacoes .edu115-period:nth-child(4n+4) .edu115-columns{background:linear-gradient(105deg,#725022,#a57a31 60%,#c99c4c)!important}
+#edu-formacoes .edu115-columns>span{color:rgba(255,255,255,.86)!important;font-size:7.3px!important;font-weight:900!important;letter-spacing:.09em!important;text-transform:uppercase!important}
+#edu-formacoes .edu115-columns>span:nth-child(n+2){text-align:center!important}
+#edu-formacoes .edu116-period-heading{
+  display:grid!important;grid-template-columns:auto 1fr!important;grid-template-areas:"tag title" "tag sub"!important;
+  align-items:center!important;gap:1px 9px!important;text-align:left!important;min-width:0!important;
+}
+#edu-formacoes .edu116-period-heading small{
+  grid-area:tag!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  min-height:30px!important;padding:0 9px!important;border-radius:10px!important;
+  background:rgba(255,255,255,.13)!important;border:1px solid rgba(255,255,255,.17)!important;
+  color:#fff!important;font-size:6.7px!important;font-weight:950!important;letter-spacing:.13em!important;text-transform:uppercase!important;
+}
+#edu-formacoes .edu116-period-heading strong{
+  grid-area:title!important;display:block!important;color:#fff!important;font-size:13px!important;line-height:1.05!important;
+  letter-spacing:-.02em!important;text-transform:none!important;white-space:normal!important;
+}
+#edu-formacoes .edu116-period-heading em{
+  grid-area:sub!important;display:block!important;color:rgba(255,255,255,.70)!important;font-size:7px!important;font-weight:800!important;
+  font-style:normal!important;letter-spacing:.05em!important;text-transform:uppercase!important;
+}
+#edu-formacoes .edu115-period{border-radius:18px!important}
+#edu-formacoes .edu115-discipline{text-transform:none!important}
+
+/* garantir clique e prioridade das ações */
+#edu-formacoes .edu115-actions{position:relative!important;z-index:20!important;pointer-events:auto!important}
+#edu-formacoes .edu115-edit,#edu-formacoes .edu115-delete{position:relative!important;z-index:21!important;pointer-events:auto!important;touch-action:manipulation!important}
+</style>
+<script id="pp-v116-formacoes-refino-final-script">
+(()=>{'use strict';
+ const ROOT=document.getElementById('v117FormationRoot'); if(!ROOT)return;
+ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[m]));
+ const sentence=s=>{const t=String(s||'').trim().toLocaleLowerCase('pt-BR');return t?t.charAt(0).toLocaleUpperCase('pt-BR')+t.slice(1):''};
+ const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+ const key=()=>`planejador_education_formations_v117_${profile().toLowerCase()}`;
+ function migrateNames(){let list=null;try{list=JSON.parse(localStorage.getItem(key())||'null')}catch(_){ }if(!Array.isArray(list)&&profile()==='Marcos'){try{list=JSON.parse(localStorage.getItem('planejador_education_formations_v117')||'[]')}catch(_){list=[]}}if(!Array.isArray(list))return;let changed=false;list.forEach(f=>(Array.isArray(f.history)?f.history:[]).forEach(x=>{const field=x.name!==undefined?'name':(x.discipline!==undefined?'discipline':null);if(!field)return;const n=sentence(x[field]);if(n&&n!==x[field]){x[field]=n;changed=true}}));if(changed){localStorage.setItem(key(),JSON.stringify(list));if(profile()==='Marcos')localStorage.setItem('planejador_education_formations_v117',JSON.stringify(list));}}
+ function refine(){
+   $$('.edu115-period',ROOT).forEach(sec=>{
+     const columns=$('.edu115-columns',sec), first=columns?.children?.[0];
+     if(!columns||!first)return;
+     const period=$('.edu115-period-copy strong',sec)?.textContent?.trim() || sec.dataset.period || 'Período';
+     first.innerHTML=`<span class="edu116-period-heading"><small>Período</small><strong>${esc(period)}</strong><em>Disciplinas / etapas</em></span>`;
+   });
+   $$('.edu115-discipline',ROOT).forEach(el=>{const t=sentence(el.textContent);if(t)el.textContent=t});
+   const host=$('.edu115-detail',ROOT); const id=host?.dataset.id||'';
+   const edit=$('.edu115-edit',host||ROOT), del=$('.edu115-delete',host||ROOT);
+   if(edit){edit.dataset.edu116Edit=id;edit.setAttribute('aria-label','Editar formação')}
+   if(del){del.dataset.edu116Delete=id;del.setAttribute('aria-label','Excluir formação')}
+ }
+ // Window capture runs before document-level legacy handlers.
+ window.addEventListener('click',e=>{
+   const edit=e.target.closest?.('[data-edu116-edit]');
+   const del=e.target.closest?.('[data-edu116-delete]');
+   if(!edit&&!del)return;
+   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+   const id=(edit||del).dataset.edu116Edit||(edit||del).dataset.edu116Delete||$('.edu115-detail',ROOT)?.dataset.id||'';
+   setTimeout(()=>{
+     if(edit) window.ppEduFormationsFinal?.edit?.(id);
+     else window.ppEduFormationsFinal?.remove?.(id);
+   },0);
+ },true);
+ migrateNames();
+ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(refine,25)};
+ new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-id']});
+ [0,60,160,420,900,1600].forEach(ms=>setTimeout(refine,ms));
 })();
 </script>
 
