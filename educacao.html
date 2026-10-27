@@ -2680,41 +2680,6 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
 </script>
 
 
-<script id="pp-v102-academic-header-actions-bridge">
-(()=>{'use strict';
- const ROOT=document.getElementById('v117FormationRoot'); if(!ROOT)return;
- const qs=(s,r=document)=>r.querySelector(s);
- function activeId(){return ROOT.querySelector('[data-v121-open].active')?.dataset.v121Open||ROOT.querySelector('.edu92-course-select')?.value||ROOT.querySelector('.edu83-course-select')?.value||''}
- function legacyButton(kind){
-   const attr=kind==='edit'?'data-v119-edit':'data-v119-delete';
-   return ROOT.querySelector(`[${attr}]`) || ROOT.querySelector(`.v119-detail-actions .${kind}`);
- }
- function fireLegacy(kind,tries=0){
-   const btn=legacyButton(kind);
-   if(btn){
-     btn.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:window}));
-     return true;
-   }
-   if(tries>=3)return false;
-   const id=activeId();
-   const card=id?ROOT.querySelector(`[data-v121-open="${CSS.escape(id)}"]`):ROOT.querySelector('[data-v121-open].active');
-   if(card){
-     card.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:window}));
-     setTimeout(()=>fireLegacy(kind,tries+1),50+tries*40);
-     return true;
-   }
-   return false;
- }
- ROOT.addEventListener('click',e=>{
-   const edit=e.target.closest('.edu101-edit');
-   const del=e.target.closest('.edu101-delete');
-   if(!edit&&!del)return;
-   e.preventDefault();
-   e.stopPropagation();
-   fireLegacy(edit?'edit':'delete');
- },true);
-})();
-</script>
 
 <style id="pp-v103-curriculo-vitae-style">
 #edu-curriculo .v115-content-grid{display:none!important}
@@ -2814,4 +2779,122 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
  [0,280,900].forEach(ms=>setTimeout(render,ms));
 })();
 </script>
+
+<style id="pp-v104-curriculo-executivo-style">
+/* V104 — Currículo executivo premium, sem hero/dashboard repetitivo */
+#edu-curriculo .edu103-cv,#edu-curriculo .edu89-cv-formations,#edu-curriculo .edu98-career,#edu-curriculo .edu87-curriculum{display:none!important}
+#edu-curriculo .v115-content-grid{display:none!important}
+#edu-curriculo .edu104-cv{display:grid;gap:14px;margin:0}
+#edu-curriculo .edu104-section{border:1px solid #d8e5ef;border-radius:22px;background:linear-gradient(180deg,#fff,#f8fbfd);padding:18px 20px;box-shadow:0 10px 24px rgba(15,44,78,.045)}
+#edu-curriculo .edu104-section-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #e7eef5}
+#edu-curriculo .edu104-section-head small{display:block;color:#4b7eb0;font-size:8px;font-weight:950;letter-spacing:.13em;text-transform:uppercase;margin-bottom:4px}
+#edu-curriculo .edu104-section-head h2{margin:0!important;color:#15334f!important;font-size:22px!important;letter-spacing:-.04em}
+#edu-curriculo .edu104-section-head p{margin:4px 0 0!important;color:#718397!important;font-size:10px!important;line-height:1.45!important;max-width:760px}
+#edu-curriculo .edu104-count{padding:7px 10px;border-radius:999px;background:#edf5fb;border:1px solid #dce8f3;color:#315f87;font-size:8.7px;font-weight:900}
+
+/* Experiência — empresa como eixo; cargos como trajetória horizontal */
+#edu-curriculo .edu104-company-list{display:grid;gap:10px}
+#edu-curriculo .edu104-company-row{display:grid;grid-template-columns:minmax(205px,.62fr) minmax(0,1.38fr);gap:16px;align-items:center;padding:15px 16px;border:1px solid #e0e9f1;border-radius:18px;background:#fff;min-width:0}
+#edu-curriculo .edu104-company-id{min-width:0;padding-right:14px;border-right:1px solid #e7eef4}
+#edu-curriculo .edu104-company-id h3{margin:0!important;color:#142f4b!important;font-size:15px!important;line-height:1.2!important;letter-spacing:-.02em}
+#edu-curriculo .edu104-company-id p{margin:6px 0 0!important;color:#77889a!important;font-size:9.5px!important;line-height:1.4!important}
+#edu-curriculo .edu104-company-period{display:inline-flex;align-items:center;margin-top:9px;min-height:26px;padding:0 9px;border-radius:999px;background:#f2f7fc;border:1px solid #dde8f2;color:#386389;font-size:8.5px;font-weight:900}
+#edu-curriculo .edu104-career-track{position:relative;display:flex;gap:10px;overflow-x:auto;padding:4px 2px 6px;scroll-snap-type:x proximity;scrollbar-width:thin;min-width:0}
+#edu-curriculo .edu104-career-track:before{content:"";position:absolute;left:9px;right:9px;top:17px;height:2px;background:linear-gradient(90deg,#d8e7f4,#d4dfec);border-radius:999px}
+#edu-curriculo .edu104-career-step{position:relative;z-index:1;flex:0 0 190px;scroll-snap-align:start;display:grid;gap:6px;padding:11px 12px;border:1px solid #dfe8f0;border-radius:15px;background:linear-gradient(180deg,#fff,#fbfdff);box-shadow:0 7px 17px rgba(18,46,80,.035)}
+#edu-curriculo .edu104-career-step:before{content:"";position:absolute;left:13px;top:-1px;width:13px;height:13px;border-radius:50%;background:linear-gradient(135deg,#6b4dff,#2d83eb,#21b7aa);box-shadow:0 0 0 4px #fff,0 0 0 5px rgba(93,121,184,.12)}
+#edu-curriculo .edu104-career-step time{display:inline-flex;align-items:center;width:max-content;min-height:24px;padding:0 8px;border-radius:999px;background:#f4f8fd;border:1px solid #dce7f3;color:#35628c;font-size:8px;font-weight:950}
+#edu-curriculo .edu104-career-step strong{display:block;color:#173653;font-size:11.5px;line-height:1.3}
+#edu-curriculo .edu104-career-step.current{border-color:#cfe8df;background:linear-gradient(180deg,#fff,#f7fcfa)}
+#edu-curriculo .edu104-career-step.current:after{content:"ATUAL";position:absolute;right:8px;top:8px;padding:3px 5px;border-radius:999px;background:#e7f8f1;color:#147451;font-size:6.7px;font-weight:950;letter-spacing:.07em}
+
+/* Formação + repertório lado a lado */
+#edu-curriculo .edu104-two-col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.88fr);gap:14px}
+#edu-curriculo .edu104-academic-list{display:grid;gap:9px}
+#edu-curriculo .edu104-academic{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 13px;border:1px solid #e2eaf1;border-radius:15px;background:#fff}
+#edu-curriculo .edu104-academic strong{display:block;color:#173553;font-size:12px;line-height:1.25}
+#edu-curriculo .edu104-academic b{display:block;margin-top:3px;color:#667b8f;font-size:9.5px;font-weight:700}
+#edu-curriculo .edu104-academic-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+#edu-curriculo .edu104-academic-meta span{display:inline-flex;align-items:center;min-height:24px;padding:0 8px;border-radius:999px;background:#f3f7fb;border:1px solid #dee8f1;color:#496981;font-size:8px;font-weight:850}
+#edu-curriculo .edu104-degree{display:grid;justify-items:end;gap:6px}
+#edu-curriculo .edu104-degree b{display:inline-flex;align-items:center;min-height:30px;padding:0 10px;border-radius:11px;background:linear-gradient(90deg,#6a48ff,#2f78e7,#22b5aa);color:#fff!important;font-size:9px!important;font-weight:950!important;white-space:nowrap}
+#edu-curriculo .edu104-degree time{color:#416784;font-size:8.5px;font-weight:900}
+
+#edu-curriculo .edu104-study-list{display:grid;gap:9px}
+#edu-curriculo .edu104-study{padding:12px 13px;border:1px solid #e2eaf1;border-radius:15px;background:#fff}
+#edu-curriculo .edu104-study h4{margin:0!important;color:#173553!important;font-size:11.5px!important;line-height:1.3}
+#edu-curriculo .edu104-study .meta{margin-top:4px;color:#8593a1;font-size:8.5px}
+#edu-curriculo .edu104-study .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+#edu-curriculo .edu104-study .tags span{padding:4px 6px;border-radius:999px;background:#edf6ff;border:1px solid #dae8f5;color:#356286;font-size:7.8px;font-weight:850}
+
+/* Competências mais limpas e capitalizadas */
+#edu-curriculo .edu104-skills{display:flex;flex-wrap:wrap;gap:7px}
+#edu-curriculo .edu104-skills span{display:inline-flex;align-items:center;min-height:29px;padding:0 10px;border-radius:999px;background:linear-gradient(180deg,#fff,#f6f9fd);border:1px solid #dce6ef;color:#355d7c;font-size:8.8px;font-weight:850}
+#edu-curriculo .edu104-empty{padding:18px;border:1px dashed #cfdeea;border-radius:14px;text-align:center;background:#fbfdff;color:#718296;font-size:10px;line-height:1.5}
+#edu-curriculo .edu104-empty b{display:block;color:#2a4c6d;font-size:11.5px;margin-bottom:4px}
+@media(max-width:980px){#edu-curriculo .edu104-company-row{grid-template-columns:1fr}#edu-curriculo .edu104-company-id{border-right:0;border-bottom:1px solid #e7eef4;padding-right:0;padding-bottom:11px}#edu-curriculo .edu104-two-col{grid-template-columns:1fr}}
+@media(max-width:620px){#edu-curriculo .edu104-career-step{flex-basis:72vw;min-width:190px}#edu-curriculo .edu104-academic{grid-template-columns:1fr}#edu-curriculo .edu104-degree{justify-items:start}}
+</style>
+<script id="pp-v104-curriculo-executivo-script">
+(()=>{'use strict';
+ const CUR=document.getElementById('edu-curriculo'); if(!CUR) return;
+ const $=(s,r=document)=>r.querySelector(s);
+ const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+ const safeProfile=()=>profile().replace(/[^a-z0-9_-]/gi,'_');
+ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+ const titleCase=s=>String(s||'').toLocaleLowerCase('pt-BR').replace(/(^|[\s\-/])([\p{L}])/gu,(m,p,c)=>p+c.toLocaleUpperCase('pt-BR')).replace(/\b(De|Da|Do|Das|Dos|E|Em|No|Na|Nos|Nas|Para|Por)\b/g,x=>x.toLocaleLowerCase('pt-BR'));
+ const studiesKey=()=>`planejador_education_studies_v87_${profile().toLowerCase()}`;
+ const formationsKey=()=>`planejador_education_formations_v117_${profile().toLowerCase()}`;
+ const careerKey=()=>`pp_rgps_career_v98_${safeProfile()}`;
+ function loadStudies(){try{const x=JSON.parse(localStorage.getItem(studiesKey())||'[]');return Array.isArray(x)?x:[]}catch(_){return[]}}
+ function loadFormations(){let x=null;try{x=JSON.parse(localStorage.getItem(formationsKey())||'null')}catch(_){}if(!Array.isArray(x)&&profile()==='Marcos'){try{x=JSON.parse(localStorage.getItem('planejador_education_formations_v117')||'null')}catch(_){}}return Array.isArray(x)?x:[]}
+ function loadCareer(){try{const x=JSON.parse(localStorage.getItem(careerKey())||'null');return Array.isArray(x?.periods)?x.periods:[]}catch(_){return[]}}
+ function monthLabel(v){const s=String(v||'').trim();if(!s)return '—';let m=s.match(/^(\d{1,2})\/(\d{4})$/);if(m)return `${String(m[1]).padStart(2,'0')}/${m[2]}`;m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)return `${String(m[2]).padStart(2,'0')}/${m[3]}`;m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(m)return `${m[2]}/${m[1]}`;return s}
+ function monthIndex(v){const s=String(v||'').trim();if(!s)return-Infinity;if(/^atual$/i.test(s)){const d=new Date();return d.getFullYear()*12+d.getMonth()}let m=s.match(/^(\d{1,2})\/(\d{4})$/);if(m)return Number(m[2])*12+Number(m[1])-1;return-Infinity}
+ function groupCareer(periods){const map=new Map();for(const p of periods){const employer=String(p.employer||'Empresa não informada').trim()||'Empresa não informada';const k=norm(employer);if(!map.has(k))map.set(k,{employer,roles:[],startIndex:Infinity,endIndex:-Infinity});const g=map.get(k);const role={jobTitle:String(p.jobTitle||'Cargo não informado').trim()||'Cargo não informado',start:monthLabel(p.start),end:monthLabel(p.end||'Atual'),startIndex:monthIndex(p.start),endIndex:/^atual$/i.test(String(p.end||''))?monthIndex('Atual'):monthIndex(p.end)};g.roles.push(role);g.startIndex=Math.min(g.startIndex,role.startIndex);g.endIndex=Math.max(g.endIndex,role.endIndex)}return Array.from(map.values()).map(g=>{g.roles.sort((a,b)=>a.startIndex-b.startIndex||a.endIndex-b.endIndex);g.start=g.roles[0]?.start||'—';g.end=g.roles[g.roles.length-1]?.end||'—';return g}).sort((a,b)=>b.endIndex-a.endIndex||a.startIndex-b.startIndex)}
+ function formationDate(f){return monthLabel(f.completionDate||f.end||f.conclusion||(/andamento|cursando/i.test(norm(f.status||''))?'Em andamento':'—'))}
+ function skills(formations,studies,groups){const raw=[];const add=v=>{v=String(v||'').trim();if(!v)return;const clean=titleCase(v);if(!raw.some(x=>norm(x)===norm(clean)))raw.push(clean)};groups.forEach(g=>g.roles.forEach(r=>add(r.jobTitle)));formations.forEach(f=>{add(f.degree);(Array.isArray(f.history)?f.history:[]).slice(0,4).forEach(h=>add(h.name))});studies.forEach(s=>(s.related||[]).forEach(r=>add(r.discipline)));return raw.slice(0,20)}
+ function render(){
+   $('#edu103CurriculumVitae',CUR)?.style.setProperty('display','none','important');
+   $('#edu98Career',CUR)?.style.setProperty('display','none','important');
+   $('#edu87CurriculumStudies',CUR)?.style.setProperty('display','none','important');
+   let host=$('#edu104Curriculum',CUR);if(!host){host=document.createElement('section');host.id='edu104Curriculum';host.className='edu104-cv';CUR.appendChild(host)}
+   const formations=loadFormations();const studies=loadStudies().filter(x=>x.showInCurriculum!==false);const groups=groupCareer(loadCareer());const skillList=skills(formations,studies,groups);
+   host.innerHTML=`<section class="edu104-section"><div class="edu104-section-head"><div><small>Experiência profissional</small><h2>Trajetória profissional</h2><p>Empresas e cargos sincronizados diretamente da Previdência Social. Quando você muda de função na mesma empresa, a trajetória aparece como uma linha de evolução profissional.</p></div><div class="edu104-count">${groups.length} ${groups.length===1?'empresa':'empresas'}</div></div><div class="edu104-company-list">${groups.length?groups.map(g=>`<article class="edu104-company-row"><div class="edu104-company-id"><h3>${esc(g.employer)}</h3><p>${g.roles.length>1?'Trajetória interna com mudanças de cargo':'Experiência profissional'}</p><span class="edu104-company-period">${esc(g.start)} — ${esc(g.end)}</span></div><div class="edu104-career-track">${g.roles.map((r,i)=>`<article class="edu104-career-step ${/^atual$/i.test(r.end)?'current':''}"><time>${esc(r.start)} — ${esc(r.end)}</time><strong>${esc(r.jobTitle)}</strong></article>`).join('')}</div></article>`).join(''):`<div class="edu104-empty"><b>Vínculos profissionais ainda não sincronizados.</b>Abra Previdência Social no Hub e revise os cargos. O Currículo usa diretamente a mesma fonte de dados.</div>`}</div></section>
+   <div class="edu104-two-col"><section class="edu104-section"><div class="edu104-section-head"><div><small>Formação acadêmica</small><h2>Formações</h2><p>Formações formais com grau, instituição e conclusão.</p></div></div><div class="edu104-academic-list">${formations.length?formations.map(f=>`<article class="edu104-academic"><div><strong>${esc(f.course||'Formação')}</strong><b>${esc(f.institution||'')}</b><div class="edu104-academic-meta">${f.level?`<span>${esc(titleCase(f.level))}</span>`:''}${f.status?`<span>${esc(titleCase(f.status))}</span>`:''}</div></div><div class="edu104-degree"><b>${esc(titleCase(f.degree||f.level||'Formação'))}</b><time>${esc(formationDate(f))}</time></div></article>`).join(''):`<div class="edu104-empty"><b>Nenhuma formação cadastrada.</b>Inclua suas formações na página de Histórico Acadêmico.</div>`}</div></section>
+   <section class="edu104-section"><div class="edu104-section-head"><div><small>Repertório acadêmico</small><h2>Assuntos estudados</h2><p>Leituras que você decidiu incorporar ao currículo.</p></div></div><div class="edu104-study-list">${studies.length?studies.slice(0,7).map(s=>`<article class="edu104-study"><h4>${esc(s.subject||s.title)}</h4><div class="meta">${esc([s.source,s.date].filter(Boolean).join(' · '))}</div><div class="tags">${(s.related||[]).slice(0,4).map(r=>`<span>${esc(titleCase(r.discipline))}</span>`).join('')}</div></article>`).join(''):`<div class="edu104-empty"><b>Nenhuma leitura no currículo.</b>Marque artigos como estudados na Visão Geral para incluí-los aqui.</div>`}</div></section></div>
+   <section class="edu104-section"><div class="edu104-section-head"><div><small>Competências</small><h2>Competências e repertórios</h2><p>Síntese dos principais temas derivados de cargos, formações e disciplinas, com capitalização padronizada.</p></div></div><div class="edu104-skills">${skillList.length?skillList.map(x=>`<span>${esc(x)}</span>`).join(''):`<div class="edu104-empty"><b>Nenhuma competência consolidada.</b>O conteúdo será formado automaticamente conforme seus dados.</div>`}</div></section>`;
+ }
+ new MutationObserver(()=>{if(CUR.classList.contains('active'))setTimeout(render,20)}).observe(CUR,{attributes:true,attributeFilter:['class']});
+ window.addEventListener('storage',e=>{if(!e.key||[studiesKey(),formationsKey(),careerKey()].includes(e.key))render()});
+ [0,220,700].forEach(ms=>setTimeout(render,ms));
+})();
+</script>
+
+<script id="pp-v104-formation-actions-direct">
+(()=>{'use strict';
+ const ROOT=document.getElementById('v117FormationRoot');if(!ROOT)return;
+ const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+ const key=()=>`planejador_education_formations_v117_${profile().toLowerCase()}`;
+ function activeId(){return ROOT.querySelector('[data-v121-open].active')?.dataset.v121Open||ROOT.querySelector('.edu92-course-select')?.value||ROOT.querySelector('.edu83-course-select')?.value||''}
+ function load(){let x=null;try{x=JSON.parse(localStorage.getItem(key())||'null')}catch(_){}if(!Array.isArray(x)&&profile()==='Marcos'){try{x=JSON.parse(localStorage.getItem('planejador_education_formations_v117')||'[]')}catch(_){x=[]}}return Array.isArray(x)?x:[]}
+ function save(list){localStorage.setItem(key(),JSON.stringify(list));try{window.__ppV41Profile?.saveState?.(profile(),window.__ppV41Profile.captureShared?.())}catch(_){}try{window.ppCloudV66?.save?.()}catch(_){}}
+ document.addEventListener('click',e=>{
+   const edit=e.target.closest?.('.edu101-edit');const del=e.target.closest?.('.edu101-delete');if(!edit&&!del)return;if(!ROOT.contains(edit||del))return;
+   e.preventDefault();e.stopImmediatePropagation();const id=activeId();if(!id)return;
+   if(edit){
+     if(window.ppEduFormationsV117?.edit){window.ppEduFormationsV117.edit(id);return}
+     const legacy=ROOT.querySelector('[data-v119-edit]');if(legacy){legacy.click();return}
+     alert('Não foi possível abrir a edição desta formação.');return;
+   }
+   const list=load();const f=list.find(x=>String(x.id)===String(id));if(!f)return;
+   if(!confirm(`Excluir a formação "${f.course||'Formação'}"?`))return;
+   save(list.filter(x=>String(x.id)!==String(id)));
+   window.ppEduFormationsV117?.render?.();
+   try{toast('Formação excluída.')}catch(_){ }
+ },true);
+})();
+</script>
+
 </body></html>

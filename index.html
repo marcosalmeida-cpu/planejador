@@ -29464,6 +29464,109 @@ body:has(#previdencia.active) .hub-content{
  [0,400,1000].forEach(ms=>setTimeout(render,ms));
 })();
 </script>
+
+<style id="pp-v105-profile-switch-input-fix">
+/* V105 — campo de senha da troca de perfil sempre interativo */
+#profileSwitchV76,
+#profileSwitchV76.open,
+#profileSwitchV76 .v76-profile-card,
+#profileSwitchV76 .v76-profile-body,
+#profileSwitchV76 .v76-field{
+  pointer-events:auto!important;
+}
+#profileSwitchV76 .v76-field{position:relative!important;z-index:5!important}
+#profileSwitchV76 #v76SwitchPass{
+  position:relative!important;
+  z-index:10!important;
+  width:100%!important;
+  min-height:46px!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  user-select:text!important;
+  -webkit-user-select:text!important;
+  touch-action:manipulation!important;
+  caret-color:#8ac8ff!important;
+  cursor:text!important;
+  background:#06121e!important;
+  color:#eef6ff!important;
+  border:1px solid rgba(102,151,201,.28)!important;
+  border-radius:13px!important;
+  padding:0 12px!important;
+  outline:none!important;
+}
+#profileSwitchV76 #v76SwitchPass:focus{
+  border-color:#3c9cf4!important;
+  box-shadow:0 0 0 3px rgba(60,156,244,.13)!important;
+}
+</style>
+<script id="pp-v105-profile-switch-input-fix-script">
+(()=>{'use strict';
+ let fixing=false;
+ function freshInput(old){
+   if(!old || old.dataset.v105Fresh==='1') return old;
+   const fresh=document.createElement('input');
+   fresh.id='v76SwitchPass';
+   fresh.type='password';
+   fresh.autocomplete='current-password';
+   fresh.placeholder=old.placeholder||'Digite a senha';
+   fresh.className=old.className||'';
+   fresh.value=old.value||'';
+   fresh.dataset.v105Fresh='1';
+   fresh.disabled=false;
+   fresh.readOnly=false;
+   fresh.tabIndex=0;
+   old.replaceWith(fresh);
+   fresh.addEventListener('keydown',e=>{
+     e.stopPropagation();
+     if(e.key==='Enter'){
+       e.preventDefault();
+       document.getElementById('v76SwitchGo')?.click();
+     }
+   });
+   fresh.addEventListener('pointerdown',()=>setTimeout(()=>fresh.focus(),0));
+   fresh.addEventListener('click',e=>{e.stopPropagation();fresh.focus()});
+   return fresh;
+ }
+ function fix(){
+   if(fixing)return;
+   const ov=document.getElementById('profileSwitchV76');
+   if(!ov || !ov.classList.contains('open'))return;
+   fixing=true;
+   try{
+     ov.removeAttribute('inert');
+     ov.setAttribute('aria-hidden','false');
+     ov.style.setProperty('pointer-events','auto','important');
+     const card=ov.querySelector('.v76-profile-card');
+     card?.removeAttribute('inert');
+     let input=ov.querySelector('#v76SwitchPass');
+     if(input){
+       input.disabled=false;
+       input.readOnly=false;
+       input.removeAttribute('disabled');
+       input.removeAttribute('readonly');
+       input.removeAttribute('inert');
+       input.style.setProperty('pointer-events','auto','important');
+       input.style.setProperty('user-select','text','important');
+       input=freshInput(input);
+       setTimeout(()=>{if(document.getElementById('profileSwitchV76')?.classList.contains('open')) input?.focus({preventScroll:true})},30);
+     }
+   }finally{fixing=false}
+ }
+ const obs=new MutationObserver(()=>setTimeout(fix,0));
+ obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','disabled','readonly','inert','style']});
+ document.addEventListener('click',e=>{
+   if(e.target.closest?.('#v76Switch,.v76-switch-option,[data-v62-profile],.profile-man')) setTimeout(fix,40);
+ },true);
+ document.addEventListener('focusin',e=>{
+   if(e.target?.id==='v76SwitchPass'){
+     e.target.disabled=false;e.target.readOnly=false;
+   }
+ },true);
+ [0,250,800].forEach(ms=>setTimeout(fix,ms));
+})();
+</script>
+
 </body></html>
 
 
