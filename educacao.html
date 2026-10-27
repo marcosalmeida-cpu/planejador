@@ -154,7 +154,10 @@ main>.view,main>.view.active,.main>.view,.main>.view.active{min-width:0!importan
 <h1>Histórico acadêmico</h1>
 <p>Uma leitura universitária da sua trajetória: cursos, vínculos, períodos, disciplinas, notas e carga horária.</p>
 </div>
+<div class="edu118-formation-controls">
+<select class="edu118-formation-select" id="edu118FormationSelect" aria-label="Selecionar formação"></select>
 <button class="v117-add-btn" id="v117AddFormation" type="button">+ Nova formação</button>
+</div>
 </div>
 <div id="v117FormationRoot"></div>
 </section>
@@ -3766,6 +3769,182 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
  let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(refine,25)};
  new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-id']});
  [0,60,160,420,900,1600].forEach(ms=>setTimeout(refine,ms));
+})();
+</script>
+
+
+<style id="pp-v117-periodos-vermelho-padronizado">
+/* V117 — período limpo, sem rótulos extras, com identidade única em vermelho escuro */
+#edu-formacoes .edu115-columns,
+#edu-formacoes .edu115-period:nth-child(4n+2) .edu115-columns,
+#edu-formacoes .edu115-period:nth-child(4n+3) .edu115-columns,
+#edu-formacoes .edu115-period:nth-child(4n+4) .edu115-columns{
+  min-height:50px!important;
+  padding:8px 14px!important;
+  background:linear-gradient(105deg,#4a1118 0%,#761c25 52%,#a33a43 100%)!important;
+  border-radius:17px 17px 0 0!important;
+  border:1px solid rgba(100,20,28,.28)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 8px 18px rgba(82,18,26,.08)!important;
+}
+#edu-formacoes .edu116-period-heading{
+  display:flex!important;
+  align-items:center!important;
+  min-width:0!important;
+  text-align:left!important;
+}
+#edu-formacoes .edu116-period-heading small,
+#edu-formacoes .edu116-period-heading em{display:none!important}
+#edu-formacoes .edu116-period-heading strong{
+  display:block!important;
+  color:#fff!important;
+  font-size:13.5px!important;
+  line-height:1.1!important;
+  letter-spacing:-.01em!important;
+  font-weight:950!important;
+  text-transform:none!important;
+  white-space:normal!important;
+}
+#edu-formacoes .edu115-columns>span:nth-child(n+2){
+  color:rgba(255,255,255,.80)!important;
+  font-size:7.2px!important;
+  font-weight:900!important;
+  letter-spacing:.08em!important;
+}
+</style>
+<script id="pp-v117-periodos-vermelho-padronizado-script">
+(()=>{'use strict';
+ const ROOT=document.getElementById('v117FormationRoot'); if(!ROOT)return;
+ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ function clean(){
+   $$('.edu115-period',ROOT).forEach(sec=>{
+     const columns=$('.edu115-columns',sec), first=columns?.children?.[0];
+     if(!columns||!first)return;
+     const period=$('.edu115-period-copy strong',sec)?.textContent?.trim() || sec.dataset.period || '';
+     first.innerHTML=`<span class="edu116-period-heading"><strong>${esc(period)}</strong></span>`;
+   });
+ }
+ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(clean,20)};
+ new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true});
+ [0,80,220,600,1200].forEach(ms=>setTimeout(clean,ms));
+})();
+</script>
+
+
+<style id="pp-v118-formacoes-header-filter-compact">
+/* V118 — seletor no cabeçalho e remoção visual do Mapa das formações */
+#edu-formacoes .v117-form-head{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:18px!important;
+}
+#edu-formacoes .edu118-formation-controls{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:9px!important;
+  min-width:0!important;
+}
+#edu-formacoes .edu118-formation-select{
+  width:clamp(230px,25vw,330px)!important;
+  min-width:230px!important;
+  max-width:330px!important;
+  height:42px!important;
+  padding:0 38px 0 12px!important;
+  border-radius:13px!important;
+  border:1px solid rgba(255,255,255,.22)!important;
+  background:rgba(255,255,255,.12)!important;
+  color:#fff!important;
+  font-size:10px!important;
+  font-weight:850!important;
+  outline:none!important;
+  backdrop-filter:blur(8px)!important;
+  -webkit-backdrop-filter:blur(8px)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10)!important;
+  cursor:pointer!important;
+}
+#edu-formacoes .edu118-formation-select:focus{
+  border-color:rgba(255,255,255,.52)!important;
+  box-shadow:0 0 0 3px rgba(255,255,255,.10)!important;
+}
+#edu-formacoes .edu118-formation-select option,
+#edu-formacoes .edu118-formation-select optgroup{
+  background:#fff!important;
+  color:#18334e!important;
+  font-size:10px!important;
+  line-height:1.2!important;
+}
+#edu-formacoes .edu118-formation-select optgroup{
+  font-weight:900!important;
+  color:#315d84!important;
+}
+#edu-formacoes .v117-add-btn{
+  min-height:42px!important;
+  height:42px!important;
+  padding:0 15px!important;
+  white-space:nowrap!important;
+}
+/* O mapa antigo sai completamente da experiência visual */
+#edu-formacoes .v121-formation-deck{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  overflow:hidden!important;
+  clip:rect(0 0 0 0)!important;
+  clip-path:inset(50%)!important;
+  white-space:nowrap!important;
+  margin:-1px!important;
+  padding:0!important;
+  border:0!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+#edu-formacoes .edu115-detail{margin-top:0!important}
+@media(max-width:900px){
+  #edu-formacoes .v117-form-head{grid-template-columns:1fr!important;gap:12px!important}
+  #edu-formacoes .edu118-formation-controls{justify-content:stretch!important;width:100%!important}
+  #edu-formacoes .edu118-formation-select{width:100%!important;max-width:none!important;min-width:0!important;flex:1 1 auto!important}
+}
+@media(max-width:560px){
+  #edu-formacoes .edu118-formation-controls{display:grid!important;grid-template-columns:1fr!important}
+  #edu-formacoes .v117-add-btn{width:100%!important}
+}
+</style>
+<script id="pp-v118-formacoes-header-filter-compact-script">
+(()=>{'use strict';
+ const ROOT=document.getElementById('v117FormationRoot');
+ const SELECT=document.getElementById('edu118FormationSelect');
+ if(!ROOT||!SELECT)return;
+ const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+ const key=()=>`planejador_education_formations_v117_${profile().toLowerCase()}`;
+ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ function load(){let x=null;try{x=JSON.parse(localStorage.getItem(key())||'null')}catch(_){ }if(!Array.isArray(x)&&profile()==='Marcos'){try{x=JSON.parse(localStorage.getItem('planejador_education_formations_v117')||'[]')}catch(_){x=[]}}return Array.isArray(x)?x:[]}
+ function group(f){const s=norm([f.level,f.degree,f.course].join(' '));if(/pos|pós|especializa|mba|mestrado|doutorado|lato sensu|stricto/.test(s))return'ENSINO SUPERIOR · PÓS-GRADUAÇÃO';if(/gradua|bacharel|licenciatura|tecnolog/.test(s))return'ENSINO SUPERIOR · GRADUAÇÃO';return'ENSINO BÁSICO'}
+ function activeId(){return ROOT.querySelector('.edu115-detail')?.dataset.id||ROOT.querySelector('[data-v121-open].active')?.dataset.v121Open||''}
+ function sync(){
+   const list=load(); const active=activeId();
+   const groups=['ENSINO BÁSICO','ENSINO SUPERIOR · GRADUAÇÃO','ENSINO SUPERIOR · PÓS-GRADUAÇÃO'];
+   const grouped=new Map(groups.map(g=>[g,[]]));
+   list.forEach(f=>{const g=group(f);if(!grouped.has(g))grouped.set(g,[]);grouped.get(g).push(f)});
+   const signature=list.map(f=>`${f.id}:${f.course}:${f.level}:${f.degree}`).join('|');
+   if(SELECT.dataset.signature!==signature){
+     SELECT.innerHTML=Array.from(grouped.entries()).filter(([,arr])=>arr.length).map(([g,arr])=>`<optgroup label="${esc(g)}">${arr.map(f=>`<option value="${esc(f.id)}">${esc(f.course||'Formação')}</option>`).join('')}</optgroup>`).join('');
+     SELECT.dataset.signature=signature;
+   }
+   if(active&&SELECT.value!==active)SELECT.value=active;
+ }
+ SELECT.addEventListener('change',()=>{
+   const id=SELECT.value;
+   const card=ROOT.querySelector(`[data-v121-open="${CSS.escape(id)}"]`);
+   if(card){card.click();setTimeout(()=>{window.ppEduFormationsFinal?.render?.();sync()},40);return;}
+   const list=load();const target=list.find(f=>String(f.id)===String(id));if(!target)return;
+ });
+ ROOT.addEventListener('click',e=>{if(e.target.closest?.('[data-v121-open]'))setTimeout(sync,30)},false);
+ new MutationObserver(()=>setTimeout(sync,20)).observe(ROOT,{childList:true,subtree:true,attributes:true,attributeFilter:['class','data-id']});
+ window.addEventListener('storage',e=>{if(!e.key||e.key===key())sync()});
+ [0,80,260,700,1400].forEach(ms=>setTimeout(sync,ms));
 })();
 </script>
 
