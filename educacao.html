@@ -3203,4 +3203,410 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
 }
 </style>
 
+
+<style id="pp-v112-curriculo-company-top-and-formacoes-premium">
+/* V112 — empresa em uma linha acima e cargos abaixo; formação mais premium */
+#edu-curriculo .edu104-company-row{
+  grid-template-columns:1fr!important;
+  gap:12px!important;
+  align-items:start!important;
+  padding:16px 18px!important;
+}
+#edu-curriculo .edu104-company-id{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:flex-end!important;
+  justify-content:space-between!important;
+  gap:10px 16px!important;
+  width:100%!important;
+  padding:0 0 11px!important;
+  border-right:0!important;
+  border-bottom:1px solid #e7eef4!important;
+}
+#edu-curriculo .edu104-company-id h3{font-size:18px!important;line-height:1.15!important}
+#edu-curriculo .edu104-company-id p{flex:1 1 280px!important;max-width:none!important;font-size:10px!important}
+#edu-curriculo .edu104-company-period{margin-top:0!important;white-space:nowrap!important}
+#edu-curriculo .edu104-career-track{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:8px!important;
+  overflow:visible!important;
+  padding:6px 0 0!important;
+}
+#edu-curriculo .edu104-career-track:before{top:18px!important;left:8px!important;right:8px!important}
+#edu-curriculo .edu104-career-step{
+  min-width:0!important;
+  flex:initial!important;
+  width:auto!important;
+  min-height:92px!important;
+}
+#edu-curriculo .edu104-career-step strong{
+  font-size:10.4px!important;
+  line-height:1.3!important;
+  overflow-wrap:anywhere!important;
+}
+@media(max-width:980px){
+  #edu-curriculo .edu104-company-id{display:block!important}
+  #edu-curriculo .edu104-company-period{margin-top:10px!important}
+  #edu-curriculo .edu104-career-track{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:520px){#edu-curriculo .edu104-career-track{grid-template-columns:1fr!important}}
+
+/* formação: cabeçalho e tabela com estética mais limpa */
+#edu-formacoes .edu89-hero,
+#edu-formacoes .v121-detail .edu89-hero{
+  padding:18px 20px!important;
+  gap:16px!important;
+}
+#edu-formacoes .v119-summary-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))!important;gap:10px!important}
+#edu-formacoes .v119-summary-grid>div{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(245,249,252,.98))!important;border:1px solid #deebf5!important;border-radius:14px!important;box-shadow:0 8px 18px rgba(17,42,73,.04)!important}
+#edu-formacoes .v119-summary-grid>div.edu112-summary-result{
+  grid-column:1/-1!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  min-height:56px!important;
+  padding:12px 15px!important;
+  border-radius:16px!important;
+  background:linear-gradient(90deg,rgba(17,47,78,.96),rgba(34,88,133,.92),rgba(40,162,155,.88))!important;
+  border:0!important;
+}
+#edu-formacoes .v119-summary-grid>div.edu112-summary-result span{color:#cfe8ff!important;font-size:8px!important;letter-spacing:.15em!important}
+#edu-formacoes .v119-summary-grid>div.edu112-summary-result b{color:#fff!important;font-size:12px!important}
+#edu-formacoes .v119-history-table tbody tr{position:relative!important}
+#edu-formacoes .v119-history-table tbody tr.edu112-row-group-0{background:linear-gradient(90deg,rgba(108,77,255,.035),rgba(108,77,255,0))!important}
+#edu-formacoes .v119-history-table tbody tr.edu112-row-group-1{background:linear-gradient(90deg,rgba(44,123,232,.045),rgba(44,123,232,0))!important}
+#edu-formacoes .v119-history-table tbody tr.edu112-row-group-2{background:linear-gradient(90deg,rgba(35,193,170,.05),rgba(35,193,170,0))!important}
+#edu-formacoes .v119-history-table tbody tr.edu112-row-group-3{background:linear-gradient(90deg,rgba(241,176,52,.06),rgba(241,176,52,0))!important}
+#edu-formacoes .edu112-period-chip{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  min-height:28px!important;padding:0 10px!important;border-radius:999px!important;
+  font-size:8px!important;font-weight:900!important;letter-spacing:.02em!important;
+  border:1px solid rgba(121,147,184,.22)!important;color:#244766!important;
+  background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(233,242,251,.98))!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.85)!important;
+}
+#edu-formacoes .edu112-period-chip.g0{background:linear-gradient(135deg,#f1eeff,#eef5ff)!important;color:#4a53b8!important}
+#edu-formacoes .edu112-period-chip.g1{background:linear-gradient(135deg,#ebf6ff,#eefbff)!important;color:#2d6fa9!important}
+#edu-formacoes .edu112-period-chip.g2{background:linear-gradient(135deg,#edfffb,#eefcf9)!important;color:#1f7a66!important}
+#edu-formacoes .edu112-period-chip.g3{background:linear-gradient(135deg,#fff7eb,#fffdf0)!important;color:#9a6d22!important}
+#edu-formacoes .v119-history-table td.name,
+#edu-formacoes .v121-detail .v119-history-table td.name{font-size:10.2px!important;line-height:1.32!important;text-transform:none!important}
+#edu-formacoes .edu112-result-ribbon{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  width:100%!important;min-height:34px!important;padding:0 10px!important;border-radius:12px!important;
+  font-size:8.5px!important;font-weight:900!important;letter-spacing:.03em!important;border:1px solid transparent!important;
+}
+#edu-formacoes .edu112-result-ribbon.approved{background:linear-gradient(90deg,rgba(31,181,130,.18),rgba(31,181,130,.08))!important;color:#167451!important;border-color:rgba(31,181,130,.24)!important}
+#edu-formacoes .edu112-result-ribbon.current{background:linear-gradient(90deg,rgba(56,124,233,.18),rgba(56,124,233,.08))!important;color:#215fa5!important;border-color:rgba(56,124,233,.22)!important}
+#edu-formacoes .edu112-result-ribbon.pending{background:linear-gradient(90deg,rgba(240,176,62,.22),rgba(240,176,62,.08))!important;color:#966018!important;border-color:rgba(240,176,62,.28)!important}
+#edu-formacoes .edu112-edit-modal{position:fixed!important;inset:0!important;z-index:9999!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:24px!important;background:rgba(5,16,29,.52)!important;backdrop-filter:blur(4px)!important}
+#edu-formacoes .edu112-edit-dialog{width:min(920px,96vw)!important;max-height:88vh!important;overflow:auto!important;padding:20px!important;border-radius:24px!important;border:1px solid rgba(151,179,210,.35)!important;background:linear-gradient(180deg,#ffffff,#f7fbff)!important;box-shadow:0 30px 70px rgba(10,31,56,.25)!important}
+#edu-formacoes .edu112-edit-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:16px!important;margin-bottom:18px!important}
+#edu-formacoes .edu112-edit-head h3{margin:0!important;color:#173553!important;font-size:26px!important;letter-spacing:-.04em!important}
+#edu-formacoes .edu112-edit-head p{margin:6px 0 0!important;color:#6d8195!important;font-size:11px!important}
+#edu-formacoes .edu112-edit-close{border:0!important;background:#eef4fb!important;color:#295279!important;border-radius:12px!important;min-width:38px!important;min-height:38px!important;font-size:22px!important;cursor:pointer!important}
+#edu-formacoes .edu112-edit-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px 14px!important}
+#edu-formacoes .edu112-edit-grid .full{grid-column:1/-1!important}
+#edu-formacoes .edu112-field{display:grid!important;gap:6px!important}
+#edu-formacoes .edu112-field label{font-size:8px!important;font-weight:900!important;letter-spacing:.14em!important;color:#4b79a2!important;text-transform:uppercase!important}
+#edu-formacoes .edu112-field input,#edu-formacoes .edu112-field select{width:100%!important;min-height:42px!important;padding:0 12px!important;border-radius:12px!important;border:1px solid #d8e5f1!important;background:#fff!important;color:#173553!important;font-size:13px!important}
+#edu-formacoes .edu112-edit-actions{display:flex!important;justify-content:flex-end!important;gap:10px!important;margin-top:18px!important}
+#edu-formacoes .edu112-edit-actions button{min-height:40px!important;padding:0 14px!important;border-radius:12px!important;font-size:12px!important;font-weight:900!important;cursor:pointer!important}
+#edu-formacoes .edu112-btn-secondary{border:1px solid #dce7f2!important;background:#fff!important;color:#325b7f!important}
+#edu-formacoes .edu112-btn-primary{border:0!important;background:linear-gradient(135deg,#173f6d,#1f6faa)!important;color:#fff!important;box-shadow:0 12px 24px rgba(23,63,109,.18)!important}
+@media(max-width:760px){#edu-formacoes .edu112-edit-grid{grid-template-columns:1fr!important}}
+</style>
+<script id="pp-v112-formacoes-and-curriculo-refino-script">
+(()=>{'use strict';
+ const ROOT=document.getElementById('v117FormationRoot');
+ const CUR=document.getElementById('edu-curriculo');
+ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+ const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+ const key=()=>`planejador_education_formations_v117_${profile().toLowerCase()}`;
+ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
+ const titleCase=s=>String(s||'').toLowerCase().replace(/\b([a-zà-ÿ])/g,m=>m.toUpperCase()).replace(/\b(De|Da|Das|Do|Dos|E|Em|Na|No|Nas|Nos)\b/g,m=>m.toLowerCase());
+ function load(){let x=null;try{x=JSON.parse(localStorage.getItem(key())||'null')}catch(_){} if(!Array.isArray(x)&&profile()==='Marcos'){try{x=JSON.parse(localStorage.getItem('planejador_education_formations_v117')||'[]')}catch(_){x=[]}} return Array.isArray(x)?x:[]}
+ function save(list){localStorage.setItem(key(),JSON.stringify(list)); if(profile()==='Marcos') localStorage.setItem('planejador_education_formations_v117',JSON.stringify(list)); }
+ function activeId(){return ROOT?.querySelector('[data-v121-open].active')?.dataset.v121Open||ROOT?.querySelector('.edu92-course-select')?.value||''}
+ function activeFormation(){const id=activeId();return load().find(f=>String(f.id)==String(id))||null}
+ function decorateSummary(){ if(!ROOT) return; ROOT.querySelectorAll('.v119-summary-grid').forEach(grid=>{ Array.from(grid.children).forEach(card=>{ const label=norm(card.querySelector('span')?.textContent || ''); if(/status/.test(label)||/conclus/.test(label)||/diploma|certificado/.test(label)) card.remove(); else if(/resultado/.test(label)){ card.classList.add('edu112-summary-result'); const val=card.querySelector('b'); const state=norm(val?.textContent||''); card.dataset.state=/curs/.test(state)?'current':/aprov|conclu|cumpr|dispens/.test(state)?'approved':'pending'; } }); }); }
+ function decorateTables(){ if(!ROOT) return; ROOT.querySelectorAll('.v119-history-table').forEach(table=>{ const heads=$$('thead th',table).map(th=>norm(th.textContent)); const idxPeriod=heads.findIndex(t=>/periodo/.test(t)); const idxDisc=heads.findIndex(t=>/disciplina|etapa/.test(t)); const idxResult=heads.findIndex(t=>/resultado/.test(t)); let last='',group=-1; $$('tbody tr',table).forEach(tr=>{ const cells=Array.from(tr.children); if(idxPeriod>-1 && cells[idxPeriod]){ const raw=cells[idxPeriod].textContent.trim(); if(raw!==last){group=(group+1)%4;last=raw} tr.classList.remove('edu112-row-group-0','edu112-row-group-1','edu112-row-group-2','edu112-row-group-3'); tr.classList.add(`edu112-row-group-${group}`); if(!$('.edu112-period-chip',cells[idxPeriod])) cells[idxPeriod].innerHTML=`<span class="edu112-period-chip g${group}">${esc(raw)}</span>`; }
+        if(idxDisc>-1 && cells[idxDisc]){ const txt=titleCase(cells[idxDisc].textContent.trim()); cells[idxDisc].textContent=txt; cells[idxDisc].classList.add('name'); }
+        if(idxResult>-1 && cells[idxResult]){ const text=titleCase(cells[idxResult].textContent.trim()); const state=/cursando|andamento/.test(norm(text))?'current':/aprovado|cumpriu|dispensado|concluido/.test(norm(text))?'approved':'pending'; cells[idxResult].innerHTML=`<span class="edu112-result-ribbon ${state}">${esc(text)}</span>`; }
+      });
+    });
+ }
+ function openEditor(){ const list=load(); const f=activeFormation(); if(!f) return; closeEditor(); const modal=document.createElement('div'); modal.className='edu112-edit-modal'; modal.innerHTML=`<div class="edu112-edit-dialog"><div class="edu112-edit-head"><div><h3>Editar formação</h3><p>Ajuste os dados principais da formação acadêmica.</p></div><button class="edu112-edit-close" type="button" aria-label="Fechar">×</button></div><div class="edu112-edit-grid"><div class="edu112-field full"><label>Curso</label><input name="course" value="${esc(f.course||'')}"></div><div class="edu112-field full"><label>Instituição</label><input name="institution" value="${esc(f.institution||'')}"></div><div class="edu112-field"><label>Nível</label><select name="level"><option ${/basic|b[aá]sico|medio/i.test(f.level||'')?'selected':''}>Educação Básica</option><option ${/gradua|superior/i.test(f.level||'')&&!/p[oó]s|mba|especial/i.test(f.level||'')?'selected':''}>Ensino Superior · Graduação</option><option ${/p[oó]s|mba|especial/i.test((f.level||'')+' '+(f.degree||''))?'selected':''}>Ensino Superior · Pós-Graduação</option></select></div><div class="edu112-field"><label>Grau</label><input name="degree" value="${esc(f.degree||'')}"></div><div class="edu112-field"><label>Status</label><select name="status"><option ${/conclu/i.test(f.status||'')?'selected':''}>Concluído</option><option ${/andamento|cursando/i.test(f.status||'')?'selected':''}>Em andamento</option><option ${/parcial/i.test(f.status||'')?'selected':''}>Histórico parcial</option></select></div><div class="edu112-field"><label>Carga horária</label><input name="workload" value="${esc(f.workload||'')}"></div><div class="edu112-field"><label>Início</label><input name="start" value="${esc(f.start||'')}"></div><div class="edu112-field"><label>Fim / referência</label><input name="end" value="${esc(f.end||'')}"></div><div class="edu112-field"><label>Conclusão</label><input name="completionDate" value="${esc(f.completionDate||'')}"></div><div class="edu112-field"><label>Matrícula / registro</label><input name="registration" value="${esc(f.registration||f.enrollment||'')}"></div><div class="edu112-field full"><label>Local / modalidade</label><input name="location" value="${esc(f.location||'')}"></div></div><div class="edu112-edit-actions"><button type="button" class="edu112-btn-secondary edu112-cancel">Cancelar</button><button type="button" class="edu112-btn-primary edu112-save">Salvar alterações</button></div></div>`; document.body.appendChild(modal);
+    $('.edu112-edit-close',modal).onclick=()=>closeEditor(); $('.edu112-cancel',modal).onclick=()=>closeEditor(); modal.addEventListener('click',e=>{ if(e.target===modal) closeEditor(); });
+    $('.edu112-save',modal).onclick=()=>{ const data=Object.fromEntries($$('input,select',modal).map(el=>[el.name,el.value.trim()])); const idx=list.findIndex(x=>String(x.id)==String(f.id)); if(idx<0){closeEditor();return;} const next={...list[idx],...data,enrollment:data.registration||list[idx].enrollment||''}; list[idx]=next; save(list); closeEditor(); location.reload(); };
+ }
+ function closeEditor(){ document.querySelector('.edu112-edit-modal')?.remove(); }
+ function deleteActive(){ const list=load(); const f=activeFormation(); if(!f) return; if(!confirm(`Excluir a formação "${f.course||'Formação'}"?`)) return; save(list.filter(x=>String(x.id)!==String(f.id))); location.reload(); }
+ document.addEventListener('click',e=>{ const btnEdit=e.target.closest('.edu101-edit'); const btnDel=e.target.closest('.edu101-delete'); if(btnEdit||btnDel){ e.preventDefault(); e.stopImmediatePropagation(); e.stopPropagation(); if(btnEdit) openEditor(); if(btnDel) deleteActive(); } },true);
+ function syncCompanyLayout(){ if(!CUR) return; $$('.edu104-company-row',CUR).forEach(row=>{ const id=$('.edu104-company-id',row), track=$('.edu104-career-track',row); if(id&&track&&id.nextElementSibling!==track) row.appendChild(track); }); }
+ function run(){ decorateSummary(); decorateTables(); syncCompanyLayout(); }
+ if(ROOT){ let t=0; const schedule=()=>{ clearTimeout(t); t=setTimeout(run,40); }; new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']}); [0,80,260,700,1400].forEach(ms=>setTimeout(run,ms)); }
+ if(CUR){ let t2=0; const schedule2=()=>{ clearTimeout(t2); t2=setTimeout(syncCompanyLayout,40); }; new MutationObserver(schedule2).observe(CUR,{childList:true,subtree:true}); [0,300,900].forEach(ms=>setTimeout(syncCompanyLayout,ms)); }
+})();
+</script>
+
+
+<style id="pp-v113-academic-premium-refinement">
+/* V113 — Currículo: empresa em faixa própria, cargos abaixo */
+#edu-curriculo .edu104-company-row{
+  display:block!important;
+  padding:16px 18px 17px!important;
+  border-radius:20px!important;
+  background:linear-gradient(180deg,#fff 0%,#fbfdff 100%)!important;
+  box-shadow:0 10px 24px rgba(18,48,82,.045)!important;
+}
+#edu-curriculo .edu104-company-id{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-areas:"name name" "subtitle period"!important;
+  column-gap:16px!important;
+  row-gap:5px!important;
+  width:100%!important;
+  padding:0 0 12px!important;
+  margin:0 0 10px!important;
+  border:0!important;
+  border-bottom:1px solid #e6eef5!important;
+}
+#edu-curriculo .edu104-company-id h3{
+  grid-area:name!important;
+  display:block!important;
+  width:100%!important;
+  margin:0!important;
+  font-size:18px!important;
+  line-height:1.18!important;
+  letter-spacing:-.025em!important;
+  color:#112f4c!important;
+  white-space:normal!important;
+  overflow:visible!important;
+}
+#edu-curriculo .edu104-company-id p{
+  grid-area:subtitle!important;
+  margin:0!important;
+  font-size:9.5px!important;
+  color:#7a8998!important;
+}
+#edu-curriculo .edu104-company-period{
+  grid-area:period!important;
+  justify-self:end!important;
+  align-self:center!important;
+  margin:0!important;
+  min-height:27px!important;
+  padding:0 9px!important;
+  border-radius:10px!important;
+  background:linear-gradient(180deg,#f5f9fd,#edf4fa)!important;
+  border:1px solid #dce7f1!important;
+  color:#356087!important;
+  white-space:nowrap!important;
+}
+#edu-curriculo .edu104-career-track{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:8px!important;
+  overflow:visible!important;
+  padding:7px 0 0!important;
+}
+#edu-curriculo .edu104-career-track:before{left:8px!important;right:8px!important;top:19px!important}
+#edu-curriculo .edu104-career-step{
+  min-width:0!important;
+  width:auto!important;
+  min-height:94px!important;
+  padding:11px 12px!important;
+}
+#edu-curriculo .edu104-career-step strong{font-size:10.5px!important;line-height:1.3!important;overflow-wrap:anywhere!important}
+@media(max-width:920px){
+  #edu-curriculo .edu104-career-track{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:600px){
+  #edu-curriculo .edu104-company-id{grid-template-columns:1fr!important;grid-template-areas:"name" "subtitle" "period"!important}
+  #edu-curriculo .edu104-company-period{justify-self:start!important;margin-top:4px!important}
+  #edu-curriculo .edu104-career-track{grid-template-columns:1fr!important}
+}
+
+/* V113 — Formação: cabeçalho AVA sofisticado */
+#edu-formacoes .edu101-academic-header{
+  position:relative!important;
+  overflow:hidden!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1.3fr) minmax(210px,.58fr) auto!important;
+  align-items:center!important;
+  gap:18px!important;
+  min-height:100px!important;
+  padding:17px 18px 17px 23px!important;
+  border:1px solid rgba(125,153,184,.28)!important;
+  border-radius:23px!important;
+  background:
+    radial-gradient(circle at 82% -25%,rgba(104,79,255,.13),transparent 34%),
+    radial-gradient(circle at 101% 110%,rgba(35,191,170,.12),transparent 34%),
+    linear-gradient(112deg,rgba(255,255,255,.99),rgba(249,252,255,.98) 53%,rgba(242,248,253,.98))!important;
+  box-shadow:0 17px 38px rgba(20,55,94,.075),inset 0 1px 0 rgba(255,255,255,.96)!important;
+}
+#edu-formacoes .edu101-academic-header:before{
+  top:15px!important;bottom:15px!important;width:4px!important;
+  background:linear-gradient(180deg,#7650ff,#2e82ed,#24c3aa)!important;
+}
+#edu-formacoes .edu101-identity{min-width:0!important}
+#edu-formacoes .edu101-level{font-size:7.5px!important;letter-spacing:.17em!important;color:#5179a2!important}
+#edu-formacoes .edu101-title{font-size:23px!important;line-height:1.04!important;letter-spacing:-.045em!important;color:#102f4c!important}
+#edu-formacoes .edu101-inst{font-size:10.5px!important;color:#728599!important}
+#edu-formacoes .edu101-degree{
+  min-width:0!important;
+  padding-left:18px!important;
+  border-left:1px solid rgba(128,151,178,.20)!important;
+}
+#edu-formacoes .edu101-degree small{font-size:7px!important;letter-spacing:.17em!important;color:#8291a3!important}
+#edu-formacoes .edu101-degree strong{
+  display:block!important;
+  margin-top:5px!important;
+  font-size:22px!important;
+  line-height:1.02!important;
+  letter-spacing:-.04em!important;
+  background:linear-gradient(92deg,#6a43ff 0%,#2e79e8 58%,#1fa891 100%)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;
+}
+#edu-formacoes .edu101-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;white-space:nowrap!important}
+#edu-formacoes .edu101-date,
+#edu-formacoes .edu101-edit,
+#edu-formacoes .edu101-delete{min-height:36px!important;border-radius:11px!important;padding:0 12px!important;font-size:9px!important;font-weight:900!important}
+#edu-formacoes .edu101-date{display:inline-flex!important;align-items:center!important;background:linear-gradient(180deg,#f5f9ff,#ebf3fb)!important;border:1px solid #d8e5f2!important;color:#2d5e8c!important}
+#edu-formacoes .edu101-edit{box-shadow:0 8px 17px rgba(23,79,136,.12)!important}
+@media(max-width:940px){
+  #edu-formacoes .edu101-academic-header{grid-template-columns:minmax(0,1fr) auto!important;grid-template-areas:"identity actions" "degree degree"!important}
+  #edu-formacoes .edu101-identity{grid-area:identity!important}.edu101-degree{grid-area:degree!important}.edu101-actions{grid-area:actions!important}
+  #edu-formacoes .edu101-degree{border-left:0!important;border-top:1px solid rgba(128,151,178,.16)!important;padding:11px 0 0!important}
+}
+@media(max-width:620px){
+  #edu-formacoes .edu101-academic-header{grid-template-columns:1fr!important;grid-template-areas:"identity" "degree" "actions"!important}
+  #edu-formacoes .edu101-actions{justify-content:flex-start!important;flex-wrap:wrap!important}
+}
+
+/* Resumo acadêmico vira uma única faixa, sem vários cards */
+#edu-formacoes .v119-summary-grid{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:stretch!important;
+  gap:0!important;
+  margin:10px 0 12px!important;
+  padding:8px 10px!important;
+  border-radius:17px!important;
+  border:1px solid rgba(49,91,129,.20)!important;
+  background:linear-gradient(105deg,rgba(15,43,72,.96),rgba(30,75,112,.94) 55%,rgba(33,128,126,.88))!important;
+  box-shadow:0 12px 28px rgba(13,42,72,.10)!important;
+}
+#edu-formacoes .v119-summary-grid>div{
+  flex:1 1 150px!important;
+  min-width:135px!important;
+  padding:9px 12px!important;
+  border:0!important;
+  border-right:1px solid rgba(255,255,255,.12)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+#edu-formacoes .v119-summary-grid>div:last-child{border-right:0!important}
+#edu-formacoes .v119-summary-grid span{display:block!important;color:#a9cae7!important;font-size:7px!important;letter-spacing:.14em!important;text-transform:uppercase!important}
+#edu-formacoes .v119-summary-grid b{display:block!important;margin-top:4px!important;color:#fff!important;font-size:10.5px!important;line-height:1.25!important}
+
+/* Período vira faixa separadora; disciplina ganha mais área */
+#edu-formacoes .v119-history-table{table-layout:fixed!important;width:100%!important;border-collapse:separate!important;border-spacing:0!important}
+#edu-formacoes .v119-history-table tr.edu113-period-band td{
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+}
+#edu-formacoes .edu113-period-bar{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  min-height:36px!important;
+  margin:8px 0 4px!important;
+  padding:0 13px!important;
+  border-radius:12px!important;
+  color:#fff!important;
+  box-shadow:0 8px 18px rgba(20,51,86,.08)!important;
+}
+#edu-formacoes .edu113-period-bar small{font-size:7px!important;font-weight:950!important;letter-spacing:.16em!important;opacity:.70!important}
+#edu-formacoes .edu113-period-bar b{font-size:10px!important;font-weight:950!important;letter-spacing:.02em!important}
+#edu-formacoes .edu113-period-bar.g0{background:linear-gradient(90deg,rgba(73,55,161,.95),rgba(93,78,199,.82))!important}
+#edu-formacoes .edu113-period-bar.g1{background:linear-gradient(90deg,rgba(25,82,132,.96),rgba(38,121,181,.82))!important}
+#edu-formacoes .edu113-period-bar.g2{background:linear-gradient(90deg,rgba(18,101,91,.96),rgba(38,157,139,.82))!important}
+#edu-formacoes .edu113-period-bar.g3{background:linear-gradient(90deg,rgba(128,86,27,.96),rgba(190,137,48,.82))!important}
+#edu-formacoes .v119-history-table tbody tr.edu113-state-approved{background:linear-gradient(90deg,rgba(30,166,119,.038),rgba(255,255,255,0))!important}
+#edu-formacoes .v119-history-table tbody tr.edu113-state-current{background:linear-gradient(90deg,rgba(45,116,222,.045),rgba(255,255,255,0))!important}
+#edu-formacoes .v119-history-table tbody tr.edu113-state-pending{background:linear-gradient(90deg,rgba(225,157,47,.052),rgba(255,255,255,0))!important}
+#edu-formacoes .v119-history-table tbody tr:not(.edu113-period-band) td{padding-top:9px!important;padding-bottom:9px!important}
+#edu-formacoes .v119-history-table td.name{font-size:10.3px!important;line-height:1.35!important;font-weight:800!important;color:#153a5c!important;text-transform:none!important}
+#edu-formacoes .edu112-result-ribbon,
+#edu-formacoes .edu113-result-label{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:6px!important;
+  width:auto!important;
+  min-height:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  font-size:8.5px!important;
+  font-weight:900!important;
+}
+#edu-formacoes .edu112-result-ribbon:before,
+#edu-formacoes .edu113-result-label:before{content:"";width:7px;height:7px;border-radius:50%;flex:0 0 7px}
+#edu-formacoes .edu112-result-ribbon.approved:before,#edu-formacoes .edu113-result-label.approved:before{background:#25aa79;box-shadow:0 0 0 4px rgba(37,170,121,.10)}
+#edu-formacoes .edu112-result-ribbon.current:before,#edu-formacoes .edu113-result-label.current:before{background:#3979dc;box-shadow:0 0 0 4px rgba(57,121,220,.10)}
+#edu-formacoes .edu112-result-ribbon.pending:before,#edu-formacoes .edu113-result-label.pending:before{background:#d8952f;box-shadow:0 0 0 4px rgba(216,149,47,.10)}
+#edu-formacoes .edu112-result-ribbon.approved,#edu-formacoes .edu113-result-label.approved{color:#167451!important}
+#edu-formacoes .edu112-result-ribbon.current,#edu-formacoes .edu113-result-label.current{color:#245eaa!important}
+#edu-formacoes .edu112-result-ribbon.pending,#edu-formacoes .edu113-result-label.pending{color:#91601e!important}
+
+/* editor próprio sempre acima do site */
+#edu-formacoes .edu112-edit-modal{z-index:2147483000!important}
+</style>
+<script id="pp-v113-academic-premium-refinement-script">
+(()=>{'use strict';
+ const ROOT=document.getElementById('v117FormationRoot');
+ const CUR=document.getElementById('edu-curriculo');
+ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+ const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+ const key=()=>`planejador_education_formations_v117_${profile().toLowerCase()}`;
+ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\u00a0/g,' ').toLowerCase().replace(/\s+/g,' ').trim();
+ const smallWords=new Set(['de','da','das','do','dos','e','em','na','nas','no','nos','para','por','com','sem','a','o','as','os']);
+ const romans=/^(i|ii|iii|iv|v|vi|vii|viii|ix|x)$/i;
+ const acronyms=new Set(['TCC','EAD','AVA','SUS','SUAS','LGPD','IA','TI','RH','MEI','INSS','FGTS','CLT']);
+ function smartTitle(s){return String(s||'').toLowerCase().split(/(\s+|[-–—:])/).map((w,i)=>{if(/^\s+$|^[-–—:]$/.test(w))return w;const up=w.toUpperCase();if(acronyms.has(up)||romans.test(w))return up;if(i>0&&smallWords.has(w))return w;return w.charAt(0).toUpperCase()+w.slice(1)}).join('')}
+ function load(){let x=null;try{x=JSON.parse(localStorage.getItem(key())||'null')}catch(_){}if(!Array.isArray(x)&&profile()==='Marcos'){try{x=JSON.parse(localStorage.getItem('planejador_education_formations_v117')||'[]')}catch(_){x=[]}}return Array.isArray(x)?x:[]}
+ function save(list){localStorage.setItem(key(),JSON.stringify(list));if(profile()==='Marcos')localStorage.setItem('planejador_education_formations_v117',JSON.stringify(list));try{window.ppCloudV66?.save?.()}catch(_){}}
+ function activeId(){return ROOT?.querySelector('[data-v121-open].active')?.dataset.v121Open||ROOT?.querySelector('.edu92-course-select')?.value||ROOT?.querySelector('.edu83-course-select')?.value||''}
+ function formationById(id){return load().find(f=>String(f.id)===String(id))||null}
+ function closeEditor(){document.querySelector('.edu112-edit-modal')?.remove()}
+ function openEditorById(id){const list=load(),f=list.find(x=>String(x.id)===String(id));if(!f)return;closeEditor();const modal=document.createElement('div');modal.className='edu112-edit-modal';modal.innerHTML=`<div class="edu112-edit-dialog"><div class="edu112-edit-head"><div><h3>Editar formação</h3><p>Atualize os dados principais desta formação. O histórico acadêmico permanece preservado.</p></div><button class="edu112-edit-close" type="button">×</button></div><div class="edu112-edit-grid"><div class="edu112-field full"><label>Curso</label><input name="course" value="${esc(f.course||'')}"></div><div class="edu112-field full"><label>Instituição</label><input name="institution" value="${esc(f.institution||'')}"></div><div class="edu112-field"><label>Nível</label><select name="level"><option ${/educa.*bas|b[aá]sico/i.test(f.level||'')?'selected':''}>Educação Básica</option><option ${/gradua/i.test(f.level||'')?'selected':''}>Graduação</option><option ${/p[oó]s|mba|especial/i.test((f.level||'')+' '+(f.degree||''))?'selected':''}>Pós-graduação</option></select></div><div class="edu112-field"><label>Grau</label><input name="degree" value="${esc(f.degree||'')}"></div><div class="edu112-field"><label>Status</label><select name="status"><option ${/conclu/i.test(f.status||'')?'selected':''}>Concluído</option><option ${/andamento|cursando/i.test(f.status||'')?'selected':''}>Em andamento</option><option ${/parcial/i.test(f.status||'')?'selected':''}>Histórico parcial</option></select></div><div class="edu112-field"><label>Carga horária</label><input name="workload" value="${esc(f.workload||'')}"></div><div class="edu112-field"><label>Início</label><input name="start" value="${esc(f.start||'')}"></div><div class="edu112-field"><label>Fim</label><input name="end" value="${esc(f.end||'')}"></div><div class="edu112-field"><label>Conclusão</label><input name="completionDate" value="${esc(f.completionDate||'')}"></div><div class="edu112-field"><label>Matrícula / registro</label><input name="registration" value="${esc(f.registration||'')}"></div><div class="edu112-field"><label>Cidade / UF</label><input name="city" value="${esc(f.city||'')}"></div><div class="edu112-field"><label>Modalidade</label><input name="modality" value="${esc(f.modality||'')}"></div></div><div class="edu112-edit-actions"><button class="edu112-btn-secondary edu113-cancel" type="button">Cancelar</button><button class="edu112-btn-primary edu113-save" type="button">Salvar alterações</button></div></div>`;document.body.appendChild(modal);
+   $('.edu112-edit-close',modal).onclick=closeEditor;$('.edu113-cancel',modal).onclick=closeEditor;modal.addEventListener('click',e=>{if(e.target===modal)closeEditor()});
+   $('.edu113-save',modal).onclick=()=>{const data=Object.fromEntries($$('input,select',modal).map(el=>[el.name,el.value.trim()]));const idx=list.findIndex(x=>String(x.id)===String(id));if(idx<0)return;list[idx]={...list[idx],...data};save(list);closeEditor();location.reload()};
+ }
+ /* torna o interceptador legado da v104 funcional */
+ window.ppEduFormationsV117={...(window.ppEduFormationsV117||{}),edit:openEditorById,render:()=>location.reload()};
+ function transformTable(table){if(table.dataset.edu113Done==='1')return;const heads=$$('thead th',table);const names=heads.map(th=>norm(th.textContent));let pidx=names.findIndex(t=>/^(periodo|período|sem|semestre)$/.test(t)||/periodo|semestre/.test(t));let didx=names.findIndex(t=>/disciplina|etapa|nome/.test(t));let ridx=names.findIndex(t=>/resultado|situacao|situação/.test(t));const rows=$$('tbody tr',table).filter(tr=>!tr.classList.contains('edu113-period-band'));if(!rows.length)return;
+   let last=null,g=-1;const originalCols=heads.length;
+   if(pidx>=0){for(const tr of rows){const cells=Array.from(tr.children);const raw=cells[pidx]?.textContent.trim()||'';if(raw!==last){g=(g+1)%4;last=raw;const band=document.createElement('tr');band.className='edu113-period-band';const td=document.createElement('td');td.colSpan=Math.max(1,originalCols-1);td.innerHTML=`<div class="edu113-period-bar g${g}"><small>PERÍODO</small><b>${esc(raw||'Não informado')}</b></div>`;band.appendChild(td);tr.parentNode.insertBefore(band,tr)}tr.dataset.edu113Group=String(g);cells[pidx]?.remove()}
+     heads[pidx]?.remove();
+   }
+   const newHeads=$$('thead th',table).map(th=>norm(th.textContent));didx=newHeads.findIndex(t=>/disciplina|etapa|nome/.test(t));ridx=newHeads.findIndex(t=>/resultado|situacao|situação/.test(t));
+   for(const tr of $$('tbody tr',table).filter(tr=>!tr.classList.contains('edu113-period-band'))){const cells=Array.from(tr.children);if(didx>=0&&cells[didx]){cells[didx].textContent=smartTitle(cells[didx].textContent.trim());cells[didx].classList.add('name')}if(ridx>=0&&cells[ridx]){const txt=cells[ridx].textContent.trim();const n=norm(txt);const state=/curs|andamento/.test(n)?'current':/aprov|cumpr|dispens|conclu|liberada/.test(n)?'approved':'pending';tr.classList.add(`edu113-state-${state}`);let pill=$('.edu112-result-ribbon',cells[ridx]);if(!pill){cells[ridx].innerHTML=`<span class="edu113-result-label ${state}">${esc(smartTitle(txt))}</span>`}else{pill.classList.remove('approved','current','pending');pill.classList.add(state);pill.textContent=smartTitle(txt)}}}
+   table.dataset.edu113Done='1';
+ }
+ function refine(){if(ROOT){ROOT.querySelectorAll('.v119-history-table').forEach(transformTable);ROOT.querySelectorAll('.v119-summary-grid>div').forEach(card=>{const label=norm(card.querySelector('span')?.textContent||'');if(/status|conclus|diploma|certificado/.test(label))card.remove()})}}
+ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(refine,65)};if(ROOT)new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true});[0,120,420,900,1600].forEach(ms=>setTimeout(refine,ms));
+})();
+</script>
+
 </body></html>
