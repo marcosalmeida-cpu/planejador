@@ -29427,6 +29427,43 @@ body:has(#previdencia.active) .hub-content{
 @media(max-width:700px){#previdencia .rgps-career-row-v98{flex-basis:82vw!important;min-width:250px!important}}
 </style>
 
+<style id="pp-v103-previdencia-vinculos-style">
+#previdencia .rgps-career-v98 .rgps-card-head-v51{margin-bottom:12px!important}
+#previdencia .rgps-career-list-v98{display:flex!important;gap:10px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:2px 2px 10px!important;scroll-snap-type:x proximity!important;scrollbar-width:thin!important;overscroll-behavior-x:contain!important}
+#previdencia .rgps-career-company-v103{flex:0 0 clamp(310px,28vw,390px);scroll-snap-align:start;padding:14px;border:1px solid #dce7f1;border-radius:18px;background:linear-gradient(180deg,#fff,#f9fbfd);box-shadow:0 8px 20px rgba(19,44,77,.05)}
+#previdencia .rgps-career-company-v103 h4{margin:0!important;color:#16324d!important;font-size:15px!important;letter-spacing:-.02em}
+#previdencia .rgps-career-company-v103 p{margin:6px 0 0!important;color:#728396!important;font-size:10px!important;line-height:1.45!important}
+#previdencia .rgps-career-badges-v103{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+#previdencia .rgps-career-badges-v103 span{display:inline-flex;align-items:center;min-height:25px;padding:0 8px;border-radius:999px;background:#edf6ff;border:1px solid #d9e7f4;color:#2e628f;font-size:8px;font-weight:900}
+#previdencia .rgps-career-track-v103{position:relative;display:flex;gap:9px;overflow-x:auto;padding:8px 2px 4px;scrollbar-width:none}
+#previdencia .rgps-career-track-v103::-webkit-scrollbar{display:none}
+#previdencia .rgps-career-track-v103:before{content:"";position:absolute;left:8px;right:8px;top:19px;height:2px;border-radius:999px;background:linear-gradient(90deg,#d8e6f4,#cfdeef)}
+#previdencia .rgps-career-step-v103{position:relative;z-index:1;flex:0 0 190px;display:grid;gap:6px;padding:11px;border:1px solid #dfe8f0;border-radius:15px;background:#fff;box-shadow:0 6px 16px rgba(17,42,75,.04)}
+#previdencia .rgps-career-step-v103:before{content:"";position:absolute;left:13px;top:-1px;width:13px;height:13px;border-radius:50%;background:linear-gradient(135deg,#6c4dff,#26baa9);box-shadow:0 0 0 4px #fff,0 0 0 5px rgba(98,124,179,.12)}
+#previdencia .rgps-career-step-v103 small{display:inline-flex;align-items:center;justify-content:center;min-height:24px;width:max-content;padding:0 8px;border-radius:999px;background:#f3f8ff;border:1px solid #dce7f4;color:#32628f;font-size:8px;font-weight:950}
+#previdencia .rgps-career-step-v103 b{display:block;color:#183652;font-size:11px;line-height:1.26}
+#previdencia .rgps-career-step-v103 span{display:block;color:#7b8997;font-size:8.8px;line-height:1.35}
+#previdencia .rgps-career-empty-v98{padding:16px;border:1px dashed #cfdeea;border-radius:14px;background:#fbfdff;color:#708296;font-size:10px;text-align:center}
+@media(max-width:720px){#previdencia .rgps-career-company-v103{flex-basis:82vw;min-width:260px}}
+</style>
+<script id="pp-v103-previdencia-vinculos-script">
+(()=>{'use strict';
+ const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+ const safeProfile=()=>profile().replace(/[^a-z0-9_-]/gi,'_');
+ const key=()=>`pp_rgps_career_v98_${safeProfile()}`;
+ const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ function load(){try{const x=JSON.parse(localStorage.getItem(key())||'null');return Array.isArray(x?.periods)?x.periods:[]}catch(_){return[]}}
+ function monthIndex(v){const s=String(v||'').trim(); if(!s) return -Infinity; if(/^atual$/i.test(s)){const d=new Date(); return d.getFullYear()*12+d.getMonth();} const m=s.match(/^(\d{1,2})\/(\d{4})$/); if(m) return Number(m[2])*12+(Number(m[1])-1); return -Infinity; }
+ function monthLabel(v){const s=String(v||'').trim(); if(!s) return '—'; const m=s.match(/^(\d{1,2})\/(\d{4})$/); if(m) return `${String(m[1]).padStart(2,'0')}/${m[2]}`; return s; }
+ function group(periods){const map=new Map(); for(const p of periods){const emp=String(p.employer||'Empresa não informada').trim()||'Empresa não informada'; const k=norm(emp); if(!map.has(k)) map.set(k,{employer:emp,roles:[],validMonths:0,startIndex:Infinity,endIndex:-Infinity}); const g=map.get(k); const item={jobTitle:String(p.jobTitle||'Cargo não informado').trim()||'Cargo não informado',start:monthLabel(p.start),end:monthLabel(p.end||'Atual'),startIndex:monthIndex(p.start),endIndex:monthIndex(/^Atual$/i.test(String(p.end||''))?'Atual':p.end),validMonths:Number(p.validMonths||0)}; g.roles.push(item); g.validMonths+=item.validMonths; g.startIndex=Math.min(g.startIndex,item.startIndex); g.endIndex=Math.max(g.endIndex,item.endIndex);} return Array.from(map.values()).map(g=>{g.roles.sort((a,b)=>a.startIndex-b.startIndex||a.endIndex-b.endIndex); g.start=g.roles[0]?.start||'—'; g.end=g.roles[g.roles.length-1]?.end||'—'; return g;}).sort((a,b)=>b.endIndex-a.endIndex||a.startIndex-b.startIndex)}
+ function render(){ const card=document.querySelector('#previdencia .rgps-career-v98'); if(!card) return; const periods=load(), groups=group(periods); const head=card.querySelector('.rgps-card-head-v51'); const note=card.querySelector('.rgps-career-note-v98'); let list=card.querySelector('.rgps-career-list-v98'); if(!list){list=document.createElement('div'); list.className='rgps-career-list-v98'; note?card.insertBefore(list,note):card.appendChild(list);} const pill=head?.querySelector('.rgps-pill-v51'); if(pill) pill.textContent=`${groups.length} ${groups.length===1?'empresa':'empresas'}`; list.innerHTML=groups.length?groups.map(g=>`<article class="rgps-career-company-v103"><h4>${esc(g.employer)}</h4><p>${esc(g.start)} — ${esc(g.end)} · ${g.roles.length} ${g.roles.length===1?'movimento de carreira':'movimentos de carreira'}</p><div class="rgps-career-badges-v103"><span>${g.validMonths} ${g.validMonths===1?'competência válida':'competências válidas'}</span><span>${g.roles.length} ${g.roles.length===1?'cargo':'cargos'}</span></div><div class="rgps-career-track-v103">${g.roles.map(r=>`<article class="rgps-career-step-v103"><small>${esc(r.start)} — ${esc(r.end)}</small><b>${esc(r.jobTitle)}</b><span>${r.validMonths?esc(r.validMonths+' competência'+(r.validMonths===1?'':'s')):'Período sincronizado'}</span></article>`).join('')}</div></article>`).join(''):'<div class="rgps-career-empty-v98">Nenhum vínculo identificado.</div>'; }
+ const schedule=()=>setTimeout(render,30);
+ new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+ window.addEventListener('storage',e=>{if(!e.key||e.key===key()) render();});
+ [0,400,1000].forEach(ms=>setTimeout(render,ms));
+})();
+</script>
 </body></html>
 
 
