@@ -2540,4 +2540,77 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
 })();
 </script>
 
+
+<style id="pp-v99-curriculo-career-horizontal">
+#edu-curriculo .edu98-career-list{display:flex!important;gap:9px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:2px 2px 10px!important;scroll-snap-type:x proximity!important;scrollbar-width:thin!important;overscroll-behavior-x:contain!important}
+#edu-curriculo .edu98-career-item{flex:0 0 clamp(270px,25vw,340px)!important;min-width:270px!important;max-width:340px!important;scroll-snap-align:start!important;grid-template-columns:5px minmax(0,1fr)!important;grid-template-areas:"line main" "line period"!important;align-items:start!important}
+#edu-curriculo .edu98-career-line{grid-area:line!important}
+#edu-curriculo .edu98-career-main{grid-area:main!important}
+#edu-curriculo .edu98-career-period{grid-area:period!important;justify-content:flex-start!important;flex-wrap:wrap!important;margin-top:5px!important}
+@media(max-width:700px){#edu-curriculo .edu98-career-item{flex-basis:82vw!important;min-width:250px!important}}
+</style>
+
+
+<style id="pp-v100-formation-header-cleanup">
+#edu-formacoes .edu97-tools{
+  gap:10px!important;
+  align-items:center!important;
+}
+#edu-formacoes .edu97-datechip{
+  min-height:36px!important;
+  padding:0 13px!important;
+  border-radius:12px!important;
+  background:linear-gradient(180deg,#f5f9ff 0%,#edf5ff 100%)!important;
+  border:1px solid #d9e6f5!important;
+  color:#2b6194!important;
+  font-size:10px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95), 0 4px 12px rgba(34,86,137,.06)!important;
+}
+#edu-formacoes .v119-detail-actions button,
+#edu-formacoes .edu89-actions button{
+  min-height:36px!important;
+  padding:0 13px!important;
+  border-radius:12px!important;
+}
+#edu-formacoes .edu89-degree-card{gap:2px!important}
+#edu-formacoes .edu89-degree-card .edu97-statuschip,
+#edu-formacoes .edu89-degree-card .edu96-statuschip,
+#edu-formacoes .edu89-degree-card .edu95-statuschip,
+#edu-formacoes .edu89-degree-card .status,
+#edu-formacoes .edu89-degree-card .chip,
+#edu-formacoes .edu89-degree-card span{display:none!important}
+</style>
+<script id="pp-v100-formation-header-cleanup-script">
+(()=>{'use strict';
+ const ROOT=document.getElementById('v117FormationRoot'); if(!ROOT) return;
+ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+ const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+ function removeSummaryCards(){
+   ROOT.querySelectorAll('.v119-summary-grid').forEach(grid=>{
+     Array.from(grid.children).forEach(card=>{
+       const label=norm(card.querySelector('span')?.textContent || card.textContent);
+       if(/conclus/.test(label) || /diploma/.test(label) || /certificado/.test(label)) card.remove();
+     });
+   });
+ }
+ function cleanHeaderStatus(){
+   const hero=$('.edu89-hero',ROOT); if(!hero) return;
+   $$('.edu97-statuschip,.edu96-statuschip,.edu95-statuschip,.status,.chip',hero).forEach(n=>n.remove());
+   const degree=$('.edu89-degree-card',hero);
+   if(degree){ Array.from(degree.children).forEach((n,idx)=>{ if(idx>1) n.remove(); }); }
+   const tools=$('.edu97-tools',hero);
+   const actions=$('.v119-detail-actions',hero) || $('.v119-detail-actions',ROOT);
+   if(tools && actions && actions.parentNode!==tools) tools.appendChild(actions);
+   const chip=$('.edu97-datechip',tools);
+   if(chip){ chip.textContent = chip.textContent.trim(); tools.insertBefore(chip, tools.firstChild); }
+ }
+ function run(){ removeSummaryCards(); cleanHeaderStatus(); }
+ let t=0; const schedule=()=>{ clearTimeout(t); t=setTimeout(run,30); };
+ new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
+ [0,80,220,500,900,1500].forEach(ms=>setTimeout(run,ms));
+})();
+</script>
+
 </body></html>

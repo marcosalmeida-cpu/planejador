@@ -9720,17 +9720,40 @@ Os dados atuais deste navegador serão substituídos.`);
     rm.forEach(x=>{try{localStorage.removeItem(x)}catch(e){}});
     return null;
   }
+  function normalizeConcurrentRowsV99(state){
+    if(!state||!Array.isArray(state.contributions))return state;
+    const singles=[...new Set(state.contributions.map(r=>String(r.employer||'').trim()).filter(Boolean).filter(x=>!x.includes(' + ')))];
+    const canonical=(token)=>{const t=String(token||'').trim();if(!t)return'';const exact=singles.find(x=>x.toLowerCase()===t.toLowerCase());if(exact)return exact;const near=singles.find(x=>x.toLowerCase().startsWith(t.toLowerCase())||t.toLowerCase().startsWith(x.toLowerCase()));return near||t};
+    const out=[];
+    for(const r of state.contributions){
+      const raw=String(r.employer||'');
+      if(!raw.includes(' + ')){out.push(r);continue}
+      const parts=raw.split(/\s+\+\s+/).map(canonical).filter(Boolean);
+      if(parts.length<2){out.push(r);continue}
+      const group=String(r.sharedMonthGroup||r.id||`conc-${r.year}-${r.month}-${out.length}`);
+      parts.forEach((employer,i)=>out.push({...r,id:`${r.id}__v99_${i+1}`,employer,jobTitle:i===0?String(r.jobTitle||''):'',sharedMonthGroup:group,sharedMonthlyValue:true,source:String(r.source||'')+' · vínculo concomitante separado'}));
+    }
+    state.contributions=out;
+    return state;
+  }
+  function calculationRowsV99(s){
+    const rows=(s?.contributions||[]).filter(r=>r&&r.valid!==false);
+    const seen=new Set(),out=[];
+    for(const r of rows){const g=String(r.sharedMonthGroup||'');if(g){if(seen.has(g))continue;seen.add(g)}out.push(r)}
+    return out;
+  }
   function load(){
     try{
       const c=JSON.parse(localStorage.getItem(storageKey())||'null');
-      if(c&&c.version===55)return decodeCompact(c);
+      if(c&&c.version===55)return normalizeConcurrentRowsV99(decodeCompact(c));
     }catch(e){}
     const migrated=migrateLegacy();
-    if(migrated)return migrated;
+    if(migrated)return normalizeConcurrentRowsV99(migrated);
     // Important: the embedded CNIS is the default source and is NOT copied into localStorage.
-    return defaultState();
+    return normalizeConcurrentRowsV99(defaultState());
   }
   function save(s){
+    normalizeConcurrentRowsV99(s);
     s.updatedAt=new Date().toISOString();
     const compact=encodeCompact(s);
     if(!safeSetItem(storageKey(),JSON.stringify(compact))){
@@ -9820,7 +9843,7 @@ Os dados atuais deste navegador serão substituídos.`);
       if(document.getElementById('previdencia')?.classList.contains('active'))render();
     }
   }
-  function validRows(s){return s.contributions.filter(r=>r.valid!==false)}
+  function validRows(s){return calculationRowsV99(s)}
   function uniqueMonths(s){
     return new Set(validRows(s).map(r=>`${r.year}-${String(r.month).padStart(2,'0')}`)).size;
   }
@@ -9829,11 +9852,11 @@ Os dados atuais deste navegador serão substituídos.`);
       .map(r=>`${r.year}-${String(r.month).padStart(2,'0')}`)).size;
   }
   function averageUpdated(s){
-    const a=validRows(s); if(!a.length)return 0;
+    const a=calculationRowsV99(s); if(!a.length)return 0;
     return a.reduce((z,r)=>z+num(r.value)*factor(r),0)/a.length;
   }
   function last12Avg(s){
-    const a=validRows(s).slice().sort((a,b)=>a.year-b.year||a.month-b.month).slice(-12);
+    const a=calculationRowsV99(s).slice().sort((a,b)=>a.year-b.year||a.month-b.month).slice(-12);
     return a.length?a.reduce((z,r)=>z+num(r.value),0)/a.length:0;
   }
   function ageYears(dob,at=new Date()){
@@ -10028,8 +10051,8 @@ Os dados atuais deste navegador serão substituídos.`);
   }
 
   function years(s){
-    const map={};
-    s.contributions.forEach(r=>{map[r.year]=(map[r.year]||0)+1});
+    const map={},seen=new Set();
+    calculationRowsV99(s).forEach(r=>{const k=`${r.year}-${String(r.month).padStart(2,'0')}`;if(seen.has(k))return;seen.add(k);map[r.year]=(map[r.year]||0)+1});
     return map;
   }
 
@@ -10037,7 +10060,7 @@ Os dados atuais deste navegador serão substituídos.`);
     // A funcionalidade existe para todos os perfis, mas os dados solicitados nesta etapa
     // são pré-calculados somente para Marcos.
     if(profile()!=='Marcos')return null;
-    const valid=(s.contributions||[]).filter(r=>r&&r.valid!==false&&num(r.value)>0)
+    const valid=calculationRowsV99(s).filter(r=>num(r.value)>0)
       .slice().sort((a,b)=>b.year-a.year||b.month-a.month);
     if(!valid.length)return null;
     const last3=valid.slice(0,3),avg=last3.reduce((a,r)=>a+num(r.value),0)/last3.length;
@@ -10053,7 +10076,7 @@ Os dados atuais deste navegador serão substituídos.`);
   }
 
   function latestContributionV66(s){
-    return (s.contributions||[]).filter(r=>r&&r.valid!==false&&num(r.value)>0)
+    return calculationRowsV99(s).filter(r=>num(r.value)>0)
       .slice().sort((a,b)=>b.year-a.year||b.month-a.month)[0]||null;
   }
   function ceilingGapV66(s){
@@ -10142,7 +10165,7 @@ Os dados atuais deste navegador serão substituídos.`);
       <tr>
         <td><b>${String(r.month).padStart(2,'0')}/${r.year}</b></td>
         <td>${esc(r.employer||'—')}</td>
-        <td class="money">${money(r.value)}</td>
+        <td class="money">${money(r.value)}${r.sharedMonthGroup?'<br><small style="font-size:7.5px;color:#7a8da0;font-weight:700">consolidado do mês</small>':''}</td>
         <td class="coef">${factor(r).toFixed(6).replace('.',',')}</td>
         <td class="money"><b>${money(num(r.value)*factor(r))}</b></td>
         <td>${esc(r.jobTitle||'—')}</td>
@@ -10291,7 +10314,7 @@ Os dados atuais deste navegador serão substituídos.`);
         <div class="rgps-field-v51"><label>Ano</label><input id="rgpsYV54" type="number" value="${r.year}"></div>
         <div class="rgps-field-v51"><label>Mês</label><select id="rgpsMV54">${MONTHS.map((m,i)=>`<option value="${i+1}" ${r.month===i+1?'selected':''}>${m}</option>`).join('')}</select></div>
         <div class="rgps-field-v51 full"><label>Empresa / origem</label><input id="rgpsEV54" value="${esc(r.employer||'')}"></div>
-        <div class="rgps-field-v51"><label>Salário de contribuição</label><input id="rgpsVV54" inputmode="decimal" value="${Number(r.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}"></div>
+        <div class="rgps-field-v51"><label>${r.sharedMonthGroup?'Salário de contribuição do mês (consolidado)':'Salário de contribuição'}</label><input id="rgpsVV54" inputmode="decimal" value="${Number(r.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}"></div>
         <div class="rgps-field-v51"><label>Fator INPC</label><input id="rgpsFV54" value="Automático" disabled></div>
         <div class="rgps-field-v51 full"><label>Cargo</label><input id="rgpsCargoV98" placeholder="Ex.: Analista, Coordenador, Gerente..." value="${esc(r.jobTitle||'')}"></div>
         <div class="rgps-field-v51"><label>Conta para tempo/carência?</label><select id="rgpsValidV54"><option value="1" ${r.valid!==false?'selected':''}>Sim</option><option value="0" ${r.valid===false?'selected':''}>Não / pendente</option></select></div>
@@ -10304,10 +10327,14 @@ Os dados atuais deste navegador serão substituídos.`);
     document.getElementById('rgpsSaveV54').onclick=()=>{
       const obj={id:r.id,year:+document.getElementById('rgpsYV54').value,month:+document.getElementById('rgpsMV54').value,
         employer:document.getElementById('rgpsEV54').value.trim(),value:num(document.getElementById('rgpsVV54').value),
-        factor:undefined,jobTitle:document.getElementById('rgpsCargoV98').value.trim(),indicator:r.indicator||'',
+        factor:undefined,jobTitle:document.getElementById('rgpsCargoV98').value.trim(),indicator:r.indicator||'',sharedMonthGroup:r.sharedMonthGroup||'',sharedMonthlyValue:!!r.sharedMonthGroup,
         valid:document.getElementById('rgpsValidV54').value==='1',note:document.getElementById('rgpsNV54').value.trim(),source:r.source||'Manual'};
       if(!obj.year||!obj.month||!obj.employer||!obj.value){alert('Preencha ano, mês, empresa/origem e salário de contribuição.');return}
-      if(id)s.contributions=s.contributions.map(x=>x.id===id?obj:x);else s.contributions.push(obj);
+      if(id){
+        if(r.sharedMonthGroup){
+          s.contributions=s.contributions.map(x=>x.id===id?obj:(x.sharedMonthGroup===r.sharedMonthGroup?{...x,value:obj.value,valid:obj.valid,note:obj.note}:x));
+        }else s.contributions=s.contributions.map(x=>x.id===id?obj:x);
+      }else s.contributions.push(obj);
       save(s);close();render();
     };
   }
@@ -29386,6 +29413,19 @@ body:has(#previdencia.active) .hub-content{
  [0,250,800,1600].forEach(ms=>setTimeout(fix,ms));
 })();
 </script>
+
+
+<style id="pp-v99-rgps-concurrent-horizontal">
+#previdencia .rgps-career-list-v98{display:flex!important;grid-template-columns:none!important;gap:9px!important;overflow-x:auto!important;overflow-y:hidden!important;padding:2px 2px 9px!important;scroll-snap-type:x proximity!important;scrollbar-width:thin!important;overscroll-behavior-x:contain!important}
+#previdencia .rgps-career-row-v98{flex:0 0 clamp(260px,24vw,330px)!important;min-width:260px!important;max-width:330px!important;scroll-snap-align:start!important;grid-template-columns:4px minmax(0,1fr)!important;grid-template-areas:"mark main" "mark period"!important;align-items:start!important}
+#previdencia .rgps-career-mark-v98{grid-area:mark!important}
+#previdencia .rgps-career-main-v98{grid-area:main!important}
+#previdencia .rgps-career-period-v98{grid-area:period!important;justify-content:flex-start!important;margin-top:6px!important;flex-wrap:wrap!important}
+#previdencia .rgps-table-v51 tbody tr:has(td:nth-child(2)){vertical-align:middle!important}
+#previdencia .rgps-table-v51 td:nth-child(2){min-width:190px!important}
+#previdencia .rgps-table-v51 td:nth-child(6){min-width:150px!important}
+@media(max-width:700px){#previdencia .rgps-career-row-v98{flex-basis:82vw!important;min-width:250px!important}}
+</style>
 
 </body></html>
 
