@@ -29456,7 +29456,24 @@ body:has(#previdencia.active) .hub-content{
  function load(){try{const x=JSON.parse(localStorage.getItem(key())||'null');return Array.isArray(x?.periods)?x.periods:[]}catch(_){return[]}}
  function monthIndex(v){const s=String(v||'').trim(); if(!s) return -Infinity; if(/^atual$/i.test(s)){const d=new Date(); return d.getFullYear()*12+d.getMonth();} const m=s.match(/^(\d{1,2})\/(\d{4})$/); if(m) return Number(m[2])*12+(Number(m[1])-1); return -Infinity; }
  function monthLabel(v){const s=String(v||'').trim(); if(!s) return '—'; const m=s.match(/^(\d{1,2})\/(\d{4})$/); if(m) return `${String(m[1]).padStart(2,'0')}/${m[2]}`; return s; }
- function group(periods){const map=new Map(); for(const p of periods){const emp=String(p.employer||'Empresa não informada').trim()||'Empresa não informada'; const k=norm(emp); if(!map.has(k)) map.set(k,{employer:emp,roles:[],validMonths:0,startIndex:Infinity,endIndex:-Infinity}); const g=map.get(k); const item={jobTitle:String(p.jobTitle||'Cargo não informado').trim()||'Cargo não informado',start:monthLabel(p.start),end:monthLabel(p.end||'Atual'),startIndex:monthIndex(p.start),endIndex:monthIndex(/^Atual$/i.test(String(p.end||''))?'Atual':p.end),validMonths:Number(p.validMonths||0)}; g.roles.push(item); g.validMonths+=item.validMonths; g.startIndex=Math.min(g.startIndex,item.startIndex); g.endIndex=Math.max(g.endIndex,item.endIndex);} return Array.from(map.values()).map(g=>{g.roles.sort((a,b)=>a.startIndex-b.startIndex||a.endIndex-b.endIndex); g.start=g.roles[0]?.start||'—'; g.end=g.roles[g.roles.length-1]?.end||'—'; return g;}).sort((a,b)=>b.endIndex-a.endIndex||a.startIndex-b.startIndex)}
+ function group(periods){
+   const map=new Map();
+   for(const p of periods){
+     const emp=String(p.employer||'Empresa não informada').trim()||'Empresa não informada'; const k=norm(emp);
+     if(!map.has(k)) map.set(k,{employer:emp,roles:[],validMonths:0,startIndex:Infinity,endIndex:-Infinity});
+     const g=map.get(k); const item={jobTitle:String(p.jobTitle||'Cargo não informado').trim()||'Cargo não informado',start:monthLabel(p.start),end:monthLabel(p.end||'Atual'),startIndex:monthIndex(p.start),endIndex:monthIndex(/^Atual$/i.test(String(p.end||''))?'Atual':p.end),validMonths:Number(p.validMonths||0)};
+     g.roles.push(item); g.validMonths+=item.validMonths; g.startIndex=Math.min(g.startIndex,item.startIndex); g.endIndex=Math.max(g.endIndex,item.endIndex);
+   }
+   return Array.from(map.values()).map(g=>{
+     const ordered=g.roles.slice().sort((a,b)=>a.startIndex-b.startIndex||a.endIndex-b.endIndex), merged=[];
+     for(const role of ordered){
+       const prev=merged[merged.length-1], same=prev&&norm(prev.jobTitle)===norm(role.jobTitle), close=prev&&Number.isFinite(prev.endIndex)&&Number.isFinite(role.startIndex)&&role.startIndex<=prev.endIndex+2;
+       if(same&&close){if(role.endIndex>=prev.endIndex){prev.endIndex=role.endIndex;prev.end=role.end;}prev.validMonths+=role.validMonths||0;}
+       else merged.push({...role});
+     }
+     g.roles=merged;g.start=merged[0]?.start||'—';g.end=merged[merged.length-1]?.end||'—';return g;
+   }).sort((a,b)=>b.endIndex-a.endIndex||a.startIndex-b.startIndex)
+ }
  function render(){ const card=document.querySelector('#previdencia .rgps-career-v98'); if(!card) return; const periods=load(), groups=group(periods); const head=card.querySelector('.rgps-card-head-v51'); const note=card.querySelector('.rgps-career-note-v98'); let list=card.querySelector('.rgps-career-list-v98'); if(!list){list=document.createElement('div'); list.className='rgps-career-list-v98'; note?card.insertBefore(list,note):card.appendChild(list);} const pill=head?.querySelector('.rgps-pill-v51'); if(pill) pill.textContent=`${groups.length} ${groups.length===1?'empresa':'empresas'}`; list.innerHTML=groups.length?groups.map(g=>`<article class="rgps-career-company-v103"><h4>${esc(g.employer)}</h4><p>${esc(g.start)} — ${esc(g.end)} · ${g.roles.length} ${g.roles.length===1?'movimento de carreira':'movimentos de carreira'}</p><div class="rgps-career-badges-v103"><span>${g.validMonths} ${g.validMonths===1?'competência válida':'competências válidas'}</span><span>${g.roles.length} ${g.roles.length===1?'cargo':'cargos'}</span></div><div class="rgps-career-track-v103">${g.roles.map(r=>`<article class="rgps-career-step-v103"><small>${esc(r.start)} — ${esc(r.end)}</small><b>${esc(r.jobTitle)}</b><span>${r.validMonths?esc(r.validMonths+' competência'+(r.validMonths===1?'':'s')):'Período sincronizado'}</span></article>`).join('')}</div></article>`).join(''):'<div class="rgps-career-empty-v98">Nenhum vínculo identificado.</div>'; }
  const schedule=()=>setTimeout(render,30);
  new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
