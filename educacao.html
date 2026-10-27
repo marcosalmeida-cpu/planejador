@@ -15,6 +15,33 @@ main>.view,main>.view.active,.main>.view,.main>.view.active{min-width:0!importan
 @media(max-width:700px){:root{--pp-v62-rail:50px;--pp-v62-content-left:64px}#ppBankRailV62{left:6px;top:6px;bottom:6px;border-radius:16px;padding:6px 4px}.v62-logo,.v62-btn{width:36px;height:36px;min-width:36px;min-height:36px;border-radius:10px;font-size:14px}.main>.view.active,main>.view.active{padding:10px!important;border-radius:16px}.v62-hub-grid{grid-template-columns:1fr}.filterbar>*{flex:1 1 100%!important}.tablewrap th,.tablewrap td,#lancamentos .v63-tablewrap th,#lancamentos .v63-tablewrap td{font-size:9.5px!important;padding:7px 4px!important}}
 </style>
 <style id="pp-v64-one-navigation-only">html,body{overflow-x:clip!important;max-width:100%!important}header,.topbar,.topinner,#nav,.nav,#v76FloatNav,#v76ProfilePod,#ppV57CornerMenu,#menuTrigger,.menu-trigger,.floating-nav,.floating-menu,.hub-floating-nav{display:none!important;visibility:hidden!important;pointer-events:none!important}#ppBankRailV62{display:flex!important}main.main,main.hub-content,.main,.hub-content{min-width:0!important;max-width:100%!important;overflow-x:hidden!important}main.main *,main.hub-content *{box-sizing:border-box}.section-tools,.hero,.filterbar,.tablewrap,[class*="grid"],[class*="Grid"]{min-width:0!important;max-width:100%!important}img,svg,canvas{max-width:100%}</style>
+
+<style id="pp-v107-no-flash-critical">
+/* V107 — evita exibir versões intermediárias enquanto Currículo/Formações são hidratados */
+html[data-pp-v107-target="edu-curriculo"] #edu-curriculo,
+html[data-pp-v107-target="edu-formacoes"] #edu-formacoes{
+  visibility:hidden!important;
+  opacity:0!important;
+  pointer-events:none!important;
+}
+/* Componentes legados do Currículo jamais devem aparecer durante a montagem */
+#edu-curriculo .v115-content-grid,
+#edu-curriculo .edu103-cv,
+#edu-curriculo .edu89-cv-formations,
+#edu-curriculo .edu98-career,
+#edu-curriculo .edu87-curriculum{display:none!important}
+</style>
+<script id="pp-v107-no-flash-arm-education">
+(()=>{'use strict';
+ const allowed=new Set(['edu-curriculo','edu-formacoes']);
+ const root=document.documentElement;
+ function arm(id){if(!allowed.has(id))return;root.dataset.ppV107Target=id;root.dataset.ppV107Armed=String(Date.now());}
+ const h=(location.hash||'').replace(/^#/,'');if(allowed.has(h))arm(h);
+ document.addEventListener('click',e=>{const b=e.target.closest?.('[data-v62-view]');if(b)arm(b.dataset.v62View)},true);
+ window.addEventListener('hashchange',()=>{const id=(location.hash||'').replace(/^#/,'');if(allowed.has(id))arm(id)});
+})();
+</script>
+
 </head><body class="hub-page" data-hub-area="educacao"><aside id="ppBankRailV62" aria-label="Navegação principal"><button type="button" class="v62-logo" data-v62-hub data-tip="Hub Pessoal" aria-label="Abrir Hub Pessoal"></button><nav class="v62-nav" aria-label="Navegação"><button type="button" class="v62-btn" data-v62-view="edu-overview" data-tip="Visão geral" aria-label="Visão geral">⌂</button><button type="button" class="v62-btn" data-v62-view="edu-curriculo" data-tip="Currículo" aria-label="Currículo">≡</button><button type="button" class="v62-btn" data-v62-view="edu-formacoes" data-tip="Formações" aria-label="Formações">◇</button><button type="button" class="v62-btn" data-v62-view="edu-publicacoes" data-tip="Publicações" aria-label="Publicações">✎</button></nav><div class="v62-foot"><div class="v62-sep"></div><button type="button" class="v62-btn" data-v62-profile data-tip="Perfil" aria-label="Perfil"><span class="v62-dot">P</span></button><button type="button" class="v62-btn" data-v62-logout data-tip="Sair" aria-label="Sair">↪</button></div></aside><div id="ppHubV62" aria-hidden="true"><section class="v62-hub-card" role="dialog" aria-modal="true" aria-label="Hub Pessoal"><div class="v62-hub-head"><div><h2>Hub Pessoal</h2><p>Escolha a área que deseja abrir.</p></div><button type="button" class="v62-hub-close" aria-label="Fechar">×</button></div><div class="v62-hub-grid"><a data-v62-area="financas" href="index.html"><b>Finanças</b><span>Lançamentos, cartões, dívidas e patrimônio</span></a><a data-v62-area="educacao" href="educacao.html"><b>Educação</b><span>Formações e trajetória acadêmica</span></a><a data-v62-area="saude" href="saude.html"><b>Saúde</b><span>Acompanhamento pessoal</span></a><a data-v62-area="entretenimento" href="entretenimento.html"><b>Entretenimento</b><span>Filmes, séries, livros e viagens</span></a></div></section></div><main class="main hub-content"><section class="view v115-life-view edu82-overview active" data-v115-site-view="educacao" id="edu-overview">
 <div class="edu82-shell">
   <header class="edu82-masthead">
@@ -1492,7 +1519,7 @@ function beautifyDetail(detail){ const form=currentFormation(); const kicker=$('
 <script id="pp-v90-formation-hide-observations-script">
 (()=>{'use strict';
  const root=document.getElementById('v117FormationRoot');if(!root)return;
- const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+ const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/\u00a0/g,' ').toLowerCase().replace(/&/g,' e ').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
  function cleanTable(table){
    if(!table||table.dataset.v90ObsRemoved==='1')return;
    const heads=[...table.querySelectorAll('thead th')];
@@ -1657,7 +1684,7 @@ function beautifyDetail(detail){ const form=currentFormation(); const kicker=$('
 (()=>{'use strict';
 const ROOT=document.getElementById('v117FormationRoot'); if(!ROOT)return;
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/\u00a0/g,' ').toLowerCase().replace(/&/g,' e ').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
 const key=()=>`planejador_education_formations_v117_${profile().toLowerCase()}`;
@@ -1913,7 +1940,7 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
 (()=>{'use strict';
  const ROOT=document.getElementById('v117FormationRoot'); if(!ROOT)return;
  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
- const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+ const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/\u00a0/g,' ').toLowerCase().replace(/&/g,' e ').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
  function activeFormation(){
    const id=ROOT.querySelector('[data-v121-open].active')?.dataset.v121Open||'';
    const p=localStorage.getItem('planejador_active_profile')||'Marcos';
@@ -2842,7 +2869,7 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
  const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
  const safeProfile=()=>profile().replace(/[^a-z0-9_-]/gi,'_');
  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
- const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+ const norm=s=>String(s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/\u00a0/g,' ').toLowerCase().replace(/&/g,' e ').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
  const titleCase=s=>String(s||'').toLocaleLowerCase('pt-BR').replace(/(^|[\s\-/])([\p{L}])/gu,(m,p,c)=>p+c.toLocaleUpperCase('pt-BR')).replace(/\b(De|Da|Do|Das|Dos|E|Em|No|Na|Nos|Nas|Para|Por)\b/g,x=>x.toLocaleLowerCase('pt-BR'));
  const studiesKey=()=>`planejador_education_studies_v87_${profile().toLowerCase()}`;
  const formationsKey=()=>`planejador_education_formations_v117_${profile().toLowerCase()}`;
@@ -2919,6 +2946,42 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
    window.ppEduFormationsV117?.render?.();
    try{toast('Formação excluída.')}catch(_){ }
  },true);
+})();
+</script>
+
+
+<script id="pp-v107-no-flash-settle-education">
+(()=>{'use strict';
+ const root=document.documentElement;
+ let quietTimer=0, fallbackTimer=0, lastTarget='';
+ function isReady(id){
+   if(id==='edu-curriculo'){
+     const host=document.getElementById('edu104Curriculum');
+     return !!(host && host.querySelector('.edu104-section'));
+   }
+   if(id==='edu-formacoes'){
+     const formRoot=document.getElementById('v117FormationRoot');
+     return !!(formRoot && formRoot.querySelector('.v121-detail') && formRoot.querySelector('.edu101-academic-header'));
+   }
+   return true;
+ }
+ function reveal(id){
+   if(root.dataset.ppV107Target!==id)return;
+   delete root.dataset.ppV107Target;delete root.dataset.ppV107Armed;
+ }
+ function assess(){
+   const id=root.dataset.ppV107Target;if(!id)return;
+   const sec=document.getElementById(id);if(!sec||!sec.classList.contains('active'))return;
+   if(!isReady(id))return;
+   clearTimeout(quietTimer);
+   quietTimer=setTimeout(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>reveal(id))),85);
+   if(lastTarget!==id){lastTarget=id;clearTimeout(fallbackTimer);fallbackTimer=setTimeout(()=>reveal(id),900)}
+ }
+ const mo=new MutationObserver(assess);
+ mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','data-pp-v107-target','data-pp-v107-armed']});
+ document.addEventListener('click',()=>setTimeout(assess,0),true);
+ window.addEventListener('hashchange',()=>setTimeout(assess,0));
+ [0,80,180,350,700].forEach(ms=>setTimeout(assess,ms));
 })();
 </script>
 
