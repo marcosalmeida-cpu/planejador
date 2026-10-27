@@ -55,3 +55,10 @@ Correção estrutural de largura: remove o `width:100%` conflitante com a margem
 
 ## Educação v87 — repertório estudado
 Na Visão Geral de Educação, notícias e leituras podem ser marcadas como "assunto estudado". O registro é salvo por perfil e pode ser exibido no Currículo, com anotação opcional e vínculos sugeridos com disciplinas das formações de ensino superior cadastradas.
+
+
+## v95
+- Maior largura para a coluna Disciplina no histórico acadêmico.
+- Cabeçalho das formações refinado como credencial acadêmica premium.
+- Grau com destaque visual principal.
+- Conclusão exibida em mês/ano quando a data está disponível.
