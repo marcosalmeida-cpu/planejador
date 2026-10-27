@@ -9646,7 +9646,7 @@ Os dados atuais deste navegador serão substituídos.`);
   }
   function sameRow(a,b){
     if(!a||!b)return false;
-    const keys=['year','month','value','employer','indicator','valid','note','source','factor'];
+    const keys=['year','month','value','employer','jobTitle','indicator','valid','note','source','factor'];
     return keys.every(k=>JSON.stringify(a[k]??null)===JSON.stringify(b[k]??null));
   }
   function encodeCompact(s){
@@ -10081,13 +10081,63 @@ Os dados atuais deste navegador serão substituídos.`);
   // Expõe a mesma estimativa usada no card da Previdência para outros módulos do Hub.
   window.ppRgpsUnemploymentV45={estimate:()=>unemploymentEstimate(load())};
 
+  function careerMonthIndex(y,m){return Number(y)*12+(Number(m)-1)}
+  function careerMonthLabel(idx){const y=Math.floor(idx/12),m=(idx%12)+1;return `${String(m).padStart(2,'0')}/${y}`}
+  function careerEmployers(contributions){
+    const singles=[...new Set((contributions||[]).map(r=>String(r.employer||'').trim()).filter(Boolean).filter(x=>!x.includes(' + ')))];
+    const canonical=(token)=>{
+      const t=String(token||'').trim(); if(!t)return'';
+      const exact=singles.find(x=>x.toLowerCase()===t.toLowerCase()); if(exact)return exact;
+      const start=singles.find(x=>x.toLowerCase().startsWith(t.toLowerCase())||t.toLowerCase().startsWith(x.toLowerCase()));
+      return start||t;
+    };
+    const out=[];
+    for(const r of (contributions||[])){
+      const employers=String(r.employer||'').split(/\s+\+\s+/).map(canonical).filter(Boolean);
+      for(const employer of employers)out.push({employer,jobTitle:String(r.jobTitle||'').trim(),year:Number(r.year),month:Number(r.month),valid:r.valid!==false});
+    }
+    return out;
+  }
+  function careerPeriods(s){
+    const rows=careerEmployers(s?.contributions||[]).filter(r=>r.year&&r.month);
+    const by=new Map();
+    for(const r of rows){const k=r.employer.toLowerCase();if(!by.has(k))by.set(k,[]);by.get(k).push(r)}
+    const periods=[];
+    for(const list of by.values()){
+      list.sort((a,b)=>careerMonthIndex(a.year,a.month)-careerMonthIndex(b.year,b.month));
+      let cur=null;
+      for(const r of list){
+        const idx=careerMonthIndex(r.year,r.month),title=r.jobTitle||'';
+        if(!cur||idx-cur.last>2||(title&&cur.jobTitle&&title.toLowerCase()!==cur.jobTitle.toLowerCase())){
+          if(cur)periods.push(cur);
+          cur={employer:r.employer,jobTitle:title,start:idx,last:idx,validMonths:r.valid?1:0};
+        }else{
+          cur.last=Math.max(cur.last,idx);if(!cur.jobTitle&&title)cur.jobTitle=title;if(r.valid)cur.validMonths++;
+        }
+      }
+      if(cur)periods.push(cur);
+    }
+    const currentIdx=careerMonthIndex(new Date().getFullYear(),new Date().getMonth()+1);
+    return periods.sort((a,b)=>b.last-a.last||b.start-a.start).map(p=>({
+      employer:p.employer,jobTitle:p.jobTitle,start:careerMonthLabel(p.start),end:(currentIdx-p.last<=2?'Atual':careerMonthLabel(p.last)),startIndex:p.start,endIndex:p.last,validMonths:p.validMonths
+    }));
+  }
+  function syncCareerV98(s){
+    try{localStorage.setItem('pp_rgps_career_v98_'+safeProfile(),JSON.stringify({profile:profile(),updatedAt:new Date().toISOString(),periods:careerPeriods(s)}))}catch(e){}
+  }
+  function careerHistoryHtml(s){
+    const periods=careerPeriods(s);
+    const rows=periods.slice(0,18).map(p=>`<div class="rgps-career-row-v98"><div class="rgps-career-mark-v98"></div><div class="rgps-career-main-v98"><b>${esc(p.employer)}</b><span>${esc(p.jobTitle||'Cargo não informado')}</span></div><div class="rgps-career-period-v98"><strong>${esc(p.start)}</strong><i>→</i><strong>${esc(p.end)}</strong></div></div>`).join('');
+    return `<article class="rgps-card-v51 rgps-career-v98" style="margin-top:14px"><div class="rgps-card-head-v51"><div><h3>Vínculos profissionais</h3><p>Experiências consolidadas pelas competências previdenciárias. O Currículo usa esta mesma fonte para empresa, cargo, início e fim.</p></div><span class="rgps-pill-v51">${periods.length} vínculos/períodos</span></div><div class="rgps-career-list-v98">${rows||'<div class="rgps-career-empty-v98">Nenhum vínculo identificado.</div>'}</div><div class="rgps-career-note-v98">O campo <b>Cargo</b> substitui “Indicadores” na visualização. Códigos técnicos do CNIS continuam preservados internamente. Quando o cargo não estiver informado, edite uma contribuição do período para registrá-lo.</div></article>`;
+  }
+
   function renderRows(s){
     const body=document.getElementById('rgpsBodyV54'); if(!body)return;
     const y=document.getElementById('rgpsYearFilterV54')?.value||filterYear;
     const q=(document.getElementById('rgpsSearchV54')?.value||'').toLowerCase();
     let a=s.contributions.slice().sort((a,b)=>b.year-a.year||b.month-a.month);
     if(y!=='all')a=a.filter(r=>String(r.year)===String(y));
-    if(q)a=a.filter(r=>(`${r.employer||''} ${r.indicator||''} ${r.note||''}`).toLowerCase().includes(q));
+    if(q)a=a.filter(r=>(`${r.employer||''} ${r.jobTitle||''} ${r.note||''}`).toLowerCase().includes(q));
     body.innerHTML=a.length?a.map(r=>`
       <tr>
         <td><b>${String(r.month).padStart(2,'0')}/${r.year}</b></td>
@@ -10095,7 +10145,7 @@ Os dados atuais deste navegador serão substituídos.`);
         <td class="money">${money(r.value)}</td>
         <td class="coef">${factor(r).toFixed(6).replace('.',',')}</td>
         <td class="money"><b>${money(num(r.value)*factor(r))}</b></td>
-        <td>${esc(r.indicator||'—')}</td>
+        <td>${esc(r.jobTitle||'—')}</td>
         <td><span class="rgps-status-v51 ${r.valid===false?'att':'ok'}">${r.valid===false?'Pendente':'Válida'}</span></td>
         <td><button class="rgps-action-v51" data-rgps54-edit="${esc(r.id)}">Editar</button><button class="rgps-action-v51" data-rgps54-del="${esc(r.id)}">Excluir</button></td>
       </tr>`).join(''):'<tr><td colspan="8" style="padding:24px;text-align:center;color:#7b8798">Nenhuma contribuição encontrada.</td></tr>';
@@ -10178,16 +10228,18 @@ Os dados atuais deste navegador serão substituídos.`);
           </div>
         </article>
 
+        ${careerHistoryHtml(s)}
+
         <article class="rgps-card-v51" style="margin-top:14px">
           <div class="rgps-card-head-v51"><div><h3>Contribuições ao INSS</h3><p>Edite, adicione ou exclua competências e acompanhe a atualização automática pelo INPC.</p></div><span class="rgps-pill-v51" id="rgpsInpcStatusV56">INPC automático</span></div>
           <div class="rgps-toolbar-v51">
             <div class="rgps-toolbar-left-v51">
               <select id="rgpsYearFilterV54"><option value="all">Todos os anos</option>${ys.map(y=>`<option value="${y}" ${String(filterYear)===String(y)?'selected':''}>${y}</option>`).join('')}</select>
-              <input id="rgpsSearchV54" placeholder="Buscar empresa ou indicador">
+              <input id="rgpsSearchV54" placeholder="Buscar empresa ou cargo">
             </div>
             <div class="rgps-toolbar-right-v51"><button class="rgps-btn-v51 secondary" id="rgpsResetV54">Restaurar CNIS</button><button class="rgps-btn-v51 green" id="rgpsAddV54">+ Nova contribuição</button></div>
           </div>
-          <div class="rgps-tablewrap-v51"><table class="rgps-table-v51"><thead><tr><th>Competência</th><th>Empresa / origem</th><th class="money">Salário contribuição</th><th class="coef">Fator INPC</th><th class="money">Valor atualizado</th><th>Indicadores</th><th>Status</th><th>Ações</th></tr></thead><tbody id="rgpsBodyV54"></tbody></table></div><div class="rgps-sources-v51" id="rgpsInpcInfoV56"></div>
+          <div class="rgps-tablewrap-v51"><table class="rgps-table-v51"><thead><tr><th>Competência</th><th>Empresa / origem</th><th class="money">Salário contribuição</th><th class="coef">Fator INPC</th><th class="money">Valor atualizado</th><th>Cargo</th><th>Status</th><th>Ações</th></tr></thead><tbody id="rgpsBodyV54"></tbody></table></div><div class="rgps-sources-v51" id="rgpsInpcInfoV56"></div>
         </article>
       `;
 
@@ -10206,6 +10258,7 @@ Os dados atuais deste navegador serão substituídos.`);
         s.contributions=JSON.parse(JSON.stringify(seed));save(s);filterYear='all';render();
       };
       renderRows(s);
+      syncCareerV98(s);
       const inpcStatus=document.getElementById('rgpsInpcStatusV56');
       const inpcInfo=document.getElementById('rgpsInpcInfoV56');
       if(inpcStatus){
@@ -10228,7 +10281,7 @@ Os dados atuais deste navegador serão substituídos.`);
   }
 
   function openModal(id,s){
-    const r=id?s.contributions.find(x=>x.id===id):{id:'rgps-'+Date.now(),year:new Date().getFullYear(),month:new Date().getMonth()+1,value:0,employer:'',indicator:'',valid:true,note:'',source:'Manual'};
+    const r=id?s.contributions.find(x=>x.id===id):{id:'rgps-'+Date.now(),year:new Date().getFullYear(),month:new Date().getMonth()+1,value:0,employer:'',jobTitle:'',indicator:'',valid:true,note:'',source:'Manual'};
     if(!r)return;
     document.getElementById('rgpsModalV51')?.remove();
     const ov=document.createElement('div');ov.id='rgpsModalV51';
@@ -10240,7 +10293,7 @@ Os dados atuais deste navegador serão substituídos.`);
         <div class="rgps-field-v51 full"><label>Empresa / origem</label><input id="rgpsEV54" value="${esc(r.employer||'')}"></div>
         <div class="rgps-field-v51"><label>Salário de contribuição</label><input id="rgpsVV54" inputmode="decimal" value="${Number(r.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}"></div>
         <div class="rgps-field-v51"><label>Fator INPC</label><input id="rgpsFV54" value="Automático" disabled></div>
-        <div class="rgps-field-v51 full"><label>Indicadores</label><input id="rgpsIV54" value="${esc(r.indicator||'')}"></div>
+        <div class="rgps-field-v51 full"><label>Cargo</label><input id="rgpsCargoV98" placeholder="Ex.: Analista, Coordenador, Gerente..." value="${esc(r.jobTitle||'')}"></div>
         <div class="rgps-field-v51"><label>Conta para tempo/carência?</label><select id="rgpsValidV54"><option value="1" ${r.valid!==false?'selected':''}>Sim</option><option value="0" ${r.valid===false?'selected':''}>Não / pendente</option></select></div>
         <div class="rgps-field-v51 full"><label>Observação</label><input id="rgpsNV54" value="${esc(r.note||'')}"></div>
       </div>
@@ -10251,7 +10304,7 @@ Os dados atuais deste navegador serão substituídos.`);
     document.getElementById('rgpsSaveV54').onclick=()=>{
       const obj={id:r.id,year:+document.getElementById('rgpsYV54').value,month:+document.getElementById('rgpsMV54').value,
         employer:document.getElementById('rgpsEV54').value.trim(),value:num(document.getElementById('rgpsVV54').value),
-        factor:undefined,indicator:document.getElementById('rgpsIV54').value.trim(),
+        factor:undefined,jobTitle:document.getElementById('rgpsCargoV98').value.trim(),indicator:r.indicator||'',
         valid:document.getElementById('rgpsValidV54').value==='1',note:document.getElementById('rgpsNV54').value.trim(),source:r.source||'Manual'};
       if(!obj.year||!obj.month||!obj.employer||!obj.value){alert('Preencha ano, mês, empresa/origem e salário de contribuição.');return}
       if(id)s.contributions=s.contributions.map(x=>x.id===id?obj:x);else s.contributions.push(obj);
@@ -10294,6 +10347,8 @@ Os dados atuais deste navegador serão substituídos.`);
 
   window.renderPrevidencia=render;
   window.openPrevidenciaPageV54=openPage;
+  window.ppRgpsCareerV98={sync:()=>syncCareerV98(load()),periods:()=>careerPeriods(load())};
+  try{syncCareerV98(load())}catch(e){}
   ensureNav();
   refreshInpcV56();
 
@@ -29259,6 +29314,79 @@ window.ppOpenProfileV76=openPanel;
  window.ppNormalizeCloseButtonsV77=()=>roots();
 })();
 </script>
+
+<style id="pp-v98-previdencia-career-scroll">
+/* V98 — Previdência: cargo, vínculos profissionais e rolagem natural */
+#previdencia,
+#previdencia.active,
+.main>.view.active#previdencia,
+main>.view.active#previdencia{
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:visible!important;
+  contain:none!important;
+}
+body:has(#previdencia.active),html:has(#previdencia.active){
+  height:auto!important;
+  min-height:100%!important;
+  max-height:none!important;
+  overflow-y:auto!important;
+}
+body:has(#previdencia.active) .main,
+body:has(#previdencia.active) main.main,
+body:has(#previdencia.active) .hub-content{
+  height:auto!important;
+  max-height:none!important;
+  overflow-y:visible!important;
+}
+#previdencia .rgps-tablewrap-v51{
+  max-height:none!important;
+  height:auto!important;
+  overflow:visible!important;
+}
+#previdencia .rgps-table-v51{min-width:0!important;table-layout:fixed!important}
+#previdencia .rgps-table-v51 th:nth-child(1),#previdencia .rgps-table-v51 td:nth-child(1){width:8%!important}
+#previdencia .rgps-table-v51 th:nth-child(2),#previdencia .rgps-table-v51 td:nth-child(2){width:19%!important}
+#previdencia .rgps-table-v51 th:nth-child(3),#previdencia .rgps-table-v51 td:nth-child(3){width:12%!important}
+#previdencia .rgps-table-v51 th:nth-child(4),#previdencia .rgps-table-v51 td:nth-child(4){width:9%!important}
+#previdencia .rgps-table-v51 th:nth-child(5),#previdencia .rgps-table-v51 td:nth-child(5){width:12%!important}
+#previdencia .rgps-table-v51 th:nth-child(6),#previdencia .rgps-table-v51 td:nth-child(6){width:18%!important}
+#previdencia .rgps-table-v51 th:nth-child(7),#previdencia .rgps-table-v51 td:nth-child(7){width:9%!important}
+#previdencia .rgps-table-v51 th:nth-child(8),#previdencia .rgps-table-v51 td:nth-child(8){width:13%!important}
+#previdencia .rgps-career-v98{background:linear-gradient(180deg,#fff,#f8fbfe)!important}
+#previdencia .rgps-career-list-v98{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:8px}
+#previdencia .rgps-career-row-v98{display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid #dce5ee;border-radius:14px;background:#fff;min-width:0}
+#previdencia .rgps-career-mark-v98{width:4px;height:100%;min-height:42px;border-radius:999px;background:linear-gradient(180deg,#1f6ed2,#23b892)}
+#previdencia .rgps-career-main-v98{min-width:0}.rgps-career-main-v98 b{display:block;color:#18334f;font-size:11px;line-height:1.25}.rgps-career-main-v98 span{display:block;margin-top:4px;color:#718196;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#previdencia .rgps-career-period-v98{display:flex;align-items:center;gap:5px;white-space:nowrap;color:#385b7b;font-size:9px}.rgps-career-period-v98 strong{padding:5px 7px;border-radius:999px;background:#edf5fc;border:1px solid #dceaf6;font-size:8.5px}.rgps-career-period-v98 i{font-style:normal;color:#9aa8b5}
+#previdencia .rgps-career-note-v98{margin-top:10px;padding:9px 11px;border-radius:12px;background:#f2f7fb;border:1px solid #dfe9f2;color:#66798d;font-size:8.7px;line-height:1.45}
+#previdencia .rgps-career-empty-v98{padding:18px;text-align:center;color:#7a8998;border:1px dashed #d5e0ea;border-radius:12px}
+@media(max-width:720px){
+  #previdencia .rgps-career-list-v98{grid-template-columns:1fr}
+  #previdencia .rgps-career-row-v98{grid-template-columns:4px minmax(0,1fr)}
+  #previdencia .rgps-career-period-v98{grid-column:2;justify-content:flex-start;flex-wrap:wrap}
+}
+</style>
+<script id="pp-v98-previdencia-scroll-guard">
+(()=>{'use strict';
+ function fix(){
+   const sec=document.getElementById('previdencia');
+   if(!sec?.classList.contains('active'))return;
+   document.documentElement.style.setProperty('overflow-y','auto','important');
+   document.body.style.setProperty('overflow-y','auto','important');
+   sec.style.setProperty('overflow','visible','important');
+   sec.style.setProperty('height','auto','important');
+   sec.style.setProperty('max-height','none','important');
+   const wrap=sec.querySelector('.rgps-tablewrap-v51');
+   if(wrap){wrap.style.setProperty('max-height','none','important');wrap.style.setProperty('overflow','visible','important')}
+ }
+ document.addEventListener('click',e=>{if(e.target.closest('[data-view="previdencia"],#previdencia'))setTimeout(fix,60)},true);
+ new MutationObserver(fix).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
+ [0,250,800,1600].forEach(ms=>setTimeout(fix,ms));
+})();
+</script>
+
 </body></html>
 
 
