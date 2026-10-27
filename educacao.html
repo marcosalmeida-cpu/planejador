@@ -1511,4 +1511,179 @@ function beautifyDetail(detail){ const form=currentFormation(); const kicker=$('
 })();
 </script>
 
+
+<style id="pp-v91-horizontal-degree-card">
+/* V91 — card do grau da formação em formato horizontal */
+#edu-formacoes .edu89-hero{
+  grid-template-columns:minmax(0,1fr) minmax(320px,380px)!important;
+  align-items:stretch!important;
+}
+#edu-formacoes .edu89-degree-card{
+  min-width:320px!important;
+  max-width:380px!important;
+  width:100%!important;
+  min-height:106px!important;
+  padding:14px 16px!important;
+  border-radius:20px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-areas:
+    "label sem"
+    "title sem"
+    "status sem"!important;
+  column-gap:14px!important;
+  row-gap:4px!important;
+  align-items:center!important;
+}
+#edu-formacoes .edu89-degree-card small{
+  grid-area:label!important;
+  margin:0!important;
+}
+#edu-formacoes .edu89-degree-card b{
+  grid-area:title!important;
+  font-size:15px!important;
+  line-height:1.08!important;
+  margin:0!important;
+}
+#edu-formacoes .edu89-degree-card > span:not(.edu89-sem-chip){
+  grid-area:status!important;
+  margin:0!important;
+  font-size:10px!important;
+}
+#edu-formacoes .edu89-degree-card .edu89-sem-chip{
+  grid-area:sem!important;
+  align-self:center!important;
+  justify-self:end!important;
+  margin:0!important;
+  white-space:nowrap!important;
+}
+@media(max-width:1120px){
+  #edu-formacoes .edu89-hero{grid-template-columns:minmax(0,1fr) minmax(280px,340px)!important}
+  #edu-formacoes .edu89-degree-card{min-width:280px!important;max-width:340px!important}
+}
+@media(max-width:900px){
+  #edu-formacoes .edu89-hero{grid-template-columns:1fr!important}
+  #edu-formacoes .edu89-degree-card{
+    min-width:0!important;max-width:none!important;width:100%!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-areas:"label" "title" "status" "sem"!important;
+    row-gap:6px!important;
+  }
+  #edu-formacoes .edu89-degree-card .edu89-sem-chip{justify-self:start!important}
+}
+</style>
+
+
+<style id="pp-v92-academic-progress-and-results">
+/* V92 — atualização robusta do grau + progresso acadêmico por horas + resultado normalizado */
+#edu-formacoes .edu83-course-select{display:none!important}
+#edu-formacoes .edu92-course-select{
+  display:block!important;width:min(430px,100%)!important;max-width:100%!important;height:42px!important;
+  border:1px solid #d6e3ef!important;border-radius:13px!important;background:#fff!important;color:#173650!important;
+  padding:0 38px 0 12px!important;font-size:11px!important;font-weight:800!important;outline:none!important;
+  justify-self:end!important;box-sizing:border-box!important;
+}
+#edu-formacoes .edu92-course-select:focus{border-color:#72a9dd!important;box-shadow:0 0 0 3px rgba(54,130,199,.10)!important}
+#edu-formacoes .edu92-course-select optgroup{font-style:normal!important;font-weight:900!important;color:#365d82!important}
+#edu-formacoes .edu92-course-select option{font-weight:600!important;color:#18334e!important}
+#edu-formacoes .v121-deck-head{grid-template-columns:minmax(0,1fr) minmax(280px,430px)!important;align-items:center!important}
+#edu-formacoes .edu89-select-note{display:none!important}
+
+/* Destaque horizontal do grau — sempre sincronizado com a formação ativa */
+#edu-formacoes .edu89-hero{
+  grid-template-columns:minmax(0,1fr) minmax(360px,430px)!important;gap:18px!important;align-items:center!important;
+}
+#edu-formacoes .edu89-degree-card{
+  min-width:0!important;max-width:none!important;width:100%!important;min-height:88px!important;padding:12px 14px!important;
+  border-radius:18px!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-areas:"label sem" "title sem" "status sem"!important;column-gap:14px!important;row-gap:3px!important;
+  align-items:center!important;background:linear-gradient(110deg,#5b43f5 0%,#287be7 56%,#28bea9 100%)!important;
+  box-shadow:0 12px 28px rgba(40,93,180,.20)!important;
+}
+#edu-formacoes .edu89-degree-card small{grid-area:label!important;margin:0!important}
+#edu-formacoes .edu89-degree-card b{grid-area:title!important;margin:0!important;font-size:15px!important;line-height:1.08!important}
+#edu-formacoes .edu89-degree-card>span:not(.edu89-sem-chip){grid-area:status!important;margin:0!important;font-size:9.5px!important}
+#edu-formacoes .edu89-degree-card .edu89-sem-chip{grid-area:sem!important;margin:0!important;justify-self:end!important;align-self:center!important;white-space:nowrap!important}
+#edu-formacoes .edu89-kicker .edu89-semester{display:none!important}
+
+/* Faixa visual de carga horária */
+#edu-formacoes .edu92-hours{
+  width:100%!important;box-sizing:border-box!important;display:grid!important;grid-template-columns:minmax(145px,.28fr) minmax(0,1fr)!important;
+  gap:16px!important;align-items:center!important;margin:0 0 14px!important;padding:14px 15px!important;border-radius:18px!important;
+  border:1px solid #dbe7f0!important;background:linear-gradient(120deg,#f8fbff 0%,#ffffff 52%,#f5fbf9 100%)!important;
+  box-shadow:0 8px 24px rgba(24,70,112,.045)!important;
+}
+#edu-formacoes .edu92-hours-total{min-width:0!important}
+#edu-formacoes .edu92-hours-total small{display:block!important;font-size:8px!important;letter-spacing:.11em!important;font-weight:950!important;color:#6d8297!important;text-transform:uppercase!important;margin-bottom:4px!important}
+#edu-formacoes .edu92-hours-total strong{display:block!important;font-size:23px!important;line-height:1!important;letter-spacing:-.04em!important;color:#143c62!important}
+#edu-formacoes .edu92-hours-total span{display:block!important;margin-top:5px!important;font-size:9px!important;color:#6a7f92!important;line-height:1.3!important}
+#edu-formacoes .edu92-hours-main{min-width:0!important;display:grid!important;gap:9px!important}
+#edu-formacoes .edu92-hours-bar{height:14px!important;width:100%!important;display:flex!important;overflow:hidden!important;border-radius:999px!important;background:#e8eef4!important;box-shadow:inset 0 1px 2px rgba(14,45,76,.08)!important}
+#edu-formacoes .edu92-hours-bar i{display:block!important;height:100%!important;min-width:0!important;transition:width .35s ease!important}
+#edu-formacoes .edu92-hours-bar .approved{background:linear-gradient(90deg,#23a875,#37c895)!important}
+#edu-formacoes .edu92-hours-bar .current{background:linear-gradient(90deg,#2f78df,#59a4ff)!important}
+#edu-formacoes .edu92-hours-bar .pending{background:linear-gradient(90deg,#e9a63d,#f5c46d)!important}
+#edu-formacoes .edu92-hours-legend{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+#edu-formacoes .edu92-hours-item{min-width:0!important;padding:8px 9px!important;border-radius:11px!important;border:1px solid #e1e9f0!important;background:#fff!important;display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;gap:7px!important;align-items:center!important}
+#edu-formacoes .edu92-hours-item i{width:9px!important;height:9px!important;border-radius:50%!important}
+#edu-formacoes .edu92-hours-item.approved i{background:#28b681!important}.edu92-hours-item.current i{background:#428eea!important}.edu92-hours-item.pending i{background:#efad48!important}
+#edu-formacoes .edu92-hours-item b{display:block!important;font-size:10px!important;color:#1f405e!important;line-height:1.1!important}
+#edu-formacoes .edu92-hours-item span{display:block!important;margin-top:2px!important;font-size:8px!important;color:#718599!important;white-space:nowrap!important}
+
+/* Resultado fixo em três estados */
+#edu-formacoes .edu92-result{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:68px!important;padding:4px 7px!important;border-radius:999px!important;font-size:8px!important;font-weight:900!important;white-space:nowrap!important}
+#edu-formacoes .edu92-result.approved{background:#e8f8f1!important;color:#147650!important;border:1px solid #ccecdf!important}
+#edu-formacoes .edu92-result.current{background:#eaf3ff!important;color:#215fa5!important;border:1px solid #d3e4fa!important}
+#edu-formacoes .edu92-result.pending{background:#fff5e5!important;color:#956018!important;border:1px solid #f2dfbb!important}
+#edu-formacoes .edu89-average-note{margin:0 0 9px!important;padding:7px 9px!important;border-radius:10px!important;background:#f8fafc!important;border:1px solid #e5ebf1!important;color:#708296!important;font-size:8.5px!important}
+
+@media(max-width:1050px){
+  #edu-formacoes .v121-deck-head{grid-template-columns:1fr!important}
+  #edu-formacoes .edu92-course-select{width:100%!important;justify-self:stretch!important}
+  #edu-formacoes .edu89-hero{grid-template-columns:1fr!important}
+  #edu-formacoes .edu89-degree-card{width:100%!important;max-width:none!important}
+}
+@media(max-width:760px){
+  #edu-formacoes .edu92-hours{grid-template-columns:1fr!important;gap:11px!important}
+  #edu-formacoes .edu92-hours-legend{grid-template-columns:1fr 1fr 1fr!important}
+}
+@media(max-width:540px){
+  #edu-formacoes .edu92-hours-legend{grid-template-columns:1fr!important}
+  #edu-formacoes .edu89-degree-card{grid-template-columns:1fr!important;grid-template-areas:"label" "title" "status" "sem"!important;row-gap:5px!important}
+  #edu-formacoes .edu89-degree-card .edu89-sem-chip{justify-self:start!important}
+}
+</style>
+<script id="pp-v92-academic-progress-and-results-script">
+(()=>{'use strict';
+const ROOT=document.getElementById('v117FormationRoot'); if(!ROOT)return;
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+const key=()=>`planejador_education_formations_v117_${profile().toLowerCase()}`;
+function load(){let x=null;try{x=JSON.parse(localStorage.getItem(key())||'null')}catch(_){}if(!Array.isArray(x)&&profile()==='Marcos'){try{x=JSON.parse(localStorage.getItem('planejador_education_formations_v117')||'null')}catch(_){}}return Array.isArray(x)?x:[]}
+function activeId(){return ROOT.querySelector('[data-v121-open].active')?.dataset.v121Open||''}
+function activeFormation(){const id=activeId(),list=load();return list.find(f=>String(f.id||'')===String(id))||null}
+function isPost(f={}){return /(pos|especializa|mba|mestrado|doutorado|lato sensu|stricto)/.test(norm([f.level,f.degree,f.course].join(' ')))}
+function isGrad(f={}){const s=norm([f.level,f.degree,f.course].join(' '));return /(gradu|bacharel|licenciatura|tecnologo)/.test(s)&&!isPost(f)}
+function category(f={}){return isPost(f)?'ENSINO SUPERIOR · PÓS-GRADUAÇÃO':isGrad(f)?'ENSINO SUPERIOR · GRADUAÇÃO':'ENSINO BÁSICO'}
+function degree(f={}){const d=String(f.degree||'').trim();if(d)return d;const c=norm(f.course);if(/servico social|ciencias contabeis|administracao/.test(c))return 'Bacharelado';if(/pedagogia/.test(c))return 'Licenciatura';if(/mba/.test(c))return 'Especialização · Lato Sensu';if(/ensino medio/.test(c))return 'Ensino Médio';return String(f.level||'Formação').trim()||'Formação'}
+function endLabel(f={}){const raw=String(f.end||f.completionDate||'').trim();if(!raw){return /andamento|cursando/i.test(String(f.status||''))?'Em andamento':'Conclusão não informada'}let y='',m='';let x=raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(x){m=x[2];y=x[3]}else{x=raw.match(/(20\d{2}|19\d{2})/);if(x)y=x[1];const mm=raw.match(/(?:^|\D)(0?[1-9]|1[0-2])(?:\D|$)/);if(mm)m=mm[1]}const mn=parseInt(m||'0',10);return y?(mn?`${mn<=6?'1º':'2º'} semestre de ${y}`:`Conclusão em ${y}`):raw}
+function parseHours(v){if(typeof v==='number'&&Number.isFinite(v))return v;let s=String(v??'').trim().toLowerCase();if(!s)return 0;const hm=s.match(/([\d.]+)\s*h(?:\s*(\d+)\s*(?:min|m)?)?/);if(hm){let h=hm[1].replace(/\./g,'');let n=parseFloat(h)||0;let mins=parseFloat(hm[2]||'0')||0;return n+mins/60}if(/h\s*\/\s*a/.test(s)||/horas?/.test(s)){s=s.replace(/[^\d.,]/g,'')}s=s.replace(/\s/g,'');if(!s)return 0;if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');else if(s.includes(','))s=s.replace(',','.');else if(/^\d{1,3}(?:\.\d{3})+$/.test(s))s=s.replace(/\./g,'');const n=parseFloat(s);return Number.isFinite(n)?n:0}
+function parseGrade(v){if(typeof v==='number'&&Number.isFinite(v))return v;let s=String(v??'').trim();if(!s)return null;if(/[a-z]/i.test(s.replace(/nota|media|m[eé]dia/ig,'')))return null;s=s.replace(/\s+/g,'');if(!/^[-+]?\d+[.,]?\d*$/.test(s))return null;if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const n=parseFloat(s);return Number.isFinite(n)&&n>=0&&n<=100?n:null}
+function stateOf(item={}){const raw=norm([item.result,item.status,item.situation,item.situacao].filter(Boolean).join(' '));const grade=parseGrade(item.grade??item.concept??item.nota);if(/nao liberada|não liberada|pendente|reprov|tranc|cancel/.test(raw))return'pending';if(/cursando|em andamento|andamento/.test(raw))return'current';if(/aprov|dispens|cumpr|conclu|integraliz/.test(raw))return'approved';if(/liberada/.test(raw)&&grade!==null)return'approved';if(grade!==null&&raw&&!/pendente/.test(raw))return'approved';return'pending'}
+function stateText(s){return s==='approved'?'Aprovado':s==='current'?'Cursando':'Pendente'}
+function stats(f){const h=Array.isArray(f?.history)?f.history:[];let approved=0,current=0,pendingExplicit=0;for(const x of h){const hrs=parseHours(x.hours);const st=stateOf(x);if(st==='approved')approved+=hrs;else if(st==='current')current+=hrs;else pendingExplicit+=hrs}let total=parseHours(f?.workload);const rowsTotal=approved+current+pendingExplicit;if(!total||total<approved+current)total=Math.max(rowsTotal,approved+current);let pending=Math.max(0,total-approved-current);if(!total){total=rowsTotal;pending=pendingExplicit}if(/conclu/i.test(String(f?.status||''))&&total>0){approved=total;current=0;pending=0}const numeric=h.map(x=>parseGrade(x.grade??x.concept??x.nota)).filter(v=>v!==null);const avg=numeric.length?numeric.reduce((a,b)=>a+b,0)/numeric.length:null;return{total,approved,current,pending,numeric,avg}}
+function fmtH(n){if(!Number.isFinite(n)||n<=0)return'0 h';const r=Math.round(n*10)/10;return `${String(r).replace('.',',')} h`}
+function buildSelect(){const deck=$('.v121-formation-deck',ROOT),cards=$$('[data-v121-open]',deck||ROOT);if(!deck||!cards.length)return;let sel=$('.edu92-course-select',deck);if(!sel){sel=document.createElement('select');sel.className='edu92-course-select';sel.setAttribute('aria-label','Selecionar formação por nível de ensino');$('.v121-deck-head',deck)?.appendChild(sel);sel.addEventListener('change',()=>{const target=ROOT.querySelector(`[data-v121-open="${CSS.escape(sel.value)}"]`);target?.click();setTimeout(run,30)})}const list=load(),active=activeId();const groups=[['ENSINO BÁSICO',[]],['ENSINO SUPERIOR · GRADUAÇÃO',[]],['ENSINO SUPERIOR · PÓS-GRADUAÇÃO',[]]];for(const card of cards){const id=card.dataset.v121Open;const f=list.find(x=>String(x.id||'')===String(id))||{};const idx=isPost(f)?2:isGrad(f)?1:0;groups[idx][1].push({id,label:f.course||$('h3',card)?.textContent?.trim()||'Formação'})}const signature=groups.map(g=>g[0]+g[1].map(x=>x.id).join('|')).join('::');if(sel.dataset.signature!==signature){sel.innerHTML=groups.filter(g=>g[1].length).map(([label,items])=>`<optgroup label="${esc(label)}">${items.map(x=>`<option value="${esc(x.id)}">${esc(x.label)}</option>`).join('')}</optgroup>`).join('');sel.dataset.signature=signature}if(active&&sel.value!==active)sel.value=active}
+function forceHero(f){const detail=$('.v121-detail',ROOT);if(!detail||!f)return;let hero=$('.edu89-hero',detail);const oldKicker=$('.v119-detail-kicker',detail);if(!hero){hero=document.createElement('div');hero.className='edu89-hero';detail.insertBefore(hero,oldKicker||detail.firstChild)}let head=$('.edu89-headline',hero);if(!head){head=document.createElement('div');head.className='edu89-headline';hero.appendChild(head)}let badge=$('.edu89-degree-card',hero);if(!badge){badge=document.createElement('aside');badge.className='edu89-degree-card';hero.appendChild(badge)}const course=String(f.course||$('h2',oldKicker)?.textContent||'Formação');const inst=String(f.institution||$('p',oldKicker)?.textContent||'');const end=endLabel(f);head.innerHTML=`<div class="edu89-kicker"><span class="edu89-level">${esc(category(f))}</span></div><h2>${esc(course)}</h2><p>${esc(inst)}</p>`;badge.innerHTML=`<small>GRAU DA FORMAÇÃO</small><b>${esc(degree(f))}</b><span>${esc(String(f.status||'Vínculo acadêmico registrado'))}</span><span class="edu89-sem-chip">${esc(end)}</span>`;const actions=$('.v119-detail-actions',detail);if(actions&&actions.parentNode!==hero)hero.appendChild(actions);if(oldKicker)oldKicker.style.display='none'}
+function renderHours(f){const detail=$('.v121-detail',ROOT);if(!detail||!f)return;const s=stats(f);let box=$('.edu92-hours',detail);if(!box){box=document.createElement('section');box.className='edu92-hours';const grid=$('.v119-summary-grid',detail);grid?detail.insertBefore(box,grid):detail.appendChild(box)}const total=s.total||1,a=Math.min(100,s.approved/total*100),c=Math.min(100-a,s.current/total*100),p=Math.max(0,100-a-c);const sig=[s.total,s.approved,s.current,s.pending].map(x=>x.toFixed(2)).join('|');if(box.dataset.signature===sig)return;box.dataset.signature=sig;box.innerHTML=`<div class="edu92-hours-total"><small>CARGA HORÁRIA DO CURSO</small><strong>${fmtH(s.total)}</strong><span>${fmtH(s.approved)} concluídas · ${s.total?Math.round(s.approved/s.total*100):0}% integralizado</span></div><div class="edu92-hours-main"><div class="edu92-hours-bar" aria-label="Progresso da carga horária"><i class="approved" style="width:${a}%"></i><i class="current" style="width:${c}%"></i><i class="pending" style="width:${p}%"></i></div><div class="edu92-hours-legend"><div class="edu92-hours-item approved"><i></i><div><b>Aprovado</b><span>${fmtH(s.approved)}</span></div></div><div class="edu92-hours-item current"><i></i><div><b>Cursando</b><span>${fmtH(s.current)}</span></div></div><div class="edu92-hours-item pending"><i></i><div><b>Pendente</b><span>${fmtH(s.pending)}</span></div></div></div></div>`}
+function removeObservationColumns(table){if(!table)return;let heads=$$('thead th',table);let indexes=[];heads.forEach((th,i)=>{if(/observ/.test(norm(th.textContent)))indexes.push(i)});indexes.sort((a,b)=>b-a).forEach(idx=>{table.querySelectorAll('tr').forEach(tr=>{const cells=Array.from(tr.children);if(cells[idx])cells[idx].remove()})})}
+function normalizeResults(f){const detail=$('.v121-detail',ROOT),table=$('.v119-history-table',detail||ROOT);if(!table||!f)return;removeObservationColumns(table);const headers=$$('thead th',table);let resultIdx=headers.findIndex(th=>/resultado|situacao|situação/.test(norm(th.textContent)));if(resultIdx<0)return;headers[resultIdx].textContent='Resultado';const rows=$$('tbody tr',table),history=Array.isArray(f.history)?f.history:[];rows.forEach((r,i)=>{const cell=Array.from(r.children)[resultIdx];if(!cell)return;const st=stateOf(history[i]||{result:cell.textContent,status:cell.textContent,grade:Array.from(r.children)[Math.max(0,resultIdx-1)]?.textContent});cell.innerHTML=`<span class="edu92-result ${st}">${stateText(st)}</span>`})}
+function updateAverage(f){const detail=$('.v121-detail',ROOT);if(!detail||!f)return;const s=stats(f),title=$('.v119-history-title',detail);if(!title)return;let metrics=$('.edu83-academic-metrics',detail);if(!metrics){metrics=document.createElement('div');metrics.className='edu83-academic-metrics';title.insertAdjacentElement('afterend',metrics)}const approved=(f.history||[]).filter(x=>stateOf(x)==='approved').length;const avg=s.avg===null?'—':String(s.avg.toFixed(1)).replace('.',',');metrics.innerHTML=`<span><b>${(f.history||[]).length}</b> registros</span><span><b>${approved}</b> aprovados</span><span><b>${avg}</b> média automática</span><span><b>${s.numeric.length}</b> notas consideradas</span>`;let note=$('.edu89-average-note',detail);if(!note){note=document.createElement('div');note.className='edu89-average-note';metrics.insertAdjacentElement('afterend',note)}note.textContent=`Média = soma das ${s.numeric.length} notas numéricas ÷ ${s.numeric.length||0} disciplinas com nota. Conceitos A, B, C e equivalentes são desconsiderados.`}
+let running=false;function run(){if(running)return;running=true;try{buildSelect();const f=activeFormation();if(!f)return;forceHero(f);renderHours(f);normalizeResults(f);updateAverage(f)}finally{running=false}}
+let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});window.addEventListener('storage',e=>{if(!e.key||e.key===key())schedule()});window.addEventListener('resize',schedule,{passive:true});[0,120,380,900,1600].forEach(ms=>setTimeout(run,ms));
+})();
+</script>
+
 </body></html>
