@@ -2613,4 +2613,70 @@ let t=0;const schedule=()=>{clearTimeout(t);t=setTimeout(run,45)};new MutationOb
 })();
 </script>
 
+
+<style id="pp-v101-stable-academic-header">
+/* V101 — cabeçalho acadêmico estável e independente do legado */
+#edu-formacoes .v121-detail > .edu89-hero{display:none!important}
+#edu-formacoes .edu101-academic-header{
+  position:relative;isolation:isolate;display:grid;
+  grid-template-columns:minmax(0,1.2fr) minmax(220px,.5fr) auto;
+  gap:18px;align-items:center;min-height:100px;margin:0 0 12px;padding:18px 18px 18px 22px;
+  border:1px solid rgba(144,169,196,.36);border-radius:24px;overflow:hidden;
+  background:
+    radial-gradient(circle at 91% 0%,rgba(103,88,255,.11),transparent 25%),
+    radial-gradient(circle at 100% 100%,rgba(30,194,169,.11),transparent 27%),
+    linear-gradient(112deg,#fff 0%,#fbfdff 43%,#f5f9ff 72%,#f1faf9 100%);
+  box-shadow:0 16px 40px rgba(24,56,94,.08),inset 0 1px 0 rgba(255,255,255,.95);
+}
+#edu-formacoes .edu101-academic-header:before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 999px 999px 0;background:linear-gradient(180deg,#6e48ff 0%,#2f7fe9 52%,#22c7ad 100%)}
+#edu-formacoes .edu101-identity{min-width:0;display:grid;gap:4px}
+#edu-formacoes .edu101-level{position:relative;padding-left:12px;font-size:8px;font-weight:950;letter-spacing:.16em;text-transform:uppercase;color:#416f9e;line-height:1}
+#edu-formacoes .edu101-level:before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,#694cff,#23bfa7);box-shadow:0 0 0 4px rgba(104,91,255,.08)}
+#edu-formacoes .edu101-title{margin:0;font-size:22px;line-height:1.04;letter-spacing:-.045em;color:#0e2d49;font-weight:950;overflow-wrap:anywhere}
+#edu-formacoes .edu101-inst{margin:0;font-size:11px;line-height:1.3;color:#74879b;overflow-wrap:anywhere}
+#edu-formacoes .edu101-degree{min-width:220px;padding:4px 0 4px 18px;border-left:1px solid rgba(136,157,183,.22);display:grid;gap:5px;align-content:center}
+#edu-formacoes .edu101-degree small{font-size:7px;font-weight:950;letter-spacing:.16em;color:#8a97a8;text-transform:uppercase}
+#edu-formacoes .edu101-degree strong{font-size:23px;line-height:1.02;letter-spacing:-.04em;font-weight:950;background:linear-gradient(92deg,#6a40ff 0%,#2b77e6 55%,#18a995 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+#edu-formacoes .edu101-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:max-content}
+#edu-formacoes .edu101-date,
+#edu-formacoes .edu101-actions button{min-height:36px;padding:0 13px;border-radius:12px;font-size:9.5px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+#edu-formacoes .edu101-date{background:linear-gradient(180deg,#f6f9ff 0%,#edf5ff 100%);border:1px solid #d9e6f5;color:#2b6194;box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 4px 12px rgba(34,86,137,.06)}
+#edu-formacoes .edu101-edit{border:0;background:linear-gradient(135deg,#173f6d,#1e679f);color:#fff;cursor:pointer}
+#edu-formacoes .edu101-delete{border:1px solid #f1d9d9;background:#fff2f2;color:#a53232;cursor:pointer}
+#edu-formacoes .edu101-edit:hover{filter:brightness(1.06)}
+#edu-formacoes .edu101-delete:hover{background:#ffeaea}
+@media(max-width:980px){
+ #edu-formacoes .edu101-academic-header{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"identity actions" "degree degree";gap:12px}
+ #edu-formacoes .edu101-identity{grid-area:identity}.edu101-degree{grid-area:degree!important;border-left:0!important;border-top:1px solid rgba(136,157,183,.18)!important;padding:12px 0 0!important}.edu101-actions{grid-area:actions!important}
+}
+@media(max-width:660px){
+ #edu-formacoes .edu101-academic-header{grid-template-columns:1fr;grid-template-areas:"identity" "degree" "actions";padding:16px 16px 16px 20px}
+ #edu-formacoes .edu101-actions{justify-self:stretch;justify-content:flex-end;flex-wrap:wrap}
+}
+</style>
+<script id="pp-v101-stable-academic-header-script">
+(()=>{'use strict';
+ const ROOT=document.getElementById('v117FormationRoot'); if(!ROOT)return;
+ const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
+ function formations(){let x=null;try{x=JSON.parse(localStorage.getItem(`planejador_education_formations_v117_${profile().toLowerCase()}`)||'null')}catch(_){}if(!Array.isArray(x)&&profile()==='Marcos'){try{x=JSON.parse(localStorage.getItem('planejador_education_formations_v117')||'[]')}catch(_){x=[]}}return Array.isArray(x)?x:[]}
+ function activeId(){return ROOT.querySelector('[data-v121-open].active')?.dataset.v121Open||ROOT.querySelector('.edu92-course-select')?.value||ROOT.querySelector('.edu83-course-select')?.value||''}
+ function active(){const list=formations(),id=activeId();let f=list.find(x=>String(x.id||'')===String(id));if(f)return f;const title=ROOT.querySelector('.v121-detail .v119-detail-kicker h2,.v121-detail .edu89-headline h2')?.textContent?.trim();return title?list.find(x=>String(x.course||'').trim()===title)||null:null}
+ function monthYear(v){const s=String(v||'').trim();if(!s)return'';let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)return`${String(m[2]).padStart(2,'0')}/${m[3]}`;m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);if(m)return`${m[2]}/${m[1]}`;m=s.match(/^(\d{1,2})\/(\d{4})$/);if(m)return`${String(m[1]).padStart(2,'0')}/${m[2]}`;const y=(s.match(/(?:19|20)\d{2}/)||[])[0];return y||''}
+ function endLabel(f){return monthYear(f.completionDate)||monthYear(f.end)||monthYear(f.diplomaDate)||(/andamento|cursando/i.test(norm(f.status))?'Em andamento':'—')}
+ function removeSummaryCards(detail){$$('.v119-summary-grid > div',detail).forEach(card=>{const label=norm(card.querySelector('span')?.textContent||'');if(/conclus/.test(label)||/diploma|certificado/.test(label))card.remove()})}
+ function render(){const detail=$('.v121-detail',ROOT),f=active();if(!detail||!f)return;removeSummaryCards(detail);let head=$('.edu101-academic-header',detail);if(!head){head=document.createElement('section');head.className='edu101-academic-header';detail.insertBefore(head,detail.firstChild)}head.innerHTML=`<div class="edu101-identity"><span class="edu101-level">${esc(String(f.level||'Formação'))}</span><h2 class="edu101-title">${esc(f.course||'Formação')}</h2><p class="edu101-inst">${esc(f.institution||'')}</p></div><div class="edu101-degree"><small>GRAU ACADÊMICO</small><strong>${esc(f.degree||f.level||'Formação')}</strong></div><div class="edu101-actions"><span class="edu101-date">${esc(endLabel(f))}</span><button type="button" class="edu101-edit">Editar</button><button type="button" class="edu101-delete">Excluir</button></div>`;
+   $('.edu101-edit',head)?.addEventListener('click',()=>{const legacy=$('.v119-detail-actions .edit',detail);legacy?.click()});
+   $('.edu101-delete',head)?.addEventListener('click',()=>{const legacy=$('.v119-detail-actions .delete',detail);legacy?.click()});
+ }
+ let queued=false;function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;render()})}
+ new MutationObserver(schedule).observe(ROOT,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
+ ROOT.addEventListener('click',e=>{if(e.target.closest('[data-v121-open]'))setTimeout(render,0)});
+ window.addEventListener('focus',schedule);
+ [0,80,220,500,900,1600,2400].forEach(ms=>setTimeout(render,ms));
+})();
+</script>
+
 </body></html>
