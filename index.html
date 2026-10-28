@@ -1632,15 +1632,119 @@ img,svg,canvas{max-width:100%}
 @media(max-width:620px){#previdenciaPrivada .ppv-head{align-items:flex-start;flex-direction:column}.ppv-head-actions{width:100%}.ppv-head-actions button{flex:1}#previdenciaPrivada .ppv-marketbar{grid-template-columns:1fr}.ppv-refresh{width:100%}#previdenciaPrivada .ppv-summary{grid-template-columns:1fr}#previdenciaPrivada .ppv-proj-controls,#previdenciaPrivada .ppv-proj-result,#previdenciaPrivada .ppv-proj-foot,#previdenciaPrivada .ppv-risk-presets,#previdenciaPrivada .ppv-formgrid{grid-template-columns:1fr}#previdenciaPrivada .ppv-formgrid .wide{grid-column:auto}#previdenciaPrivada .ppv-compare-row{grid-template-columns:1fr auto}.ppv-compare-bar{grid-column:1/-1;grid-row:2}.ppv-compare-val{grid-column:2;grid-row:1}#previdenciaPrivada .ppv-market-grid{grid-template-columns:1fr 1fr}}
 </style>
 
+
+<style id="pp-v125-fintech-overview-structural">
+#dashboard.fin125-dashboard{display:grid!important;gap:14px!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;overflow:visible!important}
+#dashboard.fin125-dashboard>.grid2{display:none!important}
+#dashboard.fin125-dashboard #annualPremium,#dashboard.fin125-dashboard #capacityShell,#dashboard.fin125-dashboard #planningCards,#dashboard.fin125-dashboard #premiumTrend{display:none!important}
+#dashboard .fin125-hero{position:relative!important;display:grid!important;grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr)!important;align-items:stretch!important;gap:18px!important;min-height:220px!important;padding:28px 28px!important;border:0!important;border-radius:28px!important;overflow:hidden!important;background:linear-gradient(126deg,#071e43 0%,#0a438f 38%,#0c6be6 73%,#11a8de 115%)!important;box-shadow:0 22px 55px rgba(7,49,112,.17)!important;color:#fff!important}
+#dashboard .fin125-hero:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0 55%,rgba(255,255,255,.045) 55.1% 55.3%,transparent 55.4%),linear-gradient(0deg,transparent 0 70%,rgba(255,255,255,.04) 70.1% 70.3%,transparent 70.4%);pointer-events:none}
+#dashboard .fin125-hero:after{content:"";position:absolute;width:370px;height:370px;border:1px solid rgba(255,255,255,.13);border-radius:50%;right:-118px;top:-146px;box-shadow:0 0 0 54px rgba(255,255,255,.028),0 0 0 112px rgba(255,255,255,.018);pointer-events:none}
+#dashboard .fin125-hero-copy,#dashboard .fin125-period-controls{position:relative;z-index:2}
+#dashboard .fin125-kicker{font-size:9px!important;font-weight:900!important;letter-spacing:.18em!important;color:#a9d9ff!important;margin-bottom:16px!important}
+#dashboard .fin125-hero h1{font-size:clamp(34px,4vw,52px)!important;line-height:.95!important;letter-spacing:-.065em!important;margin:0!important;color:#fff!important}
+#dashboard .fin125-hero p{font-size:12px!important;line-height:1.6!important;max-width:650px!important;color:rgba(239,248,255,.84)!important;margin:12px 0 0!important}
+#dashboard .fin125-hero-result{display:flex!important;align-items:flex-end!important;gap:16px!important;margin-top:24px!important}
+#dashboard .fin125-hero-result span{display:block!important;font-size:9px!important;text-transform:uppercase!important;letter-spacing:.12em!important;color:#a8d6ff!important;font-weight:800!important}
+#dashboard .fin125-hero-result b{display:block!important;margin-top:5px!important;font-size:30px!important;letter-spacing:-.055em!important;color:#fff!important;line-height:1!important}
+#dashboard .fin125-hero-result em{font-style:normal!important;display:inline-flex!important;min-height:30px!important;align-items:center!important;padding:0 11px!important;border-radius:999px!important;border:1px solid rgba(255,255,255,.17)!important;background:rgba(255,255,255,.10)!important;color:#fff!important;font-size:10px!important;font-weight:900!important;backdrop-filter:blur(8px)!important}
+#dashboard .fin125-period-controls{align-self:start!important;justify-self:end!important;width:min(100%,430px)!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;padding:9px!important;border-radius:20px!important;background:rgba(5,28,67,.20)!important;border:1px solid rgba(255,255,255,.14)!important;backdrop-filter:blur(13px)!important}
+#dashboard .fin125-period-controls .dashboard-period-button{min-height:44px!important;background:rgba(255,255,255,.10)!important;border:1px solid rgba(255,255,255,.13)!important;color:#fff!important;border-radius:13px!important;box-shadow:none!important}
+#dashboard .fin125-period-controls .dashboard-period-button svg{stroke:#fff!important}
+#dashboard .fin125-period-controls .dashboard-scope{grid-column:1/-1!important;display:flex!important;gap:4px!important;padding:4px!important;border-radius:13px!important;background:rgba(2,18,45,.19)!important;border:1px solid rgba(255,255,255,.08)!important}
+#dashboard .fin125-period-controls .dashboard-scope button{flex:1!important;background:transparent!important;border:0!important;color:#d6eaff!important;box-shadow:none!important;border-radius:10px!important;padding:8px 10px!important}
+#dashboard .fin125-period-controls .dashboard-scope button.active{background:#fff!important;color:#0b438f!important;font-weight:900!important}
+#dashboard .fin125-geo{position:absolute;right:380px;bottom:0;width:280px;height:150px;opacity:.35;pointer-events:none}
+#dashboard .fin125-geo i{position:absolute;display:block;border:1px solid rgba(255,255,255,.32);transform:rotate(35deg)}
+#dashboard .fin125-geo i:nth-child(1){width:150px;height:62px;left:30px;bottom:-20px;border-radius:22px}
+#dashboard .fin125-geo i:nth-child(2){width:86px;height:86px;right:4px;bottom:32px;border-radius:50%}
+#dashboard .fin125-geo i:nth-child(3){width:160px;height:1px;left:0;top:34px;border:0;background:linear-gradient(90deg,rgba(255,255,255,.6),transparent)}
+#dashboard #dashboardKpis.fin125-summary-line{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:0!important;background:#fff!important;border:1px solid #e1e9f2!important;border-radius:22px!important;overflow:hidden!important;box-shadow:0 10px 28px rgba(18,45,80,.045)!important}
+#dashboard #dashboardKpis .kpi{min-height:118px!important;padding:17px 17px!important;border:0!important;border-right:1px solid #edf1f5!important;border-radius:0!important;background:linear-gradient(180deg,#fff,#fbfdff)!important;box-shadow:none!important;color:#122c4d!important}
+#dashboard #dashboardKpis .kpi:last-child{border-right:0!important}
+#dashboard #dashboardKpis .kpi:after{display:none!important}
+#dashboard #dashboardKpis .kpi-icon{width:28px!important;height:28px!important;margin-bottom:9px!important;border-radius:9px!important;background:linear-gradient(135deg,#e9f2ff,#f3f8ff)!important}
+#dashboard #dashboardKpis .kpi-icon svg{stroke:#0e62df!important;width:16px!important;height:16px!important}
+#dashboard #dashboardKpis .label{font-size:8.5px!important;letter-spacing:.10em!important;text-transform:uppercase!important;color:#70829a!important;font-weight:900!important}
+#dashboard #dashboardKpis strong{font-size:22px!important;line-height:1.05!important;letter-spacing:-.05em!important;color:#122c4d!important}
+#dashboard #dashboardKpis .delta{font-size:9px!important;color:#8795a7!important;margin-top:5px!important}
+#dashboard .fin125-layout{display:grid!important;grid-template-columns:minmax(0,1.55fr) minmax(315px,.72fr)!important;gap:14px!important;align-items:start!important}
+#dashboard .fin125-primary,#dashboard .fin125-secondary{display:grid!important;gap:14px!important;min-width:0!important}
+#dashboard .fin125-surface,#dashboard .fin125-side-panel{background:linear-gradient(180deg,#fff 0%,#fbfdff 100%)!important;border:1px solid #e1e9f2!important;border-radius:24px!important;box-shadow:0 10px 30px rgba(18,45,80,.045)!important;overflow:hidden!important}
+#dashboard .fin125-section-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:14px!important;padding:18px 20px 13px!important}
+#dashboard .fin125-section-head>div>span{font-size:8px!important;font-weight:950!important;letter-spacing:.16em!important;color:#3478bd!important}
+#dashboard .fin125-section-head h2{margin:5px 0 3px!important;font-size:21px!important;letter-spacing:-.045em!important;color:#153251!important}
+#dashboard .fin125-section-head p{margin:0!important;font-size:10px!important;color:#74849a!important;line-height:1.5!important}
+#dashboard .fin125-status{display:inline-flex!important;align-items:center!important;min-height:29px!important;padding:0 10px!important;border-radius:999px!important;background:#edf5ff!important;color:#1765bd!important;font-size:9px!important;font-weight:900!important;white-space:nowrap!important}
+#dashboard .fin125-health-line{display:grid!important;grid-template-columns:1.15fr repeat(3,1fr)!important;gap:0!important;border-top:1px solid #edf1f5!important;border-bottom:1px solid #edf1f5!important;margin:0 20px!important}
+#dashboard .fin125-health-metric{padding:15px 14px!important;border-right:1px solid #edf1f5!important;min-width:0!important}
+#dashboard .fin125-health-metric:first-child{padding-left:0!important}.fin125-health-metric:last-child{border-right:0!important;padding-right:0!important}
+#dashboard .fin125-health-metric span{display:block!important;font-size:8px!important;text-transform:uppercase!important;letter-spacing:.09em!important;color:#7c8c9f!important;font-weight:900!important}
+#dashboard .fin125-health-metric b{display:block!important;margin-top:7px!important;font-size:20px!important;color:#153251!important;letter-spacing:-.045em!important;line-height:1.05!important}
+#dashboard .fin125-health-metric small{display:block!important;margin-top:5px!important;font-size:9px!important;color:#8492a4!important;line-height:1.4!important}
+#dashboard .fin125-dual{display:grid!important;grid-template-columns:1fr 1fr!important}
+#dashboard .fin125-embedded{padding:17px 20px 19px!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;min-width:0!important}
+#dashboard .fin125-embedded:first-child{border-right:1px solid #edf1f5!important}
+#dashboard .fin125-embedded .panelhead{margin:0 0 12px!important}.fin125-embedded .panelhead h2{font-size:15px!important;color:#173452!important;margin:0 0 3px!important}.fin125-embedded .panelhead span{font-size:9px!important;color:#8390a2!important}
+#dashboard .fin125-embedded .row3{grid-template-columns:90px minmax(0,1fr) auto!important;gap:9px!important;padding:8px 0!important;border-bottom:1px solid #f0f3f7!important}.fin125-embedded .row3:last-child{border-bottom:0!important}.fin125-embedded .row3 span{font-size:9.5px!important;color:#53677f!important}.fin125-embedded .row3 b{font-size:11.5px!important;color:#153251!important}.fin125-embedded .bar{height:6px!important;border-radius:999px!important;background:#eef3f8!important;overflow:hidden!important}.fin125-embedded .bar i{height:100%!important;border-radius:999px!important;background:linear-gradient(90deg,#0c5ed6,#43a5ff)!important}
+#dashboard .fin125-radar-list,#dashboard .fin125-recent-list{padding:0 20px 12px!important}
+#dashboard .fin125-radar-row,#dashboard .fin125-recent-row{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:12px!important;align-items:center!important;padding:12px 0!important;border-top:1px solid #edf1f5!important}
+#dashboard .fin125-radar-row:first-child,#dashboard .fin125-recent-row:first-child{border-top:0!important}
+#dashboard .fin125-radar-row b,#dashboard .fin125-recent-row b{display:block!important;color:#173452!important;font-size:12px!important;line-height:1.3!important}.fin125-radar-row span,.fin125-recent-row span{display:block!important;margin-top:4px!important;color:#7c8b9e!important;font-size:9px!important;line-height:1.45!important}.fin125-radar-row strong,.fin125-recent-row strong{font-size:13px!important;color:#123159!important;white-space:nowrap!important;letter-spacing:-.025em!important}
+#dashboard .fin125-orbit{width:38px;height:38px;border-radius:50%;border:1px solid #cfe2f8;position:relative}.fin125-orbit:before{content:"";position:absolute;inset:8px;border-radius:50%;background:#0d6ce6;box-shadow:0 0 0 5px #edf5ff}
+#dashboard .fin125-side-panel{padding:17px 17px!important}.fin125-side-panel .panelhead{margin:0 0 11px!important}.fin125-side-panel .panelhead h2{font-size:17px!important;margin:0 0 3px!important;color:#173452!important}.fin125-side-panel .panelhead span{font-size:9px!important;color:#8190a2!important}
+#dashboard .fin125-side-panel .row3{display:grid!important;grid-template-columns:64px minmax(0,1fr) auto!important;gap:8px!important;align-items:center!important;padding:9px 0!important;border-bottom:1px solid #edf1f5!important}.fin125-side-panel .row3:last-child{border-bottom:0!important}.fin125-side-panel .row3 span{font-size:9px!important;color:#66788e!important}.fin125-side-panel .row3 div{font-size:9px!important;color:#6e7e91!important}.fin125-side-panel .row3 b{font-size:11px!important;color:#173452!important}
+#dashboard .fin125-pension-line{margin-top:11px!important;padding-top:11px!important;border-top:1px solid #e9eef5!important}.fin125-pension-item{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important}.fin125-pension-item span{font-size:9px!important;color:#74859a!important}.fin125-pension-item b{font-size:12px!important;color:#153251!important}.fin125-pension-item small{display:block!important;margin-top:4px!important;font-size:8px!important;color:#91a0b1!important}
+#dashboard .fin125-recent .fin125-section-head{padding-bottom:8px!important}
+@media(max-width:1150px){#dashboard .fin125-layout{grid-template-columns:1fr!important}#dashboard .fin125-secondary{grid-template-columns:1fr 1fr!important}.fin125-recent{grid-column:1/-1!important}#dashboard .fin125-hero{grid-template-columns:1fr!important}.fin125-period-controls{justify-self:stretch!important;width:100%!important;max-width:520px!important}.fin125-geo{right:10px!important}}
+@media(max-width:850px){#dashboard #dashboardKpis.fin125-summary-line{grid-template-columns:repeat(2,1fr)!important}#dashboard #dashboardKpis .kpi:nth-child(2n){border-right:0!important}.fin125-health-line{grid-template-columns:1fr 1fr!important}.fin125-health-metric:nth-child(2){border-right:0!important}.fin125-health-metric:nth-child(n+3){border-top:1px solid #edf1f5!important}.fin125-dual{grid-template-columns:1fr!important}.fin125-embedded:first-child{border-right:0!important;border-bottom:1px solid #edf1f5!important}.fin125-secondary{grid-template-columns:1fr!important}.fin125-recent{grid-column:auto!important}}
+@media(max-width:560px){#dashboard .fin125-hero{padding:20px!important;border-radius:22px!important;min-height:0!important}.fin125-period-controls{grid-template-columns:1fr!important}.fin125-period-controls .dashboard-scope{grid-column:auto!important}.fin125-hero-result{align-items:flex-start!important;flex-direction:column!important}#dashboard #dashboardKpis.fin125-summary-line{grid-template-columns:1fr!important}#dashboard #dashboardKpis .kpi{border-right:0!important;border-bottom:1px solid #edf1f5!important}.fin125-health-line{grid-template-columns:1fr!important}.fin125-health-metric{border-right:0!important;border-top:1px solid #edf1f5!important;padding:12px 0!important}.fin125-health-metric:first-child{border-top:0!important}.fin125-section-head{padding:15px 15px 10px!important}.fin125-radar-list,.fin125-recent-list{padding-left:15px!important;padding-right:15px!important}}
+</style>
+
 </head>
 <body data-hub-area="financas"><aside aria-label="Navegação principal" id="ppBankRailV62"><button aria-label="Abrir Hub Pessoal" class="v62-logo" data-tip="Hub Pessoal" data-v62-hub="" type="button"></button><nav aria-label="Navegação" class="v62-nav"><button aria-label="Visão geral" class="v62-btn" data-tip="Visão geral" data-v62-view="dashboard" type="button">⌂</button><button aria-label="Lançamentos" class="v62-btn" data-tip="Lançamentos" data-v62-view="lancamentos" type="button">↕</button><button aria-label="Cartões" class="v62-btn" data-tip="Cartões" data-v62-view="cartoes" type="button">▣</button><button aria-label="Dívidas" class="v62-btn" data-tip="Dívidas" data-v62-view="dividas" type="button">◴</button><button aria-label="FGTS" class="v62-btn" data-tip="FGTS" data-v62-view="fgts" type="button">◇</button><button aria-label="Previdência" class="v62-btn" data-tip="Previdência" data-v62-view="previdencia" type="button">◎</button><button aria-label="Previdência privada" class="v62-btn" data-tip="Previdência privada" data-v62-view="previdenciaPrivada" type="button">◉</button><button aria-label="Investimentos" class="v62-btn" data-tip="Investimentos" data-v62-view="investimentos" type="button">↗</button><button aria-label="Patrimônio" class="v62-btn" data-tip="Patrimônio" data-v62-view="patrimonio" type="button">⬡</button><button aria-label="Veículos" class="v62-btn" data-tip="Veículos" data-v62-view="veiculos" type="button">⚙</button><button aria-label="Calculadora" class="v62-btn" data-tip="Calculadora" data-v62-view="nuvem" type="button">∑</button></nav><div class="v62-foot"><button aria-label="Backup" class="v62-btn" data-tip="Backup" data-v62-backup="" type="button">↓</button><button aria-label="Novo lançamento" class="v62-btn v62-add" data-tip="Novo lançamento" data-v62-add="" type="button">＋</button><div class="v62-sep"></div><button aria-label="Perfil" class="v62-btn" data-tip="Perfil" data-v62-profile="" type="button"><span class="v62-dot">P</span></button><button aria-label="Sair" class="v62-btn" data-tip="Sair" data-v62-logout="" type="button">↪</button></div></aside><div aria-hidden="true" id="ppHubV62"><section aria-label="Hub Pessoal" aria-modal="true" class="v62-hub-card" role="dialog"><div class="v62-hub-head"><div><h2>Hub Pessoal</h2><p>Escolha a área que deseja abrir.</p></div><button aria-label="Fechar" class="v62-hub-close" type="button">×</button></div><div class="v62-hub-grid"><a data-v62-area="financas" href="index.html"><b>Finanças</b><span>Lançamentos, cartões, dívidas e patrimônio</span></a><a data-v62-area="educacao" href="educacao.html"><b>Educação</b><span>Formações e trajetória acadêmica</span></a><a data-v62-area="saude" href="saude.html"><b>Saúde</b><span>Acompanhamento pessoal</span></a><a data-v62-area="entretenimento" href="entretenimento.html"><b>Entretenimento</b><span>Filmes, séries, livros e viagens</span></a></div></section></div><div class="app">
 <div aria-hidden="true" hidden="" id="ppLegacyControlsV63" style="display:none!important"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button class="active" data-view="dashboard">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="previdenciaPrivada">Previdência privada</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="veiculos">Veículos</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx="">+ Lançamento</button></div></div></div>
 <main class="main">
-<section class="view active" id="dashboard">
-<div class="hero"><div><h1>Olá, Marcos.</h1><p id="periodText">Receitas e despesas realizadas, sem misturar projeções futuras.</p></div><div class="filterbar"><select id="yearFilter"></select><select id="monthFilter"></select></div></div>
-<div class="kpis" id="dashboardKpis"></div>
-<div class="grid2"><article class="card panel"><div class="panelhead"><div><h2>Fluxo acumulado do ano</h2><span id="dashboardLegend">entradas, saídas e saldo até o mês selecionado</span></div></div><div class="list" id="flowList"></div></article><article class="card panel"><div class="panelhead"><div><h2>Onde você mais gastou</h2><span id="catPeriod">categorias do período</span></div></div><div class="list" id="categoryList"></div></article></div>
-<div class="grid2"><article class="card panel"><div class="panelhead"><div><h2>Próximas faturas de cartões</h2><span>exclusivamente faturas dos cartões de crédito cadastrados</span></div></div><div class="list" id="nextDues"></div></article><article class="card panel"><div class="panelhead"><div><h2>Resumo patrimonial</h2><span>FGTS, patrimônio e investimentos</span></div></div><div class="list" id="assetSnapshot"></div></article></div>
+<section class="view active fin125-dashboard" id="dashboard">
+  <div class="hero fin125-hero">
+    <div class="fin125-hero-copy">
+      <div class="fin125-kicker" id="fin125Kicker">CENTRO FINANCEIRO · VISÃO INTEGRADA</div>
+      <h1>Visão financeira</h1>
+      <p id="periodText">Receitas e despesas realizadas, sem misturar projeções futuras.</p>
+      <div class="fin125-hero-result">
+        <div><span>Saldo do período</span><b id="fin125HeroBalance">R$ 0,00</b></div>
+        <em id="fin125HeroState">Equilíbrio</em>
+      </div>
+    </div>
+    <div class="filterbar fin125-period-controls"><select id="yearFilter"></select><select id="monthFilter"></select></div>
+    <div class="fin125-geo" aria-hidden="true"><i></i><i></i><i></i></div>
+  </div>
+
+  <div class="kpis fin125-summary-line" id="dashboardKpis"></div>
+
+  <div class="fin125-layout">
+    <div class="fin125-primary">
+      <section class="fin125-surface fin125-health">
+        <div class="fin125-section-head"><div><span>SAÚDE FINANCEIRA</span><h2>Seu mês em uma leitura só</h2><p>Fluxo, comprometimento, cartões e obrigações conectados em um único painel.</p></div><div class="fin125-status" id="fin125HealthStatus">Em análise</div></div>
+        <div class="fin125-health-line" id="fin125HealthLine"></div>
+        <div class="fin125-dual">
+          <article class="card panel fin125-embedded"><div class="panelhead"><div><h2>Fluxo do período</h2><span id="dashboardLegend">entradas, saídas e saldo</span></div></div><div class="list" id="flowList"></div></article>
+          <article class="card panel fin125-embedded"><div class="panelhead"><div><h2>Onde seu dinheiro mais foi</h2><span id="catPeriod">categorias do período</span></div></div><div class="list" id="categoryList"></div></article>
+        </div>
+      </section>
+
+      <section class="fin125-surface fin125-radar">
+        <div class="fin125-section-head"><div><span>RADAR FINANCEIRO</span><h2>O que merece sua atenção</h2><p>Insights automáticos das suas subpáginas, sem precisar abrir cada módulo.</p></div><div class="fin125-orbit" aria-hidden="true"></div></div>
+        <div class="fin125-radar-list" id="fin125RadarList"></div>
+      </section>
+    </div>
+
+    <aside class="fin125-secondary">
+      <article class="card panel fin125-side-panel"><div class="panelhead"><div><h2>Agenda de cartões</h2><span>próximas faturas e vencimentos</span></div></div><div class="list" id="nextDues"></div></article>
+      <article class="card panel fin125-side-panel"><div class="panelhead"><div><h2>Patrimônio consolidado</h2><span>FGTS, patrimônio, investimentos e previdência</span></div></div><div class="list" id="assetSnapshot"></div><div class="fin125-pension-line" id="fin125PensionLine"></div></article>
+      <section class="fin125-surface fin125-recent"><div class="fin125-section-head"><div><span>ÚLTIMOS MOVIMENTOS</span><h2>Atividade recente</h2></div></div><div class="fin125-recent-list" id="fin125RecentList"></div></section>
+    </aside>
+  </div>
 </section>
 <section class="view" id="lancamentos">
 <div class="section-tools"><div><h2>Lançamentos</h2></div><div class="filterbar"><select id="txYear"></select><select id="txType"><option value="all">Todos</option><option value="entrada">Entradas</option><option value="saida">Saídas</option><option value="cartao">Faturas de cartão</option></select><input autocomplete="off" class="search" id="txSearch" list="txCreditorList" placeholder="Buscar credor / origem"/><datalist id="txCreditorList"></datalist></div></div>
@@ -29698,224 +29802,27 @@ body:has(#previdencia.active) .hub-content{
 </script>
 
 
-<style id="pp-v124-fin-overview-b">
-#dashboard.fin-v124{display:grid;gap:16px}
-#dashboard.fin-v124 .hero{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:18px;align-items:stretch;padding:22px 22px;border-radius:30px;background:linear-gradient(135deg,#0a3a85 0%,#0c51bf 42%,#2071f4 100%);border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 56px rgba(11,57,124,.18)}
-#dashboard.fin-v124 .hero:before{content:"";position:absolute;right:-60px;top:-30px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.18),rgba(255,255,255,0) 62%)}
-#dashboard.fin-v124 .hero:after{content:"";position:absolute;inset:auto 180px -85px auto;width:240px;height:240px;border-radius:42px;transform:rotate(28deg);background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,0));border:1px solid rgba(255,255,255,.08)}
-#dashboard.fin-v124 .hero>*{position:relative;z-index:1}
-#dashboard.fin-v124 .hero h1{margin:0 0 10px;font-size:40px;line-height:1;letter-spacing:-.06em;color:#fff}
-#dashboard.fin-v124 .hero p{max-width:660px;color:rgba(255,255,255,.92);font-size:13px;line-height:1.65;margin:0}
-#dashboard.fin-v124 .hero .filterbar{align-self:start;justify-self:end;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(12px);min-width:420px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
-#dashboard.fin-v124 .hero .dashboard-period-button{border:1px solid rgba(255,255,255,.18)!important;background:rgba(255,255,255,.10)!important;color:#fff!important;min-height:46px;border-radius:15px!important}
-#dashboard.fin-v124 .hero .dashboard-period-button svg{stroke:#fff!important;opacity:.9}
-#dashboard.fin-v124 .hero .dashboard-period-button strong{font-size:13px!important}
-#dashboard.fin-v124 .hero .dashboard-scope{grid-column:1/-1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:4px;border-radius:16px;display:flex;gap:5px}
-#dashboard.fin-v124 .hero .dashboard-scope button{background:transparent!important;color:rgba(255,255,255,.86)!important;border-radius:12px!important;padding:10px 12px!important;border:0!important;box-shadow:none!important}
-#dashboard.fin-v124 .hero .dashboard-scope button.active{background:rgba(255,255,255,.95)!important;color:#113f83!important;font-weight:900!important}
-#dashboard.fin-v124 #dashboardKpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;background:linear-gradient(180deg,#fff,#fbfcff);border:1px solid #e7edf5;border-radius:28px;overflow:hidden;box-shadow:0 14px 36px rgba(16,24,40,.05)}
-#dashboard.fin-v124 #dashboardKpis .kpi{margin:0!important;min-height:auto!important;padding:18px 18px 17px!important;background:transparent!important;border:0!important;border-right:1px solid #eef2f7!important;border-top:0!important;box-shadow:none!important;border-radius:0!important}
-#dashboard.fin-v124 #dashboardKpis .kpi:last-child{border-right:0!important}
-#dashboard.fin-v124 #dashboardKpis .kpi-icon{width:30px;height:30px;border-radius:10px;margin-bottom:9px;background:#eef4ff!important}
-#dashboard.fin-v124 #dashboardKpis .kpi-icon svg{stroke:#1154d9!important}
-#dashboard.fin-v124 #dashboardKpis .kpi .label{font-size:10px!important;letter-spacing:.08em;text-transform:uppercase;color:#71829b!important;font-weight:800}
-#dashboard.fin-v124 #dashboardKpis .kpi strong{font-size:28px!important;line-height:1.05;color:#152643!important;letter-spacing:-.06em}
-#dashboard.fin-v124 #dashboardKpis .kpi .delta{font-size:11px!important;color:#6f7f95!important;margin-top:6px!important}
-#dashboard.fin-v124 #finMainBandV124{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(330px,.9fr);gap:16px}
-#dashboard.fin-v124 .fin-stack{display:grid;gap:16px}
-#dashboard.fin-v124 .fin-connected{background:linear-gradient(180deg,#ffffff,#fbfcff);border:1px solid #e6edf5;border-radius:28px;box-shadow:0 14px 38px rgba(16,24,40,.05);overflow:hidden}
-#dashboard.fin-v124 .fin-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 0}
-#dashboard.fin-v124 .fin-panel-head h2{margin:0;font-size:22px;letter-spacing:-.04em;color:#152643}
-#dashboard.fin-v124 .fin-panel-head span{color:#7b8aa0;font-size:11px;line-height:1.5;max-width:540px}
-#dashboard.fin-v124 .fin-health-shell{padding-bottom:18px}
-#dashboard.fin-v124 .fin-health-kpis{display:grid;grid-template-columns:1.05fr repeat(3,minmax(0,1fr));gap:0;padding:14px 10px 0}
-#dashboard.fin-v124 .fin-h-main{padding:0 14px 0 10px;display:flex;flex-direction:column;justify-content:center}
-#dashboard.fin-v124 .fin-h-main .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#71829b;font-weight:900}
-#dashboard.fin-v124 .fin-h-main b{font-size:38px;letter-spacing:-.07em;line-height:1;color:#132748;margin-top:6px}
-#dashboard.fin-v124 .fin-h-main p{margin:10px 0 0;color:#607087;font-size:12px;line-height:1.6}
-#dashboard.fin-v124 .fin-h-mini{padding:6px 16px 0;border-left:1px solid #eef2f7;display:flex;flex-direction:column;justify-content:center;min-height:86px}
-#dashboard.fin-v124 .fin-h-mini span{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#7b8aa0;font-weight:800}
-#dashboard.fin-v124 .fin-h-mini b{margin-top:8px;font-size:22px;color:#162949;letter-spacing:-.05em;line-height:1.1}
-#dashboard.fin-v124 .fin-h-mini small{margin-top:6px;color:#6f7f95;font-size:11px;line-height:1.45}
-#dashboard.fin-v124 .fin-linear-strip{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px 20px 0}
-#dashboard.fin-v124 .fin-compact-row{display:grid;gap:10px}
-#dashboard.fin-v124 .fin-line-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #eef2f7}
-#dashboard.fin-v124 .fin-line-item:last-child{border-bottom:0}
-#dashboard.fin-v124 .fin-line-item span{font-size:11px;color:#71829b}
-#dashboard.fin-v124 .fin-line-item b{font-size:16px;color:#162949;letter-spacing:-.03em}
-#dashboard.fin-v124 .fin-flow-cats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #eef2f7;margin-top:14px}
-#dashboard.fin-v124 .fin-flow-cats .panel{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:18px 20px 22px!important}
-#dashboard.fin-v124 .fin-flow-cats .panel:first-child{border-right:1px solid #eef2f7}
-#dashboard.fin-v124 .fin-flow-cats .panel .panelhead{margin-bottom:12px!important}
-#dashboard.fin-v124 .fin-flow-cats .panel .panelhead h2{font-size:18px!important;margin:0 0 3px!important;color:#173154}
-#dashboard.fin-v124 .fin-flow-cats .panel .panelhead span{font-size:11px!important;color:#75859b!important}
-#dashboard.fin-v124 .fin-flow-cats .panel .list .row3{grid-template-columns:110px minmax(0,1fr) auto;gap:10px;padding:10px 0;border-bottom:1px solid #eef2f7}
-#dashboard.fin-v124 .fin-flow-cats .panel .list .row3:last-child{border-bottom:0}
-#dashboard.fin-v124 .fin-flow-cats .panel .list .row3 span{font-size:11px;color:#475467;font-weight:700}
-#dashboard.fin-v124 .fin-flow-cats .panel .list .row3 b{font-size:14px;color:#162949;letter-spacing:-.03em}
-#dashboard.fin-v124 .fin-flow-cats .panel .bar{height:8px;background:#edf2f7;border-radius:999px;overflow:hidden;align-self:center}
-#dashboard.fin-v124 .fin-flow-cats .panel .bar i{display:block;height:100%;background:linear-gradient(90deg,#0b4db2,#60a5fa);border-radius:999px}
-#dashboard.fin-v124 .fin-side-col .panel{background:linear-gradient(180deg,#fff,#fbfcff)!important;border:1px solid #e6edf5!important;border-radius:24px!important;box-shadow:0 14px 38px rgba(16,24,40,.05)!important;padding:18px 18px 16px!important}
-#dashboard.fin-v124 .fin-side-col .panel .panelhead{margin-bottom:12px!important}
-#dashboard.fin-v124 .fin-side-col .panel .panelhead h2{font-size:19px!important;margin:0 0 3px!important;color:#173154}
-#dashboard.fin-v124 .fin-side-col .panel .panelhead span{font-size:11px!important;color:#75859b!important}
-#dashboard.fin-v124 .fin-side-col .panel .list .row3{grid-template-columns:72px minmax(0,1fr) auto;gap:10px;padding:10px 0;border-bottom:1px solid #eef2f7}
-#dashboard.fin-v124 .fin-side-col .panel .list .row3:last-child{border-bottom:0}
-#dashboard.fin-v124 .fin-side-col .panel .list .row3 span{font-size:11px;color:#69788f;font-weight:700}
-#dashboard.fin-v124 .fin-side-col .panel .list .row3 b{font-size:15px;color:#162949;letter-spacing:-.03em}
-#dashboard.fin-v124 .fin-radar-list,#dashboard.fin-v124 .fin-recent-list{display:grid;gap:0;padding:10px 20px 18px}
-#dashboard.fin-v124 .fin-radar-item,#dashboard.fin-v124 .fin-recent-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #eef2f7}
-#dashboard.fin-v124 .fin-radar-item:last-child,#dashboard.fin-v124 .fin-recent-item:last-child{border-bottom:0}
-#dashboard.fin-v124 .fin-radar-item b,#dashboard.fin-v124 .fin-recent-item b{display:block;color:#162949;font-size:14px;letter-spacing:-.02em}
-#dashboard.fin-v124 .fin-radar-item span,#dashboard.fin-v124 .fin-recent-item span{display:block;margin-top:5px;color:#728198;font-size:11px;line-height:1.5}
-#dashboard.fin-v124 .fin-radar-item .val,#dashboard.fin-v124 .fin-recent-item .val{font-size:15px;font-weight:900;color:#132748;letter-spacing:-.03em;white-space:nowrap}
-#dashboard.fin-v124 .fin-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#eef4ff;color:#0c58d6;font-weight:800;font-size:10px;letter-spacing:.04em;text-transform:uppercase}
-#dashboard.fin-v124 #annualPremium,#dashboard.fin-v124 #capacityShell{display:none!important}
-#dashboard.fin-v124 > .grid2{display:none!important}
-@media(max-width:1180px){#dashboard.fin-v124 .hero{grid-template-columns:1fr}#dashboard.fin-v124 .hero .filterbar{justify-self:stretch;min-width:0}#dashboard.fin-v124 #finMainBandV124{grid-template-columns:1fr}#dashboard.fin-v124 .fin-health-kpis{grid-template-columns:1fr 1fr}#dashboard.fin-v124 .fin-h-main{grid-column:1/-1;padding:0 10px 10px}#dashboard.fin-v124 .fin-h-mini:nth-child(3){border-left:0}}
-@media(max-width:760px){#dashboard.fin-v124 .hero{padding:18px;border-radius:24px}#dashboard.fin-v124 .hero h1{font-size:30px}#dashboard.fin-v124 .hero .filterbar{grid-template-columns:1fr}#dashboard.fin-v124 #dashboardKpis{grid-template-columns:1fr 1fr!important}#dashboard.fin-v124 #dashboardKpis .kpi:nth-child(2n){border-right:0!important}#dashboard.fin-v124 .fin-health-kpis{grid-template-columns:1fr!important}#dashboard.fin-v124 .fin-h-mini{border-left:0;border-top:1px solid #eef2f7;padding:14px 10px 0}#dashboard.fin-v124 .fin-linear-strip{grid-template-columns:1fr}#dashboard.fin-v124 .fin-flow-cats{grid-template-columns:1fr}#dashboard.fin-v124 .fin-flow-cats .panel:first-child{border-right:0;border-bottom:1px solid #eef2f7}}
-@media(max-width:520px){#dashboard.fin-v124 #dashboardKpis{grid-template-columns:1fr!important}#dashboard.fin-v124 #dashboardKpis .kpi{border-right:0!important;border-bottom:1px solid #eef2f7!important}#dashboard.fin-v124 #dashboardKpis .kpi:last-child{border-bottom:0!important}.fin-side-col .panel,.fin-connected{border-radius:20px!important}}
-</style>
-<script id="pp-v124-fin-overview-b-script">
-(function(){
-  function activeProfileNameV124(){try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}}
-  function scopeLabelV124(){
-    try{
-      const scope=localStorage.getItem('planejador_dashboard_scope')||'month';
-      if(scope==='month') return `${monthNames[month-1]} de ${year}`;
-      if(scope==='year') return `Ano de ${year}`;
-      return `Histórico consolidado até ${monthNames[currentMonth-1]} de ${currentYear}`;
-    }catch(e){return ''}
-  }
-  function safeNum(v){try{return Number(num(v)||0)}catch(e){return Number(v)||0}}
-  function allRowsV124(){try{return (typeof allTx==='function'?allTx():[]).filter(x=>x && (x.ano<currentYear || (x.ano===currentYear && x.mesNum<=currentMonth)))}catch(e){return []}}
-  function rowsByScopeV124(){
-    const scope=localStorage.getItem('planejador_dashboard_scope')||'month';
-    const rows=allRowsV124();
-    if(scope==='month') return rows.filter(x=>+x.ano===+year&&+x.mesNum===+month);
-    if(scope==='year') return rows.filter(x=>+x.ano===+year);
-    return rows;
-  }
-  function topCategoryV124(rows){
-    const map={};
-    rows.filter(x=>x.tipo==='saida').forEach(x=>{const k=x.categoria||'Sem categoria'; map[k]=(map[k]||0)+safeNum(x.valor)});
-    return Object.entries(map).sort((a,b)=>b[1]-a[1])[0]||['Sem categoria',0];
-  }
-  function topExpenseV124(rows){
-    return rows.filter(x=>x.tipo==='saida').sort((a,b)=>safeNum(b.valor)-safeNum(a.valor))[0]||null;
-  }
-  function nextInvoiceV124(){
-    try{return (typeof cardAggregatedTx==='function'?cardAggregatedTx():[]).filter(x=>x.ano>currentYear||(x.ano===currentYear&&x.mesNum>=currentMonth)).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum)[0]||null}catch(e){return null}
-  }
-  function totalAssetV124(){try{return (assets||[]).reduce((a,x)=>a+safeNum(x.value),0)}catch(e){return 0}}
-  function totalInvestV124(){try{return (investments||[]).filter(x=>String(x.status||'Ativo')!=='Resgatado').reduce((a,x)=>a+safeNum(x.currentValue),0)}catch(e){return 0}}
-  function totalDebtV124(){try{return (typeof getDebts==='function'?getDebts(false):[]).reduce((a,x)=>a+safeNum(x.pendente),0)}catch(e){return 0}}
-  function majorDebtV124(){try{return (typeof getDebts==='function'?getDebts(false):[]).filter(x=>safeNum(x.pendente)>0).sort((a,b)=>safeNum(b.pendente)-safeNum(a.pendente))[0]||null}catch(e){return null}}
-  function cardLimitV124(){try{return (cards||[]).reduce((a,x)=>a+safeNum(x.limit),0)}catch(e){return 0}}
-  function dueSelectedV124(){try{return (typeof cardAggregatedTx==='function'?cardAggregatedTx():[]).filter(x=>+x.ano===+year&&+x.mesNum===+month).reduce((a,x)=>a+safeNum(x.valor),0)}catch(e){return 0}}
-  function commitmentPctV124(y,m){
-    try{const mt=typeof monthTotals==='function'?monthTotals(y,m):{inc:0,out:0}; return mt.inc? (mt.out/mt.inc*100):0}catch(e){return 0}
-  }
-  function recentRowsV124(){
-    return allRowsV124().slice().sort((a,b)=>(+b.ano-+a.ano)||(+b.mesNum-+a.mesNum)||safeNum(b.valor)-safeNum(a.valor)).slice(0,6)
-  }
-  function ensureLayoutV124(){
-    const dash=document.getElementById('dashboard');
-    if(!dash) return;
-    dash.classList.add('fin-v124');
-    const hero=dash.querySelector('.hero');
-    if(hero){
-      const h1=hero.querySelector('h1'); if(h1) h1.textContent='Visão financeira';
-      const p=hero.querySelector('#periodText'); if(p) p.textContent=`${scopeLabelV124()} · leitura integrada de fluxo, cartões, dívidas, FGTS e patrimônio.`;
-    }
-    const flowPanel=document.getElementById('flowList')?.closest('.panel');
-    const catPanel=document.getElementById('categoryList')?.closest('.panel');
-    const duePanel=document.getElementById('nextDues')?.closest('.panel');
-    const assetPanel=document.getElementById('assetSnapshot')?.closest('.panel');
-    if(!flowPanel || !catPanel || !duePanel || !assetPanel) return;
-    let shell=document.getElementById('finMainBandV124');
-    if(!shell){
-      shell=document.createElement('section');
-      shell.id='finMainBandV124';
-      shell.innerHTML='<div class="fin-stack fin-main-col"></div><div class="fin-stack fin-side-col"></div>';
-      dash.appendChild(shell);
-    }
-    const left=shell.querySelector('.fin-main-col');
-    const right=shell.querySelector('.fin-side-col');
-    if(!document.getElementById('finHealthShellV124')){
-      const health=document.createElement('section');
-      health.id='finHealthShellV124';
-      health.className='fin-connected fin-health-shell';
-      health.innerHTML='<div class="fin-panel-head"><div><h2>Saúde financeira</h2><span>Painel principal com leitura executiva do período, puxando informações de lançamentos, cartões e dívidas.</span></div><div class="fin-tag">Visão integrada</div></div><div class="fin-health-kpis" id="finHealthBodyV124"></div><div class="fin-linear-strip"><div class="fin-compact-row" id="finHealthLinesV124"></div><div class="fin-compact-row" id="finHealthLines2V124"></div></div><div class="fin-flow-cats" id="finFlowCatsV124"></div>';
-      left.appendChild(health);
-      document.getElementById('finFlowCatsV124').append(flowPanel,catPanel);
-    }
-    if(!document.getElementById('finRadarShellV124')){
-      const radar=document.createElement('section');
-      radar.id='finRadarShellV124';
-      radar.className='fin-connected';
-      radar.innerHTML='<div class="fin-panel-head"><div><h2>Radar financeiro</h2><span>Insights automáticos trazidos das subpáginas para leitura rápida na home.</span></div><div class="fin-tag">Etapa 2</div></div><div class="fin-radar-list" id="finRadarListV124"></div>';
-      left.appendChild(radar);
-    }
-    if(!document.getElementById('finRecentShellV124')){
-      const recent=document.createElement('section');
-      recent.id='finRecentShellV124';
-      recent.className='fin-connected';
-      recent.innerHTML='<div class="fin-panel-head"><div><h2>Últimos movimentos</h2><span>Amostra dos lançamentos mais recentes para evitar que a home fique rasa demais.</span></div><div class="fin-tag">Lançamentos</div></div><div class="fin-recent-list" id="finRecentListV124"></div>';
-      right.appendChild(recent);
-    }
-    if(duePanel && duePanel.parentElement!==right) right.insertBefore(duePanel,right.firstChild);
-    if(assetPanel && assetPanel.parentElement!==right) right.insertBefore(assetPanel,document.getElementById('finRecentShellV124'));
-    if(flowPanel){flowPanel.querySelector('h2')&&(flowPanel.querySelector('h2').textContent='Fluxo do período');}
-    if(flowPanel){const s=flowPanel.querySelector('.panelhead span'); if(s) s.textContent='Receitas, despesas e resultado em leitura linear';}
-    if(catPanel){catPanel.querySelector('h2')&&(catPanel.querySelector('h2').textContent='Onde seu dinheiro mais foi');}
-    if(duePanel){duePanel.querySelector('h2')&&(duePanel.querySelector('h2').textContent='Agenda de cartões'); const s=duePanel.querySelector('.panelhead span'); if(s) s.textContent='Próximas faturas e obrigações vindas da subpágina de cartões';}
-    if(assetPanel){assetPanel.querySelector('h2')&&(assetPanel.querySelector('h2').textContent='Patrimônio consolidado'); const s=assetPanel.querySelector('.panelhead span'); if(s) s.textContent='FGTS, patrimônio cadastrado e investimentos em visão única';}
-  }
-  function renderOverviewV124(){
-    const dash=document.getElementById('dashboard'); if(!dash) return;
-    const profile=activeProfileNameV124();
-    const heroP=dash.querySelector('#periodText'); if(heroP) heroP.textContent=`${scopeLabelV124()} · visão unificada do perfil ${profile}, conectando fluxo, cartões, dívidas, FGTS e patrimônio.`;
-    const rows=rowsByScopeV124();
-    const inc=rows.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+safeNum(x.valor),0);
-    const out=rows.filter(x=>x.tipo==='saida').reduce((a,x)=>a+safeNum(x.valor),0);
-    const bal=inc-out;
-    const status=bal>0?'Superávit':bal<0?'Déficit':'Equilíbrio';
-    const monthRef=year===currentYear?Math.min(month,currentMonth):month;
-    const pct=commitmentPctV124(year,monthRef);
-    const health=document.getElementById('finHealthBodyV124');
-    if(health){
-      health.innerHTML=`<div class="fin-h-main"><span class="eyebrow">situação do período</span><b>${status}</b><p>${bal>=0?'As receitas sustentam o período selecionado.':'As despesas estão acima das receitas no período selecionado.'} Use este painel como centro da tomada de decisão.</p></div><div class="fin-h-mini"><span>Saldo do período</span><b>${brl(bal)}</b><small>${bal>=0?'resultado positivo':'pressão financeira'} · ${scopeLabelV124()}</small></div><div class="fin-h-mini"><span>Comprometimento</span><b>${pct.toFixed(1).replace('.',',')}%</b><small>despesas sobre receitas no mês de referência</small></div><div class="fin-h-mini"><span>Limite total dos cartões</span><b>${brl(cardLimitV124())}</b><small>exposição no mês selecionado: ${brl(dueSelectedV124())}</small></div>`;
-    }
-    const l1=document.getElementById('finHealthLinesV124');
-    const l2=document.getElementById('finHealthLines2V124');
-    if(l1) l1.innerHTML=`<div class="fin-line-item"><span>Receitas realizadas</span><b>${brl(inc)}</b></div><div class="fin-line-item"><span>Despesas realizadas</span><b>${brl(out)}</b></div><div class="fin-line-item"><span>Dívidas pendentes</span><b>${brl(totalDebtV124())}</b></div>`;
-    if(l2) l2.innerHTML=`<div class="fin-line-item"><span>FGTS disponível</span><b>${brl((fgtsSummary||{}).saldoDisponivel||0)}</b></div><div class="fin-line-item"><span>Investimentos ativos</span><b>${brl(totalInvestV124())}</b></div><div class="fin-line-item"><span>Patrimônio cadastrado</span><b>${brl(totalAssetV124())}</b></div>`;
-
-    const topCat=topCategoryV124(rows), topExp=topExpenseV124(rows), nextInv=nextInvoiceV124(), heavyDebt=majorDebtV124();
-    const radar=[
-      {title:'Maior categoria de saída',sub:`${scopeLabelV124()} · leitura por categoria`,val:brl(topCat[1]),note:topCat[0]},
-      {title:'Maior despesa individual',sub:topExp?`${topExp.descricao||'Sem descrição'} · ${topExp.categoria||'Sem categoria'}`:'Sem despesas relevantes',val:topExp?brl(topExp.valor):'—'},
-      {title:'Próxima fatura no radar',sub:nextInv?`Fatura ${nextInv.origem} · ${monthLabel(nextInv.ano,nextInv.mesNum)}`:'Nenhuma fatura futura encontrada',val:nextInv?brl(nextInv.valor):'—'},
-      {title:'Dívida que mais pesa hoje',sub:heavyDebt?`${heavyDebt.descricao||heavyDebt.credor||'Sem descrição'}`:'Sem dívida pendente',val:heavyDebt?brl(heavyDebt.pendente):'—'},
-      {title:'Capital em investimentos',sub:'Leitura resumida da subpágina de investimentos',val:brl(totalInvestV124())},
-      {title:'FGTS livre disponível',sub:'Baseado nos saldos editáveis do FGTS',val:brl((fgtsSummary||{}).saldoDisponivel||0)}
-    ];
-    const radarEl=document.getElementById('finRadarListV124');
-    if(radarEl) radarEl.innerHTML=radar.map(r=>`<div class="fin-radar-item"><div><b>${r.title}</b><span>${r.note?r.note+' · ':''}${r.sub||''}</span></div><div class="val">${r.val}</div></div>`).join('');
-    const recentEl=document.getElementById('finRecentListV124');
-    if(recentEl){
-      const items=recentRowsV124();
-      recentEl.innerHTML=items.length?items.map(x=>`<div class="fin-recent-item"><div><b>${(x.descricao||x.origem||'Lançamento').toString()}</b><span>${monthLabel(x.ano,x.mesNum)} · ${(x.categoria||x.tipo||'Sem categoria').toString()} · ${(x.tipo==='entrada'?'Entrada':'Saída')}</span></div><div class="val">${brl(x.valor)}</div></div>`).join(''):'<div class="fin-recent-item"><div><b>Nenhum lançamento recente</b><span>Quando existirem movimentos, eles aparecerão aqui.</span></div><div class="val">—</div></div>';
-    }
-  }
-  const oldRender=window.renderDashboard;
-  window.renderDashboard=function(){
-    const out=oldRender&&oldRender.apply(this,arguments);
-    setTimeout(()=>{try{ensureLayoutV124();renderOverviewV124();}catch(e){console.error(e)}},80);
-    return out;
-  };
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{try{ensureLayoutV124();renderOverviewV124();}catch(e){console.error(e)}},300));
+<script id="pp-v125-fintech-overview-script">
+(()=>{'use strict';
+const q=id=>document.getElementById(id);const n=v=>{try{return Number(num(v)||0)}catch(e){return Number(v)||0}};
+function profile(){try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}}
+function scope(){return localStorage.getItem('planejador_dashboard_scope')||'month'}
+function scopeLabel125(){try{if(scope()==='month')return `${monthNames[month-1]} de ${year}`;if(scope()==='year')return `Ano de ${year}`;return `Histórico até ${monthNames[currentMonth-1].toLowerCase()} de ${currentYear}`}catch(e){return ''}}
+function rowsAll(){try{return allTx().filter(x=>x.ano<currentYear||(x.ano===currentYear&&x.mesNum<=currentMonth))}catch(e){return[]}}
+function rowsScope(){const r=rowsAll();if(scope()==='month')return r.filter(x=>+x.ano===+year&&+x.mesNum===+month);if(scope()==='year')return r.filter(x=>+x.ano===+year);return r}
+function privatePension(){try{const raw=JSON.parse(localStorage.getItem('planejador_private_pension_v70')||'null');if(!raw)return null;const rec=Array.isArray(raw.records)?raw.records.slice().sort((a,b)=>String(a.month).localeCompare(String(b.month))):[];let bal=0,contrib=0,withdraw=0;const annual=((raw.settings?.annualReturn||0)-(raw.settings?.adminFee||0))/100;const mr=Math.pow(1+annual,1/12)-1;for(const x of rec){const c=n(x.contribution),w=n(x.withdrawal);contrib+=c;withdraw+=w;const base=Math.max(0,bal+c-w);const rp=x.returnPct===null||x.returnPct===''||!Number.isFinite(Number(x.returnPct))?mr*100:Number(x.returnPct);const calc=base*(1+rp/100);const rep=x.reportedBalance===null||x.reportedBalance===''||!Number.isFinite(Number(x.reportedBalance))?null:Number(x.reportedBalance);bal=Math.max(0,rep===null?calc:rep)}return{balance:bal,net:contrib-withdraw,bank:raw.settings?.bank||'Previdência privada',plan:raw.settings?.plan||'Plano previdenciário',records:rec.length}}catch(e){return null}}
+function cardLimit(){try{return (cards||[]).reduce((a,x)=>a+n(x.limit),0)}catch(e){return 0}}
+function debtTotal(){try{return getDebts(false).reduce((a,x)=>a+n(x.pendente),0)}catch(e){return 0}}
+function investTotal(){try{return (investments||[]).filter(x=>x.status!=='Resgatado').reduce((a,x)=>a+n(x.currentValue),0)}catch(e){return 0}}
+function assetTotal(){try{return (assets||[]).reduce((a,x)=>a+n(x.value),0)}catch(e){return 0}}
+function render125(){const rows=rowsScope();const inc=rows.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+n(x.valor),0);const out=rows.filter(x=>x.tipo==='saida').reduce((a,x)=>a+n(x.valor),0);const bal=inc-out;const state=bal>0?'Superávit':bal<0?'Déficit':'Equilíbrio';const p=q('periodText');if(p)p.textContent=`${scopeLabel125()} · visão integrada do perfil ${profile()}, conectando fluxo, cartões, dívidas, FGTS, investimentos e patrimônio.`;q('fin125HeroBalance')&&(q('fin125HeroBalance').textContent=brl(bal));q('fin125HeroState')&&(q('fin125HeroState').textContent=state);q('fin125Kicker')&&(q('fin125Kicker').textContent=`CENTRO FINANCEIRO · ${scopeLabel125().toUpperCase()}`);q('fin125HealthStatus')&&(q('fin125HealthStatus').textContent=state);
+let monthRows=rowsAll().filter(x=>+x.ano===+year&&+x.mesNum===+(year===currentYear?Math.min(month,currentMonth):month));let mi=monthRows.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+n(x.valor),0),mo=monthRows.filter(x=>x.tipo==='saida').reduce((a,x)=>a+n(x.valor),0),commit=mi?mo/mi*100:0;let cardMonth=0;try{cardMonth=cardAggregatedTx().filter(x=>+x.ano===+year&&+x.mesNum===+month).reduce((a,x)=>a+n(x.valor),0)}catch(e){}
+const health=q('fin125HealthLine');if(health)health.innerHTML=`<div class="fin125-health-metric"><span>Comprometimento do mês</span><b>${commit.toFixed(1).replace('.',',')}%</b><small>despesas sobre receitas</small></div><div class="fin125-health-metric"><span>Dívidas pendentes</span><b>${brl(debtTotal())}</b><small>obrigações ainda abertas</small></div><div class="fin125-health-metric"><span>Limite dos cartões</span><b>${brl(cardLimit())}</b><small>${brl(cardMonth)} em faturas no mês</small></div><div class="fin125-health-metric"><span>Capital investido</span><b>${brl(investTotal())}</b><small>investimentos ativos</small></div>`;
+const cats={};rows.filter(x=>x.tipo==='saida').forEach(x=>{const k=x.categoria||'Sem categoria';cats[k]=(cats[k]||0)+n(x.valor)});const topCat=Object.entries(cats).sort((a,b)=>b[1]-a[1])[0]||['Sem categoria',0];const topExp=rows.filter(x=>x.tipo==='saida').sort((a,b)=>n(b.valor)-n(a.valor))[0]||null;let nxt=null;try{nxt=cardAggregatedTx().filter(x=>x.ano>currentYear||(x.ano===currentYear&&x.mesNum>=currentMonth)).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum)[0]||null}catch(e){}const heavy=(()=>{try{return getDebts(false).filter(x=>n(x.pendente)>0).sort((a,b)=>n(b.pendente)-n(a.pendente))[0]||null}catch(e){return null}})();const pp=privatePension();const radar=[['Maior categoria de saída',`${topCat[0]} · ${scopeLabel125()}`,brl(topCat[1])],['Maior despesa individual',topExp?`${topExp.descricao||topExp.origem||'Sem descrição'} · ${topExp.categoria||'Sem categoria'}`:'Nenhuma despesa no período',topExp?brl(topExp.valor):'—'],['Próxima fatura',nxt?`${nxt.origem} · ${monthLabel(nxt.ano,nxt.mesNum)}`:'Nenhuma fatura futura',nxt?brl(nxt.valor):'—'],['Maior dívida pendente',heavy?`${heavy.descricao||heavy.credor||'Compromisso'}`:'Nenhuma dívida pendente',heavy?brl(heavy.pendente):'—'],['FGTS disponível','saldo livre informado na subpágina de FGTS',brl(fgtsSummary?.saldoDisponivel||0)],['Previdência privada',pp?`${pp.bank} · ${pp.records} lançamento(s)`:'Sem movimentação registrada',pp?brl(pp.balance):'—']];const re=q('fin125RadarList');if(re)re.innerHTML=radar.map(x=>`<div class="fin125-radar-row"><div><b>${x[0]}</b><span>${x[1]}</span></div><strong>${x[2]}</strong></div>`).join('');
+const pe=q('fin125PensionLine');if(pe)pe.innerHTML=pp?`<div class="fin125-pension-item"><div><span>Previdência privada</span><small>${pp.plan} · ${pp.records} mês(es) registrados</small></div><b>${brl(pp.balance)}</b></div>`:`<div class="fin125-pension-item"><div><span>Previdência privada</span><small>Nenhum lançamento registrado ainda.</small></div><b>—</b></div>`;
+const recent=rowsAll().slice().sort((a,b)=>(+b.ano-+a.ano)||(+b.mesNum-+a.mesNum)||n(b.valor)-n(a.valor)).slice(0,6);const rr=q('fin125RecentList');if(rr)rr.innerHTML=recent.length?recent.map(x=>`<div class="fin125-recent-row"><div><b>${x.descricao||x.origem||'Lançamento'}</b><span>${monthLabel(x.ano,x.mesNum)} · ${x.categoria||'Sem categoria'} · ${x.tipo==='entrada'?'Entrada':'Saída'}</span></div><strong>${brl(x.valor)}</strong></div>`).join(''):`<div class="fin125-recent-row"><div><b>Nenhum movimento recente</b><span>Os lançamentos aparecerão aqui.</span></div><strong>—</strong></div>`;
+}
+const original=window.renderDashboard;window.renderDashboard=function(){const r=original?.apply(this,arguments);setTimeout(render125,60);return r};window.addEventListener('load',()=>setTimeout(render125,500));document.addEventListener('click',e=>{if(e.target.closest?.('#dashboardScope,#dashMonthBtn,#dashYearBtn'))setTimeout(render125,140)},true);['yearFilter','monthFilter'].forEach(id=>q(id)?.addEventListener('change',()=>setTimeout(render125,80)));setTimeout(render125,1200);
 })();
 </script>
 
@@ -30125,27 +30032,3 @@ body:has(#previdencia.active) .hub-content{
 })();
 </script>
 
-<style id="pp-v124-fin-overview-b-final"></style>
-<script id="pp-v124-fin-overview-b-final-script">
-(function(){
-  try{
-    if(!document.getElementById('pp-v124-fin-overview-b')){
-      const st=document.createElement('style');
-      st.id='pp-v124-fin-overview-b';
-      st.textContent='';
-      document.head.appendChild(st);
-    }
-  }catch(e){}
-  function activeProfileNameV124(){try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}}
-  function scopeLabelV124(){try{const s=localStorage.getItem('planejador_dashboard_scope')||'month';if(s==='month')return `${monthNames[month-1]} de ${year}`;if(s==='year')return `Ano de ${year}`;return `Histórico consolidado até ${monthNames[currentMonth-1]} de ${currentYear}`;}catch(e){return ''}}
-  function safeNum(v){try{return Number(num(v)||0)}catch(e){return Number(v)||0}}
-  function rowsAll(){try{return (typeof allTx==='function'?allTx():[]).filter(x=>x&&(x.ano<currentYear||(x.ano===currentYear&&x.mesNum<=currentMonth)))}catch(e){return []}}
-  function rowsScoped(){const s=localStorage.getItem('planejador_dashboard_scope')||'month';const rows=rowsAll();if(s==='month')return rows.filter(x=>+x.ano===+year&&+x.mesNum===+month);if(s==='year')return rows.filter(x=>+x.ano===+year);return rows;}
-  function ensure(){const dash=document.getElementById('dashboard');if(!dash)return;dash.classList.add('fin-v124');const hero=dash.querySelector('.hero');if(hero){const h1=hero.querySelector('h1');if(h1)h1.textContent='Visão financeira';const p=hero.querySelector('#periodText');if(p)p.textContent=`${scopeLabelV124()} · leitura integrada de fluxo, cartões, dívidas, FGTS e patrimônio.`;}const fp=document.getElementById('flowList')?.closest('.panel');const cp=document.getElementById('categoryList')?.closest('.panel');const dp=document.getElementById('nextDues')?.closest('.panel');const ap=document.getElementById('assetSnapshot')?.closest('.panel');if(!fp||!cp||!dp||!ap)return;let shell=document.getElementById('finMainBandV124');if(!shell){shell=document.createElement('section');shell.id='finMainBandV124';shell.innerHTML='<div class="fin-stack fin-main-col"></div><div class="fin-stack fin-side-col"></div>';dash.appendChild(shell);}const left=shell.querySelector('.fin-main-col'),right=shell.querySelector('.fin-side-col');if(!document.getElementById('finHealthShellV124')){const health=document.createElement('section');health.id='finHealthShellV124';health.className='fin-connected fin-health-shell';health.innerHTML='<div class="fin-panel-head"><div><h2>Saúde financeira</h2><span>Painel principal com leitura executiva do período, puxando informações de lançamentos, cartões e dívidas.</span></div><div class="fin-tag">Visão integrada</div></div><div class="fin-health-kpis" id="finHealthBodyV124"></div><div class="fin-linear-strip"><div class="fin-compact-row" id="finHealthLinesV124"></div><div class="fin-compact-row" id="finHealthLines2V124"></div></div><div class="fin-flow-cats" id="finFlowCatsV124"></div>';left.appendChild(health);document.getElementById('finFlowCatsV124').append(fp,cp);}if(!document.getElementById('finRadarShellV124')){const radar=document.createElement('section');radar.id='finRadarShellV124';radar.className='fin-connected';radar.innerHTML='<div class="fin-panel-head"><div><h2>Radar financeiro</h2><span>Insights automáticos trazidos das subpáginas para leitura rápida na home.</span></div><div class="fin-tag">Etapa 2</div></div><div class="fin-radar-list" id="finRadarListV124"></div>';left.appendChild(radar);}if(!document.getElementById('finRecentShellV124')){const recent=document.createElement('section');recent.id='finRecentShellV124';recent.className='fin-connected';recent.innerHTML='<div class="fin-panel-head"><div><h2>Últimos movimentos</h2><span>Amostra dos lançamentos mais recentes para evitar que a home fique rasa demais.</span></div><div class="fin-tag">Lançamentos</div></div><div class="fin-recent-list" id="finRecentListV124"></div>';right.appendChild(recent);}if(dp&&dp.parentElement!==right)right.insertBefore(dp,right.firstChild);if(ap&&ap.parentElement!==right)right.insertBefore(ap,document.getElementById('finRecentShellV124'));fp.querySelector('h2')&&(fp.querySelector('h2').textContent='Fluxo do período');cp.querySelector('h2')&&(cp.querySelector('h2').textContent='Onde seu dinheiro mais foi');dp.querySelector('h2')&&(dp.querySelector('h2').textContent='Agenda de cartões');ap.querySelector('h2')&&(ap.querySelector('h2').textContent='Patrimônio consolidado');const fsub=fp.querySelector('.panelhead span');if(fsub)fsub.textContent='Receitas, despesas e resultado em leitura linear';const dsub=dp.querySelector('.panelhead span');if(dsub)dsub.textContent='Próximas faturas e obrigações vindas da subpágina de cartões';const asub=ap.querySelector('.panelhead span');if(asub)asub.textContent='FGTS, patrimônio cadastrado e investimentos em visão única';}
-  function render(){const dash=document.getElementById('dashboard');if(!dash)return;const rows=rowsScoped();const inc=rows.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+safeNum(x.valor),0);const out=rows.filter(x=>x.tipo==='saida').reduce((a,x)=>a+safeNum(x.valor),0);const bal=inc-out;const status=bal>0?'Superávit':bal<0?'Déficit':'Equilíbrio';const mt=typeof monthTotals==='function'?monthTotals(year===currentYear?year:year,year===currentYear?Math.min(month,currentMonth):month):{inc:0,out:0};const pct=mt.inc?mt.out/mt.inc*100:0;const cardLimit=(cards||[]).reduce((a,x)=>a+safeNum(x.limit),0);const dueMonth=(typeof cardAggregatedTx==='function'?cardAggregatedTx():[]).filter(x=>+x.ano===+year&&+x.mesNum===+month).reduce((a,x)=>a+safeNum(x.valor),0);const debtTotal=(typeof getDebts==='function'?getDebts(false):[]).reduce((a,x)=>a+safeNum(x.pendente),0);const investTotal=(investments||[]).filter(x=>String(x.status||'Ativo')!=='Resgatado').reduce((a,x)=>a+safeNum(x.currentValue),0);const assetTotal=(assets||[]).reduce((a,x)=>a+safeNum(x.value),0);const health=document.getElementById('finHealthBodyV124');if(health)health.innerHTML=`<div class="fin-h-main"><span class="eyebrow">situação do período</span><b>${status}</b><p>${bal>=0?'As receitas sustentam o período selecionado.':'As despesas estão acima das receitas no período selecionado.'} Use este painel como centro da tomada de decisão.</p></div><div class="fin-h-mini"><span>Saldo do período</span><b>${brl(bal)}</b><small>${bal>=0?'resultado positivo':'pressão financeira'} · ${scopeLabelV124()}</small></div><div class="fin-h-mini"><span>Comprometimento</span><b>${pct.toFixed(1).replace('.',',')}%</b><small>despesas sobre receitas no mês de referência</small></div><div class="fin-h-mini"><span>Limite total dos cartões</span><b>${brl(cardLimit)}</b><small>exposição no mês selecionado: ${brl(dueMonth)}</small></div>`;const l1=document.getElementById('finHealthLinesV124');if(l1)l1.innerHTML=`<div class="fin-line-item"><span>Receitas realizadas</span><b>${brl(inc)}</b></div><div class="fin-line-item"><span>Despesas realizadas</span><b>${brl(out)}</b></div><div class="fin-line-item"><span>Dívidas pendentes</span><b>${brl(debtTotal)}</b></div>`;const l2=document.getElementById('finHealthLines2V124');if(l2)l2.innerHTML=`<div class="fin-line-item"><span>FGTS disponível</span><b>${brl((fgtsSummary||{}).saldoDisponivel||0)}</b></div><div class="fin-line-item"><span>Investimentos ativos</span><b>${brl(investTotal)}</b></div><div class="fin-line-item"><span>Patrimônio cadastrado</span><b>${brl(assetTotal)}</b></div>`;const catMap={};rows.filter(x=>x.tipo==='saida').forEach(x=>{const k=x.categoria||'Sem categoria';catMap[k]=(catMap[k]||0)+safeNum(x.valor)});const topCat=Object.entries(catMap).sort((a,b)=>b[1]-a[1])[0]||['Sem categoria',0];const topExp=rows.filter(x=>x.tipo==='saida').sort((a,b)=>safeNum(b.valor)-safeNum(a.valor))[0]||null;const nextInv=(typeof cardAggregatedTx==='function'?cardAggregatedTx():[]).filter(x=>x.ano>currentYear||(x.ano===currentYear&&x.mesNum>=currentMonth)).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum)[0]||null;const heavy=(typeof getDebts==='function'?getDebts(false):[]).filter(x=>safeNum(x.pendente)>0).sort((a,b)=>safeNum(b.pendente)-safeNum(a.pendente))[0]||null;const radarEl=document.getElementById('finRadarListV124');if(radarEl){const radar=[{title:'Maior categoria de saída',sub:`${scopeLabelV124()} · leitura por categoria`,val:brl(topCat[1]),note:topCat[0]},{title:'Maior despesa individual',sub:topExp?`${topExp.descricao||'Sem descrição'} · ${topExp.categoria||'Sem categoria'}`:'Sem despesas relevantes',val:topExp?brl(topExp.valor):'—'},{title:'Próxima fatura no radar',sub:nextInv?`Fatura ${nextInv.origem} · ${monthLabel(nextInv.ano,nextInv.mesNum)}`:'Nenhuma fatura futura encontrada',val:nextInv?brl(nextInv.valor):'—'},{title:'Dívida que mais pesa hoje',sub:heavy?`${heavy.descricao||heavy.credor||'Sem descrição'}`:'Sem dívida pendente',val:heavy?brl(heavy.pendente):'—'},{title:'Capital em investimentos',sub:'Leitura resumida da subpágina de investimentos',val:brl(investTotal)},{title:'FGTS livre disponível',sub:'Baseado nos saldos editáveis do FGTS',val:brl((fgtsSummary||{}).saldoDisponivel||0)}];radarEl.innerHTML=radar.map(r=>`<div class="fin-radar-item"><div><b>${r.title}</b><span>${r.note?r.note+' · ':''}${r.sub||''}</span></div><div class="val">${r.val}</div></div>`).join('');}const recentEl=document.getElementById('finRecentListV124');if(recentEl){const items=rowsAll().slice().sort((a,b)=>(+b.ano-+a.ano)||(+b.mesNum-+a.mesNum)||safeNum(b.valor)-safeNum(a.valor)).slice(0,6);recentEl.innerHTML=items.length?items.map(x=>`<div class="fin-recent-item"><div><b>${(x.descricao||x.origem||'Lançamento').toString()}</b><span>${monthLabel(x.ano,x.mesNum)} · ${(x.categoria||x.tipo||'Sem categoria').toString()} · ${(x.tipo==='entrada'?'Entrada':'Saída')}</span></div><div class="val">${brl(x.valor)}</div></div>`).join(''):'<div class="fin-recent-item"><div><b>Nenhum lançamento recente</b><span>Quando existirem movimentos, eles aparecerão aqui.</span></div><div class="val">—</div></div>';}const p=dash.querySelector('#periodText');if(p)p.textContent=`${scopeLabelV124()} · visão unificada do perfil ${activeProfileNameV124()}, conectando fluxo, cartões, dívidas, FGTS e patrimônio.`;}
-  const prev=window.renderDashboard;window.renderDashboard=function(){const r=prev&&prev.apply(this,arguments);setTimeout(()=>{ensure();render();},120);return r;};document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{ensure();render();},500));setTimeout(()=>{ensure();render();},1400);
-})();
-</script>
-<style id="pp-v124-fin-overview-b-final-css">
-#dashboard.fin-v124{display:grid;gap:16px}#dashboard.fin-v124 .hero{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:18px;align-items:stretch;padding:22px 22px;border-radius:30px;background:linear-gradient(135deg,#0a3a85 0%,#0c51bf 42%,#2071f4 100%);border:1px solid rgba(255,255,255,.12);box-shadow:0 24px 56px rgba(11,57,124,.18)}#dashboard.fin-v124 .hero:before{content:"";position:absolute;right:-60px;top:-30px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.18),rgba(255,255,255,0) 62%)}#dashboard.fin-v124 .hero:after{content:"";position:absolute;inset:auto 180px -85px auto;width:240px;height:240px;border-radius:42px;transform:rotate(28deg);background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,0));border:1px solid rgba(255,255,255,.08)}#dashboard.fin-v124 .hero>*{position:relative;z-index:1}#dashboard.fin-v124 .hero h1{margin:0 0 10px;font-size:40px;line-height:1;letter-spacing:-.06em;color:#fff}#dashboard.fin-v124 .hero p{max-width:660px;color:rgba(255,255,255,.92);font-size:13px;line-height:1.65;margin:0}#dashboard.fin-v124 .hero .filterbar{align-self:start;justify-self:end;display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.08));border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(12px);min-width:420px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}#dashboard.fin-v124 .hero .dashboard-period-button{border:1px solid rgba(255,255,255,.18)!important;background:rgba(255,255,255,.10)!important;color:#fff!important;min-height:46px;border-radius:15px!important}#dashboard.fin-v124 .hero .dashboard-period-button svg{stroke:#fff!important;opacity:.9}#dashboard.fin-v124 .hero .dashboard-period-button strong{font-size:13px!important}#dashboard.fin-v124 .hero .dashboard-scope{grid-column:1/-1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:4px;border-radius:16px;display:flex;gap:5px}#dashboard.fin-v124 .hero .dashboard-scope button{background:transparent!important;color:rgba(255,255,255,.86)!important;border-radius:12px!important;padding:10px 12px!important;border:0!important;box-shadow:none!important}#dashboard.fin-v124 .hero .dashboard-scope button.active{background:rgba(255,255,255,.95)!important;color:#113f83!important;font-weight:900!important}#dashboard.fin-v124 #dashboardKpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;background:linear-gradient(180deg,#fff,#fbfcff);border:1px solid #e7edf5;border-radius:28px;overflow:hidden;box-shadow:0 14px 36px rgba(16,24,40,.05)}#dashboard.fin-v124 #dashboardKpis .kpi{margin:0!important;min-height:auto!important;padding:18px 18px 17px!important;background:transparent!important;border:0!important;border-right:1px solid #eef2f7!important;box-shadow:none!important;border-radius:0!important}#dashboard.fin-v124 #dashboardKpis .kpi:last-child{border-right:0!important}#dashboard.fin-v124 #dashboardKpis .kpi-icon{width:30px;height:30px;border-radius:10px;margin-bottom:9px;background:#eef4ff!important}#dashboard.fin-v124 #dashboardKpis .kpi-icon svg{stroke:#1154d9!important}#dashboard.fin-v124 #dashboardKpis .kpi .label{font-size:10px!important;letter-spacing:.08em;text-transform:uppercase;color:#71829b!important;font-weight:800}#dashboard.fin-v124 #dashboardKpis .kpi strong{font-size:28px!important;line-height:1.05;color:#152643!important;letter-spacing:-.06em}#dashboard.fin-v124 #dashboardKpis .kpi .delta{font-size:11px!important;color:#6f7f95!important;margin-top:6px!important}#dashboard.fin-v124 #finMainBandV124{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(330px,.9fr);gap:16px}#dashboard.fin-v124 .fin-stack{display:grid;gap:16px}#dashboard.fin-v124 .fin-connected{background:linear-gradient(180deg,#ffffff,#fbfcff);border:1px solid #e6edf5;border-radius:28px;box-shadow:0 14px 38px rgba(16,24,40,.05);overflow:hidden}#dashboard.fin-v124 .fin-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 0}#dashboard.fin-v124 .fin-panel-head h2{margin:0;font-size:22px;letter-spacing:-.04em;color:#152643}#dashboard.fin-v124 .fin-panel-head span{color:#7b8aa0;font-size:11px;line-height:1.5;max-width:540px}#dashboard.fin-v124 .fin-health-shell{padding-bottom:18px}#dashboard.fin-v124 .fin-health-kpis{display:grid;grid-template-columns:1.05fr repeat(3,minmax(0,1fr));gap:0;padding:14px 10px 0}#dashboard.fin-v124 .fin-h-main{padding:0 14px 0 10px;display:flex;flex-direction:column;justify-content:center}#dashboard.fin-v124 .fin-h-main .eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#71829b;font-weight:900}#dashboard.fin-v124 .fin-h-main b{font-size:38px;letter-spacing:-.07em;line-height:1;color:#132748;margin-top:6px}#dashboard.fin-v124 .fin-h-main p{margin:10px 0 0;color:#607087;font-size:12px;line-height:1.6}#dashboard.fin-v124 .fin-h-mini{padding:6px 16px 0;border-left:1px solid #eef2f7;display:flex;flex-direction:column;justify-content:center;min-height:86px}#dashboard.fin-v124 .fin-h-mini span{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#7b8aa0;font-weight:800}#dashboard.fin-v124 .fin-h-mini b{margin-top:8px;font-size:22px;color:#162949;letter-spacing:-.05em;line-height:1.1}#dashboard.fin-v124 .fin-h-mini small{margin-top:6px;color:#6f7f95;font-size:11px;line-height:1.45}#dashboard.fin-v124 .fin-linear-strip{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px 20px 0}#dashboard.fin-v124 .fin-compact-row{display:grid;gap:10px}#dashboard.fin-v124 .fin-line-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid #eef2f7}#dashboard.fin-v124 .fin-line-item:last-child{border-bottom:0}#dashboard.fin-v124 .fin-line-item span{font-size:11px;color:#71829b}#dashboard.fin-v124 .fin-line-item b{font-size:16px;color:#162949;letter-spacing:-.03em}#dashboard.fin-v124 .fin-flow-cats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #eef2f7;margin-top:14px}#dashboard.fin-v124 .fin-flow-cats .panel{background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:18px 20px 22px!important}#dashboard.fin-v124 .fin-flow-cats .panel:first-child{border-right:1px solid #eef2f7}#dashboard.fin-v124 .fin-flow-cats .panel .panelhead{margin-bottom:12px!important}#dashboard.fin-v124 .fin-flow-cats .panel .panelhead h2{font-size:18px!important;margin:0 0 3px!important;color:#173154}#dashboard.fin-v124 .fin-flow-cats .panel .panelhead span{font-size:11px!important;color:#75859b!important}#dashboard.fin-v124 .fin-flow-cats .panel .list .row3{grid-template-columns:110px minmax(0,1fr) auto;gap:10px;padding:10px 0;border-bottom:1px solid #eef2f7}#dashboard.fin-v124 .fin-flow-cats .panel .list .row3:last-child{border-bottom:0}#dashboard.fin-v124 .fin-flow-cats .panel .list .row3 span{font-size:11px;color:#475467;font-weight:700}#dashboard.fin-v124 .fin-flow-cats .panel .list .row3 b{font-size:14px;color:#162949;letter-spacing:-.03em}#dashboard.fin-v124 .fin-flow-cats .panel .bar{height:8px;background:#edf2f7;border-radius:999px;overflow:hidden;align-self:center}#dashboard.fin-v124 .fin-flow-cats .panel .bar i{display:block;height:100%;background:linear-gradient(90deg,#0b4db2,#60a5fa);border-radius:999px}#dashboard.fin-v124 .fin-side-col .panel{background:linear-gradient(180deg,#fff,#fbfcff)!important;border:1px solid #e6edf5!important;border-radius:24px!important;box-shadow:0 14px 38px rgba(16,24,40,.05)!important;padding:18px 18px 16px!important}#dashboard.fin-v124 .fin-side-col .panel .panelhead{margin-bottom:12px!important}#dashboard.fin-v124 .fin-side-col .panel .panelhead h2{font-size:19px!important;margin:0 0 3px!important;color:#173154}#dashboard.fin-v124 .fin-side-col .panel .panelhead span{font-size:11px!important;color:#75859b!important}#dashboard.fin-v124 .fin-side-col .panel .list .row3{grid-template-columns:72px minmax(0,1fr) auto;gap:10px;padding:10px 0;border-bottom:1px solid #eef2f7}#dashboard.fin-v124 .fin-side-col .panel .list .row3:last-child{border-bottom:0}#dashboard.fin-v124 .fin-side-col .panel .list .row3 span{font-size:11px;color:#69788f;font-weight:700}#dashboard.fin-v124 .fin-side-col .panel .list .row3 b{font-size:15px;color:#162949;letter-spacing:-.03em}#dashboard.fin-v124 .fin-radar-list,#dashboard.fin-v124 .fin-recent-list{display:grid;gap:0;padding:10px 20px 18px}#dashboard.fin-v124 .fin-radar-item,#dashboard.fin-v124 .fin-recent-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #eef2f7}#dashboard.fin-v124 .fin-radar-item:last-child,#dashboard.fin-v124 .fin-recent-item:last-child{border-bottom:0}#dashboard.fin-v124 .fin-radar-item b,#dashboard.fin-v124 .fin-recent-item b{display:block;color:#162949;font-size:14px;letter-spacing:-.02em}#dashboard.fin-v124 .fin-radar-item span,#dashboard.fin-v124 .fin-recent-item span{display:block;margin-top:5px;color:#728198;font-size:11px;line-height:1.5}#dashboard.fin-v124 .fin-radar-item .val,#dashboard.fin-v124 .fin-recent-item .val{font-size:15px;font-weight:900;color:#132748;letter-spacing:-.03em;white-space:nowrap}#dashboard.fin-v124 .fin-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#eef4ff;color:#0c58d6;font-weight:800;font-size:10px;letter-spacing:.04em;text-transform:uppercase}#dashboard.fin-v124 #annualPremium,#dashboard.fin-v124 #capacityShell{display:none!important}#dashboard.fin-v124 > .grid2{display:none!important}@media(max-width:1180px){#dashboard.fin-v124 .hero{grid-template-columns:1fr}#dashboard.fin-v124 .hero .filterbar{justify-self:stretch;min-width:0}#dashboard.fin-v124 #finMainBandV124{grid-template-columns:1fr}#dashboard.fin-v124 .fin-health-kpis{grid-template-columns:1fr 1fr}#dashboard.fin-v124 .fin-h-main{grid-column:1/-1;padding:0 10px 10px}#dashboard.fin-v124 .fin-h-mini:nth-child(3){border-left:0}}@media(max-width:760px){#dashboard.fin-v124 .hero{padding:18px;border-radius:24px}#dashboard.fin-v124 .hero h1{font-size:30px}#dashboard.fin-v124 .hero .filterbar{grid-template-columns:1fr}#dashboard.fin-v124 #dashboardKpis{grid-template-columns:1fr 1fr!important}#dashboard.fin-v124 #dashboardKpis .kpi:nth-child(2n){border-right:0!important}#dashboard.fin-v124 .fin-health-kpis{grid-template-columns:1fr!important}#dashboard.fin-v124 .fin-h-mini{border-left:0;border-top:1px solid #eef2f7;padding:14px 10px 0}#dashboard.fin-v124 .fin-linear-strip{grid-template-columns:1fr}#dashboard.fin-v124 .fin-flow-cats{grid-template-columns:1fr}#dashboard.fin-v124 .fin-flow-cats .panel:first-child{border-right:0;border-bottom:1px solid #eef2f7}}@media(max-width:520px){#dashboard.fin-v124 #dashboardKpis{grid-template-columns:1fr!important}#dashboard.fin-v124 #dashboardKpis .kpi{border-right:0!important;border-bottom:1px solid #eef2f7!important}#dashboard.fin-v124 #dashboardKpis .kpi:last-child{border-bottom:0!important}.fin-side-col .panel,.fin-connected{border-radius:20px!important}}
-</style>
