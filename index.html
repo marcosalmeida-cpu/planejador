@@ -1701,10 +1701,125 @@ img,svg,canvas{max-width:100%}
 @media(max-width:560px){#dashboard .fin125-hero{padding:20px!important;border-radius:22px!important;min-height:0!important}.fin125-period-controls{grid-template-columns:1fr!important}.fin125-period-controls .dashboard-scope{grid-column:auto!important}.fin125-hero-result{align-items:flex-start!important;flex-direction:column!important}#dashboard #dashboardKpis.fin125-summary-line{grid-template-columns:1fr!important}#dashboard #dashboardKpis .kpi{border-right:0!important;border-bottom:1px solid #edf1f5!important}.fin125-health-line{grid-template-columns:1fr!important}.fin125-health-metric{border-right:0!important;border-top:1px solid #edf1f5!important;padding:12px 0!important}.fin125-health-metric:first-child{border-top:0!important}.fin125-section-head{padding:15px 15px 10px!important}.fin125-radar-list,.fin125-recent-list{padding-left:15px!important;padding-right:15px!important}}
 </style>
 
+
+<style id="pp-v126-finance-dashboard-isolated">
+/* v126: dashboard novo totalmente isolado dos renderizadores legados */
+#dashboard{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;position:absolute!important;left:-200vw!important;top:0!important;width:1px!important;height:1px!important;overflow:hidden!important}
+#dashboardV126{display:none;min-width:0;box-sizing:border-box}
+#dashboardV126.v126-show{display:grid!important;gap:14px!important;opacity:1!important;visibility:visible!important;transform:none!important}
+#dashboardV126 *{box-sizing:border-box}
+#dashboardV126 .v126-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(330px,.7fr);gap:18px;min-height:205px;padding:25px 26px;border-radius:28px;background:linear-gradient(135deg,#072c66 0%,#0b4fb9 47%,#176ce8 100%);box-shadow:0 22px 54px rgba(10,62,143,.17);color:#fff}
+#dashboardV126 .v126-hero:before{content:"";position:absolute;right:-70px;top:-80px;width:280px;height:280px;border:1px solid rgba(255,255,255,.12);border-radius:50%}
+#dashboardV126 .v126-hero:after{content:"";position:absolute;right:85px;bottom:-135px;width:260px;height:260px;border:1px solid rgba(255,255,255,.10);border-radius:42px;transform:rotate(35deg);background:linear-gradient(180deg,rgba(255,255,255,.08),transparent)}
+#dashboardV126 .v126-hero>*{position:relative;z-index:1}
+#dashboardV126 .v126-kicker{font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:#bcdcff}
+#dashboardV126 .v126-hero h1{margin:9px 0 4px;font-size:38px;line-height:1;letter-spacing:-.055em;color:#fff}
+#dashboardV126 .v126-hero-sub{margin:0;color:rgba(255,255,255,.85);font-size:11.5px;line-height:1.55;max-width:650px}
+#dashboardV126 .v126-balance{display:flex;align-items:flex-end;gap:14px;margin-top:22px;flex-wrap:wrap}
+#dashboardV126 .v126-balance span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#bcdcff;font-weight:800}
+#dashboardV126 .v126-balance strong{display:block;margin-top:4px;font-size:36px;letter-spacing:-.06em;line-height:1;color:#fff}
+#dashboardV126 .v126-state{display:inline-flex;align-items:center;min-height:32px;padding:0 11px;border-radius:999px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.16);font-size:10px;font-weight:900;color:#fff}
+#dashboardV126 .v126-controls{align-self:start;display:grid;gap:10px;padding:12px;border-radius:21px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(10px)}
+#dashboardV126 .v126-scope{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:4px;border-radius:13px;background:rgba(255,255,255,.08)}
+#dashboardV126 .v126-scope button{border:0;min-height:34px;border-radius:10px;background:transparent;color:#d8e8ff;font-weight:800;font-size:10px;cursor:pointer}
+#dashboardV126 .v126-scope button.active{background:#fff;color:#174e9d;box-shadow:0 7px 17px rgba(0,0,0,.10)}
+#dashboardV126 .v126-selects{display:grid;grid-template-columns:1fr 1.25fr;gap:8px}
+#dashboardV126 .v126-selects select{width:100%;height:43px;border:1px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(255,255,255,.12);color:#fff;padding:0 11px;font-weight:800;outline:none}
+#dashboardV126 .v126-selects select option{color:#172b4d;background:#fff}
+#dashboardV126 .v126-summary{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;border:1px solid #e5ebf3;border-radius:22px;background:#fff;overflow:hidden;box-shadow:0 10px 30px rgba(16,24,40,.045)}
+#dashboardV126 .v126-metric{min-width:0;padding:14px 15px;border-right:1px solid #edf1f6}
+#dashboardV126 .v126-metric:last-child{border-right:0}
+#dashboardV126 .v126-metric span{display:block;color:#7b899c;font-size:8.5px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
+#dashboardV126 .v126-metric b{display:block;margin-top:7px;color:#142842;font-size:19px;line-height:1.08;letter-spacing:-.045em;overflow-wrap:anywhere}
+#dashboardV126 .v126-metric small{display:block;margin-top:5px;color:#8c99a9;font-size:9px;line-height:1.35}
+#dashboardV126 .v126-grid{display:grid;grid-template-columns:minmax(0,1.42fr) minmax(320px,.78fr);gap:14px;align-items:start}
+#dashboardV126 .v126-stack{display:grid;gap:14px;min-width:0}
+#dashboardV126 .v126-surface{min-width:0;border:1px solid #e4ebf3;border-radius:23px;background:linear-gradient(180deg,#fff,#fbfdff);box-shadow:0 12px 32px rgba(16,24,40,.045);overflow:hidden}
+#dashboardV126 .v126-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:17px 19px 12px}
+#dashboardV126 .v126-head .eyebrow{display:block;color:#1763c5;font-size:8.5px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}
+#dashboardV126 .v126-head h2{margin:5px 0 0;color:#142b49;font-size:21px;letter-spacing:-.04em}
+#dashboardV126 .v126-head p{margin:5px 0 0;color:#78879a;font-size:10.5px;line-height:1.45;max-width:610px}
+#dashboardV126 .v126-chip{flex:0 0 auto;padding:6px 9px;border-radius:999px;background:#edf4ff;color:#1458b2;font-size:8px;font-weight:900;letter-spacing:.05em;text-transform:uppercase}
+#dashboardV126 .v126-health{display:grid;grid-template-columns:1.05fr .95fr .95fr .95fr;gap:0;padding:2px 12px 14px}
+#dashboardV126 .v126-health-main{padding:9px 12px 6px}
+#dashboardV126 .v126-health-main span{font-size:8.5px;color:#7b899c;text-transform:uppercase;font-weight:900;letter-spacing:.11em}
+#dashboardV126 .v126-health-main b{display:block;margin-top:5px;color:#15345c;font-size:31px;letter-spacing:-.055em}
+#dashboardV126 .v126-health-main p{margin:7px 0 0;color:#718197;font-size:10.5px;line-height:1.45}
+#dashboardV126 .v126-health-mini{border-left:1px solid #edf1f5;padding:9px 13px 6px}
+#dashboardV126 .v126-health-mini span{display:block;color:#7c8a9d;font-size:8px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
+#dashboardV126 .v126-health-mini b{display:block;margin-top:8px;color:#162c49;font-size:18px;letter-spacing:-.04em}
+#dashboardV126 .v126-health-mini small{display:block;margin-top:5px;color:#8491a1;font-size:9px;line-height:1.35}
+#dashboardV126 .v126-two{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #edf1f5}
+#dashboardV126 .v126-subsection{padding:16px 18px 17px;min-width:0}
+#dashboardV126 .v126-subsection:first-child{border-right:1px solid #edf1f5}
+#dashboardV126 .v126-subsection h3{margin:0;color:#17314f;font-size:15px;letter-spacing:-.02em}
+#dashboardV126 .v126-subsection .sub{display:block;margin-top:3px;color:#8a97a7;font-size:9px}
+#dashboardV126 .v126-list{display:grid;gap:0;margin-top:9px}
+#dashboardV126 .v126-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,.85fr) auto;gap:10px;align-items:center;min-height:38px;border-bottom:1px solid #f0f3f7}
+#dashboardV126 .v126-row:last-child{border-bottom:0}
+#dashboardV126 .v126-row .name{min-width:0;color:#4a5d74;font-size:10px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#dashboardV126 .v126-bar{height:6px;border-radius:999px;background:#edf2f7;overflow:hidden}
+#dashboardV126 .v126-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#0b4eb7,#6bb6ff)}
+#dashboardV126 .v126-row b{color:#152c49;font-size:11px;white-space:nowrap}
+#dashboardV126 .v126-radar{display:grid;gap:0;padding:3px 18px 16px}
+#dashboardV126 .v126-radar-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #edf1f5}
+#dashboardV126 .v126-radar-item:last-child{border-bottom:0}
+#dashboardV126 .v126-radar-item b{display:block;color:#17314e;font-size:12px}
+#dashboardV126 .v126-radar-item span{display:block;margin-top:4px;color:#7b899b;font-size:9.5px;line-height:1.4}
+#dashboardV126 .v126-radar-item strong{color:#143151;font-size:13px;letter-spacing:-.03em;white-space:nowrap}
+#dashboardV126 .v126-side-list{display:grid;padding:1px 18px 15px}
+#dashboardV126 .v126-side-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #edf1f5}
+#dashboardV126 .v126-side-row:last-child{border-bottom:0}
+#dashboardV126 .v126-side-row b{display:block;color:#17314e;font-size:11px}
+#dashboardV126 .v126-side-row span{display:block;margin-top:3px;color:#8290a2;font-size:9px;line-height:1.35}
+#dashboardV126 .v126-side-row strong{color:#142f4d;font-size:13px;white-space:nowrap}
+#dashboardV126 .v126-patrimony{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:0 18px 15px}
+#dashboardV126 .v126-pat-item{padding:12px 10px;border-bottom:1px solid #edf1f5}
+#dashboardV126 .v126-pat-item:nth-child(odd){border-right:1px solid #edf1f5;padding-left:0}
+#dashboardV126 .v126-pat-item:nth-child(even){padding-right:0;padding-left:16px}
+#dashboardV126 .v126-pat-item span{display:block;color:#8290a2;font-size:8.5px;text-transform:uppercase;font-weight:850;letter-spacing:.07em}
+#dashboardV126 .v126-pat-item b{display:block;margin-top:5px;color:#152e4d;font-size:15px;letter-spacing:-.035em}
+#dashboardV126 .v126-empty{padding:15px 0;color:#8491a1;font-size:10px}
+@media(max-width:1150px){#dashboardV126 .v126-hero{grid-template-columns:1fr}#dashboardV126 .v126-summary{grid-template-columns:repeat(3,1fr)}#dashboardV126 .v126-metric:nth-child(3){border-right:0}#dashboardV126 .v126-metric:nth-child(-n+3){border-bottom:1px solid #edf1f6}#dashboardV126 .v126-grid{grid-template-columns:1fr}#dashboardV126 .v126-health{grid-template-columns:1fr 1fr}#dashboardV126 .v126-health-main{grid-column:1/-1;padding-bottom:12px}#dashboardV126 .v126-health-mini:nth-child(3){border-left:0}}
+@media(max-width:700px){#dashboardV126 .v126-hero{padding:18px;border-radius:22px}#dashboardV126 .v126-hero h1{font-size:30px}#dashboardV126 .v126-selects{grid-template-columns:1fr 1fr}#dashboardV126 .v126-summary{grid-template-columns:1fr 1fr}#dashboardV126 .v126-metric{border-bottom:1px solid #edf1f6!important}#dashboardV126 .v126-metric:nth-child(2n){border-right:0!important}#dashboardV126 .v126-health{grid-template-columns:1fr}#dashboardV126 .v126-health-main{grid-column:auto}#dashboardV126 .v126-health-mini{border-left:0;border-top:1px solid #edf1f5}#dashboardV126 .v126-two{grid-template-columns:1fr}#dashboardV126 .v126-subsection:first-child{border-right:0;border-bottom:1px solid #edf1f5}}
+</style>
+
 </head>
 <body data-hub-area="financas"><aside aria-label="Navegação principal" id="ppBankRailV62"><button aria-label="Abrir Hub Pessoal" class="v62-logo" data-tip="Hub Pessoal" data-v62-hub="" type="button"></button><nav aria-label="Navegação" class="v62-nav"><button aria-label="Visão geral" class="v62-btn" data-tip="Visão geral" data-v62-view="dashboard" type="button">⌂</button><button aria-label="Lançamentos" class="v62-btn" data-tip="Lançamentos" data-v62-view="lancamentos" type="button">↕</button><button aria-label="Cartões" class="v62-btn" data-tip="Cartões" data-v62-view="cartoes" type="button">▣</button><button aria-label="Dívidas" class="v62-btn" data-tip="Dívidas" data-v62-view="dividas" type="button">◴</button><button aria-label="FGTS" class="v62-btn" data-tip="FGTS" data-v62-view="fgts" type="button">◇</button><button aria-label="Previdência" class="v62-btn" data-tip="Previdência" data-v62-view="previdencia" type="button">◎</button><button aria-label="Previdência privada" class="v62-btn" data-tip="Previdência privada" data-v62-view="previdenciaPrivada" type="button">◉</button><button aria-label="Investimentos" class="v62-btn" data-tip="Investimentos" data-v62-view="investimentos" type="button">↗</button><button aria-label="Patrimônio" class="v62-btn" data-tip="Patrimônio" data-v62-view="patrimonio" type="button">⬡</button><button aria-label="Veículos" class="v62-btn" data-tip="Veículos" data-v62-view="veiculos" type="button">⚙</button><button aria-label="Calculadora" class="v62-btn" data-tip="Calculadora" data-v62-view="nuvem" type="button">∑</button></nav><div class="v62-foot"><button aria-label="Backup" class="v62-btn" data-tip="Backup" data-v62-backup="" type="button">↓</button><button aria-label="Novo lançamento" class="v62-btn v62-add" data-tip="Novo lançamento" data-v62-add="" type="button">＋</button><div class="v62-sep"></div><button aria-label="Perfil" class="v62-btn" data-tip="Perfil" data-v62-profile="" type="button"><span class="v62-dot">P</span></button><button aria-label="Sair" class="v62-btn" data-tip="Sair" data-v62-logout="" type="button">↪</button></div></aside><div aria-hidden="true" id="ppHubV62"><section aria-label="Hub Pessoal" aria-modal="true" class="v62-hub-card" role="dialog"><div class="v62-hub-head"><div><h2>Hub Pessoal</h2><p>Escolha a área que deseja abrir.</p></div><button aria-label="Fechar" class="v62-hub-close" type="button">×</button></div><div class="v62-hub-grid"><a data-v62-area="financas" href="index.html"><b>Finanças</b><span>Lançamentos, cartões, dívidas e patrimônio</span></a><a data-v62-area="educacao" href="educacao.html"><b>Educação</b><span>Formações e trajetória acadêmica</span></a><a data-v62-area="saude" href="saude.html"><b>Saúde</b><span>Acompanhamento pessoal</span></a><a data-v62-area="entretenimento" href="entretenimento.html"><b>Entretenimento</b><span>Filmes, séries, livros e viagens</span></a></div></section></div><div class="app">
 <div aria-hidden="true" hidden="" id="ppLegacyControlsV63" style="display:none!important"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button class="active" data-view="dashboard">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="previdenciaPrivada">Previdência privada</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="veiculos">Veículos</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx="">+ Lançamento</button></div></div></div>
 <main class="main">
+
+<section id="dashboardV126" class="fin126-dashboard v126-show" aria-label="Visão geral financeira">
+  <section class="v126-hero">
+    <div>
+      <div class="v126-kicker">CENTRO FINANCEIRO · VISÃO INTEGRADA</div>
+      <h1>Visão financeira</h1>
+      <p class="v126-hero-sub" id="v126HeroSub">Fluxo, cartões, dívidas, FGTS, investimentos e patrimônio em uma leitura única.</p>
+      <div class="v126-balance"><div><span>Saldo do período</span><strong id="v126Balance">R$ 0,00</strong></div><div class="v126-state" id="v126State">Equilíbrio</div></div>
+    </div>
+    <div class="v126-controls">
+      <div class="v126-scope"><button type="button" data-v126-scope="month">Mês</button><button type="button" data-v126-scope="year">Ano</button><button type="button" data-v126-scope="all">Histórico</button></div>
+      <div class="v126-selects"><select id="v126Year"></select><select id="v126Month"></select></div>
+    </div>
+  </section>
+  <section class="v126-summary" id="v126Summary"></section>
+  <section class="v126-grid">
+    <div class="v126-stack">
+      <section class="v126-surface">
+        <div class="v126-head"><div><span class="eyebrow">SAÚDE FINANCEIRA</span><h2>Seu dinheiro em uma leitura só</h2><p>Mais informação, menos blocos isolados: fluxo, comprometimento e cartões conectados no mesmo painel.</p></div><span class="v126-chip">Visão integrada</span></div>
+        <div class="v126-health" id="v126Health"></div>
+        <div class="v126-two"><div class="v126-subsection"><h3>Fluxo</h3><span class="sub" id="v126FlowSub"></span><div class="v126-list" id="v126Flow"></div></div><div class="v126-subsection"><h3>Onde seu dinheiro mais foi</h3><span class="sub" id="v126CatSub"></span><div class="v126-list" id="v126Cats"></div></div></div>
+      </section>
+      <section class="v126-surface"><div class="v126-head"><div><span class="eyebrow">RADAR FINANCEIRO</span><h2>O que merece sua atenção</h2><p>Insights automáticos vindos das suas subpáginas.</p></div><span class="v126-chip">Inteligência</span></div><div class="v126-radar" id="v126Radar"></div></section>
+    </div>
+    <aside class="v126-stack">
+      <section class="v126-surface"><div class="v126-head"><div><span class="eyebrow">CARTÕES</span><h2>Agenda financeira</h2><p>Próximas faturas e compromissos de cartão.</p></div></div><div class="v126-side-list" id="v126Cards"></div></section>
+      <section class="v126-surface"><div class="v126-head"><div><span class="eyebrow">PATRIMÔNIO</span><h2>Posição consolidada</h2><p>FGTS, investimentos, patrimônio e previdência privada.</p></div></div><div class="v126-patrimony" id="v126Patrimony"></div></section>
+      <section class="v126-surface"><div class="v126-head"><div><span class="eyebrow">ATIVIDADE</span><h2>Últimos movimentos</h2><p>Os lançamentos mais recentes do Hub.</p></div></div><div class="v126-side-list" id="v126Recent"></div></section>
+    </aside>
+  </section>
+</section>
+
 <section class="view active fin125-dashboard" id="dashboard">
   <div class="hero fin125-hero">
     <div class="fin125-hero-copy">
@@ -29823,6 +29938,46 @@ const pe=q('fin125PensionLine');if(pe)pe.innerHTML=pp?`<div class="fin125-pensio
 const recent=rowsAll().slice().sort((a,b)=>(+b.ano-+a.ano)||(+b.mesNum-+a.mesNum)||n(b.valor)-n(a.valor)).slice(0,6);const rr=q('fin125RecentList');if(rr)rr.innerHTML=recent.length?recent.map(x=>`<div class="fin125-recent-row"><div><b>${x.descricao||x.origem||'Lançamento'}</b><span>${monthLabel(x.ano,x.mesNum)} · ${x.categoria||'Sem categoria'} · ${x.tipo==='entrada'?'Entrada':'Saída'}</span></div><strong>${brl(x.valor)}</strong></div>`).join(''):`<div class="fin125-recent-row"><div><b>Nenhum movimento recente</b><span>Os lançamentos aparecerão aqui.</span></div><strong>—</strong></div>`;
 }
 const original=window.renderDashboard;window.renderDashboard=function(){const r=original?.apply(this,arguments);setTimeout(render125,60);return r};window.addEventListener('load',()=>setTimeout(render125,500));document.addEventListener('click',e=>{if(e.target.closest?.('#dashboardScope,#dashMonthBtn,#dashYearBtn'))setTimeout(render125,140)},true);['yearFilter','monthFilter'].forEach(id=>q(id)?.addEventListener('change',()=>setTimeout(render125,80)));setTimeout(render125,1200);
+})();
+</script>
+
+
+<script id="pp-v126-finance-dashboard-isolated-script">
+(function(){'use strict';
+  const root=()=>document.getElementById('dashboardV126');
+  const money=v=>{try{return brl(Number(v)||0)}catch(e){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0)}};
+  const n=v=>{try{return Number(num(v)||0)}catch(e){return Number(v)||0}};
+  const esc126=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const months=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  let state={scope:localStorage.getItem('pp_fin126_scope')||'month',year:Number(localStorage.getItem('pp_fin126_year'))||new Date().getFullYear(),month:Number(localStorage.getItem('pp_fin126_month'))||new Date().getMonth()+1};
+  function profile(){try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}}
+  function allRows(){try{return (typeof allTx==='function'?allTx():[]).filter(x=>x&&Number(x.ano)>=2000)}catch(e){return []}}
+  function scoped(){const rows=allRows().filter(x=>Number(x.ano)<currentYear||(Number(x.ano)===currentYear&&Number(x.mesNum)<=currentMonth));if(state.scope==='month')return rows.filter(x=>+x.ano===state.year&&+x.mesNum===state.month);if(state.scope==='year')return rows.filter(x=>+x.ano===state.year);return rows}
+  function scopeText(){if(state.scope==='month')return `${months[state.month-1]} de ${state.year}`;if(state.scope==='year')return `Ano de ${state.year}`;return `Histórico até ${months[currentMonth-1]} de ${currentYear}`}
+  function debts(){try{return typeof getDebts==='function'?getDebts(false):[]}catch(e){return []}}
+  function cardBills(){try{return typeof cardAggregatedTx==='function'?cardAggregatedTx():[]}catch(e){return []}}
+  function ppv(){try{const raw=JSON.parse(localStorage.getItem('planejador_private_pension_v70')||'null');if(!raw)return null;const rec=Array.isArray(raw.records)?raw.records.slice().sort((a,b)=>String(a.month).localeCompare(String(b.month))):[];let bal=0,con=0,wd=0;const ar=((Number(raw.settings?.annualReturn)||0)-(Number(raw.settings?.adminFee)||0))/100;const mr=Math.pow(1+ar,1/12)-1;rec.forEach(x=>{const c=n(x.contribution),w=n(x.withdrawal);con+=c;wd+=w;const base=Math.max(0,bal+c-w);const rp=(x.returnPct===null||x.returnPct===''||!Number.isFinite(Number(x.returnPct)))?mr*100:Number(x.returnPct);const calc=base*(1+rp/100);const rep=(x.reportedBalance===null||x.reportedBalance===''||!Number.isFinite(Number(x.reportedBalance)))?null:Number(x.reportedBalance);bal=Math.max(0,rep===null?calc:rep)});return{balance:bal,net:con-wd,bank:raw.settings?.bank||'Previdência privada',plan:raw.settings?.plan||'Plano previdenciário'}}catch(e){return null}}
+  function setupControls(){const y=document.getElementById('v126Year'),m=document.getElementById('v126Month');if(!y||!m)return;const ys=[...new Set([...allRows().map(x=>Number(x.ano)),currentYear])].filter(Boolean).sort((a,b)=>b-a);if(!ys.includes(state.year))state.year=ys[0]||currentYear;y.innerHTML=ys.map(v=>`<option value="${v}" ${v===state.year?'selected':''}>${v}</option>`).join('');m.innerHTML=months.map((v,i)=>`<option value="${i+1}" ${i+1===state.month?'selected':''}>${v}</option>`).join('');y.onchange=()=>{state.year=+y.value;save();render()};m.onchange=()=>{state.month=+m.value;save();render()};document.querySelectorAll('[data-v126-scope]').forEach(b=>{b.onclick=()=>{state.scope=b.dataset.v126Scope;save();render()}})}
+  function save(){localStorage.setItem('pp_fin126_scope',state.scope);localStorage.setItem('pp_fin126_year',String(state.year));localStorage.setItem('pp_fin126_month',String(state.month))}
+  function metric(label,val,sub=''){return `<div class="v126-metric"><span>${label}</span><b>${val}</b><small>${sub}</small></div>`}
+  function lineRow(name,val,pct=0){return `<div class="v126-row"><span class="name" title="${esc126(name)}">${esc126(name)}</span><span class="v126-bar"><i style="width:${Math.max(0,Math.min(100,pct))}%"></i></span><b>${money(val)}</b></div>`}
+  function render(){const r=root();if(!r||typeof currentYear==='undefined')return;document.querySelectorAll('[data-v126-scope]').forEach(b=>b.classList.toggle('active',b.dataset.v126Scope===state.scope));const rows=scoped(),inc=rows.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+n(x.valor),0),out=rows.filter(x=>x.tipo==='saida').reduce((a,x)=>a+n(x.valor),0),bal=inc-out,status=bal>0?'Superávit':bal<0?'Déficit':'Equilíbrio';document.getElementById('v126Balance').textContent=money(bal);document.getElementById('v126State').textContent=status;document.getElementById('v126HeroSub').textContent=`${scopeText()} · perfil ${profile()} · visão integrada sem misturar projeções futuras.`;
+    const debt=debts(),debtTotal=debt.reduce((a,x)=>a+n(x.pendente),0),fg=(typeof fgtsSummary!=='undefined'?fgtsSummary:{}),inv=(typeof investments!=='undefined'?investments:[]),ass=(typeof assets!=='undefined'?assets:[]),cardArr=(typeof cards!=='undefined'?cards:[]);const invTotal=inv.filter(x=>String(x.status||'Ativo')!=='Resgatado').reduce((a,x)=>a+n(x.currentValue),0),assetTotal=ass.reduce((a,x)=>a+n(x.value),0),limits=cardArr.reduce((a,x)=>a+n(x.limit),0),bills=cardBills(),monthBill=bills.filter(x=>+x.ano===state.year&&+x.mesNum===state.month).reduce((a,x)=>a+n(x.valor),0),available=Math.max(0,limits-monthBill),commit=inc?out/inc*100:0;
+    document.getElementById('v126Summary').innerHTML=metric('Receitas',money(inc),scopeText())+metric('Despesas',money(out),scopeText())+metric('Saldo',money(bal),status)+metric('Cartões disponíveis',money(available),`de ${money(limits)} em limites`)+metric('Dívidas pendentes',money(debtTotal),`${debt.filter(x=>n(x.pendente)>0).length} compromissos`)+metric('Investimentos',money(invTotal),'capital ativo');
+    document.getElementById('v126Health').innerHTML=`<div class="v126-health-main"><span>Situação do período</span><b>${status}</b><p>${bal>=0?'As receitas cobrem as despesas no recorte selecionado.':'As despesas estão acima das receitas no recorte selecionado.'}</p></div><div class="v126-health-mini"><span>Comprometimento</span><b>${commit.toFixed(1).replace('.',',')}%</b><small>despesas / receitas</small></div><div class="v126-health-mini"><span>Fatura no mês</span><b>${money(monthBill)}</b><small>cartões de crédito</small></div><div class="v126-health-mini"><span>FGTS livre</span><b>${money(n(fg.saldoDisponivel))}</b><small>saldo disponível informado</small></div>`;
+    document.getElementById('v126FlowSub').textContent=scopeText();const mx=Math.max(inc,out,Math.abs(bal),1);document.getElementById('v126Flow').innerHTML=lineRow('Receitas',inc,inc/mx*100)+lineRow('Despesas',out,out/mx*100)+lineRow('Resultado',Math.abs(bal),Math.abs(bal)/mx*100);
+    const cm={};rows.filter(x=>x.tipo==='saida').forEach(x=>{const k=x.categoria||'Sem categoria';cm[k]=(cm[k]||0)+n(x.valor)});const cats=Object.entries(cm).sort((a,b)=>b[1]-a[1]).slice(0,6),catMax=Math.max(1,...cats.map(x=>x[1]));document.getElementById('v126CatSub').textContent=`${cats.length} maiores categorias · ${scopeText()}`;document.getElementById('v126Cats').innerHTML=cats.length?cats.map(([k,v])=>lineRow(k,v,v/catMax*100)).join(''):'<div class="v126-empty">Sem despesas no período.</div>';
+    const topCat=cats[0]||['Sem categoria',0],topExpense=rows.filter(x=>x.tipo==='saida').sort((a,b)=>n(b.valor)-n(a.valor))[0]||null,nextBill=bills.filter(x=>x.ano>currentYear||(x.ano===currentYear&&x.mesNum>=currentMonth)).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum)[0]||null,heavy=debt.filter(x=>n(x.pendente)>0).sort((a,b)=>n(b.pendente)-n(a.pendente))[0]||null,pension=ppv();const radar=[['Maior categoria de saída',`${topCat[0]} · ${scopeText()}`,money(topCat[1])],['Maior despesa individual',topExpense?`${topExpense.descricao||topExpense.origem||'Sem descrição'} · ${topExpense.categoria||''}`:'Sem despesa relevante',topExpense?money(topExpense.valor):'—'],['Próxima fatura',nextBill?`${nextBill.origem} · ${months[nextBill.mesNum-1]}/${nextBill.ano}`:'Nenhuma fatura futura',nextBill?money(nextBill.valor):'—'],['Dívida mais pesada',heavy?`${heavy.descricao||heavy.credor||'Compromisso'}`:'Sem dívida pendente',heavy?money(heavy.pendente):'—'],['Previdência privada',pension?`${pension.bank} · ${pension.plan}`:'Sem plano configurado',pension?money(pension.balance):'—']];document.getElementById('v126Radar').innerHTML=radar.map(x=>`<div class="v126-radar-item"><div><b>${esc126(x[0])}</b><span>${esc126(x[1])}</span></div><strong>${x[2]}</strong></div>`).join('');
+    const nextBills=bills.filter(x=>x.ano>currentYear||(x.ano===currentYear&&x.mesNum>=currentMonth)).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum).slice(0,5);document.getElementById('v126Cards').innerHTML=nextBills.length?nextBills.map(x=>`<div class="v126-side-row"><div><b>${esc126(x.origem||'Cartão')}</b><span>${months[x.mesNum-1]} de ${x.ano} · ${x.itemCount||0} item(ns)</span></div><strong>${money(x.valor)}</strong></div>`).join(''):'<div class="v126-empty">Nenhuma fatura futura encontrada.</div>';
+    const p=document.getElementById('v126Patrimony');p.innerHTML=`<div class="v126-pat-item"><span>Patrimônio cadastrado</span><b>${money(assetTotal)}</b></div><div class="v126-pat-item"><span>Investimentos</span><b>${money(invTotal)}</b></div><div class="v126-pat-item"><span>FGTS livre</span><b>${money(n(fg.saldoDisponivel))}</b></div><div class="v126-pat-item"><span>FGTS rescisório</span><b>${money(n(fg.saldoRescisao))}</b></div><div class="v126-pat-item"><span>Previdência privada</span><b>${pension?money(pension.balance):'—'}</b></div><div class="v126-pat-item"><span>Dívidas</span><b>${money(debtTotal)}</b></div>`;
+    const recent=allRows().slice().sort((a,b)=>(+b.ano-+a.ano)||(+b.mesNum-+a.mesNum)||n(b.valor)-n(a.valor)).slice(0,6);document.getElementById('v126Recent').innerHTML=recent.length?recent.map(x=>`<div class="v126-side-row"><div><b>${esc126(x.descricao||x.origem||'Lançamento')}</b><span>${months[(+x.mesNum||1)-1]}/${x.ano} · ${esc126(x.categoria||x.tipo||'Sem categoria')}</span></div><strong>${money(x.valor)}</strong></div>`).join(''):'<div class="v126-empty">Nenhum lançamento recente.</div>';
+  }
+  function show(){const r=root();if(!r)return;document.querySelectorAll('main .view').forEach(v=>v.classList.remove('active'));r.classList.add('v126-show');document.querySelectorAll('[data-v62-view],[data-view]').forEach(b=>{const v=b.getAttribute('data-v62-view')||b.getAttribute('data-view');b.classList.toggle('active',v==='dashboard')});render()}
+  function hide(){root()?.classList.remove('v126-show')}
+  document.addEventListener('click',e=>{const b=e.target.closest?.('[data-v62-view],[data-view]');if(!b)return;const v=b.getAttribute('data-v62-view')||b.getAttribute('data-view');if(v==='dashboard'){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();show()}else hide()},true);
+  window.addEventListener('storage',()=>setTimeout(render,20));
+  document.addEventListener('DOMContentLoaded',()=>{setupControls();show();setTimeout(render,400)});
+  setTimeout(()=>{setupControls();show();render()},900);
 })();
 </script>
 
