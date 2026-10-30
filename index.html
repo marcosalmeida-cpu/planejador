@@ -30489,6 +30489,104 @@ window.ppLaunchDropdownsV154={refresh,close};
 })();
 </script>
 
+
+<style id="pp-v155-launch-creditor-dropdown-style">
+#lancamentos #txCreditorV50{display:none!important}
+#lancamentos .pp155-creditor-wrap{position:relative;min-width:240px;max-width:360px;flex:0 1 360px}
+#lancamentos .pp155-creditor-btn{
+  width:100%;min-height:40px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:0 13px;border:1px solid #d9e1eb;border-radius:12px;background:#fff;color:#1d3553;
+  font:750 12px/1.2 inherit;text-align:left;cursor:pointer;box-shadow:none;transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;
+}
+#lancamentos .pp155-creditor-btn:hover{border-color:#9cbde5;background:#fbfdff}
+#lancamentos .pp155-creditor-btn:focus{outline:none;border-color:#3f83e8;box-shadow:0 0 0 3px rgba(63,131,232,.12)}
+#lancamentos .pp155-creditor-btn .label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lancamentos .pp155-creditor-btn .chev{font-size:15px;color:#52708f;flex:0 0 auto}
+.pp155-creditor-pop{
+  position:fixed;z-index:2147483630;display:none;overflow:hidden;
+  min-width:260px;max-width:min(420px,calc(100vw - 20px));
+  border:1px solid #d8e3f0;border-radius:15px;background:#fff;
+  box-shadow:0 22px 60px rgba(15,35,65,.22);padding:8px;
+}
+.pp155-creditor-pop.open{display:block}
+.pp155-creditor-search{width:100%;height:38px;box-sizing:border-box;border:1px solid #dce5ef;border-radius:10px;padding:0 11px;color:#172b46;background:#f8fafc;font:650 12px/1 inherit;outline:none;margin-bottom:6px}
+.pp155-creditor-search:focus{border-color:#6da0e8;background:#fff;box-shadow:0 0 0 3px rgba(63,131,232,.10)}
+.pp155-creditor-list{max-height:280px;overflow:auto;padding:2px}
+.pp155-creditor-option{width:100%;min-height:36px;display:flex;align-items:center;border:0;border-radius:9px;background:transparent;color:#203751;padding:8px 10px;text-align:left;font:700 11.5px/1.25 inherit;cursor:pointer}
+.pp155-creditor-option:hover,.pp155-creditor-option.active{background:#eaf3ff;color:#0b63f6}
+.pp155-creditor-empty{padding:14px 10px;text-align:center;color:#7d8ba0;font-size:11px}
+@media(max-width:700px){#lancamentos .pp155-creditor-wrap{min-width:0;max-width:none;width:100%;flex-basis:100%}}
+</style>
+<script id="pp-v155-launch-creditor-dropdown-script">
+(()=>{
+'use strict';
+let pop=null,btn=null,wrap=null,search=null,list=null,opened=false,observer=null;
+const HIDDEN='txSearch',NATIVE='txCreditorV50';
+function native(){return document.getElementById(NATIVE)}
+function hidden(){return document.getElementById(HIDDEN)}
+function getValues(){
+  try{
+    const api=window.ppLaunchCreditorV50;
+    const vals=api?.values?.();
+    if(Array.isArray(vals)&&vals.length)return vals.slice();
+  }catch(e){}
+  const sel=native();
+  return sel?[...sel.options].map(o=>o.value).filter(Boolean):[];
+}
+function current(){return hidden()?.value||native()?.value||''}
+function label(){return current()||'Todos os credores / origens'}
+function syncButton(){if(btn)btn.querySelector('.label').textContent=label()}
+function renderList(q=''){
+  if(!list)return;
+  const cur=current(); q=String(q||'').trim().toLocaleLowerCase('pt-BR');
+  let vals=getValues();
+  if(q)vals=vals.filter(v=>String(v).toLocaleLowerCase('pt-BR').includes(q));
+  const all=`<button type="button" class="pp155-creditor-option${cur?'':' active'}" data-value="">Todos os credores / origens</button>`;
+  list.innerHTML=all+(vals.length?vals.map(v=>`<button type="button" class="pp155-creditor-option${v===cur?' active':''}" data-value="${String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;')}</button>`).join(''):'<div class="pp155-creditor-empty">Nenhum credor/origem encontrado.</div>');
+}
+function position(){
+  if(!btn||!pop)return;const r=btn.getBoundingClientRect();
+  const w=Math.max(280,Math.min(420,r.width+60));
+  let left=Math.min(r.left,window.innerWidth-w-10);left=Math.max(10,left);
+  let top=r.bottom+6;const est=Math.min(340,window.innerHeight*.5);
+  if(top+est>window.innerHeight-10)top=Math.max(10,r.top-est-6);
+  Object.assign(pop.style,{left:left+'px',top:top+'px',width:w+'px'});
+}
+function close(){opened=false;pop?.classList.remove('open');btn?.setAttribute('aria-expanded','false')}
+function open(){if(!pop)return;opened=true;renderList('');position();pop.classList.add('open');btn.setAttribute('aria-expanded','true');search.value='';requestAnimationFrame(()=>search.focus())}
+function choose(v){
+  const h=hidden(),sel=native();if(h)h.value=v;if(sel)sel.value=v;
+  syncButton();close();
+  try{window.renderLancamentos?.()}catch(e){}
+  try{window.ppLaunchPendingV150?.refresh?.()}catch(e){}
+}
+function build(){
+  const sel=native(),h=hidden();if(!sel||!h)return false;
+  if(document.getElementById('pp155CreditorBtn')){btn=document.getElementById('pp155CreditorBtn');wrap=btn.closest('.pp155-creditor-wrap');pop=document.getElementById('pp155CreditorPop');search=document.getElementById('pp155CreditorSearch');list=document.getElementById('pp155CreditorList');syncButton();return true}
+  wrap=document.createElement('div');wrap.className='pp155-creditor-wrap';
+  btn=document.createElement('button');btn.type='button';btn.id='pp155CreditorBtn';btn.className='pp155-creditor-btn';btn.setAttribute('aria-haspopup','listbox');btn.setAttribute('aria-expanded','false');btn.innerHTML='<span class="label"></span><span class="chev">⌄</span>';
+  sel.insertAdjacentElement('beforebegin',wrap);wrap.appendChild(btn);sel.style.display='none';
+  pop=document.createElement('div');pop.id='pp155CreditorPop';pop.className='pp155-creditor-pop';pop.innerHTML='<input id="pp155CreditorSearch" class="pp155-creditor-search" type="search" autocomplete="off" placeholder="Buscar credor ou origem"><div id="pp155CreditorList" class="pp155-creditor-list" role="listbox"></div>';document.body.appendChild(pop);
+  search=document.getElementById('pp155CreditorSearch');list=document.getElementById('pp155CreditorList');syncButton();
+  btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();opened?close():open()});
+  search.addEventListener('input',()=>renderList(search.value));
+  list.addEventListener('click',e=>{const o=e.target.closest('.pp155-creditor-option');if(!o)return;choose(o.dataset.value||'')});
+  document.addEventListener('pointerdown',e=>{if(!opened)return;if(e.target.closest('#pp155CreditorPop,#pp155CreditorBtn'))return;close()},true);
+  window.addEventListener('resize',()=>opened&&position(),{passive:true});window.addEventListener('scroll',()=>opened&&position(),true);
+  observer=new MutationObserver(()=>{syncButton();if(opened)renderList(search?.value||'')});observer.observe(sel,{childList:true,subtree:true,attributes:true,attributeFilter:['value']});
+  return true;
+}
+function refresh(){
+  try{window.ppLaunchCreditorV50?.ensure?.(false)}catch(e){}
+  if(!build())return;syncButton();if(opened)renderList(search?.value||'');
+}
+const oldRefresh=window.ppLaunchCreditorV50?.refresh;
+if(window.ppLaunchCreditorV50){window.ppLaunchCreditorV50.refresh=function(){let r;try{r=oldRefresh?.apply(this,arguments)}catch(e){}setTimeout(refresh,0);return r}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,450),{once:true});else setTimeout(refresh,250);
+setTimeout(refresh,1100);
+window.ppLaunchCreditorV155={refresh,open,close};
+})();
+</script>
 </body></html>
 
 
