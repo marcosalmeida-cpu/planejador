@@ -28625,36 +28625,7 @@ window.ppSharedPatrimonyV123={read,render:()=>window.renderAssets?.(),sync:()=>r
 @media(max-width:700px){#lancamentos #txSearch{min-width:0;width:100%}}
 </style>
 <script id="pp-v49-launch-creditor-filter">
-(()=>{'use strict';
-function creditorValues49(){
-  let rows=[];try{rows=window.allTx?.()||[]}catch(e){}
-  return [...new Set(rows.map(x=>String(x?.origem||'').trim()).filter(Boolean))]
-    .sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));
-}
-function refreshCreditorList49(){
-  const input=document.getElementById('txSearch'),list=document.getElementById('txCreditorList');
-  if(!input||!list)return;
-  input.placeholder='Buscar credor / origem';
-  list.innerHTML=creditorValues49().map(v=>`<option value="${String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}"></option>`).join('');
-  const tools=document.querySelector('#lancamentos .section-tools');
-  if(tools&&!document.querySelector('#lancamentos .v49-creditor-hint')){
-    tools.insertAdjacentHTML('afterend','<div class="v49-creditor-hint">Digite ou selecione um credor/origem. Os cards de Entradas, Saídas, Saldo e Pendentes do período acompanham este filtro.</div>');
-  }
-}
-const prev49=window.renderLancamentos;
-if(typeof prev49==='function'){
-  const wrapped49=function(){refreshCreditorList49();return prev49.apply(this,arguments)};
-  window.renderLancamentos=wrapped49;try{renderLancamentos=wrapped49}catch(e){}
-}
-const input49=document.getElementById('txSearch');
-if(input49){
-  input49.addEventListener('input',()=>setTimeout(()=>window.renderLancamentos?.(),0));
-  input49.addEventListener('change',()=>setTimeout(()=>window.renderLancamentos?.(),0));
-}
-refreshCreditorList49();
-setTimeout(()=>{refreshCreditorList49()},180);
-window.ppLaunchCreditorV49={refresh:refreshCreditorList49};
-})();
+(()=>{'use strict';window.ppLaunchCreditorV49={refresh:()=>{}}})();
 </script>
 <style id="pp-v50-launch-creditor-select-style">
 #lancamentos #txSearch,#lancamentos #txCreditorList{display:none!important}
@@ -28685,73 +28656,45 @@ window.ppLaunchCreditorV49={refresh:refreshCreditorList49};
 <script id="pp-v50-launch-creditor-select-final">
 (()=>{'use strict';
 const INPUT='txSearch', SELECT='txCreditorV50';
-
-function esc50(s){return String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]))}
-function values50(){
-  let rows=[];try{rows=window.allTx?.()||[]}catch(e){}
-  return [...new Set(rows.map(x=>String(x?.origem||x?.credor||'').trim()).filter(Boolean))]
-    .sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));
+const KEYS={creditors:'planejador_creditores_v1',tx:'financeiro_marcos_custom_tx_v3',purchases:'financeiro_marcos_card_purchases_v3',cards:'financeiro_marcos_cards_v3'};
+let lastSignature='', lastValues=[];
+function parse(raw,fallback=[]){try{const v=JSON.parse(raw||'');return v??fallback}catch(e){return fallback}}
+function sourceSnapshot(){
+  const c=localStorage.getItem(KEYS.creditors)||'[]',t=localStorage.getItem(KEYS.tx)||'[]',p=localStorage.getItem(KEYS.purchases)||'[]',k=localStorage.getItem(KEYS.cards)||'[]';
+  return {c,t,p,k,signature:c+'\u0001'+t+'\u0001'+p+'\u0001'+k};
 }
-function ensure50(){
-  const tools=document.querySelector('#lancamentos .filterbar');
-  const hidden=document.getElementById(INPUT);
-  if(!tools||!hidden)return null;
-
-  hidden.style.display='none';
-  hidden.setAttribute('aria-hidden','true');
-
+function valuesFromSources(snap){
+  const set=new Set(),add=v=>{v=String(v||'').trim();if(v)set.add(v)};
+  parse(snap.c,[]).forEach(x=>{if(x?.status!=='Arquivado')add(x?.name)});
+  parse(snap.t,[]).forEach(x=>add(x?.origem));
+  parse(snap.p,[]).forEach(x=>{add(x?.creditor);add(x?.origem)});
+  parse(snap.k,[]).forEach(x=>add(x?.name));
+  return [...set].sort((a,b)=>a.localeCompare(b,'pt-BR',{sensitivity:'base'}));
+}
+function ensure50(force=false){
+  const tools=document.querySelector('#lancamentos .filterbar'),hidden=document.getElementById(INPUT);if(!tools||!hidden)return null;
+  hidden.style.display='none';hidden.setAttribute('aria-hidden','true');
   let sel=document.getElementById(SELECT);
   if(!sel){
-    sel=document.createElement('select');
-    sel.id=SELECT;
-    sel.setAttribute('aria-label','Filtrar por credor ou origem');
-    hidden.insertAdjacentElement('beforebegin',sel);
-    sel.addEventListener('change',()=>{
-      hidden.value=sel.value||'';
-      try{window.renderLancamentos?.()}catch(e){}
-      setTimeout(()=>{try{window.ppLaunchSummaryV75?.refresh?.()}catch(e){}},0);
-    });
+    sel=document.createElement('select');sel.id=SELECT;sel.setAttribute('aria-label','Filtrar por credor ou origem');hidden.insertAdjacentElement('beforebegin',sel);
+    sel.addEventListener('change',()=>{hidden.value=sel.value||'';requestAnimationFrame(()=>{try{window.renderLancamentos?.()}catch(e){}})},{passive:true});
   }
-
-  const current=sel.value||hidden.value||'';
-  const vals=values50();
-  sel.innerHTML='<option value="">Todos os credores / origens</option>'+vals.map(v=>`<option value="${esc50(v)}">${esc50(v)}</option>`).join('');
-  if(current&&vals.includes(current))sel.value=current;
-  else if(hidden.value&&vals.includes(hidden.value))sel.value=hidden.value;
-  else{sel.value='';hidden.value=''}
-
+  const snap=sourceSnapshot();
+  if(force||snap.signature!==lastSignature){
+    const current=sel.value||hidden.value||'';lastValues=valuesFromSources(snap);lastSignature=snap.signature;
+    const frag=document.createDocumentFragment(),all=document.createElement('option');all.value='';all.textContent='Todos os credores / origens';frag.appendChild(all);
+    lastValues.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;frag.appendChild(o)});sel.replaceChildren(frag);
+    if(current&&lastValues.includes(current)){sel.value=current;hidden.value=current}else{sel.value='';hidden.value=''}
+  }else if((sel.value||'')!==(hidden.value||'')){sel.value=lastValues.includes(hidden.value)?hidden.value:''}
   const section=document.querySelector('#lancamentos .section-tools');
-  if(section&&!document.querySelector('#lancamentos .v50-creditor-hint')){
-    section.insertAdjacentHTML('afterend','<div class="v50-creditor-hint"><b>Filtro por credor/origem:</b> selecione um nome para recalcular Entradas, Saídas, Saldo e Pendentes do período.</div>');
-  }
+  if(section&&!document.querySelector('#lancamentos .v50-creditor-hint'))section.insertAdjacentHTML('afterend','<div class="v50-creditor-hint"><b>Filtro por credor/origem:</b> selecione um nome para recalcular Entradas, Saídas, Saldo e Pendentes do período.</div>');
   return sel;
 }
-
-const previous50=window.renderLancamentos;
-window.renderLancamentos=function(){
-  ensure50();
-  const r=typeof previous50==='function'?previous50.apply(this,arguments):undefined;
-  setTimeout(()=>{
-    ensure50();
-    try{window.ppLaunchSummaryV75?.refresh?.()}catch(e){}
-  },0);
-  return r;
-};
-try{renderLancamentos=window.renderLancamentos}catch(e){}
-
-// Mantém o filtro atualizado quando novos lançamentos/credor forem incluídos.
-document.addEventListener('click',e=>{
-  if(e.target.closest?.('#saveTx,#saveCardPurchaseV52,#saveCardPurchase,[data-v63-pay]')){
-    setTimeout(()=>{ensure50();try{window.renderLancamentos?.()}catch(x){}},140);
-  }
-},false);
-
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',()=>{ensure50();setTimeout(()=>window.renderLancamentos?.(),80)},{once:true});
-}else{
-  ensure50();setTimeout(()=>window.renderLancamentos?.(),80);
-}
-window.ppLaunchCreditorV50={refresh:ensure50};
+function refresh50(){return ensure50(true)}
+document.addEventListener('click',e=>{if(e.target.closest?.('#saveTx,#saveCardPurchaseV52,#saveCardPurchase,#saveCreditor,[data-v63-pay]'))setTimeout(()=>ensure50(true),60)},false);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)ensure50(false)});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>ensure50(true),{once:true});else ensure50(true);
+window.ppLaunchCreditorV50={refresh:refresh50,ensure:ensure50,values:()=>lastValues.slice()};
 })();
 </script>
 <style id="pp-v57-corner-menu-launch-titles-style">
@@ -30414,6 +30357,11 @@ window.ppLaunchV147={refresh:patch147,menu:menu147};
 <script id="pp-v150-pending-immediate-marker">window.ppLaunchPendingV150={mode:'same-render-cycle'};</script>
 
 <script id="pp-v151-alpha-order-marker">window.ppLaunchAlphabeticalV151={field:'descricao',locale:'pt-BR',groups:['entrada','saida'],engine:'render63'};</script>
+
+<style id="pp-v152-creditor-fast-style">
+#lancamentos #txCreditorV50{cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;position:relative!important;z-index:3!important;background-color:#fff!important}
+#lancamentos .filterbar{pointer-events:auto!important}
+</style>
 </body></html>
 
 
@@ -31508,5 +31456,105 @@ function observe146(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(observe146,500),{once:true});
 else setTimeout(observe146,500);
 window.ppMoveOccurrenceV146={move:window.moveTxOccurrenceNext146,restore:window.restoreTxOccurrenceMonth146,refresh:patchExpenseMenus146};
+})();
+</script>
+
+<style id="pp-v153-modal-selects-interactive">
+/* v153 — selects do lançamento sempre interativos e acima de camadas legadas */
+#txModal select,
+#cardPurchaseModal select,
+#creditorModal select{
+  position:relative!important;
+  z-index:40!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  user-select:auto!important;
+  -webkit-user-select:auto!important;
+  opacity:1!important;
+  visibility:visible!important;
+  cursor:pointer!important;
+}
+#txModal .field,
+#txModal .v32-f-origin>div,
+#cardPurchaseModal .field,
+#creditorModal .field{
+  position:relative!important;
+}
+#txModal select:focus,
+#cardPurchaseModal select:focus,
+#creditorModal select:focus{
+  z-index:60!important;
+}
+</style>
+<script id="pp-v153-modal-selects-interactive-script">
+(()=>{
+'use strict';
+const SELECTOR='#txModal select,#cardPurchaseModal select,#creditorModal select';
+function cleanSelect(s){
+  if(!s)return;
+  s.disabled=false;
+  s.removeAttribute('disabled');
+  s.removeAttribute('inert');
+  s.style.setProperty('pointer-events','auto','important');
+  s.style.setProperty('visibility','visible','important');
+  s.style.setProperty('opacity','1','important');
+  s.style.setProperty('position','relative','important');
+  s.style.setProperty('z-index','40','important');
+}
+function refreshLists(){
+  try{
+    const m=document.getElementById('fMonth');
+    if(m && !m.options.length && Array.isArray(window.monthNames)){
+      m.innerHTML=window.monthNames.map((x,i)=>`<option value="${i+1}">${x}</option>`).join('');
+    }
+  }catch(e){}
+  try{window.updateCategorySelect?.()}catch(e){}
+  try{window.populateCreditorSelects?.(document.getElementById('fOriginSelect')?.value||'')}catch(e){}
+  document.querySelectorAll(SELECTOR).forEach(cleanSelect);
+}
+function openNativePicker(e){
+  const s=e.target?.closest?.(SELECTOR);
+  if(!s)return;
+  cleanSelect(s);
+  // Abre o seletor no próprio gesto do usuário antes que listeners legados
+  // possam consumir o clique. Edge/Chrome suportam showPicker().
+  if(typeof s.showPicker==='function'){
+    try{
+      s.focus({preventScroll:true});
+      s.showPicker();
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      return;
+    }catch(err){}
+  }
+  // fallback: mantém o clique nativo utilizável, mas evita handlers posteriores
+  // no document de alterarem o DOM no mesmo ciclo.
+  s.focus({preventScroll:true});
+}
+window.addEventListener('pointerdown',openNativePicker,true);
+window.addEventListener('mousedown',e=>{
+  if(e.pointerType)return;
+  const s=e.target?.closest?.(SELECTOR);if(!s)return;cleanSelect(s);
+  if(typeof s.showPicker==='function'){
+    try{s.focus({preventScroll:true});s.showPicker();e.preventDefault();e.stopImmediatePropagation();}catch(err){}
+  }
+},true);
+// Não repopula a cada clique; apenas quando o modal é efetivamente aberto.
+document.addEventListener('click',e=>{
+  if(e.target?.closest?.('[data-addtx]'))setTimeout(refreshLists,35);
+  if(e.target?.closest?.('#addCardPurchaseBtn'))setTimeout(refreshLists,35);
+  if(e.target?.closest?.('#quickCreditorBtn'))setTimeout(refreshLists,80);
+},true);
+document.addEventListener('focusin',e=>{const s=e.target?.closest?.(SELECTOR);if(s)cleanSelect(s)},true);
+const obs=new MutationObserver(muts=>{
+  for(const m of muts){
+    if(m.type==='attributes' && m.target?.matches?.('#txModal,#cardPurchaseModal,#creditorModal') && m.target.classList.contains('open')){
+      setTimeout(refreshLists,0);break;
+    }
+  }
+});
+['txModal','cardPurchaseModal','creditorModal'].forEach(id=>{const n=document.getElementById(id);if(n)obs.observe(n,{attributes:true,attributeFilter:['class']})});
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(refreshLists,450),{once:true});else setTimeout(refreshLists,450);
+window.ppModalSelectsV153={refresh:refreshLists};
 })();
 </script>
