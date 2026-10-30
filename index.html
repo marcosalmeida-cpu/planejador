@@ -30765,101 +30765,133 @@ body.pp-v138-view-ready .main{overflow-y:visible!important;height:auto!important
   #lancamentos .v63-tablewrap{width:calc(100% - 20px)!important;margin:0 10px!important}
 }
 </style>
-<script id="pp-v141-launch-entry-recovery-final">
-(()=>{'use strict';
-const ACTIVE=()=>{try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}};
-const CUSTOM_KEY=(typeof txKey!=='undefined'&&txKey)||'financeiro_marcos_custom_tx_v3';
-const V141_MARK='pp_v141_entry_recovery_last_';
-let cloudAttempted=false, cloudBusy=false;
 
-function parse(v){if(v==null)return null;if(typeof v!=='string')return v;try{return JSON.parse(v)}catch(e){return null}}
-function isEntry(x){return !!(x&&typeof x==='object'&&String(x.tipo||'').toLowerCase()==='entrada'&&Number(x.valor||0)>0&&Number(x.ano||0)>=2000&&Number(x.mesNum||0)>=1&&Number(x.mesNum||0)<=12)}
-function sig(x){return [String(x?.id||''),String(x?.descricao||'').trim().toLowerCase(),Number(x?.valor||0).toFixed(2),Number(x?.ano||0),Number(x?.mesNum||0),String(x?.origem||'').trim().toLowerCase()].join('|')}
-function normalizeEntry(x){return {...x,tipo:'entrada',categoria:x.categoria||'Receita',status:x.status||'Quitado',origemDados:x.origemDados||'Site'} }
-function entriesFromCustomValue(raw){const arr=parse(raw);return Array.isArray(arr)?arr.filter(isEntry).map(normalizeEntry):[]}
-function entriesFromProfileState(raw){const obj=parse(raw);if(!obj||typeof obj!=='object')return[];return entriesFromCustomValue(obj[CUSTOM_KEY]??obj.financeiro_marcos_custom_tx_v3)}
-function collectRecursive(node,out,depth=0){
-  if(depth>9||node==null)return;
-  node=parse(node);
-  if(node==null)return;
-  if(Array.isArray(node)){node.forEach(v=>{if(isEntry(v))out.push(normalizeEntry(v));else collectRecursive(v,out,depth+1)});return}
-  if(typeof node!=='object')return;
-  Object.entries(node).forEach(([k,v])=>{
-    if(k===CUSTOM_KEY||k==='financeiro_marcos_custom_tx_v3') entriesFromCustomValue(v).forEach(x=>out.push(x));
-    else collectRecursive(v,out,depth+1);
-  });
-}
-function localCandidates(){
-  const profile=ACTIVE(),found=[];
-  try{entriesFromProfileState(localStorage.getItem(`planejador_profile_state_${profile}_v41`)).forEach(x=>found.push(x))}catch(e){}
-  try{const rec=parse(localStorage.getItem('pp_profile_recovery_v56'));if(rec){collectRecursive(rec?.[profile],found);if(String(rec?.active||'')===String(profile))collectRecursive(rec?.shared,found)}}catch(e){}
-  /* Varrer somente chaves de snapshot/backup/perfil: não vasculha dados acadêmicos ou outros módulos. */
-  try{
-    for(let i=0;i<localStorage.length;i++){
-      const k=String(localStorage.key(i)||'');
-      if(!/(profile_state|recovery|backup|snapshot|cloud)/i.test(k))continue;
-      collectRecursive(localStorage.getItem(k),found);
-    }
-  }catch(e){}
-  return found;
-}
-function mergeEntries(found,source){
-  if(!Array.isArray(custom))return 0;
-  const seen=new Set(custom.map(sig)),add=[];
-  (found||[]).forEach(x=>{if(!isEntry(x))return;const k=sig(x);if(!seen.has(k)){seen.add(k);add.push(normalizeEntry(x))}});
-  if(!add.length)return 0;
-  custom.push(...add);
-  try{persist()}catch(e){try{localStorage.setItem(CUSTOM_KEY,JSON.stringify(custom))}catch(_){} }
-  try{const PM=window.__ppV41Profile;if(PM?.captureShared&&PM?.saveState)PM.saveState(ACTIVE(),PM.captureShared())}catch(e){}
-  try{window.ppCloudV66?.save?.()}catch(e){}
-  try{localStorage.setItem(V141_MARK+ACTIVE(),JSON.stringify({at:new Date().toISOString(),count:add.length,source}))}catch(e){}
-  return add.length;
-}
-function restoreLocal(){
-  if(Array.isArray(custom)&&custom.some(isEntry))return 0;
-  return mergeEntries(localCandidates(),'local-snapshots');
-}
-async function restoreCloud(){
-  if(cloudBusy||cloudAttempted||(Array.isArray(custom)&&custom.some(isEntry)))return 0;
-  cloudAttempted=true;cloudBusy=true;
-  try{
-    const sb=window.ppSupabase;if(!sb)return 0;
-    const auth=await sb.auth.getUser();const user=auth?.data?.user;if(!user)return 0;
-    /* Backups de segurança do próprio usuário, criados pelo Hub antes de sincronizações. */
-    const res=await sb.from('planner_device_backup_v66').select('snapshot,created_at,app_version').eq('user_id',user.id).order('created_at',{ascending:false}).limit(80);
-    if(res?.error)throw res.error;
-    const found=[];(res?.data||[]).forEach(row=>collectRecursive(row?.snapshot,found));
-    let n=mergeEntries(found,'cloud-device-backups');
-    if(!n){
-      /* Último estado sincronizado também é consultado, caso ainda preserve a base antiga. */
-      const rows=await sb.from('planner_key_state_v65').select('profile,storage_key,value,deleted,updated_at').eq('user_id',user.id).eq('profile',ACTIVE()).eq('storage_key',CUSTOM_KEY).eq('deleted',false).limit(5);
-      if(!rows?.error){const alt=[];(rows?.data||[]).forEach(r=>entriesFromCustomValue(r.value).forEach(x=>alt.push(x)));n=mergeEntries(alt,'cloud-current-state')}
-    }
-    if(n>0){
+<script id="pp-v144-income-recovery-diff-safe">
+(function(){
+  'use strict';
+  const TX='financeiro_marcos_custom_tx_v3';
+  const MARCOS_BACKUP=[{"id":"U1790816838963","tipo":"entrada","ano":2026,"mesNum":9,"descricao":"Salário","valor":3079.78,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-01T01:07:18.963Z"},{"id":"U1790816863634","tipo":"entrada","ano":2026,"mesNum":9,"descricao":"Renda Extra","valor":2948.18,"categoria":"Renda extra","classificacao":"Entrada","origem":"","status":"Quitado","origemDados":"Site","createdAt":"2026-10-01T01:28:16.573Z"},{"id":"U1790819601192","tipo":"entrada","ano":2026,"mesNum":9,"descricao":"Pluxxe","valor":600,"categoria":"Outros recebimentos","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-01T01:53:21.192Z"},{"id":"U1790819678665","tipo":"entrada","ano":2026,"mesNum":9,"descricao":"Christian","valor":79.99,"categoria":"Salário","classificacao":"Entrada","origem":"Christian Alves Dias","status":"Quitado","origemDados":"Site","createdAt":"2026-10-01T01:54:38.665Z"},{"id":"U1790819920717","tipo":"entrada","ano":2026,"mesNum":10,"descricao":"Salário","valor":4266.17,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-01T11:52:54.945Z"},{"id":"U1790819940694","tipo":"entrada","ano":2026,"mesNum":10,"descricao":"Renda Extra","valor":472,"categoria":"Salário","classificacao":"Entrada","origem":"","status":"Quitado","origemDados":"Site","createdAt":"2026-10-01T01:59:21.887Z","paymentMethod":"padrao"},{"id":"U1790819984814","tipo":"entrada","ano":2026,"mesNum":10,"descricao":"Férias","valor":3808.92,"categoria":"Férias","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-01T01:59:44.814Z"},{"id":"U1790862166433","tipo":"entrada","ano":2026,"mesNum":10,"descricao":"Reembolso","valor":151.57,"categoria":"Reembolso","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-01T13:42:46.433Z"},{"id":"U1790882049008","tipo":"entrada","ano":2026,"mesNum":10,"descricao":"Pluxee","valor":650,"categoria":"Outros recebimentos","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-01T19:14:09.008Z"},{"id":"U1791228467365","tipo":"entrada","ano":2026,"mesNum":10,"descricao":"Bônus","valor":177.26,"categoria":"Bônus","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-05T19:27:47.365Z"},{"id":"U1791228580692","tipo":"entrada","ano":2026,"mesNum":11,"descricao":"Salário","valor":2394.03,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site","createdAt":"2026-10-05T19:30:41.567Z"},{"id":"U1791228720319","tipo":"entrada","ano":2026,"mesNum":11,"descricao":"13º Salário - 1ª Parcela","valor":4036.39,"categoria":"13º salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site","createdAt":"2026-10-05T19:32:00.319Z"},{"id":"U1791228763309","tipo":"entrada","ano":2026,"mesNum":12,"descricao":"13º Salário - 2ª Parcela","valor":2049.62,"categoria":"13º salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site","createdAt":"2026-10-05T19:32:43.309Z"},{"id":"U1791228797658","tipo":"entrada","ano":2026,"mesNum":12,"descricao":"Salário","valor":4266.17,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site","createdAt":"2026-10-05T19:33:17.658Z"},{"id":"U1791228847274","tipo":"entrada","ano":2026,"mesNum":1,"descricao":"Renda Extra","valor":689.9,"categoria":"Renda extra","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-05T19:34:07.274Z"},{"id":"U1791228863770","tipo":"entrada","ano":2026,"mesNum":2,"descricao":"Renda Extra","valor":759.9,"categoria":"Renda extra","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-05T19:34:23.770Z"},{"id":"U1791228880259","tipo":"entrada","ano":2026,"mesNum":3,"descricao":"Renda Extra","valor":759.9,"categoria":"Renda extra","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-05T19:34:40.259Z"},{"id":"U1791228902924","tipo":"entrada","ano":2026,"mesNum":4,"descricao":"Renda Extra","valor":759.9,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-05T19:35:02.924Z"},{"id":"U1791228919714","tipo":"entrada","ano":2026,"mesNum":5,"descricao":"Renda Extra","valor":1153.46,"categoria":"Renda extra","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-05T19:35:19.714Z"},{"id":"U1791228933379","tipo":"entrada","ano":2026,"mesNum":6,"descricao":"Renda Extra","valor":1292.71,"categoria":"Renda extra","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-05T19:35:33.379Z"},{"id":"U1791228950834","tipo":"entrada","ano":2026,"mesNum":7,"descricao":"Renda Extra","valor":1383,"categoria":"Renda extra","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-05T19:35:50.834Z"},{"id":"U1791228977232","tipo":"entrada","ano":2026,"mesNum":8,"descricao":"Renda Extra","valor":2526.51,"categoria":"Renda extra","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-05T19:36:17.232Z"},{"id":"U1791292427173","tipo":"entrada","ano":2026,"mesNum":11,"descricao":"Pluxee","valor":650,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site","createdAt":"2026-10-06T13:40:28.268Z","paymentMethod":"padrao"},{"id":"U1791292493074","tipo":"entrada","ano":2026,"mesNum":12,"descricao":"Pluxee","valor":650,"categoria":"Outros recebimentos","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site","createdAt":"2026-10-06T13:14:53.074Z"},{"id":"U1791294400834","tipo":"entrada","ano":2026,"mesNum":12,"descricao":"Férias","valor":1527.93,"categoria":"Férias","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site","createdAt":"2026-10-06T13:46:54.817Z","paymentMethod":"padrao"},{"id":"U1791294488487","tipo":"entrada","ano":2027,"mesNum":1,"descricao":"Salário","valor":4266.17,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site","createdAt":"2026-10-06T13:48:08.488Z","standardRecurring":true,"paymentMethod":"padrao","recurringStartYear":2027,"recurringStartMonth":1,"recurringMode":"mensal","recurringOverrides":{"2027-01":{"tipo":"entrada","descricao":"Salário","valor":4508.62,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site"}}},{"id":"U1791322568678","tipo":"entrada","ano":2027,"mesNum":1,"descricao":"Pluxee","valor":650,"categoria":"VA/VR","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site","createdAt":"2026-10-06T21:36:08.678Z","standardRecurring":true,"paymentMethod":"padrao","recurringStartYear":2027,"recurringStartMonth":1,"recurringMode":"mensal"},{"id":"U1791734960124","tipo":"entrada","ano":2026,"mesNum":11,"descricao":"Christian: Presente do Ravi","valor":33.33,"categoria":"Salário","classificacao":"Entrada","origem":"Christian Alves Dias","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T14:38:20.799Z","paymentMethod":"padrao"},{"id":"U1791812483057","tipo":"entrada","ano":2026,"mesNum":11,"descricao":"Poli: Shoppe","valor":112.88,"categoria":"Salário","classificacao":"Entrada","origem":"Apoliana de Oliveira Santos","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T13:41:52.263Z","paymentMethod":"padrao"},{"id":"U1791812536221","tipo":"entrada","ano":2026,"mesNum":12,"descricao":"Poli: Shoppe","valor":112.88,"categoria":"Restituição","classificacao":"Entrada","origem":"Apoliana de Oliveira Santos","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T13:43:48.187Z","paymentMethod":"padrao"},{"id":"U1791812560535","tipo":"entrada","ano":2027,"mesNum":1,"descricao":"Poli: Shoppe","valor":112.88,"categoria":"Salário","classificacao":"Entrada","origem":"Apoliana de Oliveira Santos","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T13:42:40.535Z","paymentMethod":"padrao"},{"id":"U1791813169322","tipo":"entrada","ano":2027,"mesNum":11,"descricao":"13º Salário - 1ª Parcela","valor":4036.39,"categoria":"13º salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T13:52:49.322Z","paymentMethod":"padrao"},{"id":"U1791813219867","tipo":"entrada","ano":2027,"mesNum":12,"descricao":"13º Salário - 2ª Parcela","valor":2049.62,"categoria":"13º salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T13:53:39.867Z","paymentMethod":"padrao"},{"id":"U1791813308414","tipo":"entrada","ano":2027,"mesNum":1,"descricao":"Christian: Reforma","valor":196.78,"categoria":"Renda extra","classificacao":"Entrada","origem":"Christian Alves Dias","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T13:55:08.414Z","paymentMethod":"padrao"},{"id":"U1791813340268","tipo":"entrada","ano":2027,"mesNum":2,"descricao":"Christian: Reforma","valor":196.78,"categoria":"Renda extra","classificacao":"Entrada","origem":"Christian Alves Dias","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T13:55:40.268Z","paymentMethod":"padrao"},{"id":"U1791813393025","tipo":"entrada","ano":2027,"mesNum":1,"descricao":"Christian: Despesas de Casa","valor":190,"categoria":"Renda extra","classificacao":"Entrada","origem":"Christian Alves Dias","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T13:56:33.025Z","standardRecurring":true,"paymentMethod":"padrao","recurringStartYear":2027,"recurringStartMonth":1,"recurringMode":"mensal"},{"id":"U1791814083969","tipo":"entrada","ano":2026,"mesNum":11,"descricao":"Christian: Despesas de Casa","valor":386.78,"categoria":"Renda extra","classificacao":"Entrada","origem":"Christian Alves Dias","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T14:08:03.969Z","paymentMethod":"padrao"},{"id":"U1791814160110","tipo":"entrada","ano":2026,"mesNum":12,"descricao":"Christian - Presente do Ravi","valor":33.33,"categoria":"Renda extra","classificacao":"Entrada","origem":"Christian Alves Dias","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T14:09:20.110Z","paymentMethod":"padrao"},{"id":"U1791814210553","tipo":"entrada","ano":2026,"mesNum":12,"descricao":"Christian: Despesas de Casa","valor":386.78,"categoria":"Renda extra","classificacao":"Entrada","origem":"Christian Alves Dias","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T14:10:10.553Z","paymentMethod":"padrao"},{"id":"U1791816163469","tipo":"entrada","ano":2025,"mesNum":12,"descricao":"689,90","valor":689.9,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Pendente","origemDados":"Site","createdAt":"2026-10-12T14:42:43.469Z","paymentMethod":"padrao"},{"id":"U1791816179165","tipo":"entrada","ano":2025,"mesNum":11,"descricao":"Salário","valor":400,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-12T14:43:27.797Z","paymentMethod":"padrao"},{"id":"U1791816222636","tipo":"entrada","ano":2025,"mesNum":10,"descricao":"Salário","valor":400,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-12T14:43:42.636Z","paymentMethod":"padrao"},{"id":"U1791816238908","tipo":"entrada","ano":2025,"mesNum":8,"descricao":"Salário","valor":400,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-12T14:44:23.873Z","paymentMethod":"padrao"},{"id":"U1791816254413","tipo":"entrada","ano":2025,"mesNum":9,"descricao":"Salário","valor":400,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-12T14:44:14.413Z","paymentMethod":"padrao"},{"id":"U1791816278904","tipo":"entrada","ano":2025,"mesNum":7,"descricao":"Salário","valor":400,"categoria":"Salário","classificacao":"Entrada","origem":"Rede Cidadã","status":"Quitado","origemDados":"Site","createdAt":"2026-10-12T14:44:38.904Z","paymentMethod":"padrao"}];
+  const PROFILE_KEY=p=>`planejador_profile_state_${p}_v41`;
+  const MARK='pp_v144_income_recovery_audit';
+  const parse=v=>{if(v==null)return null;if(typeof v!=='string')return v;try{return JSON.parse(v)}catch(e){return null}};
+  const isEntry=x=>!!(x&&typeof x==='object'&&String(x.tipo||'').toLowerCase()==='entrada'&&Number(x.valor||0)>0&&Number(x.ano||0)>=2000&&Number(x.mesNum||0)>=1&&Number(x.mesNum||0)<=12);
+  const sig=x=>[Number(x?.ano)||0,Number(x?.mesNum)||0,String(x?.descricao||'').trim().toLowerCase(),Number(x?.valor||0).toFixed(2),String(x?.origem||'').trim().toLowerCase()].join('|');
+  const active=()=>{try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}};
+  function readState(profile){
+    try{const PM=window.__ppV41Profile;if(PM?.readState)return PM.readState(profile)||{}}catch(e){}
+    return parse(localStorage.getItem(PROFILE_KEY(profile)))||{};
+  }
+  function saveState(profile,state){
+    try{const PM=window.__ppV41Profile;if(PM?.saveState){PM.saveState(profile,state);return}}catch(e){}
+    try{localStorage.setItem(PROFILE_KEY(profile),JSON.stringify(state||{}))}catch(e){}
+  }
+  function arrFromState(state){const a=parse(state?.[TX]);return Array.isArray(a)?a:[]}
+  function mergeMissing(base,incoming){
+    const out=Array.isArray(base)?base.slice():[];
+    const ids=new Set(out.map(x=>String(x?.id||'')).filter(Boolean));
+    const sigs=new Set(out.filter(isEntry).map(sig));
+    let added=0;
+    (incoming||[]).forEach(src=>{
+      if(!isEntry(src))return;
+      const id=String(src?.id||''),k=sig(src);
+      if((id&&ids.has(id))||sigs.has(k))return;
+      out.push({...src}); if(id)ids.add(id); sigs.add(k); added++;
+    });
+    return {out,added};
+  }
+  function refresh(){
+    [0,120,500].forEach(ms=>setTimeout(()=>{
       try{window.renderLancamentos?.()}catch(e){}
       try{window.ppLaunchSummaryV75?.refresh?.()}catch(e){}
       try{window.ppLaunchCreditorV50?.refresh?.()}catch(e){}
-      try{toast(`${n} entrada(s) recuperada(s) dos snapshots de segurança do Hub.`)}catch(e){}
+      try{window.renderDashboard?.()}catch(e){}
+    },ms));
+  }
+  function persistActive(profile,out){
+    localStorage.setItem(TX,JSON.stringify(out));
+    try{custom=out}catch(e){}
+    try{
+      const PM=window.__ppV41Profile;
+      if(PM?.captureShared&&PM?.saveState)PM.saveState(profile,PM.captureShared());
+      else{const st=readState(profile)||{};st[TX]=JSON.stringify(out);saveState(profile,st)}
+    }catch(e){const st=readState(profile)||{};st[TX]=JSON.stringify(out);saveState(profile,st)}
+    try{window.ppCloudV66?.save?.()}catch(e){}
+    refresh();
+  }
+  function restoreMarcosMissing(){
+    const profile='Marcos',isActive=active()===profile;let state=readState(profile)||{};
+    let base=isActive?(parse(localStorage.getItem(TX))||[]):arrFromState(state); if(!Array.isArray(base))base=[];
+    const before=base.filter(isEntry).length;
+    const r=mergeMissing(base,MARCOS_BACKUP);
+    if(r.added){
+      if(isActive)persistActive(profile,r.out);else{state[TX]=JSON.stringify(r.out);saveState(profile,state)}
+      try{toast(`${r.added} entrada(s) ausente(s) restaurada(s) no perfil Marcos.`)}catch(e){}
     }
-    return n;
-  }catch(e){console.warn('V141 recovery cloud',e);return 0}
-  finally{cloudBusy=false}
-}
-function runRecovery(){
-  if(Array.isArray(custom)&&custom.some(isEntry))return;
-  const n=restoreLocal();
-  if(n>0){try{toast(`${n} entrada(s) recuperada(s) do histórico local.`)}catch(e){};return}
-  /* A nuvem pode inicializar alguns instantes depois do restante do app. */
-  [450,1400,3200,6500].forEach(ms=>setTimeout(()=>{if(!(Array.isArray(custom)&&custom.some(isEntry)))restoreCloud()},ms));
-}
-
-/* Neutraliza definitivamente o antigo reset destrutivo nas próximas instalações/perfis. */
-try{localStorage.setItem('planejador_manual_reset_20260927_v2','done')}catch(e){}
-const previousRender=window.renderLancamentos;
-window.renderLancamentos=function(){runRecovery();return typeof previousRender==='function'?previousRender.apply(this,arguments):undefined};
-try{renderLancamentos=window.renderLancamentos}catch(e){}
-window.ppLaunchEntryRecoveryV141={restoreLocal,restoreCloud,run:runRecovery};
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{runRecovery();window.renderLancamentos?.()},180),{once:true});
-else setTimeout(()=>{runRecovery();window.renderLancamentos?.()},180);
+    return {before,after:r.out.filter(isEntry).length,added:r.added,referenceCount:MARCOS_BACKUP.length};
+  }
+  function collectEntries(node,out,depth=0){
+    if(depth>9||node==null)return; node=parse(node); if(node==null)return;
+    if(Array.isArray(node)){node.forEach(v=>{if(isEntry(v))out.push(v);else collectEntries(v,out,depth+1)});return}
+    if(typeof node!=='object')return;
+    Object.entries(node).forEach(([k,v])=>{if(k===TX){const a=parse(v);if(Array.isArray(a))a.filter(isEntry).forEach(x=>out.push(x))}else collectEntries(v,out,depth+1)});
+  }
+  function christianOwnCandidates(){
+    const found=[];
+    try{const rec=parse(localStorage.getItem('pp_profile_recovery_v56'));if(rec?.Christian)collectEntries(rec.Christian,found)}catch(e){}
+    try{
+      for(let i=0;i<localStorage.length;i++){
+        const k=String(localStorage.key(i)||'');
+        if(!/christian/i.test(k)||!/(backup|snapshot|recovery|profile_state)/i.test(k))continue;
+        collectEntries(localStorage.getItem(k),found);
+      }
+    }catch(e){}
+    return found;
+  }
+  function restoreChristianLocalMissing(){
+    const profile='Christian',isActive=active()===profile;let state=readState(profile)||{};
+    let base=isActive?(parse(localStorage.getItem(TX))||[]):arrFromState(state); if(!Array.isArray(base))base=[];
+    const candidates=christianOwnCandidates(); const r=mergeMissing(base,candidates);
+    if(r.added){
+      if(isActive)persistActive(profile,r.out);else{state[TX]=JSON.stringify(r.out);saveState(profile,state)}
+      try{toast(`${r.added} entrada(s) ausente(s) do Christian recuperada(s) do histórico local dele.`)}catch(e){}
+    }
+    return {before:base.filter(isEntry).length,after:r.out.filter(isEntry).length,added:r.added,candidates:candidates.length,source:'christian-local'};
+  }
+  async function restoreChristianCloudMissing(){
+    const profile='Christian',isActive=active()===profile;let state=readState(profile)||{};
+    let base=isActive?(parse(localStorage.getItem(TX))||[]):arrFromState(state); if(!Array.isArray(base))base=[];
+    try{
+      const sb=window.ppSupabase;if(!sb)return {before:base.filter(isEntry).length,after:base.filter(isEntry).length,added:0,source:'no-cloud'};
+      const auth=await sb.auth.getUser();const user=auth?.data?.user;if(!user)return {before:base.filter(isEntry).length,after:base.filter(isEntry).length,added:0,source:'no-user'};
+      const rows=await sb.from('planner_key_state_v65').select('value,updated_at').eq('user_id',user.id).eq('profile','Christian').eq('storage_key',TX).eq('deleted',false).order('updated_at',{ascending:false}).limit(25);
+      if(rows?.error)throw rows.error;
+      const cand=[];(rows?.data||[]).forEach(row=>{const a=parse(row.value);if(Array.isArray(a))a.filter(isEntry).forEach(x=>cand.push(x))});
+      const r=mergeMissing(base,cand);
+      if(r.added){if(isActive)persistActive(profile,r.out);else{state[TX]=JSON.stringify(r.out);saveState(profile,state)}}
+      return {before:base.filter(isEntry).length,after:r.out.filter(isEntry).length,added:r.added,candidates:cand.length,source:'christian-cloud'};
+    }catch(e){console.warn('V144 Christian cloud audit',e);return {before:base.filter(isEntry).length,after:base.filter(isEntry).length,added:0,source:'cloud-error'}}
+  }
+  async function auditChristian(){
+    const local=restoreChristianLocalMissing();
+    const cloud=await restoreChristianCloudMissing();
+    const finalState=readState('Christian')||{};
+    const finalCount=(active()==='Christian'?(parse(localStorage.getItem(TX))||[]):arrFromState(finalState)).filter?.(isEntry)?.length||0;
+    return {local,cloud,finalCount};
+  }
+  async function run(){
+    /* Neutralize destructive legacy reset flags; never erase current transactions. */
+    try{localStorage.setItem('planejador_manual_reset_20260927_v2','done')}catch(e){}
+    try{localStorage.setItem('planejador_manual_reset_20260927_v3','done')}catch(e){}
+    const marcos=restoreMarcosMissing();
+    const christian=await auditChristian();
+    const report={at:new Date().toISOString(),marcos,christian,source:'financeiro-marcos-backup-2026-10-24.json',policy:'restore-missing-income-only'};
+    try{localStorage.setItem(MARK,JSON.stringify(report))}catch(e){}
+    window.__ppIncomeAuditV144=report;
+    return report;
+  }
+  window.ppIncomeRecoveryV144={run,restoreMarcosMissing,auditChristian};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(run,850),{once:true});else setTimeout(run,850);
+  setTimeout(run,2300);
+  document.addEventListener('click',e=>{if(e.target.closest?.('[data-v62-profile],#switchProfileBtnV46,.pp-profile-v46-option'))setTimeout(run,750)},true);
 })();
 </script>

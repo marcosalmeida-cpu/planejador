@@ -1,0 +1,46 @@
+﻿id,tipo,ano,mesNum,descricao,valor,categoria,classificacao,origem,status,origemDados,createdAt
+U1790816838963,entrada,2026,9,Salário,3079.78,Salário,Entrada,Rede Cidadã,Quitado,Site,2026-10-01T01:07:18.963Z
+U1790816863634,entrada,2026,9,Renda Extra,2948.18,Renda extra,Entrada,,Quitado,Site,2026-10-01T01:28:16.573Z
+U1790819601192,entrada,2026,9,Pluxxe,600,Outros recebimentos,Entrada,Rede Cidadã,Quitado,Site,2026-10-01T01:53:21.192Z
+U1790819678665,entrada,2026,9,Christian,79.99,Salário,Entrada,Christian Alves Dias,Quitado,Site,2026-10-01T01:54:38.665Z
+U1790819920717,entrada,2026,10,Salário,4266.17,Salário,Entrada,Rede Cidadã,Quitado,Site,2026-10-01T11:52:54.945Z
+U1790819940694,entrada,2026,10,Renda Extra,472,Salário,Entrada,,Quitado,Site,2026-10-01T01:59:21.887Z
+U1790819984814,entrada,2026,10,Férias,3808.92,Férias,Entrada,Rede Cidadã,Quitado,Site,2026-10-01T01:59:44.814Z
+U1790862166433,entrada,2026,10,Reembolso,151.57,Reembolso,Entrada,Rede Cidadã,Quitado,Site,2026-10-01T13:42:46.433Z
+U1790882049008,entrada,2026,10,Pluxee,650,Outros recebimentos,Entrada,Rede Cidadã,Quitado,Site,2026-10-01T19:14:09.008Z
+U1791228467365,entrada,2026,10,Bônus,177.26,Bônus,Entrada,Rede Cidadã,Quitado,Site,2026-10-05T19:27:47.365Z
+U1791228580692,entrada,2026,11,Salário,2394.03,Salário,Entrada,Rede Cidadã,Pendente,Site,2026-10-05T19:30:41.567Z
+U1791228720319,entrada,2026,11,13º Salário - 1ª Parcela,4036.39,13º salário,Entrada,Rede Cidadã,Pendente,Site,2026-10-05T19:32:00.319Z
+U1791228763309,entrada,2026,12,13º Salário - 2ª Parcela,2049.62,13º salário,Entrada,Rede Cidadã,Pendente,Site,2026-10-05T19:32:43.309Z
+U1791228797658,entrada,2026,12,Salário,4266.17,Salário,Entrada,Rede Cidadã,Pendente,Site,2026-10-05T19:33:17.658Z
+U1791228847274,entrada,2026,1,Renda Extra,689.9,Renda extra,Entrada,Rede Cidadã,Quitado,Site,2026-10-05T19:34:07.274Z
+U1791228863770,entrada,2026,2,Renda Extra,759.9,Renda extra,Entrada,Rede Cidadã,Quitado,Site,2026-10-05T19:34:23.770Z
+U1791228880259,entrada,2026,3,Renda Extra,759.9,Renda extra,Entrada,Rede Cidadã,Quitado,Site,2026-10-05T19:34:40.259Z
+U1791228902924,entrada,2026,4,Renda Extra,759.9,Salário,Entrada,Rede Cidadã,Quitado,Site,2026-10-05T19:35:02.924Z
+U1791228919714,entrada,2026,5,Renda Extra,1153.46,Renda extra,Entrada,Rede Cidadã,Quitado,Site,2026-10-05T19:35:19.714Z
+U1791228933379,entrada,2026,6,Renda Extra,1292.71,Renda extra,Entrada,Rede Cidadã,Quitado,Site,2026-10-05T19:35:33.379Z
+U1791228950834,entrada,2026,7,Renda Extra,1383,Renda extra,Entrada,Rede Cidadã,Quitado,Site,2026-10-05T19:35:50.834Z
+U1791228977232,entrada,2026,8,Renda Extra,2526.51,Renda extra,Entrada,Rede Cidadã,Quitado,Site,2026-10-05T19:36:17.232Z
+U1791292427173,entrada,2026,11,Pluxee,650,Salário,Entrada,Rede Cidadã,Pendente,Site,2026-10-06T13:40:28.268Z
+U1791292493074,entrada,2026,12,Pluxee,650,Outros recebimentos,Entrada,Rede Cidadã,Pendente,Site,2026-10-06T13:14:53.074Z
+U1791294400834,entrada,2026,12,Férias,1527.93,Férias,Entrada,Rede Cidadã,Pendente,Site,2026-10-06T13:46:54.817Z
+U1791294488487,entrada,2027,1,Salário,4266.17,Salário,Entrada,Rede Cidadã,Pendente,Site,2026-10-06T13:48:08.488Z
+U1791322568678,entrada,2027,1,Pluxee,650,VA/VR,Entrada,Rede Cidadã,Pendente,Site,2026-10-06T21:36:08.678Z
+U1791734960124,entrada,2026,11,Christian: Presente do Ravi,33.33,Salário,Entrada,Christian Alves Dias,Pendente,Site,2026-10-12T14:38:20.799Z
+U1791812483057,entrada,2026,11,Poli: Shoppe,112.88,Salário,Entrada,Apoliana de Oliveira Santos,Pendente,Site,2026-10-12T13:41:52.263Z
+U1791812536221,entrada,2026,12,Poli: Shoppe,112.88,Restituição,Entrada,Apoliana de Oliveira Santos,Pendente,Site,2026-10-12T13:43:48.187Z
+U1791812560535,entrada,2027,1,Poli: Shoppe,112.88,Salário,Entrada,Apoliana de Oliveira Santos,Pendente,Site,2026-10-12T13:42:40.535Z
+U1791813169322,entrada,2027,11,13º Salário - 1ª Parcela,4036.39,13º salário,Entrada,Rede Cidadã,Pendente,Site,2026-10-12T13:52:49.322Z
+U1791813219867,entrada,2027,12,13º Salário - 2ª Parcela,2049.62,13º salário,Entrada,Rede Cidadã,Pendente,Site,2026-10-12T13:53:39.867Z
+U1791813308414,entrada,2027,1,Christian: Reforma,196.78,Renda extra,Entrada,Christian Alves Dias,Pendente,Site,2026-10-12T13:55:08.414Z
+U1791813340268,entrada,2027,2,Christian: Reforma,196.78,Renda extra,Entrada,Christian Alves Dias,Pendente,Site,2026-10-12T13:55:40.268Z
+U1791813393025,entrada,2027,1,Christian: Despesas de Casa,190,Renda extra,Entrada,Christian Alves Dias,Pendente,Site,2026-10-12T13:56:33.025Z
+U1791814083969,entrada,2026,11,Christian: Despesas de Casa,386.78,Renda extra,Entrada,Christian Alves Dias,Pendente,Site,2026-10-12T14:08:03.969Z
+U1791814160110,entrada,2026,12,Christian - Presente do Ravi,33.33,Renda extra,Entrada,Christian Alves Dias,Pendente,Site,2026-10-12T14:09:20.110Z
+U1791814210553,entrada,2026,12,Christian: Despesas de Casa,386.78,Renda extra,Entrada,Christian Alves Dias,Pendente,Site,2026-10-12T14:10:10.553Z
+U1791816163469,entrada,2025,12,"689,90",689.9,Salário,Entrada,Rede Cidadã,Pendente,Site,2026-10-12T14:42:43.469Z
+U1791816179165,entrada,2025,11,Salário,400,Salário,Entrada,Rede Cidadã,Quitado,Site,2026-10-12T14:43:27.797Z
+U1791816222636,entrada,2025,10,Salário,400,Salário,Entrada,Rede Cidadã,Quitado,Site,2026-10-12T14:43:42.636Z
+U1791816238908,entrada,2025,8,Salário,400,Salário,Entrada,Rede Cidadã,Quitado,Site,2026-10-12T14:44:23.873Z
+U1791816254413,entrada,2025,9,Salário,400,Salário,Entrada,Rede Cidadã,Quitado,Site,2026-10-12T14:44:14.413Z
+U1791816278904,entrada,2025,7,Salário,400,Salário,Entrada,Rede Cidadã,Quitado,Site,2026-10-12T14:44:38.904Z

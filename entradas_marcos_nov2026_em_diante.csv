@@ -1,0 +1,22 @@
+﻿id,ano,mesNum,descricao,valor,categoria,origem,status,standardRecurring,recurringStartYear,recurringStartMonth,recurringMode
+U1791228580692,2026,11,Salário,2394.03,Salário,Rede Cidadã,Pendente,,,,
+U1791228720319,2026,11,13º Salário - 1ª Parcela,4036.39,13º salário,Rede Cidadã,Pendente,,,,
+U1791292427173,2026,11,Pluxee,650,Salário,Rede Cidadã,Pendente,,,,
+U1791812483057,2026,11,Poli: Shoppe,112.88,Salário,Apoliana de Oliveira Santos,Pendente,,,,
+U1791814083969,2026,11,Christian: Despesas de Casa,386.78,Renda extra,Christian Alves Dias,Pendente,,,,
+U1791734960124,2026,11,Christian: Presente do Ravi,33.33,Salário,Christian Alves Dias,Pendente,,,,
+U1791228763309,2026,12,13º Salário - 2ª Parcela,2049.62,13º salário,Rede Cidadã,Pendente,,,,
+U1791228797658,2026,12,Salário,4266.17,Salário,Rede Cidadã,Pendente,,,,
+U1791292493074,2026,12,Pluxee,650,Outros recebimentos,Rede Cidadã,Pendente,,,,
+U1791294400834,2026,12,Férias,1527.93,Férias,Rede Cidadã,Pendente,,,,
+U1791812536221,2026,12,Poli: Shoppe,112.88,Restituição,Apoliana de Oliveira Santos,Pendente,,,,
+U1791814160110,2026,12,Christian - Presente do Ravi,33.33,Renda extra,Christian Alves Dias,Pendente,,,,
+U1791814210553,2026,12,Christian: Despesas de Casa,386.78,Renda extra,Christian Alves Dias,Pendente,,,,
+U1791294488487,2027,1,Salário,4266.17,Salário,Rede Cidadã,Pendente,True,2027,1,mensal
+U1791322568678,2027,1,Pluxee,650,VA/VR,Rede Cidadã,Pendente,True,2027,1,mensal
+U1791812560535,2027,1,Poli: Shoppe,112.88,Salário,Apoliana de Oliveira Santos,Pendente,,,,
+U1791813308414,2027,1,Christian: Reforma,196.78,Renda extra,Christian Alves Dias,Pendente,,,,
+U1791813393025,2027,1,Christian: Despesas de Casa,190,Renda extra,Christian Alves Dias,Pendente,True,2027,1,mensal
+U1791813340268,2027,2,Christian: Reforma,196.78,Renda extra,Christian Alves Dias,Pendente,,,,
+U1791813169322,2027,11,13º Salário - 1ª Parcela,4036.39,13º salário,Rede Cidadã,Pendente,,,,
+U1791813219867,2027,12,13º Salário - 2ª Parcela,2049.62,13º salário,Rede Cidadã,Pendente,,,,
