@@ -2301,7 +2301,7 @@ const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll
 const monthNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const shortMonths=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const esc=s=>String(s??'').replace(/[&<>\"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
-const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const brl=v=>{const n=Number(v)||0;const z=Math.abs(n)<0.005?0:n;return z.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});};
 const num=v=>{
   if(typeof v==='number'&&Number.isFinite(v))return v;
   let s=String(v??'').trim().replace(/R\$/gi,'').replace(/\s/g,'').replace(/[^0-9,.-]/g,'');
@@ -11669,7 +11669,7 @@ const oldRC=window.renderCards;if(typeof oldRC==='function'){window.renderCards=
 <script id="pp-v43-inline-calculator-script">
 (()=>{
 'use strict';
-function brl(v){return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function brl(v){const n=Number(v)||0;const z=Math.abs(n)<0.005?0:n;return z.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 function formatInput(v){return (Math.round((Number(v)||0)*100)/100).toFixed(2).replace('.',',')}
 function tokenize(raw){
   const s=String(raw||'').replace(/R\$/gi,'').replace(/\s+/g,'').replace(/,/g,'.');
@@ -17725,7 +17725,7 @@ function firstInvoiceV54(){
 }
 function addMonthV54(y,m,i){const d=new Date(+y,+m-1+i,1,12);return {year:d.getFullYear(),month:d.getMonth()+1}}
 function labelMonthV54(y,m){const names=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];return `${names[m-1]||String(m).padStart(2,'0')}/${String(y).slice(-2)}`}
-function brlV54(v){return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function brlV54(v){const n=Number(v)||0;const z=Math.abs(n)<0.005?0:n;return z.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 function refreshInstallmentPreviewV54(){
   const p=document.getElementById('v39InstallmentPreview');
   if(!p)return;
@@ -22555,7 +22555,8 @@ function renderSummary75(){
   const pending=cards.concat(exits)
     .filter(x=>String(invoiceStatus75(x)).toLowerCase()!=='quitado')
     .reduce((a,x)=>a+n75(x.valor),0);
-  const balance=inc-out;
+  const rawBalance=inc-out;
+  const balance=Math.abs(rawBalance)<0.005?0:rawBalance;
 
   summary.innerHTML=`
     <div class="card mini v63-summary v63-entry">
@@ -24665,7 +24666,8 @@ function render99(){
   const rows=rows99();
   const income=rows.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+n99(x.valor),0);
   const expense=rows.filter(x=>x.tipo==='saida').reduce((a,x)=>a+n99(x.valor),0);
-  const result=income-expense;
+  const rawResult=income-expense;
+  const result=Math.abs(rawResult)<0.005?0:rawResult;
 
   // Regra solicitada:
   // normal = despesa / receita; 0/0 = 100%; sem receita com despesa = 200% (déficit sem cobertura).
@@ -28385,7 +28387,7 @@ window.ppRepairCreditorsV40=ensureCreditorsV40;
 <script id="pp-v44-card-inline-calculator-script">
 (()=>{
 'use strict';
-function brl(v){return (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function brl(v){const n=Number(v)||0;const z=Math.abs(n)<0.005?0:n;return z.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
 function formatInput(v){return (Math.round((Number(v)||0)*100)/100).toFixed(2).replace('.',',')}
 function tokenize(raw){
   const s=String(raw||'').replace(/R\$/gi,'').replace(/\s+/g,'').replace(/,/g,'.');
@@ -30401,7 +30403,7 @@ const original=window.renderDashboard;window.renderDashboard=function(){const r=
    const root=q(ROOT);if(!root)return;
    q('v128Scope')?.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.v128Scope===state.scope));
    const y=q('v128Year'),m=q('v128Month'),mf=q('v128MonthField'),pl=q('v129PeriodLabel');if(y)y.value=String(state.year);if(m)m.value=String(state.month);if(mf)mf.classList.toggle('is-hidden',state.scope!=='month');if(pl)pl.textContent=periodText();
-   const rows=periodRows(),inc=rows.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+n(x.valor),0),out=rows.filter(x=>x.tipo==='saida').reduce((a,x)=>a+n(x.valor),0),bal=inc-out,status=bal>0?'Superávit':bal<0?'Déficit':'Equilíbrio';
+   const rows=periodRows(),inc=rows.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+n(x.valor),0),out=rows.filter(x=>x.tipo==='saida').reduce((a,x)=>a+n(x.valor),0),rawBal=inc-out,bal=Math.abs(rawBal)<0.005?0:rawBal,status=bal>0?'Superávit':bal<0?'Déficit':'Equilíbrio';
    q('v128Balance').textContent=money(bal);
    const statusClass=bal>0?'state-positive':bal<0?'state-negative':'state-neutral';
    const heroState=q('v128State'); if(heroState){heroState.textContent=status; heroState.className=`v128-state ${statusClass}`}
