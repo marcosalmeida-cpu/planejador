@@ -30897,3 +30897,354 @@ body.pp-v138-view-ready .main{overflow-y:visible!important;height:auto!important
   document.addEventListener('click',e=>{if(e.target.closest?.('[data-v62-profile],#switchProfileBtnV46,.pp-profile-v46-option'))setTimeout(run,750)},true);
 })();
 </script>
+
+<style id="pp-v146-launch-invoice-premium-style">
+/* V146 — Faturas em Lançamentos: visual linear premium e ações alinhadas */
+#lancamentos .v63-group.card{
+  border:1px solid #dce6f1!important;
+  border-radius:20px!important;
+  background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%)!important;
+  box-shadow:0 10px 28px rgba(25,52,86,.055)!important;
+  overflow:hidden!important;
+}
+#lancamentos .v63-group.card .v63-group-head{
+  position:relative!important;
+  min-height:72px!important;
+  padding:18px 20px 15px 22px!important;
+  background:linear-gradient(90deg,#f7fbff 0%,#ffffff 68%)!important;
+  border-bottom:0!important;
+}
+#lancamentos .v63-group.card .v63-group-head:before{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;top:0!important;bottom:0!important;
+  width:3px!important;
+  background:linear-gradient(180deg,#1268df,#2b8cff)!important;
+}
+#lancamentos .v63-group.card .v63-group-head h3{
+  font-size:17px!important;
+  letter-spacing:-.025em!important;
+  color:#15304f!important;
+}
+#lancamentos .v63-group.card .v63-group-head p{
+  margin-top:5px!important;
+  font-size:9.5px!important;
+  color:#71839a!important;
+}
+#lancamentos .v63-group.card .v63-count{
+  width:auto!important;
+  min-width:0!important;
+  height:29px!important;
+  padding:0 11px!important;
+  border-radius:9px!important;
+  background:#edf5ff!important;
+  border:1px solid #d9e9ff!important;
+  color:#145fbd!important;
+  font-size:9px!important;
+  letter-spacing:.02em!important;
+  font-weight:900!important;
+}
+#lancamentos .v63-group.card .v63-tablewrap{
+  width:auto!important;
+  margin:0 14px 14px!important;
+  border:1px solid #e5ebf2!important;
+  border-radius:14px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  background:#fff!important;
+}
+#lancamentos .v63-group.card .v63-tablewrap table{
+  table-layout:fixed!important;
+  min-width:900px!important;
+  border-collapse:separate!important;
+  border-spacing:0!important;
+}
+#lancamentos .v63-group.card .v63-tablewrap thead th{
+  height:34px!important;
+  padding:0 10px!important;
+  background:#f8fafc!important;
+  border-bottom:1px solid #e6ebf1!important;
+  color:#718097!important;
+  font-size:8px!important;
+  font-weight:900!important;
+  letter-spacing:.075em!important;
+  text-transform:uppercase!important;
+  vertical-align:middle!important;
+}
+#lancamentos .v63-group.card .v63-tablewrap tbody td{
+  height:64px!important;
+  padding:11px 10px!important;
+  border-bottom:1px solid #edf1f5!important;
+  vertical-align:middle!important;
+  color:#283b52!important;
+  font-size:10px!important;
+  box-sizing:border-box!important;
+}
+#lancamentos .v63-group.card .v63-tablewrap tbody tr:last-child td{border-bottom:0!important}
+#lancamentos .v63-group.card .v63-tablewrap tbody tr{transition:background .15s ease!important}
+#lancamentos .v63-group.card .v63-tablewrap tbody tr:hover{background:#fafcff!important}
+#lancamentos .v63-group.card .v63-tablewrap th:nth-child(1),
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(1){width:9%!important}
+#lancamentos .v63-group.card .v63-tablewrap th:nth-child(2),
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(2){width:8%!important}
+#lancamentos .v63-group.card .v63-tablewrap th:nth-child(3),
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(3){width:25%!important}
+#lancamentos .v63-group.card .v63-tablewrap th:nth-child(4),
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(4){width:13%!important}
+#lancamentos .v63-group.card .v63-tablewrap th:nth-child(5),
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(5){width:13%!important}
+#lancamentos .v63-group.card .v63-tablewrap th:nth-child(6),
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(6){width:10%!important}
+#lancamentos .v63-group.card .v63-tablewrap th:nth-child(7),
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(7){width:12%!important;text-align:right!important}
+#lancamentos .v63-group.card .v63-tablewrap th:nth-child(8),
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(8){width:10%!important;text-align:right!important}
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(3) b{
+  font-size:11px!important;
+  color:#152f4e!important;
+  font-weight:850!important;
+}
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(3) small{
+  margin-top:4px!important;
+  color:#8390a2!important;
+  font-size:8.5px!important;
+}
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(4),
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(5){
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#lancamentos .v63-group.card .v63-tablewrap td:nth-child(7){
+  color:#bd3341!important;
+  font-size:11px!important;
+  font-weight:900!important;
+  font-variant-numeric:tabular-nums!important;
+}
+#lancamentos .v63-group.card .v68-invoice-actions{
+  justify-content:flex-end!important;
+  gap:6px!important;
+  flex-wrap:nowrap!important;
+}
+#lancamentos .v63-group.card .v63-pay{
+  height:31px!important;
+  min-width:58px!important;
+  padding:0 9px!important;
+  border-radius:9px!important;
+  border:1px solid #d6e0eb!important;
+  background:#fff!important;
+  box-shadow:none!important;
+  font-size:8.5px!important;
+}
+#lancamentos .v63-group.card .v63-pay.reopen{color:#99620b!important}
+#lancamentos .v63-group.card .v63-pay.pay{color:#0e62c7!important}
+#lancamentos .v63-group.card .v68-invoice-dots{
+  width:31px!important;height:31px!important;
+  min-width:31px!important;
+  border-radius:9px!important;
+  background:#f3f6f9!important;
+  border:1px solid #dde5ee!important;
+  color:#60748c!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+}
+/* Saídas/Entradas mantêm o respiro, mas ações permanecem alinhadas */
+#lancamentos .v63-group.entry .v63-tablewrap,
+#lancamentos .v63-group.exit .v63-tablewrap{
+  width:auto!important;
+  margin:0 14px 14px!important;
+  border:1px solid #e7ecf2!important;
+  border-radius:14px!important;
+  overflow-x:auto!important;
+}
+#lancamentos .v67-manual-actions{min-height:32px!important}
+#lancamentos .v67-manual-actions .v67-manual-pay,
+#lancamentos .v67-manual-actions .dots{
+  height:31px!important;
+  box-sizing:border-box!important;
+}
+#lancamentos .v67-manual-actions .dots{
+  width:31px!important;min-width:31px!important;padding:0!important;
+  border-radius:9px!important;
+}
+@media(max-width:620px){
+  #lancamentos .v63-group.card .v63-tablewrap,
+  #lancamentos .v63-group.entry .v63-tablewrap,
+  #lancamentos .v63-group.exit .v63-tablewrap{margin:0 9px 10px!important}
+  #lancamentos .v63-group.card .v63-group-head{padding:15px 15px 13px 18px!important}
+}
+</style>
+<script id="pp-v146-move-occurrence-and-premium-invoices">
+(()=>{
+'use strict';
+
+const baseAllTx146=window.allTx;
+const baseOpenTxEdit146=window.openTxEdit;
+
+function ym146(y,m){return `${+y}-${String(+m).padStart(2,'0')}`}
+function idx146(y,m){return (+y)*12+(+m-1)}
+function fromIdx146(i){return {year:Math.floor(i/12),month:(i%12)+1}}
+function next146(y,m){return fromIdx146(idx146(y,m)+1)}
+function src146(id){try{return (custom||[]).find(x=>String(x.id)===String(id))||null}catch(e){return null}}
+function parse146(id){
+  const p=String(id||'').split('::');
+  if(p[0]==='P66'&&p.length>=4)return {kind:'installment',sourceId:p[1],year:+p[2],month:+p[3]};
+  if(p[0]==='R64'&&p.length>=4)return {kind:'recurring',sourceId:p[1],year:+p[2],month:+p[3]};
+  return {kind:'single',sourceId:String(id||'')};
+}
+function currentRow146(id){
+  try{return (window.allTx?.()||[]).find(x=>String(x.id)===String(id))||null}catch(e){return null}
+}
+function moveState146(row){
+  return row && Number.isFinite(+row.moveToYear) && Number.isFinite(+row.moveToMonth)
+    ? {year:+row.moveToYear,month:+row.moveToMonth}:null;
+}
+function applyMoves146(rows){
+  return (rows||[]).map(r=>{
+    if(r?.origemDados==='Cartões')return r;
+    const mv=moveState146(r);
+    if(!mv)return r;
+    return {...r,originalAno:r.ano,originalMesNum:r.mesNum,ano:mv.year,mesNum:mv.month,movedOccurrence146:true};
+  });
+}
+if(typeof baseAllTx146==='function'){
+  window.allTx=function(){return applyMoves146(baseAllTx146.apply(this,arguments))};
+  try{allTx=window.allTx}catch(e){}
+}
+
+function persistAndRefresh146(msg){
+  try{persist()}catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  try{window.renderLancamentos?.()}catch(e){}
+  try{window.renderDashboard?.()}catch(e){}
+  try{window.ppLaunchSummaryV75?.refresh?.()}catch(e){}
+  try{window.ppManualPayV67?.refresh?.()}catch(e){}
+  try{window.ppInvoiceMenuV68?.refresh?.()}catch(e){}
+  try{toast(msg)}catch(e){}
+}
+function setMove146(id,target){
+  const p=parse146(id);
+  if(p.kind==='installment'){
+    const s=src146(p.sourceId);if(!s)return false;
+    s.installmentOverrides=s.installmentOverrides||{};
+    const k=ym146(p.year,p.month);
+    s.installmentOverrides[k]={...(s.installmentOverrides[k]||{}),moveToYear:target.year,moveToMonth:target.month};
+    return true;
+  }
+  if(p.kind==='recurring'){
+    const s=src146(p.sourceId);if(!s)return false;
+    s.recurringOverrides=s.recurringOverrides||{};
+    const k=ym146(p.year,p.month);
+    s.recurringOverrides[k]={...(s.recurringOverrides[k]||{}),moveToYear:target.year,moveToMonth:target.month};
+    return true;
+  }
+  const s=src146(p.sourceId);if(!s)return false;
+  s.moveToYear=target.year;s.moveToMonth=target.month;
+  return true;
+}
+function clearMove146(id){
+  const p=parse146(id);
+  if(p.kind==='installment'){
+    const s=src146(p.sourceId);if(!s)return false;
+    const o=s.installmentOverrides?.[ym146(p.year,p.month)];
+    if(o){delete o.moveToYear;delete o.moveToMonth;if(!Object.keys(o).length)delete s.installmentOverrides[ym146(p.year,p.month)]}
+    return true;
+  }
+  if(p.kind==='recurring'){
+    const s=src146(p.sourceId);if(!s)return false;
+    const o=s.recurringOverrides?.[ym146(p.year,p.month)];
+    if(o){delete o.moveToYear;delete o.moveToMonth;if(!Object.keys(o).length)delete s.recurringOverrides[ym146(p.year,p.month)]}
+    return true;
+  }
+  const s=src146(p.sourceId);if(!s)return false;
+  delete s.moveToYear;delete s.moveToMonth;return true;
+}
+window.moveTxOccurrenceNext146=function(id){
+  const row=currentRow146(id);if(!row||row.tipo!=='saida'||row.origemDados==='Cartões')return;
+  const t=next146(+row.ano,+row.mesNum);
+  if(!confirm(`Mover somente este lançamento para ${monthNames[t.month-1]} de ${t.year}?\n\nAs demais parcelas/recorrências permanecerão nos meses atuais.`))return;
+  if(setMove146(id,t))persistAndRefresh146(`Lançamento movido para ${monthNames[t.month-1]} de ${t.year}.`);
+};
+window.restoreTxOccurrenceMonth146=function(id){
+  if(clearMove146(id))persistAndRefresh146('Lançamento devolvido à competência original.');
+};
+
+/* Ao editar uma ocorrência já movida, mostra no formulário o mês em que ela está sendo exibida. */
+if(typeof baseOpenTxEdit146==='function'){
+  window.openTxEdit=function(id){
+    const row=currentRow146(id);
+    const r=baseOpenTxEdit146.apply(this,arguments);
+    if(row?.movedOccurrence146){
+      setTimeout(()=>{
+        const y=document.getElementById('fYear'),m=document.getElementById('fMonth');
+        if(y)y.value=String(row.ano);if(m)m.value=String(row.mesNum);
+      },80);
+    }
+    return r;
+  };
+  try{openTxEdit=window.openTxEdit}catch(e){}
+}
+
+function extractId146(btn){
+  const oc=btn?.getAttribute('onclick')||'';
+  let m=oc.match(/openTxEdit\('([^']+)'\)/);if(m)return m[1];
+  m=oc.match(/openTxEdit\("([^"]+)"\)/);return m?m[1]:'';
+}
+function patchExpenseMenus146(){
+  const root=document.getElementById('v63LaunchGroups');if(!root)return;
+  root.querySelectorAll('.v63-group.exit tbody tr').forEach(tr=>{
+    const dots=tr.querySelector('.v67-manual-actions .dots, td:last-child .dots');
+    if(!dots)return;
+    const id=extractId146(dots);if(!id)return;
+    dots.dataset.v146TxMenu=id;
+  });
+  const cardGroup=root.querySelector('.v63-group.card');
+  if(cardGroup){
+    const count=cardGroup.querySelector('.v63-count');
+    if(count){const n=parseInt(count.textContent||'0',10)||0;count.textContent=`${n} ${n===1?'fatura':'faturas'}`}
+  }
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('[data-v146-tx-menu]');
+  if(!b)return;
+  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+  const id=b.dataset.v146TxMenu;
+  const row=currentRow146(id);
+  if(!row)return;
+  const moved=!!row.movedOccurrence146;
+  const items=[
+    ['Editar',()=>window.openTxEdit?.(id)],
+    [moved?'Mover novamente para o próximo mês':'Mover esta competência para o próximo mês',()=>window.moveTxOccurrenceNext146(id)]
+  ];
+  if(moved)items.push(['Voltar à competência original',()=>window.restoreTxOccurrenceMonth146(id)]);
+  items.push(['Excluir',()=>window.deleteTxEnhanced?.(id,'custom'),'danger']);
+  try{openRowMenu(e,items)}catch(err){items[1][1]()}
+},true);
+
+const prevRender146=window.renderLancamentos;
+if(typeof prevRender146==='function'&&!prevRender146.__v146){
+  const wrapped=function(){
+    const r=prevRender146.apply(this,arguments);
+    setTimeout(patchExpenseMenus146,0);
+    return r;
+  };
+  wrapped.__v146=true;
+  window.renderLancamentos=wrapped;
+  try{renderLancamentos=wrapped}catch(e){}
+}
+
+let ob146=null;
+function observe146(){
+  const root=document.getElementById('v63LaunchGroups');if(!root)return;
+  if(ob146)ob146.disconnect();
+  ob146=new MutationObserver(()=>setTimeout(patchExpenseMenus146,0));
+  ob146.observe(root,{childList:true,subtree:true});
+  patchExpenseMenus146();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(observe146,500),{once:true});
+else setTimeout(observe146,500);
+window.ppMoveOccurrenceV146={move:window.moveTxOccurrenceNext146,restore:window.restoreTxOccurrenceMonth146,refresh:patchExpenseMenus146};
+})();
+</script>
