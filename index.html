@@ -30587,6 +30587,42 @@ setTimeout(refresh,1100);
 window.ppLaunchCreditorV155={refresh,open,close};
 })();
 </script>
+
+<style id="pp-v156-card-selector-width-fix">
+/* v156 — campo Cartão no Novo lançamento com largura útil e sem corte */
+#txModal #txCardBlock .formgrid > .field:has(#fCardId){
+  grid-column:span 4!important;
+  min-width:260px!important;
+  max-width:420px!important;
+}
+#txModal #txCardBlock .formgrid > .field:has(#fCardId) .pp154-select-btn{
+  width:100%!important;
+  min-width:260px!important;
+  max-width:420px!important;
+  height:44px!important;
+  padding:10px 13px!important;
+}
+#txModal #txCardBlock .formgrid > .field:has(#fCardId) .pp154-label{
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+@media(max-width:900px){
+  #txModal #txCardBlock .formgrid > .field:has(#fCardId){
+    grid-column:span 6!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  #txModal #txCardBlock .formgrid > .field:has(#fCardId) .pp154-select-btn{
+    min-width:0!important;
+    max-width:none!important;
+  }
+}
+@media(max-width:620px){
+  #txModal #txCardBlock .formgrid > .field:has(#fCardId){grid-column:1/-1!important}
+}
+</style>
+
 </body></html>
 
 
@@ -31685,3 +31721,236 @@ window.ppMoveOccurrenceV146={move:window.moveTxOccurrenceNext146,restore:window.
 </script>
 
 
+<style id="pp-v157-launch-filters-one-line">
+/* v157 — filtros de Lançamentos em uma única linha, mantendo legibilidade */
+#lancamentos .section-tools{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  flex-wrap:nowrap!important;
+  gap:16px!important;
+}
+#lancamentos .section-tools>div:first-child{
+  flex:0 0 auto!important;
+  min-width:max-content!important;
+}
+#lancamentos .section-tools .filterbar{
+  display:grid!important;
+  grid-template-columns:116px 116px minmax(150px,165px) minmax(285px,340px)!important;
+  align-items:center!important;
+  justify-content:end!important;
+  gap:8px!important;
+  flex:0 1 auto!important;
+  width:auto!important;
+  max-width:100%!important;
+  margin-left:auto!important;
+  flex-wrap:nowrap!important;
+}
+#lancamentos .section-tools .filterbar>#txYear,
+#lancamentos .section-tools .filterbar>#txMonth,
+#lancamentos .section-tools .filterbar>#txType{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:40px!important;
+  box-sizing:border-box!important;
+  white-space:nowrap!important;
+}
+#lancamentos .section-tools .filterbar>.pp155-creditor-wrap{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  flex:none!important;
+  grid-column:4!important;
+}
+#lancamentos .pp155-creditor-btn{
+  height:40px!important;
+  min-height:40px!important;
+  width:100%!important;
+  padding-left:14px!important;
+  padding-right:12px!important;
+}
+#lancamentos .pp155-creditor-btn .label{
+  font-size:11.5px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+/* Os campos internos ocultos não participam da grade. */
+#lancamentos #txSearch,
+#lancamentos #txCreditorV50,
+#lancamentos #txCreditorList{
+  display:none!important;
+}
+@media(max-width:1050px){
+  #lancamentos .section-tools{gap:10px!important}
+  #lancamentos .section-tools .filterbar{
+    grid-template-columns:108px 108px 140px minmax(245px,1fr)!important;
+    gap:6px!important;
+  }
+  #lancamentos .section-tools h2{font-size:21px!important}
+}
+@media(max-width:860px){
+  #lancamentos .section-tools{display:block!important}
+  #lancamentos .section-tools .filterbar{
+    margin-top:10px!important;
+    width:100%!important;
+    grid-template-columns:1fr 1fr!important;
+  }
+  #lancamentos .section-tools .filterbar>.pp155-creditor-wrap{grid-column:1/-1!important}
+}
+</style>
+
+<script id="pp-v158-transaction-safety-guard">
+(()=>{
+'use strict';
+const TX='financeiro_marcos_custom_tx_v3';
+const VERSION='v158';
+const active=()=>{try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}};
+const safeName=p=>String(p||'Marcos').replace(/[^a-z0-9_-]/gi,'_');
+const guardKey=p=>`pp_tx_guard_${VERSION}_${safeName(p)}`;
+const deletedKey=p=>`pp_tx_guard_deleted_${VERSION}_${safeName(p)}`;
+const metaKey=p=>`pp_tx_guard_meta_${VERSION}_${safeName(p)}`;
+const parse=(v,fb)=>{try{const x=JSON.parse(v);return x??fb}catch(e){return fb}};
+const readCurrent=()=>{const a=parse(localStorage.getItem(TX)||'[]',[]);return Array.isArray(a)?a:[]};
+const readGuard=p=>{const a=parse(localStorage.getItem(guardKey(p))||'[]',[]);return Array.isArray(a)?a:[]};
+const readDeleted=p=>new Set((parse(localStorage.getItem(deletedKey(p))||'[]',[])||[]).map(String));
+const idOf=x=>String(x?.id||'');
+const sourceId=id=>{const s=String(id||'');const p=s.split('::');return ((p[0]==='P66'||p[0]==='R64')&&p[1])?String(p[1]):s};
+const stableString=x=>{try{return JSON.stringify(x)}catch(e){return ''}};
+let busy=false;
+let lastFingerprint='';
+
+function writeGuard(profile,arr,reason='update'){
+  try{
+    localStorage.setItem(guardKey(profile),JSON.stringify(arr));
+    localStorage.setItem(metaKey(profile),JSON.stringify({updatedAt:new Date().toISOString(),count:arr.length,reason}));
+  }catch(e){console.warn('v158 guard write',e)}
+}
+function saveMirror(profile){
+  try{
+    const PM=window.__ppV41Profile;
+    if(PM?.captureShared&&PM?.saveState&&profile===active()) PM.saveState(profile,PM.captureShared());
+  }catch(e){console.warn('v158 mirror',e)}
+}
+function exposeCustom(arr){
+  try{custom=arr}catch(e){}
+}
+function mergeGuardWithCurrent(profile,current,reason='snapshot'){
+  const deleted=readDeleted(profile);
+  const map=new Map();
+  for(const row of readGuard(profile)){
+    const id=idOf(row);if(id&&!deleted.has(id))map.set(id,row);
+  }
+  for(const row of current){
+    const id=idOf(row);if(!id||deleted.has(id))continue;
+    map.set(id,row); // current record wins for edits
+  }
+  const out=[...map.values()];
+  writeGuard(profile,out,reason);
+  return out;
+}
+function snapshot(reason='snapshot'){
+  if(busy)return;
+  const profile=active(),current=readCurrent();
+  mergeGuardWithCurrent(profile,current,reason);
+  saveMirror(profile);
+}
+function reconcile(reason='reconcile'){
+  if(busy)return false;
+  busy=true;
+  try{
+    const profile=active();
+    const deleted=readDeleted(profile);
+    const current=readCurrent();
+    const curIds=new Set(current.map(idOf).filter(Boolean));
+    const missing=[];
+    for(const row of readGuard(profile)){
+      const id=idOf(row);
+      if(id&&!deleted.has(id)&&!curIds.has(id))missing.push(row);
+    }
+    if(!missing.length){
+      mergeGuardWithCurrent(profile,current,reason);
+      lastFingerprint=stableString(current);
+      return false;
+    }
+    const restored=current.concat(missing);
+    localStorage.setItem(TX,JSON.stringify(restored));
+    exposeCustom(restored);
+    mergeGuardWithCurrent(profile,restored,'restore-missing');
+    saveMirror(profile);
+    try{window.ppCloudV66?.save?.()}catch(e){}
+    console.warn(`v158: ${missing.length} lançamento(s) restaurado(s) da proteção local.`);
+    return true;
+  }catch(e){console.warn('v158 reconcile',e);return false}
+  finally{busy=false}
+}
+function markDeleted(id){
+  const profile=active(),sid=sourceId(id);if(!sid)return;
+  const set=readDeleted(profile);set.add(sid);
+  try{localStorage.setItem(deletedKey(profile),JSON.stringify([...set]))}catch(e){}
+  const guard=readGuard(profile).filter(x=>idOf(x)!==sid);
+  writeGuard(profile,guard,'explicit-delete');
+}
+function wrapDelete(name){
+  const old=window[name];if(typeof old!=='function'||old.__v158Guard)return;
+  const fn=function(id){
+    const sid=sourceId(id),before=readCurrent().some(x=>idOf(x)===sid);
+    const result=old.apply(this,arguments);
+    setTimeout(()=>{
+      const after=readCurrent();
+      if(before&&!after.some(x=>idOf(x)===sid))markDeleted(sid);
+      snapshot('after-delete');
+    },0);
+    return result;
+  };
+  fn.__v158Guard=true;window[name]=fn;
+  try{if(name==='deleteTxEnhanced')deleteTxEnhanced=fn;if(name==='removeTx')removeTx=fn}catch(e){}
+}
+function wrapRender(){
+  const old=window.renderLancamentos;if(typeof old!=='function'||old.__v158Guard)return;
+  const fn=function(){
+    reconcile('before-render');
+    const r=old.apply(this,arguments);
+    snapshot('after-render');
+    return r;
+  };
+  fn.__v158Guard=true;window.renderLancamentos=fn;
+  try{renderLancamentos=fn}catch(e){}
+}
+function wrapSwitch(){
+  const names=['ppV41SwitchProfile','ppV42SwitchProfile','ppV46SwitchProfile'];
+  const old=names.map(n=>window[n]).find(f=>typeof f==='function'&&!f.__v158Guard);
+  if(!old)return;
+  const fn=function(){snapshot('before-profile-switch');return old.apply(this,arguments)};
+  fn.__v158Guard=true;names.forEach(n=>window[n]=fn);
+}
+function protectTick(){
+  try{
+    const fp=stableString(readCurrent());
+    if(fp!==lastFingerprint){snapshot('change-detected');lastFingerprint=fp}
+    reconcile('periodic');
+  }catch(e){}
+}
+
+/* Primeira inicialização: protege exatamente o que existe agora; nunca apaga. */
+(function init(){
+  const p=active();
+  if(!localStorage.getItem(guardKey(p)))writeGuard(p,readCurrent(),'initial-snapshot');
+  reconcile('startup');
+  wrapDelete('deleteTxEnhanced');
+  wrapDelete('removeTx');
+  wrapRender();
+  wrapSwitch();
+  lastFingerprint=stableString(readCurrent());
+})();
+
+/* Reafirma wrappers porque alguns scripts antigos substituem funções tardiamente. */
+setTimeout(()=>{wrapDelete('deleteTxEnhanced');wrapDelete('removeTx');wrapRender();wrapSwitch();reconcile('late-startup')},700);
+setTimeout(()=>{wrapDelete('deleteTxEnhanced');wrapRender();reconcile('late-startup-2')},1800);
+setInterval(protectTick,2500);
+window.addEventListener('pagehide',()=>snapshot('pagehide'),{capture:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)snapshot('hidden');else setTimeout(()=>reconcile('visible'),50)});
+window.ppTxGuardV158={snapshot,reconcile,status:()=>({profile:active(),current:readCurrent().length,protected:readGuard(active()).length,deleted:readDeleted(active()).size})};
+})();
+</script>
