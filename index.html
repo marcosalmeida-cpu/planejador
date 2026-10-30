@@ -19474,14 +19474,30 @@ function render63(){
   const cardOut=sum(cards,x=>x.valor);
   const normalOut=sum(exits,x=>x.valor);
   const totalOut=cardOut+normalOut;
-  const balance=inc-totalOut;
+  const rawBalance=inc-totalOut;
+  const balance=Math.abs(rawBalance)<0.005?0:rawBalance;
+
+  // V150 — pendentes calculados no mesmo ciclo dos demais indicadores.
+  // Para faturas, respeita o status manual da própria competência; para as demais
+  // saídas, usa diretamente o status do lançamento exibido no período.
+  const pending=cards.concat(exits).filter(x=>{
+    let st=x?.status||'Pendente';
+    try{
+      if(x?.origemDados==='Cartões' && window.ppInvoiceActionsV61?.status){
+        st=window.ppInvoiceActionsV61.status(x.cardId,+x.ano,+x.mesNum,st);
+      }
+    }catch(e){}
+    return String(st).trim().toLowerCase()!=='quitado';
+  }).reduce((a,x)=>a+(Number(x?.valor)||0),0);
+  const pendingSafe=Math.abs(pending)<0.005?0:pending;
 
   const summary=document.getElementById('txSummary');
   if(summary){
     summary.innerHTML=`
       <div class="card mini v63-summary v63-entry"><span>Entradas</span><b>${brl(inc)}</b></div>
       <div class="card mini v63-summary v63-exit"><span>Saídas</span><b>${brl(totalOut)}</b></div>
-      <div class="card mini v63-summary v63-balance"><span>Saldo</span><b>${brl(balance)}</b></div>`;
+      <div class="card mini v63-summary v63-balance"><span>Saldo</span><b>${brl(balance)}</b></div>
+      <div class="card mini v75-summary v75-pending"><span>Pendentes do período</span><b>${brl(pendingSafe)}</b></div>`;
   }
 
   const root=ensureLayout63();
@@ -22541,37 +22557,7 @@ function filtered75(){
     return true;
   });
 }
-function renderSummary75(){
-  const summary=document.getElementById('txSummary');
-  if(!summary)return;
-
-  const rows=filtered75();
-  const entries=rows.filter(x=>x.tipo==='entrada' && x.origemDados!=='Cartões');
-  const cards=rows.filter(x=>x.origemDados==='Cartões');
-  const exits=rows.filter(x=>x.tipo==='saida' && x.origemDados!=='Cartões');
-
-  const inc=entries.reduce((a,x)=>a+n75(x.valor),0);
-  const out=cards.concat(exits).reduce((a,x)=>a+n75(x.valor),0);
-  const pending=cards.concat(exits)
-    .filter(x=>String(invoiceStatus75(x)).toLowerCase()!=='quitado')
-    .reduce((a,x)=>a+n75(x.valor),0);
-  const rawBalance=inc-out;
-  const balance=Math.abs(rawBalance)<0.005?0:rawBalance;
-
-  summary.innerHTML=`
-    <div class="card mini v63-summary v63-entry">
-      <span>Entradas</span><b>${brl(inc)}</b>
-    </div>
-    <div class="card mini v63-summary v63-exit">
-      <span>Saídas</span><b>${brl(out)}</b>
-    </div>
-    <div class="card mini v63-summary v63-balance">
-      <span>Saldo</span><b>${brl(balance)}</b>
-    </div>
-    <div class="card mini v75-summary v75-pending">
-      <span>Pendentes do período</span><b>${brl(pending)}</b>
-    </div>`;
-}
+function renderSummary75(){ /* V150: cálculo consolidado já ocorre em render63. */ return; }
 
 const prev75=window.renderLancamentos;
 if(typeof prev75==='function'&&!prev75.__v75){
@@ -30347,8 +30333,8 @@ function menu147(ev,id){
   const items=[];
   items.push(['Editar',()=>window.openTxEdit?.(id)]);
   if(r.tipo==='saida' && r.origemDados!=='Cartões'){
-    items.push([r.movedOccurrence146?'Mover novamente para o próximo mês':'Mover esta competência para o próximo mês',()=>window.moveTxOccurrenceNext146?.(id)]);
-    if(r.movedOccurrence146)items.push(['Voltar à competência original',()=>window.restoreTxOccurrenceMonth146?.(id)]);
+    items.push(['Mover',()=>window.moveTxOccurrenceNext146?.(id)]);
+    if(r.movedOccurrence146)items.push(['Restaurar',()=>window.restoreTxOccurrenceMonth146?.(id)]);
   }
   items.push(['Excluir',()=>window.deleteTxEnhanced?.(id,'custom'),'danger']);
   return window.openRowMenu?.(ev,items);
@@ -30384,6 +30370,40 @@ setTimeout(watch,1400);
 window.ppLaunchV147={refresh:patch147,menu:menu147};
 })();
 </script>
+
+<style id="pp-v148-row-menu-premium">
+.menu-pop{
+  min-width:154px!important;
+  padding:7px!important;
+  border-radius:14px!important;
+  border:1px solid #d9e4f2!important;
+  box-shadow:0 16px 42px rgba(15,23,42,.16)!important;
+}
+.menu-pop button{
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  width:100%!important;
+  min-height:38px!important;
+  padding:10px 12px!important;
+  border-radius:10px!important;
+  background:transparent!important;
+  color:#17314f!important;
+  font-size:12px!important;
+  font-weight:700!important;
+  letter-spacing:-.01em!important;
+  transition:background .16s ease,color .16s ease, transform .16s ease!important;
+}
+.menu-pop button:hover{
+  background:#eaf3ff!important;
+  color:#0b63f6!important;
+  transform:translateX(1px)!important;
+}
+.menu-pop button.danger{color:#17314f!important}
+.menu-pop button.danger:hover{background:#eaf3ff!important;color:#0b63f6!important}
+</style>
+
+<script id="pp-v150-pending-immediate-marker">window.ppLaunchPendingV150={mode:'same-render-cycle'};</script>
 </body></html>
 
 
