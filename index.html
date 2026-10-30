@@ -31954,3 +31954,97 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)snapshot('h
 window.ppTxGuardV158={snapshot,reconcile,status:()=>({profile:active(),current:readCurrent().length,protected:readGuard(active()).length,deleted:readDeleted(active()).size})};
 })();
 </script>
+<style id="pp-v159-launch-period-persist-style">
+/* v159 — remove filtro de tipo e mantém Ano + Mês + Credor na mesma linha */
+#lancamentos #txType{display:none!important;visibility:hidden!important;pointer-events:none!important;width:0!important;min-width:0!important;max-width:0!important;padding:0!important;margin:0!important;border:0!important}
+#lancamentos .section-tools .filterbar{
+  grid-template-columns:116px 116px minmax(310px,390px)!important;
+  gap:8px!important;
+}
+#lancamentos .section-tools .filterbar>.pp155-creditor-wrap{
+  grid-column:3!important;
+  min-width:310px!important;
+  max-width:390px!important;
+}
+@media(max-width:1050px){
+  #lancamentos .section-tools .filterbar{grid-template-columns:108px 108px minmax(270px,1fr)!important}
+  #lancamentos .section-tools .filterbar>.pp155-creditor-wrap{grid-column:3!important;min-width:270px!important;max-width:none!important}
+}
+@media(max-width:760px){
+  #lancamentos .section-tools .filterbar{grid-template-columns:1fr 1fr!important}
+  #lancamentos .section-tools .filterbar>.pp155-creditor-wrap{grid-column:1/-1!important;min-width:0!important;max-width:none!important}
+}
+</style>
+<script id="pp-v159-launch-period-persist-script">
+(()=>{
+'use strict';
+const activeProfile=()=>{try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}};
+const safe=p=>String(p||'Marcos').replace(/[^a-z0-9_-]/gi,'_');
+const key=()=>`pp_launch_period_v159_${safe(activeProfile())}`;
+let restoring=false;
+function read(){try{const x=JSON.parse(localStorage.getItem(key())||'{}');return x&&typeof x==='object'?x:{}}catch(e){return {}}}
+function current(){return {year:document.getElementById('txYear')?.value||'',month:document.getElementById('txMonth')?.value||''}}
+function validOption(sel,val){return !!sel&&[...sel.options].some(o=>String(o.value)===String(val))}
+function syncVisual(){try{typeof syncVisualButton==='function'&&syncVisualButton('txYear')}catch(e){}try{typeof syncVisualButton==='function'&&syncVisualButton('txMonth')}catch(e){}}
+function forceTypeAll(){const t=document.getElementById('txType');if(t&&t.value!=='all')t.value='all'}
+function save(){if(restoring)return;const p=current();if(!p.year||!p.month)return;try{localStorage.setItem(key(),JSON.stringify({...p,updatedAt:new Date().toISOString()}))}catch(e){}}
+function restore(render=false){
+  const y=document.getElementById('txYear'),m=document.getElementById('txMonth');if(!y||!m)return false;
+  const st=read();restoring=true;
+  try{
+    if(st.year&&validOption(y,st.year))y.value=st.year;
+    if(st.month&&validOption(m,st.month))m.value=st.month;
+    forceTypeAll();syncVisual();
+  }finally{restoring=false}
+  if(render){try{window.renderLancamentos?.()}catch(e){}}
+  return true;
+}
+function persistFromEvent(e){if(e.target?.id==='txYear'||e.target?.id==='txMonth'){forceTypeAll();save();setTimeout(syncVisual,0)}}
+document.addEventListener('change',persistFromEvent,true);
+
+/* Qualquer render de Lançamentos trabalha sempre sem filtro de tipo. */
+function wrapRender(){
+  const old=window.renderLancamentos;if(typeof old!=='function'||old.__v159)return;
+  const fn=function(){forceTypeAll();const r=old.apply(this,arguments);save();return r};fn.__v159=true;window.renderLancamentos=fn;try{renderLancamentos=fn}catch(e){}
+}
+/* saveSelectOptions antigo recria opções e costuma resetar o ano. Restaura imediatamente. */
+function wrapSelects(){
+  const old=window.saveSelectOptions;if(typeof old!=='function'||old.__v159)return;
+  const fn=function(){const before=current();const r=old.apply(this,arguments);const st=read();restoring=true;try{
+    const y=document.getElementById('txYear'),m=document.getElementById('txMonth');
+    const yy=st.year||before.year,mm=st.month||before.month;
+    if(yy&&validOption(y,yy))y.value=yy;if(mm&&validOption(m,mm))m.value=mm;forceTypeAll();syncVisual();
+  }finally{restoring=false}return r};fn.__v159=true;window.saveSelectOptions=fn;try{saveSelectOptions=fn}catch(e){}
+}
+/* Novo lançamento herda o período que está sendo consultado quando ele é específico. */
+function wrapOpenTx(){
+  const old=window.openTx;if(typeof old!=='function'||old.__v159)return;
+  const fn=function(){const period=current();const r=old.apply(this,arguments);setTimeout(()=>{
+    const fy=document.getElementById('fYear'),fm=document.getElementById('fMonth');
+    if(fy&&period.year&&period.year!=='all')fy.value=period.year;
+    if(fm&&period.month&&period.month!=='all')fm.value=period.month;
+    try{window.pp154Selects?.refresh?.()}catch(e){}
+  },0);return r};fn.__v159=true;window.openTx=fn;try{openTx=fn}catch(e){}
+}
+/* Ao salvar, o período da tela é restaurado mesmo que renderAll/saveSelectOptions tentem mudá-lo. */
+function wrapSave(){
+  const old=window.saveTx;if(typeof old!=='function'||old.__v159)return;
+  const fn=function(){const period=current();save();const r=old.apply(this,arguments);const putBack=()=>{
+    const y=document.getElementById('txYear'),m=document.getElementById('txMonth');restoring=true;try{
+      if(period.year&&validOption(y,period.year))y.value=period.year;
+      if(period.month&&validOption(m,period.month))m.value=period.month;
+      forceTypeAll();syncVisual();
+    }finally{restoring=false}
+    save();try{window.renderLancamentos?.()}catch(e){}
+  };setTimeout(putBack,0);setTimeout(putBack,90);setTimeout(putBack,350);return r};fn.__v159=true;window.saveTx=fn;try{saveTx=fn}catch(e){}const b=document.getElementById('saveTx');if(b)b.onclick=fn;
+}
+function init(){wrapSelects();wrapRender();wrapOpenTx();wrapSave();forceTypeAll();restore(true)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,650),{once:true});else setTimeout(init,300);
+setTimeout(init,1400);
+/* Scripts legados podem reassinar as funções tardiamente. */
+setTimeout(()=>{wrapSelects();wrapRender();wrapOpenTx();wrapSave();restore(true)},2400);
+window.addEventListener('pagehide',save,{capture:true});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else setTimeout(()=>restore(true),60)});
+window.ppLaunchPeriodV159={save,restore,state:read};
+})();
+</script>
