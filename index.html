@@ -19466,9 +19466,17 @@ function render63(){
 
   rows.sort((a,b)=>b.ano-a.ano||b.mesNum-a.mesNum||b.valor-a.valor);
 
-  const entries=rows.filter(x=>x.tipo==='entrada'&&x.origemDados!=='Cartões');
+  const alpha151=(a,b)=>{
+    const ad=String(a?.descricao||'').trim();
+    const bd=String(b?.descricao||'').trim();
+    return ad.localeCompare(bd,'pt-BR',{sensitivity:'base',numeric:true})
+      || (+a.ano)-(+b.ano)
+      || (+a.mesNum)-(+b.mesNum)
+      || String(a?.origem||'').localeCompare(String(b?.origem||''),'pt-BR',{sensitivity:'base'});
+  };
+  const entries=rows.filter(x=>x.tipo==='entrada'&&x.origemDados!=='Cartões').sort(alpha151);
   const cards=rows.filter(x=>x.origemDados==='Cartões');
-  const exits=rows.filter(x=>x.tipo==='saida'&&x.origemDados!=='Cartões');
+  const exits=rows.filter(x=>x.tipo==='saida'&&x.origemDados!=='Cartões').sort(alpha151);
 
   const inc=sum(entries,x=>x.valor);
   const cardOut=sum(cards,x=>x.valor);
@@ -30404,6 +30412,8 @@ window.ppLaunchV147={refresh:patch147,menu:menu147};
 </style>
 
 <script id="pp-v150-pending-immediate-marker">window.ppLaunchPendingV150={mode:'same-render-cycle'};</script>
+
+<script id="pp-v151-alpha-order-marker">window.ppLaunchAlphabeticalV151={field:'descricao',locale:'pt-BR',groups:['entrada','saida'],engine:'render63'};</script>
 </body></html>
 
 
