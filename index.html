@@ -12366,11 +12366,8 @@ setTimeout(initEssence,0);
  const RESET_KEY='planejador_manual_reset_20260927_v2';
  const txEditKeyFinal='planejador_tx_edits_v1',txDeleteKeyFinal='planejador_tx_deleted_v1',invoiceOverrideKey='planejador_invoice_item_overrides_v2';
  function oneTimeReset(){
+   /* V141: o reset antigo apagava lançamentos manuais/Entradas. Mantido apenas como marcador de migração. */
    if(localStorage.getItem(RESET_KEY)==='done')return;
-   localStorage.setItem('financeiro_marcos_custom_tx_v3','[]');
-   localStorage.setItem(txEditKeyFinal,'{}');
-   localStorage.setItem(txDeleteKeyFinal,'[]');
-   try{custom=[]}catch(e){};try{txEdits={}}catch(e){};try{txDeleted=[]}catch(e){};
    localStorage.setItem(RESET_KEY,'done');
  }
  oneTimeReset();
@@ -30768,83 +30765,101 @@ body.pp-v138-view-ready .main{overflow-y:visible!important;height:auto!important
   #lancamentos .v63-tablewrap{width:calc(100% - 20px)!important;margin:0 10px!important}
 }
 </style>
-<script id="pp-v140-launch-entry-recovery-final">
+<script id="pp-v141-launch-entry-recovery-final">
 (()=>{'use strict';
 const ACTIVE=()=>{try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}};
 const CUSTOM_KEY=(typeof txKey!=='undefined'&&txKey)||'financeiro_marcos_custom_tx_v3';
-const RECOVERY_MARK='pp_v140_entry_recovery_done_';
+const V141_MARK='pp_v141_entry_recovery_last_';
+let cloudAttempted=false, cloudBusy=false;
 
-function parse(v){
-  if(v==null)return null;
-  if(typeof v!=='string')return v;
-  try{return JSON.parse(v)}catch(e){return null}
+function parse(v){if(v==null)return null;if(typeof v!=='string')return v;try{return JSON.parse(v)}catch(e){return null}}
+function isEntry(x){return !!(x&&typeof x==='object'&&String(x.tipo||'').toLowerCase()==='entrada'&&Number(x.valor||0)>0&&Number(x.ano||0)>=2000&&Number(x.mesNum||0)>=1&&Number(x.mesNum||0)<=12)}
+function sig(x){return [String(x?.id||''),String(x?.descricao||'').trim().toLowerCase(),Number(x?.valor||0).toFixed(2),Number(x?.ano||0),Number(x?.mesNum||0),String(x?.origem||'').trim().toLowerCase()].join('|')}
+function normalizeEntry(x){return {...x,tipo:'entrada',categoria:x.categoria||'Receita',status:x.status||'Quitado',origemDados:x.origemDados||'Site'} }
+function entriesFromCustomValue(raw){const arr=parse(raw);return Array.isArray(arr)?arr.filter(isEntry).map(normalizeEntry):[]}
+function entriesFromProfileState(raw){const obj=parse(raw);if(!obj||typeof obj!=='object')return[];return entriesFromCustomValue(obj[CUSTOM_KEY]??obj.financeiro_marcos_custom_tx_v3)}
+function collectRecursive(node,out,depth=0){
+  if(depth>9||node==null)return;
+  node=parse(node);
+  if(node==null)return;
+  if(Array.isArray(node)){node.forEach(v=>{if(isEntry(v))out.push(normalizeEntry(v));else collectRecursive(v,out,depth+1)});return}
+  if(typeof node!=='object')return;
+  Object.entries(node).forEach(([k,v])=>{
+    if(k===CUSTOM_KEY||k==='financeiro_marcos_custom_tx_v3') entriesFromCustomValue(v).forEach(x=>out.push(x));
+    else collectRecursive(v,out,depth+1);
+  });
 }
-function arrFromState(obj){
-  obj=parse(obj);
-  if(!obj||typeof obj!=='object')return [];
-  const raw=obj[CUSTOM_KEY]??obj.financeiro_marcos_custom_tx_v3;
-  const arr=parse(raw);
-  return Array.isArray(arr)?arr:[];
-}
-function candidateSources(){
-  const p=ACTIVE();
-  const out=[];
-  try{out.push(arrFromState(localStorage.getItem(`planejador_profile_state_${p}_v41`)))}catch(e){}
+function localCandidates(){
+  const profile=ACTIVE(),found=[];
+  try{entriesFromProfileState(localStorage.getItem(`planejador_profile_state_${profile}_v41`)).forEach(x=>found.push(x))}catch(e){}
+  try{const rec=parse(localStorage.getItem('pp_profile_recovery_v56'));if(rec){collectRecursive(rec?.[profile],found);if(String(rec?.active||'')===String(profile))collectRecursive(rec?.shared,found)}}catch(e){}
+  /* Varrer somente chaves de snapshot/backup/perfil: não vasculha dados acadêmicos ou outros módulos. */
   try{
-    const rec=parse(localStorage.getItem('pp_profile_recovery_v56'));
-    if(rec){
-      out.push(arrFromState(rec[p]));
-      /* shared só é usado quando o snapshot foi criado com este mesmo perfil ativo. */
-      if(String(rec.active||'')===String(p))out.push(arrFromState(rec.shared));
+    for(let i=0;i<localStorage.length;i++){
+      const k=String(localStorage.key(i)||'');
+      if(!/(profile_state|recovery|backup|snapshot|cloud)/i.test(k))continue;
+      collectRecursive(localStorage.getItem(k),found);
     }
   }catch(e){}
-  return out.filter(a=>Array.isArray(a)&&a.length);
+  return found;
 }
-function sig(x){
-  return [x?.id||'',x?.tipo||'',x?.descricao||'',Number(x?.valor||0).toFixed(2),x?.ano||'',x?.mesNum||'',x?.origem||'',x?.recurringStartYear||'',x?.recurringStartMonth||''].join('|');
-}
-function restoreEntries(){
-  const profile=ACTIVE();
-  const current=Array.isArray(custom)?custom:[];
-  const currentEntries=current.filter(x=>x?.tipo==='entrada');
-  if(currentEntries.length)return {restored:0,reason:'current-has-entries'};
-  if(localStorage.getItem(RECOVERY_MARK+profile)==='1')return {restored:0,reason:'already-tried'};
-
-  const candidates=[];
-  candidateSources().forEach(arr=>arr.forEach(x=>{if(x?.tipo==='entrada')candidates.push(x)}));
-  const seen=new Set(current.map(sig));
-  const unique=[];
-  candidates.forEach(x=>{const k=sig(x);if(!seen.has(k)){seen.add(k);unique.push({...x})}});
-  localStorage.setItem(RECOVERY_MARK+profile,'1');
-  if(!unique.length)return {restored:0,reason:'no-snapshot-entries'};
-
-  custom.push(...unique);
+function mergeEntries(found,source){
+  if(!Array.isArray(custom))return 0;
+  const seen=new Set(custom.map(sig)),add=[];
+  (found||[]).forEach(x=>{if(!isEntry(x))return;const k=sig(x);if(!seen.has(k)){seen.add(k);add.push(normalizeEntry(x))}});
+  if(!add.length)return 0;
+  custom.push(...add);
   try{persist()}catch(e){try{localStorage.setItem(CUSTOM_KEY,JSON.stringify(custom))}catch(_){} }
-  try{
-    const PM=window.__ppV41Profile;
-    if(PM?.captureShared&&PM?.saveState)PM.saveState(profile,PM.captureShared());
-  }catch(e){}
-  return {restored:unique.length,reason:'restored'};
+  try{const PM=window.__ppV41Profile;if(PM?.captureShared&&PM?.saveState)PM.saveState(ACTIVE(),PM.captureShared())}catch(e){}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  try{localStorage.setItem(V141_MARK+ACTIVE(),JSON.stringify({at:new Date().toISOString(),count:add.length,source}))}catch(e){}
+  return add.length;
 }
-
-const previousRender=window.renderLancamentos;
-window.renderLancamentos=function(){
-  const result=restoreEntries();
-  const r=typeof previousRender==='function'?previousRender.apply(this,arguments):undefined;
-  if(result.restored>0){
-    setTimeout(()=>{
-      try{previousRender?.()}catch(e){}
+function restoreLocal(){
+  if(Array.isArray(custom)&&custom.some(isEntry))return 0;
+  return mergeEntries(localCandidates(),'local-snapshots');
+}
+async function restoreCloud(){
+  if(cloudBusy||cloudAttempted||(Array.isArray(custom)&&custom.some(isEntry)))return 0;
+  cloudAttempted=true;cloudBusy=true;
+  try{
+    const sb=window.ppSupabase;if(!sb)return 0;
+    const auth=await sb.auth.getUser();const user=auth?.data?.user;if(!user)return 0;
+    /* Backups de segurança do próprio usuário, criados pelo Hub antes de sincronizações. */
+    const res=await sb.from('planner_device_backup_v66').select('snapshot,created_at,app_version').eq('user_id',user.id).order('created_at',{ascending:false}).limit(80);
+    if(res?.error)throw res.error;
+    const found=[];(res?.data||[]).forEach(row=>collectRecursive(row?.snapshot,found));
+    let n=mergeEntries(found,'cloud-device-backups');
+    if(!n){
+      /* Último estado sincronizado também é consultado, caso ainda preserve a base antiga. */
+      const rows=await sb.from('planner_key_state_v65').select('profile,storage_key,value,deleted,updated_at').eq('user_id',user.id).eq('profile',ACTIVE()).eq('storage_key',CUSTOM_KEY).eq('deleted',false).limit(5);
+      if(!rows?.error){const alt=[];(rows?.data||[]).forEach(r=>entriesFromCustomValue(r.value).forEach(x=>alt.push(x)));n=mergeEntries(alt,'cloud-current-state')}
+    }
+    if(n>0){
+      try{window.renderLancamentos?.()}catch(e){}
       try{window.ppLaunchSummaryV75?.refresh?.()}catch(e){}
       try{window.ppLaunchCreditorV50?.refresh?.()}catch(e){}
-      try{toast(`${result.restored} entrada(s) recuperada(s) do histórico local do perfil.`)}catch(e){}
-    },30);
-  }
-  return r;
-};
-try{renderLancamentos=window.renderLancamentos}catch(e){}
+      try{toast(`${n} entrada(s) recuperada(s) dos snapshots de segurança do Hub.`)}catch(e){}
+    }
+    return n;
+  }catch(e){console.warn('V141 recovery cloud',e);return 0}
+  finally{cloudBusy=false}
+}
+function runRecovery(){
+  if(Array.isArray(custom)&&custom.some(isEntry))return;
+  const n=restoreLocal();
+  if(n>0){try{toast(`${n} entrada(s) recuperada(s) do histórico local.`)}catch(e){};return}
+  /* A nuvem pode inicializar alguns instantes depois do restante do app. */
+  [450,1400,3200,6500].forEach(ms=>setTimeout(()=>{if(!(Array.isArray(custom)&&custom.some(isEntry)))restoreCloud()},ms));
+}
 
-window.ppLaunchEntryRecoveryV140={restore:restoreEntries};
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>window.renderLancamentos?.(),180),{once:true});
-else setTimeout(()=>window.renderLancamentos?.(),180);
+/* Neutraliza definitivamente o antigo reset destrutivo nas próximas instalações/perfis. */
+try{localStorage.setItem('planejador_manual_reset_20260927_v2','done')}catch(e){}
+const previousRender=window.renderLancamentos;
+window.renderLancamentos=function(){runRecovery();return typeof previousRender==='function'?previousRender.apply(this,arguments):undefined};
+try{renderLancamentos=window.renderLancamentos}catch(e){}
+window.ppLaunchEntryRecoveryV141={restoreLocal,restoreCloud,run:runRecovery};
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{runRecovery();window.renderLancamentos?.()},180),{once:true});
+else setTimeout(()=>{runRecovery();window.renderLancamentos?.()},180);
 })();
 </script>
