@@ -30362,6 +30362,133 @@ window.ppLaunchV147={refresh:patch147,menu:menu147};
 #lancamentos #txCreditorV50{cursor:pointer!important;pointer-events:auto!important;touch-action:manipulation!important;position:relative!important;z-index:3!important;background-color:#fff!important}
 #lancamentos .filterbar{pointer-events:auto!important}
 </style>
+
+<style id="pp-v154-custom-launch-dropdowns">
+#txModal select.pp154-native-hidden{
+  position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;
+  pointer-events:none!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;
+  clip-path:inset(50%)!important;margin:-1px!important;padding:0!important;border:0!important;
+}
+#txModal .pp154-select-btn{
+  width:100%!important;min-height:44px!important;display:flex!important;align-items:center!important;
+  justify-content:space-between!important;gap:12px!important;padding:10px 13px!important;
+  border:1px solid #cfdbe9!important;border-radius:14px!important;background:#fff!important;
+  color:#172640!important;font:700 14px/1.2 inherit!important;text-align:left!important;
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset!important;cursor:pointer!important;
+  position:relative!important;z-index:55!important;
+}
+#txModal .pp154-select-btn:hover{border-color:#8db7f4!important;background:#fbfdff!important}
+#txModal .pp154-select-btn:focus{outline:none!important;border-color:#4384f5!important;box-shadow:0 0 0 3px rgba(67,132,245,.13)!important}
+#txModal .pp154-select-btn .pp154-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#txModal .pp154-select-btn .pp154-chevron{font-size:16px;color:#365c87;line-height:1;transform:translateY(-1px)}
+#txModal .v32-f-origin>div>.pp154-select-btn{min-width:0!important}
+.pp154-dropdown-menu{
+  position:fixed!important;z-index:2147483605!important;display:none;overflow:hidden;
+  min-width:220px;max-width:min(430px,calc(100vw - 24px));
+  border:1px solid #d7e2ef;border-radius:16px;background:#fff;
+  box-shadow:0 22px 62px rgba(12,31,58,.24);padding:7px;
+}
+.pp154-dropdown-menu.open{display:block!important}
+.pp154-dropdown-search{width:100%;height:38px;border:1px solid #dbe5f0;border-radius:10px;padding:0 11px;margin:0 0 6px;background:#f8fbff;color:#17314f;font:600 12px/1 inherit;outline:none}
+.pp154-dropdown-search:focus{border-color:#4c8df6;box-shadow:0 0 0 3px rgba(76,141,246,.10)}
+.pp154-dropdown-list{max-height:270px;overflow:auto;overscroll-behavior:contain;padding:1px}
+.pp154-dropdown-option{display:flex;width:100%;min-height:36px;align-items:center;padding:9px 10px;border:0;border-radius:9px;background:transparent;color:#243a55;text-align:left;font:650 12px/1.25 inherit;cursor:pointer}
+.pp154-dropdown-option:hover,.pp154-dropdown-option.active{background:#eaf3ff;color:#075cff}
+.pp154-dropdown-empty{padding:16px 10px;color:#8492a5;font-size:12px;text-align:center}
+</style>
+<script id="pp-v154-custom-launch-dropdowns-script">
+(()=>{
+'use strict';
+const IDS=['fMonth','fCategory','fOriginSelect','fCardId','fCardStart'];
+let menu=null,current=null;
+function textOf(o){return (o?.textContent||'').trim()}
+function getLabel(sel){const o=sel?.options?.[sel.selectedIndex];return o?textOf(o):'Selecione'}
+function ensureMenu(){
+  if(menu)return menu;
+  menu=document.createElement('div');menu.className='pp154-dropdown-menu';menu.id='pp154DropdownMenu';
+  menu.innerHTML='<input class="pp154-dropdown-search" type="text" placeholder="Buscar"><div class="pp154-dropdown-list"></div>';
+  document.body.appendChild(menu);return menu;
+}
+function close(){if(menu)menu.classList.remove('open');current=null}
+function position(btn){
+  if(!menu||!btn)return;const r=btn.getBoundingClientRect();
+  const vw=document.documentElement.clientWidth,vh=document.documentElement.clientHeight;
+  const w=Math.max(r.width,Math.min(380,vw-24));
+  menu.style.width=Math.min(w,vw-24)+'px';
+  let left=Math.min(Math.max(12,r.left),vw-Math.min(w,vw-24)-12);
+  menu.style.left=left+'px';
+  const h=Math.min(menu.scrollHeight||320,340);
+  let top=r.bottom+6;if(top+h>vh-10)top=Math.max(10,r.top-h-6);
+  menu.style.top=top+'px';
+}
+function renderOptions(filter=''){
+  if(!current||!menu)return;
+  const list=menu.querySelector('.pp154-dropdown-list'),q=filter.trim().toLocaleLowerCase('pt-BR');
+  const opts=Array.from(current.select.options).filter(o=>!q||textOf(o).toLocaleLowerCase('pt-BR').includes(q));
+  list.innerHTML=opts.length?opts.map(o=>`<button type="button" class="pp154-dropdown-option${String(o.value)===String(current.select.value)?' active':''}" data-value="${String(o.value).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}">${textOf(o).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</button>`).join(''):'<div class="pp154-dropdown-empty">Nenhuma opção encontrada.</div>';
+}
+function open(btn,sel){
+  ensureMenu();current={btn,select:sel};
+  const search=menu.querySelector('.pp154-dropdown-search');
+  const searchable=sel.id==='fOriginSelect'||sel.options.length>12;
+  search.style.display=searchable?'block':'none';search.value='';
+  search.placeholder=sel.id==='fOriginSelect'?'Buscar credor / origem':'Buscar opção';
+  renderOptions('');menu.classList.add('open');
+  requestAnimationFrame(()=>{position(btn);if(searchable)search.focus({preventScroll:true})});
+}
+function sync(sel){
+  if(!sel||!IDS.includes(sel.id))return;
+  sel.classList.add('pp154-native-hidden');
+  let btn=sel.parentElement?.querySelector(`.pp154-select-btn[data-for="${sel.id}"]`);
+  if(!btn){
+    btn=document.createElement('button');btn.type='button';btn.className='pp154-select-btn';btn.dataset.for=sel.id;
+    btn.innerHTML='<span class="pp154-label"></span><span class="pp154-chevron">⌄</span>';
+    sel.insertAdjacentElement('afterend',btn);
+  }
+  const lab=btn.querySelector('.pp154-label');if(lab)lab.textContent=getLabel(sel)||'Selecione';
+  btn.disabled=sel.disabled;
+  if(!sel.__pp154Observer){
+    const ob=new MutationObserver(()=>{sync(sel);if(current?.select===sel)renderOptions(menu?.querySelector('.pp154-dropdown-search')?.value||'')});
+    ob.observe(sel,{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});sel.__pp154Observer=ob;
+    sel.addEventListener('change',()=>sync(sel));
+  }
+}
+function refresh(){IDS.forEach(id=>sync(document.getElementById(id)))}
+function selectValue(value){
+  if(!current)return;const sel=current.select;sel.value=value;
+  sel.dispatchEvent(new Event('input',{bubbles:true}));sel.dispatchEvent(new Event('change',{bubbles:true}));
+  sync(sel);close();setTimeout(refresh,0);
+}
+window.addEventListener('pointerdown',e=>{
+  const btn=e.target?.closest?.('.pp154-select-btn');
+  if(btn){
+    const sel=document.getElementById(btn.dataset.for);if(!sel)return;
+    e.preventDefault();e.stopImmediatePropagation();
+    if(current?.btn===btn&&menu?.classList.contains('open'))close();else open(btn,sel);return;
+  }
+  const opt=e.target?.closest?.('.pp154-dropdown-option');
+  if(opt&&menu?.classList.contains('open')){e.preventDefault();e.stopImmediatePropagation();selectValue(opt.dataset.value);return}
+  if(e.target?.closest?.('#pp154DropdownMenu')){e.stopImmediatePropagation();return}
+  if(menu?.classList.contains('open'))close();
+},true);
+window.addEventListener('resize',()=>{if(current&&menu?.classList.contains('open'))position(current.btn)});
+window.addEventListener('scroll',()=>{if(current&&menu?.classList.contains('open'))position(current.btn)},true);
+document.addEventListener('input',e=>{if(e.target?.classList?.contains('pp154-dropdown-search'))renderOptions(e.target.value)});
+const mo=new MutationObserver(()=>{
+  const modal=document.getElementById('txModal');if(modal?.classList.contains('open'))setTimeout(refresh,0);
+});
+const modal=document.getElementById('txModal');if(modal)mo.observe(modal,{attributes:true,attributeFilter:['class'],subtree:true,childList:true});
+const oldOpen=window.openTx;if(typeof oldOpen==='function'&&!oldOpen.__pp154){
+  const w=function(){const r=oldOpen.apply(this,arguments);setTimeout(refresh,0);setTimeout(refresh,80);return r};w.__pp154=true;window.openTx=w;try{openTx=w}catch(e){}
+}
+const oldEdit=window.openTxEdit;if(typeof oldEdit==='function'&&!oldEdit.__pp154){
+  const w=function(){const r=oldEdit.apply(this,arguments);setTimeout(refresh,0);setTimeout(refresh,80);return r};w.__pp154=true;window.openTxEdit=w;try{openTxEdit=w}catch(e){}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,500),{once:true});else setTimeout(refresh,500);
+window.ppLaunchDropdownsV154={refresh,close};
+})();
+</script>
+
 </body></html>
 
 
@@ -31459,102 +31586,4 @@ window.ppMoveOccurrenceV146={move:window.moveTxOccurrenceNext146,restore:window.
 })();
 </script>
 
-<style id="pp-v153-modal-selects-interactive">
-/* v153 — selects do lançamento sempre interativos e acima de camadas legadas */
-#txModal select,
-#cardPurchaseModal select,
-#creditorModal select{
-  position:relative!important;
-  z-index:40!important;
-  pointer-events:auto!important;
-  touch-action:manipulation!important;
-  user-select:auto!important;
-  -webkit-user-select:auto!important;
-  opacity:1!important;
-  visibility:visible!important;
-  cursor:pointer!important;
-}
-#txModal .field,
-#txModal .v32-f-origin>div,
-#cardPurchaseModal .field,
-#creditorModal .field{
-  position:relative!important;
-}
-#txModal select:focus,
-#cardPurchaseModal select:focus,
-#creditorModal select:focus{
-  z-index:60!important;
-}
-</style>
-<script id="pp-v153-modal-selects-interactive-script">
-(()=>{
-'use strict';
-const SELECTOR='#txModal select,#cardPurchaseModal select,#creditorModal select';
-function cleanSelect(s){
-  if(!s)return;
-  s.disabled=false;
-  s.removeAttribute('disabled');
-  s.removeAttribute('inert');
-  s.style.setProperty('pointer-events','auto','important');
-  s.style.setProperty('visibility','visible','important');
-  s.style.setProperty('opacity','1','important');
-  s.style.setProperty('position','relative','important');
-  s.style.setProperty('z-index','40','important');
-}
-function refreshLists(){
-  try{
-    const m=document.getElementById('fMonth');
-    if(m && !m.options.length && Array.isArray(window.monthNames)){
-      m.innerHTML=window.monthNames.map((x,i)=>`<option value="${i+1}">${x}</option>`).join('');
-    }
-  }catch(e){}
-  try{window.updateCategorySelect?.()}catch(e){}
-  try{window.populateCreditorSelects?.(document.getElementById('fOriginSelect')?.value||'')}catch(e){}
-  document.querySelectorAll(SELECTOR).forEach(cleanSelect);
-}
-function openNativePicker(e){
-  const s=e.target?.closest?.(SELECTOR);
-  if(!s)return;
-  cleanSelect(s);
-  // Abre o seletor no próprio gesto do usuário antes que listeners legados
-  // possam consumir o clique. Edge/Chrome suportam showPicker().
-  if(typeof s.showPicker==='function'){
-    try{
-      s.focus({preventScroll:true});
-      s.showPicker();
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      return;
-    }catch(err){}
-  }
-  // fallback: mantém o clique nativo utilizável, mas evita handlers posteriores
-  // no document de alterarem o DOM no mesmo ciclo.
-  s.focus({preventScroll:true});
-}
-window.addEventListener('pointerdown',openNativePicker,true);
-window.addEventListener('mousedown',e=>{
-  if(e.pointerType)return;
-  const s=e.target?.closest?.(SELECTOR);if(!s)return;cleanSelect(s);
-  if(typeof s.showPicker==='function'){
-    try{s.focus({preventScroll:true});s.showPicker();e.preventDefault();e.stopImmediatePropagation();}catch(err){}
-  }
-},true);
-// Não repopula a cada clique; apenas quando o modal é efetivamente aberto.
-document.addEventListener('click',e=>{
-  if(e.target?.closest?.('[data-addtx]'))setTimeout(refreshLists,35);
-  if(e.target?.closest?.('#addCardPurchaseBtn'))setTimeout(refreshLists,35);
-  if(e.target?.closest?.('#quickCreditorBtn'))setTimeout(refreshLists,80);
-},true);
-document.addEventListener('focusin',e=>{const s=e.target?.closest?.(SELECTOR);if(s)cleanSelect(s)},true);
-const obs=new MutationObserver(muts=>{
-  for(const m of muts){
-    if(m.type==='attributes' && m.target?.matches?.('#txModal,#cardPurchaseModal,#creditorModal') && m.target.classList.contains('open')){
-      setTimeout(refreshLists,0);break;
-    }
-  }
-});
-['txModal','cardPurchaseModal','creditorModal'].forEach(id=>{const n=document.getElementById(id);if(n)obs.observe(n,{attributes:true,attributeFilter:['class']})});
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(refreshLists,450),{once:true});else setTimeout(refreshLists,450);
-window.ppModalSelectsV153={refresh:refreshLists};
-})();
-</script>
+
