@@ -30623,6 +30623,65 @@ window.ppLaunchCreditorV155={refresh,open,close};
 }
 </style>
 
+
+<style id="pp-v160-launch-filter-polish">
+#lancamentos .section-tools .filterbar{
+  display:grid!important;
+  grid-template-columns:116px 116px minmax(240px,320px)!important;
+  gap:10px!important;
+  align-items:center!important;
+  justify-content:end!important;
+  width:auto!important;
+}
+#lancamentos #txYearBtn,
+#lancamentos #txMonthBtn,
+#lancamentos #txCreditorFilterV155 .pp155-trigger{
+  min-height:42px!important;
+  height:42px!important;
+  border-radius:12px!important;
+  padding:0 14px!important;
+  box-sizing:border-box!important;
+}
+#lancamentos #txYearBtn,
+#lancamentos #txMonthBtn{
+  white-space:nowrap!important;
+  font-weight:800!important;
+}
+#lancamentos #txYearBtn{min-width:116px!important}
+#lancamentos #txMonthBtn{min-width:116px!important}
+#lancamentos #txCreditorFilterV155{
+  width:100%!important;
+  min-width:240px!important;
+  max-width:320px!important;
+}
+#lancamentos #txCreditorFilterV155 .pp155-trigger{
+  width:100%!important;
+  font-weight:800!important;
+  color:#172b4d!important;
+}
+#lancamentos #txCreditorFilterV155.open .pp155-trigger{
+  font-weight:500!important;
+}
+#lancamentos #txCreditorFilterV155 .pp155-option{
+  font-weight:500!important;
+}
+#lancamentos #txCreditorFilterV155 .pp155-option:hover,
+#lancamentos #txCreditorFilterV155 .pp155-option.active{
+  font-weight:500!important;
+}
+@media(max-width:900px){
+  #lancamentos .section-tools .filterbar{
+    grid-template-columns:112px 112px minmax(210px,1fr)!important;
+  }
+  #lancamentos #txCreditorFilterV155{max-width:none!important}
+}
+@media(max-width:680px){
+  #lancamentos .section-tools .filterbar{
+    grid-template-columns:1fr 1fr!important;
+  }
+  #lancamentos #txCreditorFilterV155{grid-column:1/-1!important;max-width:none!important}
+}
+</style>
 </body></html>
 
 
