@@ -1859,6 +1859,13 @@ img,svg,canvas{max-width:100%}
 @media(max-width:640px){#dashboardV128 .v129-periodbar{grid-template-columns:1fr;margin-bottom:10px;padding:5px 0 10px;gap:9px}#dashboardV128 .v129-periodbar .v128-scope{justify-self:start!important}#dashboardV128 .v129-period-title{display:block}#dashboardV128 .v129-period-title strong{display:block;margin-top:5px;font-size:14px}#dashboardV128 .v129-period-fields{grid-template-columns:1fr 90px!important}#dashboardV128 .v129-hero{min-height:150px!important;padding:20px!important;border-radius:21px!important}#dashboardV128 .v129-hero-index{display:none!important}}
 </style>
 
+
+<style id="pp-v137-exclusive-view-safety">
+#dashboardV128.v128-show~.view,
+#dashboardV128.v128-show~section.view{display:none!important;visibility:hidden!important}
+#dashboardV128:not(.v128-show){display:none!important}
+.main>.view:not(.active){display:none!important;visibility:hidden!important}
+</style>
 </head>
 <body data-hub-area="financas"><aside aria-label="Navegação principal" id="ppBankRailV62"><button aria-label="Abrir Hub Pessoal" class="v62-logo" data-tip="Hub Pessoal" data-v62-hub="" type="button"></button><nav aria-label="Navegação" class="v62-nav"><button aria-label="Visão geral" class="v62-btn" data-tip="Visão geral" data-v62-view="dashboard" type="button">⌂</button><button aria-label="Lançamentos" class="v62-btn" data-tip="Lançamentos" data-v62-view="lancamentos" type="button">↕</button><button aria-label="Cartões" class="v62-btn" data-tip="Cartões" data-v62-view="cartoes" type="button">▣</button><button aria-label="Dívidas" class="v62-btn" data-tip="Dívidas" data-v62-view="dividas" type="button">◴</button><button aria-label="FGTS" class="v62-btn" data-tip="FGTS" data-v62-view="fgts" type="button">◇</button><button aria-label="Previdência" class="v62-btn" data-tip="Previdência" data-v62-view="previdencia" type="button">◎</button><button aria-label="Previdência privada" class="v62-btn" data-tip="Previdência privada" data-v62-view="previdenciaPrivada" type="button">◉</button><button aria-label="Investimentos" class="v62-btn" data-tip="Investimentos" data-v62-view="investimentos" type="button">↗</button><button aria-label="Patrimônio" class="v62-btn" data-tip="Patrimônio" data-v62-view="patrimonio" type="button">⬡</button><button aria-label="Veículos" class="v62-btn" data-tip="Veículos" data-v62-view="veiculos" type="button">⚙</button><button aria-label="Calculadora" class="v62-btn" data-tip="Calculadora" data-v62-view="nuvem" type="button">∑</button></nav><div class="v62-foot"><button aria-label="Backup" class="v62-btn" data-tip="Backup" data-v62-backup="" type="button">↓</button><button aria-label="Novo lançamento" class="v62-btn v62-add" data-tip="Novo lançamento" data-v62-add="" type="button">＋</button><div class="v62-sep"></div><button aria-label="Perfil" class="v62-btn" data-tip="Perfil" data-v62-profile="" type="button"><span class="v62-dot">P</span></button><button aria-label="Sair" class="v62-btn" data-tip="Sair" data-v62-logout="" type="button">↪</button></div></aside><div aria-hidden="true" id="ppHubV62"><section aria-label="Hub Pessoal" aria-modal="true" class="v62-hub-card" role="dialog"><div class="v62-hub-head"><div><h2>Hub Pessoal</h2><p>Escolha a área que deseja abrir.</p></div><button aria-label="Fechar" class="v62-hub-close" type="button">×</button></div><div class="v62-hub-grid"><a data-v62-area="financas" href="index.html"><b>Finanças</b><span>Lançamentos, cartões, dívidas e patrimônio</span></a><a data-v62-area="educacao" href="educacao.html"><b>Educação</b><span>Formações e trajetória acadêmica</span></a><a data-v62-area="saude" href="saude.html"><b>Saúde</b><span>Acompanhamento pessoal</span></a><a data-v62-area="entretenimento" href="entretenimento.html"><b>Entretenimento</b><span>Filmes, séries, livros e viagens</span></a></div></section></div><div class="app">
 <div aria-hidden="true" hidden="" id="ppLegacyControlsV63" style="display:none!important"><div class="topinner"><div class="brand"><div class="brandmark">M</div><span>Financeiro <small>Marcos</small></span></div><nav class="nav" id="nav"><button class="active" data-view="dashboard">Visão geral</button><button data-view="lancamentos">Lançamentos</button><button data-view="cartoes">Cartões</button><button data-view="dividas">Dívidas</button><button data-view="fgts">FGTS</button><button data-view="previdencia">Previdência</button><button data-view="previdenciaPrivada">Previdência privada</button><button data-view="investimentos">Investimentos</button><button data-view="patrimonio">Patrimônio</button><button data-view="veiculos">Veículos</button><button data-view="nuvem">Nuvem</button></nav><div class="actions"><button class="iconbtn" id="backupBtn">↓ Backup</button><button class="primary" data-addtx="">+ Lançamento</button></div></div></div>
@@ -1940,7 +1947,7 @@ img,svg,canvas{max-width:100%}
   </main>
 </section>
 
-<section class="view active fin125-dashboard" id="dashboard">
+<section class="view fin125-dashboard" id="dashboard">
   <div class="hero fin125-hero">
     <div class="fin125-hero-copy">
       <div class="fin125-kicker" id="fin125Kicker">CENTRO FINANCEIRO · VISÃO INTEGRADA</div>
@@ -27239,10 +27246,19 @@ function target123(id){
  return document.getElementById(id);
 }
 function show123(id,doRender=true){
+ const LAST_VIEW_KEY='planejador_finance_last_view_v137';
+ if(id==='dashboard' && window.ppFinanceHomeV137?.show){
+   try{localStorage.setItem(LAST_VIEW_KEY,'dashboard');history.replaceState(null,'','#dashboard')}catch(e){}
+   window.ppFinanceHomeV137.show();
+   return true;
+ }
  const t=target123(id);if(!t||!t.classList.contains('view'))return false;
+ document.getElementById('dashboardV128')?.classList.remove('v128-show');
  document.querySelectorAll('.main > .view').forEach(v=>{const on=v===t;v.classList.toggle('active',on);v.style.setProperty('display',on?'block':'none','important');v.style.setProperty('visibility',on?'visible':'hidden','important')});
  document.querySelectorAll('#nav button[data-view],#v76FloatNav button[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===id));
+ document.querySelectorAll('[data-v62-view]').forEach(b=>b.classList.toggle('active',b.dataset.v62View===id));
  document.getElementById('nav')?.classList.remove('open');
+ try{localStorage.setItem(LAST_VIEW_KEY,id);history.replaceState(null,'','#'+id)}catch(e){}
  if(doRender){try{dynamicRender123[id]?.()}catch(e){}}
  try{window.scrollTo({top:0,behavior:'auto'})}catch(e){}
  return true;
@@ -30279,7 +30295,7 @@ const original=window.renderDashboard;window.renderDashboard=function(){const r=
  const n=v=>{try{return Number(num(v)||0)}catch(e){let x=Number(v);return Number.isFinite(x)?x:0}};
  const money=v=>{try{return brl(n(v))}catch(e){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n(v))}};
  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
- const keyScope='planejador_dashboard_scope',keyYear='planejador_dashboard_year_v128',keyMonth='planejador_dashboard_month_v128';
+ const keyScope='planejador_dashboard_scope',keyYear='planejador_dashboard_year_v128',keyMonth='planejador_dashboard_month_v128',keyView='planejador_finance_last_view_v137';
  let state={scope:localStorage.getItem(keyScope)||'month',year:Number(localStorage.getItem(keyYear))||Number(window.year)||Number(window.currentYear)||new Date().getFullYear(),month:Number(localStorage.getItem(keyMonth))||Number(window.month)||Number(window.currentMonth)||new Date().getMonth()+1};
  function rowsAll(){try{return typeof allTx==='function'?allTx().filter(x=>x&&Number(x.ano)>=2000):[]}catch(e){return []}}
  function years(){const ys=[...new Set([...rowsAll().map(x=>+x.ano),Number(window.currentYear)||new Date().getFullYear()])].filter(Boolean).sort((a,b)=>b-a);return ys.length?ys:[new Date().getFullYear()]}
@@ -30348,12 +30364,303 @@ const original=window.renderDashboard;window.renderDashboard=function(){const r=
    q('v128Wealth').innerHTML=[['Patrimônio',money(assetTotal)],['Investimentos',money(invTotal)],['FGTS livre',money(n(fg.saldoDisponivel))],['FGTS rescisório',money(n(fg.saldoRescisao))],['Previdência',pp?money(pp.balance):'—'],['Dívidas',money(debtTotal)]].map(x=>`<div class="v128-wealth-item"><span>${esc(x[0])}</span><b>${x[1]}</b></div>`).join('');
    const act=rows.slice().sort((a,b)=>(+b.ano-+a.ano)||(+b.mesNum-+a.mesNum)||n(b.valor)-n(a.valor)).slice(0,8);q('v128Activity').innerHTML=act.length?act.map(x=>`<div class="v128-activity-row"><span class="date">${short[(+x.mesNum||1)-1]}/${x.ano}</span><span class="desc" title="${esc(x.descricao||x.origem||'Lançamento')}">${esc(x.descricao||x.origem||'Lançamento')}</span><span class="cat">${esc(x.categoria||x.tipo||'Sem categoria')}</span><strong>${money(x.valor)}</strong></div>`).join(''):'<div class="v128-empty">Nenhum lançamento no período selecionado.</div>';
  }
- function show(){const legacy=q('dashboard');if(legacy){legacy.classList.remove('active');legacy.style.setProperty('display','none','important');legacy.setAttribute('aria-hidden','true')}q(ROOT)?.classList.add('v128-show');document.querySelectorAll('[data-v62-view],[data-view]').forEach(b=>{const v=b.getAttribute('data-v62-view')||b.getAttribute('data-view');b.classList.toggle('active',v==='dashboard')});render()}
+ function setRailActive(id){document.querySelectorAll('[data-v62-view],[data-view]').forEach(b=>{const v=b.getAttribute('data-v62-view')||b.getAttribute('data-view');b.classList.toggle('active',v===id)})}
+ function hideAllLegacyViews(){document.querySelectorAll('.main > .view').forEach(v=>{v.classList.remove('active');v.style.setProperty('display','none','important');v.style.setProperty('visibility','hidden','important');v.setAttribute('aria-hidden','true')})}
+ function show(){
+   hideAllLegacyViews();
+   const legacy=q('dashboard');if(legacy){legacy.classList.remove('active');legacy.style.setProperty('display','none','important');legacy.style.setProperty('visibility','hidden','important');legacy.setAttribute('aria-hidden','true')}
+   q(ROOT)?.classList.add('v128-show');setRailActive('dashboard');
+   try{localStorage.setItem(keyView,'dashboard');history.replaceState(null,'','#dashboard')}catch(e){}
+   render()
+ }
  function hide(){q(ROOT)?.classList.remove('v128-show')}
- document.addEventListener('click',e=>{const b=e.target.closest?.('[data-v62-view],[data-view]');if(!b)return;const v=b.getAttribute('data-v62-view')||b.getAttribute('data-view');if(v==='dashboard'){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();show()}else hide()},true);
- function init(){const legacy=q('dashboard');if(legacy){legacy.classList.remove('active');legacy.style.setProperty('display','none','important');legacy.setAttribute('aria-hidden','true')}installControls();syncLegacy();show();render()}
+ function restoreLastView(){
+   const hash=String(location.hash||'').replace('#','');
+   const allowed=new Set(['dashboard','lancamentos','cartoes','credores','dividas','fgts','previdencia','previdenciaPrivada','investimentos','patrimonio','veiculos','nuvem']);
+   const stored=localStorage.getItem(keyView)||'';
+   const wanted=allowed.has(hash)?hash:(allowed.has(stored)?stored:'dashboard');
+   if(wanted==='dashboard'){show();return}
+   hide();
+   try{localStorage.setItem(keyView,wanted)}catch(e){}
+   setTimeout(()=>{try{window.showView?.(wanted)}catch(e){};setRailActive(wanted)},0)
+ }
+ document.addEventListener('click',e=>{const b=e.target.closest?.('[data-v62-view],[data-view]');if(!b)return;const v=b.getAttribute('data-v62-view')||b.getAttribute('data-view');if(!v)return;try{localStorage.setItem(keyView,v)}catch(x){}if(v==='dashboard'){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();show()}else hide()},true);
+ function init(){const legacy=q('dashboard');if(legacy){legacy.classList.remove('active');legacy.style.setProperty('display','none','important');legacy.style.setProperty('visibility','hidden','important');legacy.setAttribute('aria-hidden','true')}installControls();syncLegacy();restoreLastView();render()}
+ window.ppFinanceHomeV137={show,hide,render,restore:restoreLastView};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,20));else setTimeout(init,20);
- setTimeout(init,700);
+ setTimeout(()=>{restoreLastView()},760);
  window.addEventListener('storage',e=>{if(e.key===keyScope||e.key===keyYear||e.key===keyMonth)setTimeout(render,20)});
+})();
+</script>
+<style id="pp-v136-card-ledger-fix-style">
+#cartoes .v136-limit-alert{display:inline-flex;align-items:center;gap:5px;margin-top:4px;font-size:8px;font-weight:900;color:#b42318}
+#cartoes .v112-card-foot b.negative,#cartoes .v112-summary-values b.negative{color:#b42318!important}
+</style>
+<script id="pp-v136-card-ledger-fix-final">
+(()=>{'use strict';
+const purchaseKey136=(typeof cardPurchasesKey!=='undefined'&&cardPurchasesKey)||'financeiro_marcos_card_purchases_v3';
+const priorAllTx136=window.allTx;
+const n136=v=>{try{return typeof num==='function'?Number(num(v)||0):Number(v)||0}catch(e){return Number(v)||0}};
+const r136=v=>Math.round((Number(v)||0)*100)/100;
+const add136=(y,m,i)=>{const d=new Date(+y,+m-1+i,1,12);return{year:d.getFullYear(),month:d.getMonth()+1}};
+const profile136=()=>String(localStorage.getItem('planejador_active_profile')||'Marcos').toLowerCase();
+const statusKey136=()=>`planejador_invoice_status_v50_${profile136()}`;
+function manualMap136(){try{return JSON.parse(localStorage.getItem(statusKey136())||'{}')||{}}catch(e){return {}}}
+function invoiceManual136(cardId,y,m){return manualMap136()[`${cardId}|${+y}|${+m}`]||''}
+function canonical136(p){
+ const total=r136(n136(p?.purchaseTotalV39??p?.purchaseTotalV44??p?.total));
+ let qty=Math.max(1,parseInt(p?.installmentCountV39??p?.installmentCountV44??p?.installments,10)||1);
+ let mode=p?.modeV39||p?.modeV44||p?.mode||'avista';
+ const refund=p?.entryTypeV39==='refund'||p?.entryTypeV44==='refund'||mode==='estorno';
+ let y=+(p?.firstInvoiceYearV39??p?.firstInvoiceYearV44??p?.startYear),m=+(p?.firstInvoiceMonthV39??p?.firstInvoiceMonthV44??p?.startMonth);
+ if(!(y&&m>=1&&m<=12)){
+   const d=new Date(String(p?.date||new Date().toISOString().slice(0,10)).slice(0,10)+'T12:00:00');d.setMonth(d.getMonth()+1);y=d.getFullYear();m=d.getMonth()+1;
+ }
+ if(refund){mode='estorno';qty=1}else if(mode==='recorrente'){qty=1}else mode=qty>1?'parcelado':'avista';
+ const paidCount=Math.max(0,Math.min(qty,parseInt(p?.paidInstallments,10)||0));
+ return{total,qty,mode,refund,first:{year:y,month:m},paidCount};
+}
+function paid136(p,c,z,installmentNo){
+ if(String(p?.status||'').toLowerCase()==='quitado')return true;
+ const manual=invoiceManual136(p.cardId,z.year,z.month);
+ if(manual==='Quitado')return true;
+ if(manual==='Pendente')return false;
+ return installmentNo<=c.paidCount;
+}
+function schedules136(){
+ const out=[];
+ (cardPurchases||[]).forEach(p=>{
+   if(!p||p.status==='Arquivado'||!p.cardId)return;
+   const c=canonical136(p);if(c.total<=0)return;
+   if(c.refund){const z=c.first;out.push({purchaseId:p.id,cardId:p.cardId,description:p.description||'Estorno',category:p.category||'Estorno',year:z.year,month:z.month,installmentNo:1,installments:1,amount:-c.total,totalPurchase:c.total,paid:paid136(p,c,z,1),isRefund:true,recurring:false});return}
+   if(c.mode==='recorrente'){
+     for(let i=0;i<60;i++){const z=add136(c.first.year,c.first.month,i);out.push({purchaseId:p.id,cardId:p.cardId,description:p.description||'Compra',category:p.category||'Cartão de crédito',year:z.year,month:z.month,installmentNo:1,installments:1,amount:c.total,totalPurchase:c.total,paid:invoiceManual136(p.cardId,z.year,z.month)==='Quitado',isRefund:false,recurring:true})}
+     return;
+   }
+   const cents=Math.round(c.total*100),base=Math.floor(cents/c.qty);let used=0;
+   for(let i=0;i<c.qty;i++){
+     const z=add136(c.first.year,c.first.month,i),pc=i===c.qty-1?cents-used:base;used+=pc;
+     out.push({purchaseId:p.id,cardId:p.cardId,description:p.description||'Compra',category:p.category||'Cartão de crédito',year:z.year,month:z.month,installmentNo:i+1,installments:c.qty,amount:pc/100,totalPurchase:c.total,paid:paid136(p,c,z,i+1),isRefund:false,recurring:false});
+   }
+ });
+ return out;
+}
+function aggregated136(){
+ const g={};
+ schedules136().forEach(x=>{
+   const k=`${x.cardId}|${x.year}|${x.month}`;
+   if(!g[k]){const c=(cards||[]).find(c=>String(c.id)===String(x.cardId))||{};g[k]={id:`CTV136_${x.cardId}_${x.year}_${x.month}`,cardId:x.cardId,tipo:'saida',ano:x.year,mesNum:x.month,descricao:`Fatura ${c.name||'Cartão'}`,valor:0,categoria:'Cartão de crédito',classificacao:'Cartão',origem:c.name||'Cartão',status:'Quitado',origemDados:'Cartões',itemCount:0};}
+   g[k].valor=r136(g[k].valor+x.amount);g[k].itemCount++;
+   if(!x.paid)g[k].status='Pendente';
+ });
+ return Object.values(g).sort((a,b)=>a.ano-b.ano||a.mesNum-b.mesNum);
+}
+function stats136(card){
+ const rows=schedules136().filter(x=>String(x.cardId)===String(card.id));
+ const current=r136(rows.filter(x=>+x.year===+currentYear&&+x.month===+currentMonth).reduce((a,x)=>a+n136(x.amount),0));
+ // Recorrentes entram na fatura mensal, mas não reservam limite futuro permanente.
+ const pending=r136(rows.filter(x=>!x.recurring&&!x.paid).reduce((a,x)=>a+n136(x.amount),0));
+ const paid=r136(rows.filter(x=>!x.recurring&&x.paid).reduce((a,x)=>a+n136(x.amount),0));
+ const lim=r136(n136(card.limit));
+ const available=r136(lim-pending);
+ return{currentInv:current,pending,paid,available,totalUsed:pending,items:new Set(rows.map(x=>x.purchaseId)).size,overLimit:available<0?Math.abs(available):0};
+}
+window.getCardSchedules=schedules136;
+window.cardAggregatedTx=aggregated136;
+window.getCardStats=stats136;
+try{getCardSchedules=schedules136;cardAggregatedTx=aggregated136;getCardStats=stats136}catch(e){}
+window.allTx=function(){
+ let prior=[];try{prior=typeof priorAllTx136==='function'?priorAllTx136():[]}catch(e){}
+ return [...prior.filter(x=>x?.origemDados!=='Cartões'),...aggregated136()];
+};
+try{allTx=window.allTx}catch(e){}
+
+function refresh136(){
+ try{window.renderCards?.()}catch(e){}
+ try{window.renderLancamentos?.()}catch(e){}
+ try{window.renderDashboard?.()}catch(e){}
+ setTimeout(()=>{try{window.ppV70?.refreshCardYears?.()}catch(e){}},20);
+}
+window.ppCardLedgerV136={schedules:schedules136,stats:stats136,refresh:refresh136};
+
+function parseMoney136(v){
+ if(typeof v==='number'&&Number.isFinite(v))return v;
+ let s=String(v??'').trim().replace(/R\$\s?/gi,'').replace(/\s/g,'');if(!s)return 0;
+ if(s.includes(',')&&s.includes('.'))s=s.replace(/\./g,'').replace(',','.');else if(s.includes(','))s=s.replace(',','.');
+ const x=Number(s.replace(/[^0-9.+-]/g,''));return Number.isFinite(x)?x:0;
+}
+function ownSave136(e){
+ const btn=e.target.closest?.('#saveCardPurchaseV52,#saveCardPurchase');if(!btn)return;
+ e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+ const $=id=>document.getElementById(id),id=$('cpId')?.value||('CP'+Date.now()),old=(cardPurchases||[]).find(x=>String(x.id)===String(id))||{};
+ const cardId=$('cpCard')?.value||'',date=$('cpDate')?.value||new Date().toISOString().slice(0,10),description=($('cpDesc')?.value||'').trim(),total=r136(parseMoney136($('cpTotal')?.value));
+ let mode=$('cpMode')?.value||'avista',qty=Math.max(1,parseInt($('cpInstallments')?.value,10)||1);
+ const fm=String($('cpFirstInvoiceV39')?.value||'').match(/^(\d{4})-(\d{2})$/);
+ if(!cardId||!description||total<=0||!fm){try{toast('Preencha cartão, descrição, valor e a 1ª parcela/fatura.')}catch(_){ }return}
+ if(mode==='parcelado'||qty>1){mode='parcelado';qty=Math.max(2,qty)}else if(mode==='recorrente'||mode==='estorno')qty=1;else qty=1;
+ const paid=Math.max(0,Math.min(qty,parseInt($('cpPaid')?.value,10)||0));
+ const cat=$('cpCategory'),category=cat?.dataset.v39Selected||cat?.value||'Cartão de crédito',fy=+fm[1],fmo=+fm[2];
+ const obj={...old,id,cardId,date,description,category,mode,total,installments:qty,paidInstallments:paid,startYear:fy,startMonth:fmo,status:$('cpStatus')?.value||old.status||'Ativo',purchaseTotalV39:total,installmentCountV39:qty,firstInvoiceYearV39:fy,firstInvoiceMonthV39:fmo,modeV39:mode,entryTypeV39:mode==='estorno'?'refund':'purchase',editedAtV136:new Date().toISOString()};
+ const ix=(cardPurchases||[]).findIndex(x=>String(x.id)===String(id));if(ix>=0)cardPurchases[ix]=obj;else cardPurchases.push(obj);
+ try{localStorage.setItem(purchaseKey136,JSON.stringify(cardPurchases));persist?.()}catch(err){console.error(err);try{toast('Não foi possível salvar a compra.')}catch(_){ }return}
+ $('cardPurchaseModal')?.classList.remove('open');
+ refresh136();
+ setTimeout(refresh136,30);
+ try{window.ppCloudV66?.save?.()}catch(_){ }
+ try{toast(ix>=0?'Compra atualizada e faturas recalculadas.':mode==='parcelado'?`${qty} parcelas salvas e limite recalculado.`:'Compra salva e limite recalculado.')}catch(_){ }
+}
+document.addEventListener('click',ownSave136,true);
+
+// Toda nova compra feita pelo modal de Lançamentos força atualização imediata da fatura e do limite.
+document.addEventListener('click',e=>{
+ if(!e.target.closest?.('#saveTx'))return;
+ const before=(cardPurchases||[]).length;
+ setTimeout(()=>{
+   const after=(cardPurchases||[]).length;
+   if(after!==before){refresh136();setTimeout(refresh136,30)}
+ },0);
+},true);
+
+// Quitar/reabrir fatura altera o limite no mesmo ciclo, sem esperar outro render.
+document.addEventListener('click',e=>{
+ if(!e.target.closest?.('[data-v61-invoice],[data-v58-invoice],[data-v55-invoice]'))return;
+ setTimeout(refresh136,0);setTimeout(refresh136,60);
+},false);
+
+// Reaplica os números após abertura/seleção de cartão.
+document.addEventListener('click',e=>{
+ if(e.target.closest?.('[data-v105-card],[data-clean-card],[data-real-card],#addCardPurchaseBtn'))setTimeout(refresh136,30);
+},false);
+setTimeout(refresh136,350);
+})();
+</script>
+
+<style id="pp-v138-router-interaction-safety">
+/* V138 — somente uma seção financeira interativa por vez. */
+.main > .view.active{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+.main > .view:not(.active){
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+#dashboardV128.v128-show{display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
+html.pp-v138-view-ready,body.pp-v138-view-ready{overflow-y:auto!important;height:auto!important;max-height:none!important}
+body.pp-v138-view-ready .main{overflow-y:visible!important;height:auto!important;max-height:none!important;pointer-events:auto!important}
+</style>
+<script id="pp-v138-router-interaction-fix">
+(()=>{'use strict';
+ const KEY='planejador_finance_last_view_v137';
+ const allowed=new Set(['dashboard','lancamentos','cartoes','credores','dividas','fgts','previdencia','previdenciaPrivada','investimentos','patrimonio','veiculos','nuvem']);
+ const renderers={
+   lancamentos:()=>window.renderLancamentos?.(),
+   cartoes:()=>window.renderCards?.(),
+   credores:()=>window.renderCreditors?.(),
+   dividas:()=>window.renderDebts?.(),
+   fgts:()=>window.renderFgts?.(),
+   previdencia:()=>window.renderPrevidencia?.(),
+   previdenciaPrivada:()=>window.renderPrivatePension?.(),
+   investimentos:()=>window.renderInvestments?.(),
+   patrimonio:()=>{window.renderAssets?.();window.ppPropertiesV120?.render?.()},
+   veiculos:()=>window.ppVehicleV101?.render?.(),
+   nuvem:()=>window.renderNuvem?.()
+ };
+ function closeTransientUI(){
+   document.querySelectorAll('.modalback.open,.period-picker-back.open,.dashboard-period-back.open').forEach(x=>{
+     x.classList.remove('open');x.setAttribute('aria-hidden','true');
+   });
+   document.querySelectorAll('#rowMenu.open,.rowmenu.open,.menu.open').forEach(x=>x.classList.remove('open'));
+   document.getElementById('ppHubV62')?.classList.remove('open');
+   document.getElementById('ppHubV62')?.setAttribute('aria-hidden','true');
+   document.body.classList.remove('ppv-modal-open','hub-login-lock');
+   document.documentElement.classList.remove('hub-login-lock');
+ }
+ function unlockPage(){
+   closeTransientUI();
+   const html=document.documentElement,body=document.body,main=document.querySelector('.main');
+   html.classList.add('pp-v138-view-ready');body.classList.add('pp-v138-view-ready');
+   ['overflow','overflow-y','height','max-height','pointer-events'].forEach(p=>{html.style.removeProperty(p);body.style.removeProperty(p)});
+   if(main){['overflow','overflow-y','height','max-height','pointer-events'].forEach(p=>main.style.removeProperty(p));main.removeAttribute('inert')}
+ }
+ function prepareTarget(t){
+   if(!t)return;
+   t.removeAttribute('inert');t.setAttribute('aria-hidden','false');
+   t.style.setProperty('display','block','important');
+   t.style.setProperty('visibility','visible','important');
+   t.style.setProperty('opacity','1','important');
+   t.style.setProperty('pointer-events','auto','important');
+ }
+ function hideLegacyViews(except){
+   document.querySelectorAll('.main > .view').forEach(v=>{
+     const on=v===except;
+     v.classList.toggle('active',on);
+     v.setAttribute('aria-hidden',on?'false':'true');
+     v.removeAttribute('inert');
+     v.style.setProperty('display',on?'block':'none','important');
+     v.style.setProperty('visibility',on?'visible':'hidden','important');
+     v.style.setProperty('pointer-events',on?'auto':'none','important');
+     if(on){v.style.setProperty('opacity','1','important')}else v.style.removeProperty('opacity');
+   });
+ }
+ function activeNav(id){
+   document.querySelectorAll('[data-v62-view],[data-view],[data-v86-view]').forEach(b=>{
+     const v=b.getAttribute('data-v62-view')||b.getAttribute('data-view')||b.getAttribute('data-v86-view');
+     b.classList.toggle('active',v===id);
+   });
+ }
+ function rerender(id){
+   const fn=renderers[id];
+   try{fn?.()}catch(e){console.warn('V138 render',id,e)}
+   requestAnimationFrame(()=>{
+     try{fn?.()}catch(e){}
+     try{window.dispatchEvent(new Event('resize'))}catch(e){}
+     try{document.dispatchEvent(new CustomEvent('pp:viewchange',{detail:{view:id}}))}catch(e){}
+   });
+ }
+ function open(id,{scroll=true,persist=true}={}){
+   if(!allowed.has(id))return false;
+   unlockPage();
+   if(id==='dashboard'){
+     hideLegacyViews(null);
+     const home=document.getElementById('dashboardV128');
+     home?.classList.add('v128-show');
+     if(home){home.removeAttribute('inert');home.setAttribute('aria-hidden','false');home.style.setProperty('pointer-events','auto','important')}
+     try{window.ppFinanceHomeV137?.render?.()}catch(e){}
+   }else{
+     document.getElementById('dashboardV128')?.classList.remove('v128-show');
+     let t=document.getElementById(id);
+     if(id==='credores'&&!t){try{window.ensureCredorSection?.()}catch(e){};t=document.getElementById(id)}
+     if(!t)return false;
+     hideLegacyViews(t);prepareTarget(t);rerender(id);
+   }
+   activeNav(id);
+   if(persist){try{localStorage.setItem(KEY,id);history.replaceState(null,'','#'+id)}catch(e){}}
+   if(scroll){try{window.scrollTo({top:0,left:0,behavior:'auto'})}catch(e){}}
+   return true;
+ }
+ // Torna o roteador V138 a única API de navegação usada por Finanças.
+ window.showView=(id)=>open(id);
+ try{showView=window.showView}catch(e){}
+ window.ppNavV123={open,apply:open};window.ppNavV122={open,apply:open};window.ppNavV87={open,apply:open};
+ window.ppFinanceRouterV138={open,unlock:unlockPage,refresh:()=>{const id=localStorage.getItem(KEY)||'dashboard';open(id,{scroll:false,persist:false})}};
+ // Captura todos os menus financeiros antes dos listeners legados.
+ document.addEventListener('click',e=>{
+   const b=e.target.closest?.('[data-v62-view],[data-view],[data-v86-view]');if(!b)return;
+   const id=b.getAttribute('data-v62-view')||b.getAttribute('data-view')||b.getAttribute('data-v86-view');
+   if(!allowed.has(id))return;
+   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();open(id);
+ },true);
+ function restore(){
+   const hash=String(location.hash||'').replace('#','');
+   const saved=localStorage.getItem(KEY)||'';
+   const id=allowed.has(hash)?hash:(allowed.has(saved)?saved:'dashboard');
+   open(id,{scroll:false,persist:false});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(restore,30),{once:true});else setTimeout(restore,30);
+ setTimeout(restore,900);
 })();
 </script>
