@@ -32107,3 +32107,242 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else
 window.ppLaunchPeriodV159={save,restore,state:read};
 })();
 </script>
+<style id="pp-v161-launch-filter-final-override">
+/* v161 — aplica no componente REAL renderizado, depois de todas as versões anteriores */
+#lancamentos .section-tools .filterbar{
+  display:grid!important;
+  grid-template-columns:136px 118px 280px!important;
+  column-gap:8px!important;
+  row-gap:0!important;
+  align-items:center!important;
+  justify-content:end!important;
+  width:max-content!important;
+  max-width:100%!important;
+  margin-left:auto!important;
+}
+
+/* selects nativos permanecem ocultos; os botões visuais ocupam a grade */
+#lancamentos .section-tools .filterbar .period-visual-trigger[data-visual-for="txYear"]{
+  width:136px!important;
+  min-width:136px!important;
+  max-width:136px!important;
+  height:42px!important;
+  min-height:42px!important;
+  padding:0 13px!important;
+  border-radius:12px!important;
+  white-space:nowrap!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  box-sizing:border-box!important;
+}
+#lancamentos .section-tools .filterbar .period-visual-trigger[data-visual-for="txMonth"]{
+  width:118px!important;
+  min-width:118px!important;
+  max-width:118px!important;
+  height:42px!important;
+  min-height:42px!important;
+  padding:0 12px!important;
+  border-radius:12px!important;
+  white-space:nowrap!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  box-sizing:border-box!important;
+}
+#lancamentos .section-tools .filterbar .period-visual-trigger[data-visual-for="txYear"] .pv-label,
+#lancamentos .section-tools .filterbar .period-visual-trigger[data-visual-for="txMonth"] .pv-label{
+  display:block!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+  line-height:1!important;
+  font-weight:800!important;
+}
+
+/* credor/origem: menor e equilibrado */
+#lancamentos .section-tools .filterbar>.pp155-creditor-wrap{
+  grid-column:3!important;
+  width:280px!important;
+  min-width:280px!important;
+  max-width:280px!important;
+  flex:none!important;
+}
+#lancamentos #pp155CreditorBtn{
+  width:280px!important;
+  min-width:280px!important;
+  max-width:280px!important;
+  height:42px!important;
+  min-height:42px!important;
+  padding:0 13px!important;
+  border-radius:12px!important;
+  box-sizing:border-box!important;
+  font-weight:800!important;
+}
+#lancamentos #pp155CreditorBtn .label{
+  min-width:0!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  font-weight:800!important;
+  color:#172b4d!important;
+}
+/* Ao abrir/clicar, o texto deixa de ficar em negrito */
+#lancamentos #pp155CreditorBtn[aria-expanded="true"],
+#lancamentos #pp155CreditorBtn[aria-expanded="true"] .label{
+  font-weight:500!important;
+}
+/* opções da lista sempre em peso normal */
+#pp155CreditorPop .pp155-creditor-option{
+  font-weight:500!important;
+}
+
+@media(max-width:900px){
+  #lancamentos .section-tools{display:block!important}
+  #lancamentos .section-tools .filterbar{
+    width:100%!important;
+    margin-top:10px!important;
+    grid-template-columns:136px 118px minmax(220px,1fr)!important;
+  }
+  #lancamentos .section-tools .filterbar>.pp155-creditor-wrap,
+  #lancamentos #pp155CreditorBtn{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+}
+@media(max-width:620px){
+  #lancamentos .section-tools .filterbar{
+    grid-template-columns:1fr 1fr!important;
+  }
+  #lancamentos .section-tools .filterbar .period-visual-trigger[data-visual-for="txYear"],
+  #lancamentos .section-tools .filterbar .period-visual-trigger[data-visual-for="txMonth"]{
+    width:100%!important;min-width:0!important;max-width:none!important;
+  }
+  #lancamentos .section-tools .filterbar>.pp155-creditor-wrap{
+    grid-column:1/-1!important;
+  }
+}
+</style>
+<style id="pp-v162-delete-scope-style">
+#deleteScopeModal162{position:fixed;inset:0;z-index:2147483646;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(7,18,34,.48);backdrop-filter:blur(8px)}
+#deleteScopeModal162.open{display:flex}
+#deleteScopeModal162 .v162-box{width:min(470px,calc(100vw - 28px));background:#fff;border:1px solid #dce5ef;border-radius:22px;box-shadow:0 28px 80px rgba(15,23,42,.28);padding:20px}
+#deleteScopeModal162 .v162-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding-bottom:14px;border-bottom:1px solid #edf1f5}
+#deleteScopeModal162 h3{margin:0;color:#142b46;font-size:19px;letter-spacing:-.03em}
+#deleteScopeModal162 p{margin:6px 0 0;color:#6f7f93;font-size:11px;line-height:1.55}
+#deleteScopeModal162 .v162-close{width:32px;height:32px;border:1px solid #dfe6ee;border-radius:10px;background:#f8fafc;color:#52657d;font-weight:900;cursor:pointer}
+#deleteScopeModal162 .v162-options{display:grid;gap:9px;margin-top:15px}
+#deleteScopeModal162 .v162-option{width:100%;text-align:left;border:1px solid #dce5ef;border-radius:14px;background:#fff;padding:13px 14px;cursor:pointer;transition:.16s ease}
+#deleteScopeModal162 .v162-option:hover{border-color:#0b63f6;background:#f4f8ff;transform:translateY(-1px)}
+#deleteScopeModal162 .v162-option b{display:block;color:#17314f;font-size:12px}
+#deleteScopeModal162 .v162-option:hover b{color:#0b63f6}
+#deleteScopeModal162 .v162-option span{display:block;margin-top:4px;color:#7a899c;font-size:10px;line-height:1.45}
+#deleteScopeModal162 .v162-option.danger:hover{border-color:#d94452;background:#fff6f7}
+#deleteScopeModal162 .v162-option.danger:hover b{color:#c53240}
+</style>
+<script id="pp-v162-delete-installment-final">
+(()=>{
+'use strict';
+const priorAllTx162=window.allTx;
+const priorDelete162=window.deleteTxEnhanced;
+const PREFIX_INST='P66::',PREFIX_REC='R64::';
+let pending162=null;
+function ym162(y,m){return `${+y}-${String(+m).padStart(2,'0')}`}
+function parse162(id){
+  const s=String(id||'');
+  const p=s.split('::');
+  if(s.startsWith(PREFIX_INST)&&p.length>=4)return {kind:'installment',sourceId:p[1],year:+p[2],month:+p[3]};
+  if(s.startsWith(PREFIX_REC)&&p.length>=4)return {kind:'recurring',sourceId:p[1],year:+p[2],month:+p[3]};
+  return {kind:'single',sourceId:s};
+}
+function source162(id){try{return (custom||[]).find(x=>String(x.id)===String(id))||null}catch(e){return null}}
+function active162(){try{return localStorage.getItem('planejador_active_profile')||'Marcos'}catch(e){return 'Marcos'}}
+function safe162(p){return String(p||'Marcos').replace(/[^a-z0-9_-]/gi,'_')}
+function markGuardDeleted162(id){
+  const sid=String(id||'');if(!sid)return;
+  try{
+    const p=safe162(active162());
+    const dk=`pp_tx_guard_deleted_v158_${p}`;
+    const gk=`pp_tx_guard_v158_${p}`;
+    const dels=new Set(JSON.parse(localStorage.getItem(dk)||'[]').map(String));dels.add(sid);
+    localStorage.setItem(dk,JSON.stringify([...dels]));
+    const guard=JSON.parse(localStorage.getItem(gk)||'[]');
+    if(Array.isArray(guard))localStorage.setItem(gk,JSON.stringify(guard.filter(x=>String(x?.id||'')!==sid)));
+  }catch(e){console.warn('v162 guard delete',e)}
+}
+function persist162(msg,whole=false){
+  try{persist()}catch(e){try{localStorage.setItem('financeiro_marcos_custom_tx_v3',JSON.stringify(custom||[]))}catch(_){}}
+  if(!whole){try{window.ppTxGuardV158?.snapshot?.('v162-delete-occurrence')}catch(e){}}
+  try{window.ppCloudV66?.save?.()}catch(e){}
+  try{window.renderLancamentos?.()}catch(e){}
+  try{window.renderDashboard?.()}catch(e){}
+  setTimeout(()=>{try{window.renderLancamentos?.()}catch(e){}},30);
+  try{toast(msg)}catch(e){}
+}
+function deleteOccurrence162(ctx){
+  const src=source162(ctx.sourceId);if(!src)return toast?.('Lançamento não encontrado.');
+  const key=ym162(ctx.year,ctx.month);
+  if(ctx.kind==='installment'){
+    src.installmentOverrides=src.installmentOverrides||{};
+    src.installmentOverrides[key]={...(src.installmentOverrides[key]||{}),deletedV162:true};
+    persist162('Somente esta parcela foi excluída.');
+    return;
+  }
+  if(ctx.kind==='recurring'){
+    src.recurringOverrides=src.recurringOverrides||{};
+    src.recurringOverrides[key]={...(src.recurringOverrides[key]||{}),deletedV162:true};
+    persist162('Somente esta competência da recorrência foi excluída.');
+  }
+}
+function deleteWhole162(ctx){
+  const src=source162(ctx.sourceId);if(!src)return toast?.('Lançamento não encontrado.');
+  markGuardDeleted162(ctx.sourceId);
+  try{custom=custom.filter(x=>String(x.id)!==String(ctx.sourceId))}catch(e){}
+  persist162(ctx.kind==='installment'?'Parcelamento excluído.':'Recorrência excluída.',true);
+}
+function ensureModal162(){
+  let m=document.getElementById('deleteScopeModal162');if(m)return m;
+  m=document.createElement('div');m.id='deleteScopeModal162';
+  m.innerHTML=`<div class="v162-box"><div class="v162-head"><div><h3 id="deleteTitle162">Excluir lançamento</h3><p id="deleteHelp162"></p></div><button type="button" class="v162-close" data-v162-close>×</button></div><div class="v162-options"><button type="button" class="v162-option" data-v162-one><b id="deleteOneTitle162">Excluir somente este lançamento</b><span id="deleteOneHelp162"></span></button><button type="button" class="v162-option danger" data-v162-all><b id="deleteAllTitle162">Excluir toda a sequência</b><span id="deleteAllHelp162"></span></button></div></div>`;
+  document.body.appendChild(m);
+  m.addEventListener('click',e=>{
+    if(e.target===m||e.target.closest('[data-v162-close]')){m.classList.remove('open');pending162=null;return}
+    if(e.target.closest('[data-v162-one]')&&pending162){const c=pending162;pending162=null;m.classList.remove('open');deleteOccurrence162(c);return}
+    if(e.target.closest('[data-v162-all]')&&pending162){const c=pending162;pending162=null;m.classList.remove('open');deleteWhole162(c)}
+  });
+  return m;
+}
+function openScope162(ctx){
+  pending162=ctx;const m=ensureModal162();
+  const inst=ctx.kind==='installment';
+  document.getElementById('deleteTitle162').textContent=inst?'Excluir parcela':'Excluir recorrência';
+  document.getElementById('deleteHelp162').textContent=inst?'Escolha se deseja remover apenas esta parcela ou todo o parcelamento.':'Escolha se deseja remover apenas esta competência ou toda a recorrência.';
+  document.getElementById('deleteOneTitle162').textContent=inst?'Excluir somente esta parcela':'Excluir somente este mês';
+  document.getElementById('deleteOneHelp162').textContent=inst?'As demais parcelas permanecem exatamente como estão.':'Os demais meses da recorrência permanecem inalterados.';
+  document.getElementById('deleteAllTitle162').textContent=inst?'Excluir todo o parcelamento':'Excluir toda a recorrência';
+  document.getElementById('deleteAllHelp162').textContent='Remove toda a sequência deste lançamento.';
+  m.classList.add('open');
+}
+window.deleteTxEnhanced=function(id,source){
+  const ctx=parse162(id);
+  if(ctx.kind==='installment'||ctx.kind==='recurring'){openScope162(ctx);return}
+  const src=source162(ctx.sourceId);
+  if(src){
+    if(!confirm('Excluir este lançamento?'))return;
+    markGuardDeleted162(ctx.sourceId);
+    try{custom=custom.filter(x=>String(x.id)!==String(ctx.sourceId))}catch(e){}
+    persist162('Lançamento excluído.',true);return;
+  }
+  return priorDelete162?.apply(this,arguments);
+};
+try{deleteTxEnhanced=window.deleteTxEnhanced}catch(e){}
+if(typeof priorAllTx162==='function'){
+  window.allTx=function(){return (priorAllTx162.apply(this,arguments)||[]).filter(x=>!x?.deletedV162)};
+  try{allTx=window.allTx}catch(e){}
+}
+window.ppDeleteV162={open:openScope162};
+})();
+</script>
