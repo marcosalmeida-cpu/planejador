@@ -25937,8 +25937,6 @@ function migrate105(){
   }
 }
 function currentSelected105(){
-  const invoiceSelection=window.ppInvoiceBoardV39?.selected?.();
-  if(invoiceSelection && (cards||[]).some(c=>String(c.id)===String(invoiceSelection)))return invoiceSelection;
   const selected=document.querySelector('#cardsCleanRoot .clean-card.selected,[data-clean-card].selected');
   if(selected?.dataset.cleanCard)return selected.dataset.cleanCard;
   const main=document.querySelector('#cardsCleanRoot .clean-main-card');
@@ -26024,7 +26022,7 @@ function renderGroups105(){
     return true;
   });
 
-  let selected=(cards||[]).find(c=>String(c.id)===String(selectedId));
+  let selected=visible.find(c=>String(c.id)===String(selectedId));
   if(!selected && visible.length) selected=visible[0];
 
   let selectedStats={pending:0,available:Number(selected?.limit||0)||0};
@@ -30705,6 +30703,71 @@ window.ppLaunchCreditorV155={refresh,open,close};
   #lancamentos #txCreditorFilterV155{grid-column:1/-1!important;max-width:none!important}
 }
 </style>
+
+<script id="pp-v164-card-filter-year-repair">
+(()=>{
+  'use strict';
+  const cancelKey='planejador_cartoes_cancelados_visiveis';
+  const archiveKey='planejador_cartoes_arquivados_visiveis';
+  let refreshing=false;
+  function scheduleYears(){
+    [0,40,130].forEach(delay=>setTimeout(()=>{
+      try{window.ppV70?.refreshCardYears?.()}catch(e){console.warn('v164 year grouping',e)}
+    },delay));
+  }
+  function refresh(){
+    if(refreshing)return;
+    refreshing=true;
+    try{
+      const clean=window.__cardsCleanV9;
+      if(clean){
+        clean.showCancelled=localStorage.getItem(cancelKey)==='1';
+        clean.showArchived=localStorage.getItem(archiveKey)==='1';
+      }
+      window.renderCards?.();
+      window.ppCardCategoryV105?.render?.();
+      window.ppCardGroupsV106?.refresh?.();
+      const current=document.querySelector('#cardsCleanRoot [data-clean-card].selected')?.dataset.cleanCard;
+      if(current)window.ppInvoiceBoardV39?.selectCard?.(current);
+      scheduleYears();
+    }catch(e){console.warn('v164 card filter',e)}
+    finally{refreshing=false}
+  }
+  // Capture the filter action ahead of the legacy listeners, avoiding competing
+  // routines that switch to an exclusive "cancelled only" dataset.
+  document.addEventListener('click',event=>{
+    const cancelled=event.target.closest?.('#cleanCancelled,#toggleCancelledReal,#cancelledCardsBtn');
+    const archived=event.target.closest?.('#cleanArchived,#toggleArchivedReal');
+    if(!cancelled&&!archived)return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    const key=cancelled?cancelKey:archiveKey;
+    const next=localStorage.getItem(key)==='1'?'0':'1';
+    localStorage.setItem(key,next);
+    refresh();
+  },true);
+  // Preserve visual selection while restoring invoice years whenever any
+  // card becomes selected. The board renderer may replace its DOM asynchronously.
+  document.addEventListener('click',event=>{
+    const select=event.target.closest?.('[data-v105-card],[data-clean-card]');
+    if(!select)return;
+    scheduleYears();
+  },false);
+  // Ensure regrouping also happens after the invoice renderer is called directly.
+  if(window.ppInvoiceBoardV39&&!window.ppInvoiceBoardV39.__v164){
+    const invoice=window.ppInvoiceBoardV39;
+    const baseSelect=invoice.selectCard;
+    const baseRefresh=invoice.refresh;
+    invoice.selectCard=function(id){const result=baseSelect.call(this,id);scheduleYears();return result};
+    invoice.refresh=function(){const result=baseRefresh.call(this);scheduleYears();return result};
+    invoice.__v164=true;
+  }
+  window.ppCardRepairV164={refresh,regroup:scheduleYears};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(scheduleYears,450),{once:true});
+  else setTimeout(scheduleYears,450);
+})();
+</script>
 </body></html>
 
 
