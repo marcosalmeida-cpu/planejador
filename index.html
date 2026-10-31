@@ -3613,7 +3613,7 @@ setTimeout(init,50);
   let m=document.getElementById('saqueMemoryModal');
   if(m)return m;
   m=document.createElement('div');m.className='modalback';m.id='saqueMemoryModal';
-  m.innerHTML='<div class="modal"><div class="saque-mem-head"><div><h2>Memória de cálculo</h2><p>Saque-aniversário do FGTS</p></div><button type="button" class="saque-close" id="saqueMemoryClose">Fechar</button></div><div class="saque-mem-body" id="saqueMemoryBody"></div></div>';
+  m.innerHTML='<div class="modal"><div class="saque-mem-head"><button type="button" class="saque-close" id="saqueMemoryClose" aria-label="Fechar" title="Fechar">×</button></div><div class="saque-mem-body" id="saqueMemoryBody"></div></div>';
   document.body.appendChild(m);
   document.getElementById('saqueMemoryClose').onclick=()=>m.classList.remove('open');
   m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')});
@@ -7819,7 +7819,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     let m=document.getElementById('saqueMemoryModal');
     if(!m){
       m=document.createElement('div');m.className='modalback';m.id='saqueMemoryModal';
-      m.innerHTML='<div class="modal"><div class="saque-mem-head"><div><h2>Memória de cálculo</h2><p>Saque-aniversário do FGTS</p></div><button type="button" class="saque-close" id="saqueMemoryClose">Fechar</button></div><div class="saque-mem-body" id="saqueMemoryBody"></div></div>';
+      m.innerHTML='<div class="modal"><div class="saque-mem-head"><button type="button" class="saque-close" id="saqueMemoryClose" aria-label="Fechar" title="Fechar">×</button></div><div class="saque-mem-body" id="saqueMemoryBody"></div></div>';
       document.body.appendChild(m);
       document.getElementById('saqueMemoryClose').onclick=()=>m.classList.remove('open');
       m.onclick=e=>{if(e.target===m)m.classList.remove('open')};
@@ -9883,7 +9883,7 @@ Os dados atuais deste navegador serão substituídos.`);
     let m=document.getElementById('saqueMemoryModal');
     if(!m){
       m=document.createElement('div');m.className='modalback';m.id='saqueMemoryModal';
-      m.innerHTML='<div class="modal"><div class="saque-mem-head"><div><h2>Memória de cálculo</h2><p>Saque-aniversário do FGTS</p></div><button type="button" class="saque-close" id="saqueMemoryClose">Fechar</button></div><div class="saque-mem-body" id="saqueMemoryBody"></div></div>';
+      m.innerHTML='<div class="modal"><div class="saque-mem-head"><button type="button" class="saque-close" id="saqueMemoryClose" aria-label="Fechar" title="Fechar">×</button></div><div class="saque-mem-body" id="saqueMemoryBody"></div></div>';
       document.body.appendChild(m);
       document.getElementById('saqueMemoryClose').onclick=()=>m.classList.remove('open');
       m.onclick=e=>{if(e.target===m)m.classList.remove('open')};
@@ -12165,7 +12165,7 @@ window.ppDebtBalanceV55={reconcile:reconcile55,reconcileAll:reconcileAll55};
     document.querySelectorAll('.modalback.open').forEach(x=>{if(x!==m)x.classList.remove('open')});m.classList.add('open');
   };
   window.openSaqueMemoryV56=function(){
-    const info=saqueInfo();let m=document.getElementById('saqueMemoryModal');if(!m){m=document.createElement('div');m.className='modalback';m.id='saqueMemoryModal';m.innerHTML='<div class="modal"><div class="saque-mem-head"><div><h2>Memória de cálculo</h2><p>Saque-aniversário do FGTS</p></div><button type="button" class="saque-close" id="saqueMemoryClose">Fechar</button></div><div class="saque-mem-body" id="saqueMemoryBody"></div></div>';document.body.appendChild(m);document.getElementById('saqueMemoryClose').onclick=()=>m.classList.remove('open');m.onclick=e=>{if(e.target===m)m.classList.remove('open')}}
+    const info=saqueInfo();let m=document.getElementById('saqueMemoryModal');if(!m){m=document.createElement('div');m.className='modalback';m.id='saqueMemoryModal';m.innerHTML='<div class="modal"><div class="saque-mem-head"><button type="button" class="saque-close" id="saqueMemoryClose" aria-label="Fechar" title="Fechar">×</button></div><div class="saque-mem-body" id="saqueMemoryBody"></div></div>';document.body.appendChild(m);document.getElementById('saqueMemoryClose').onclick=()=>m.classList.remove('open');m.onclick=e=>{if(e.target===m)m.classList.remove('open')}}
     const base=info.saldo*info.f.aliq;document.getElementById('saqueMemoryBody').innerHTML=`<div class="saque-highlight"><div><span>Saldo considerado</span><b>${money(info.saldo)}</b></div><div><span>Perfil / aniversário</span><b>${activeProfile()} · ${birthdayName()}</b></div></div><div class="saque-formula"><h3>Como o valor foi calculado</h3><div class="saque-formula-line"><span>Faixa de saldo</span><b>${info.f.faixa}</b></div><div class="saque-formula-line"><span>Alíquota</span><b>${(info.f.aliq*100).toFixed(0)}%</b></div><div class="saque-formula-line"><span>${money(info.saldo)} × ${(info.f.aliq*100).toFixed(0)}%</span><b>${money(base)}</b></div><div class="saque-formula-line"><span>Parcela adicional</span><b>${money(info.f.parcela)}</b></div><div class="saque-formula-line"><span>Saque-aniversário bruto</span><b>${money(info.gross)}</b></div><div class="saque-formula-line"><span>Parcelas FGTS pendentes em ${info.year}</span><b style="color:#b42318">− ${money(info.discount)}</b></div></div><div class="saque-result"><span>Saque-aniversário líquido estimado de ${info.year}</span><b>${money(info.net)}</b></div>`;document.querySelectorAll('.modalback.open').forEach(x=>{if(x!==m)x.classList.remove('open')});m.classList.add('open');
   };
   window.openSaqueMemory=window.openSaqueMemoryV56;
@@ -14122,7 +14122,7 @@ setTimeout(initEssence,0);
     let m=document.getElementById('saqueMemoryModal');
     if(!m){
       m=document.createElement('div');m.className='modalback';m.id='saqueMemoryModal';
-      m.innerHTML='<div class="modal"><div class="saque-mem-head"><div><h2>Memória de cálculo</h2><p>Saque-aniversário do FGTS</p></div><button type="button" class="saque-close" id="saqueMemoryClose">Fechar</button></div><div class="saque-mem-body" id="saqueMemoryBody"></div></div>';
+      m.innerHTML='<div class="modal"><div class="saque-mem-head"><button type="button" class="saque-close" id="saqueMemoryClose" aria-label="Fechar" title="Fechar">×</button></div><div class="saque-mem-body" id="saqueMemoryBody"></div></div>';
       document.body.appendChild(m);
       document.getElementById('saqueMemoryClose').onclick=()=>m.classList.remove('open');
       m.onclick=e=>{if(e.target===m)m.classList.remove('open')};
@@ -32487,3 +32487,63 @@ window.ppDeleteV162={open:openScope162};
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});else initialize();
 })();
 </script>
+
+
+<style id="v168-saque-memory-style">
+/* V168 — remove o cabeçalho azul da memória do saque e mantém apenas o botão fechar */
+#saqueMemoryModal .modal{
+  position:relative!important;
+  overflow:hidden!important;
+}
+#saqueMemoryModal .saque-mem-head{
+  position:absolute!important;
+  top:12px!important;
+  right:12px!important;
+  left:auto!important;
+  display:flex!important;
+  align-items:flex-start!important;
+  justify-content:flex-end!important;
+  gap:0!important;
+  padding:0!important;
+  background:transparent!important;
+  color:inherit!important;
+  z-index:5!important;
+  min-height:0!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+#saqueMemoryModal .saque-mem-head > div{
+  display:none!important;
+}
+#saqueMemoryModal .saque-close{
+  min-width:42px!important;
+  min-height:42px!important;
+  padding:0 12px!important;
+  border-radius:14px!important;
+  border:1px solid #d9e2ec!important;
+  background:#fff!important;
+  color:#24344d!important;
+  box-shadow:0 8px 24px rgba(15,23,42,.12)!important;
+}
+#saqueMemoryModal .saque-mem-body{
+  padding-top:20px!important;
+}
+@media(max-width:600px){
+  #saqueMemoryModal .saque-mem-head{top:10px!important;right:10px!important}
+  #saqueMemoryModal .saque-mem-body{padding-top:14px!important}
+}
+</style>
+
+
+<style id="pp-v169-fgts-stability">
+/* FGTS: rolagem pela página para acessar toda a lista sem prender em um painel. */
+#fgts.view.active{height:auto!important;max-height:none!important;overflow:visible!important;}
+#fgts .tablewrap{max-height:none!important;height:auto!important;overflow-y:visible!important;overflow-x:auto!important;scrollbar-gutter:auto!important;}
+#fgts #fgtsBody{height:auto!important;max-height:none!important;}
+/* O detalhe dos contratos permanece rolável mesmo em telas menores. */
+#fgtsContractDetailV56{overflow-y:auto!important;overscroll-behavior:contain;}
+#fgtsContractDetailV56 .v56-card{max-height:none!important;overflow:visible!important;}
+#fgtsContractDetailV56 .v56-table-wrap{overflow-y:auto!important;max-height:min(55dvh,620px)!important;overscroll-behavior:contain;}
+/* Apenas o botão X permanece visível na memória do saque. */
+#saqueMemoryModal .saque-mem-head > div{display:none!important;}
+</style>
