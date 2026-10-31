@@ -8161,6 +8161,12 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
   }
   function activeProfile(){return localStorage.getItem('planejador_active_profile')||'Marcos'}
   function rk(p,k){return p+'||'+k}
+  // V171 — Proteção dos dados editados neste navegador.
+  // Não reaplicar transações/faturas/cartões antigos recebidos da nuvem.
+  function protectLocalFinance(profile,key){
+    return (profile==='__GLOBAL__' && key.startsWith('planejador_invoice_status_v50_')) ||
+      (profile!=='__GLOBAL__' && (key.startsWith('financeiro_marcos_') || key.startsWith('planejador_')));
+  }
   function cleanProfileState(state){
     const out={};
     Object.entries(state||{}).forEach(([k,v])=>{
@@ -8441,6 +8447,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
     applyingRemote=true;
     try{
       for(const row of rows){
+        if(protectLocalFinance(row.profile,row.storage_key))continue;
         const token=rk(row.profile,row.storage_key),serverRev=Number(row.revision||0);
         const localRev=Number(revisions.get(token)||0);
         if(serverRev<=localRev)continue;
@@ -8515,11 +8522,15 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
         }
         // Baseline observed to server values, then apply server.
         for(const row of rows){
-          observed.set(rk(row.profile,row.storage_key),row.deleted?null:normalizeValue(row.storage_key,row.value));
+          const token=rk(row.profile,row.storage_key);
+          const localValue=row.profile==='__GLOBAL__' ? globalState()[row.storage_key] : profileState(row.profile)[row.storage_key];
+          observed.set(token,protectLocalFinance(row.profile,row.storage_key)
+            ? (localValue??null) : (row.deleted?null:normalizeValue(row.storage_key,row.value)));
         }
         applyingRemote=true;
         try{
           for(const row of rows){
+            if(protectLocalFinance(row.profile,row.storage_key))continue;
             const incoming=row.deleted?null:normalizeValue(row.storage_key,row.value);
             if(row.profile==='__GLOBAL__')setGlobalKey(row.storage_key,incoming);
             else setProfileKey(row.profile,row.storage_key,incoming);
@@ -23876,6 +23887,7 @@ function mergeRows88(profile,rows){
   let count=0;
   for(const row of rows||[]){
     if(row.profile!==profile||!PM.isProfileKey(row.storage_key))continue;
+    if(row.storage_key.startsWith('financeiro_marcos_') || row.storage_key.startsWith('planejador_'))continue;
     count++;
     if(row.deleted)delete merged[row.storage_key];
     else merged[row.storage_key]=String(row.value??'');
