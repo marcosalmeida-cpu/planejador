@@ -4923,8 +4923,10 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       <div class="card mini"><span>Disponível estimado</span><b>${money(available)}</b></div>`;
 
     if(!arr.length){
-      root.innerHTML='<div class="clean-empty-text">Nenhum cartão para exibir nesta visualização.</div>';
+      root.innerHTML='<div class="clean-empty-text">Nenhum cartão ativo visível. Clique em “Mostrar cancelados” para consultar e reativar cartões cancelados.</div>';
       renderRows(null);
+      window.ppCardCategoryV105?.refreshChips?.();
+      window.ppCardRepairV174?.afterRender?.();
       return;
     }
 
@@ -4988,6 +4990,9 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
       moreMenu.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{moreMenu.hidden=true}));
     }
     renderRows(sel);
+    // Atualiza também o carrossel visual atual (não apenas o painel de detalhes).
+    window.ppCardCategoryV105?.refreshChips?.();
+    window.ppCardRepairV174?.afterRender?.();
   }
 
   // Correct save: parse the typed BRL value once, then keep it numeric.
@@ -11956,8 +11961,7 @@ document.addEventListener('click',e=>{
 
   const action=e.target.closest?.('#debtDetailModal74 [data-v74-month],#debtDetailModal74 [data-v74-pay-current],#debtDetailModal74 [data-v74-advance],#debtDetailModal74 [data-v74-settle]');
   if(!action||!activeDebt55)return;
-  setTimeout(()=>refresh55(activeDebt55,true),0);
-  setTimeout(()=>refresh55(activeDebt55,false),80);
+  setTimeout(()=>refresh55(activeDebt55,false),0);
 },true);
 
 /* O modal alternativo V72 também precisa manter a identidade da dívida. */
@@ -22143,16 +22147,21 @@ function savePatch74(id,patch){
 function ensureLedger74(d){
   const all=readObj74(ledgerKey74()),id=String(d.id);
   let ledger=all[id]&&typeof all[id]==='object'?all[id]:{};
+  let changed=!all[id];
   const st=state74(d),f=first74(d);
   if(validYM74(f)){
     for(let i=0;i<st.totalInst;i++){
       const ym=add74(f,i);
       if(!ledger[ym]){
         ledger[ym]={status:i<st.paidInst?'Quitado':'Pendente',amount:i<st.paidInst?st.installment:0,inferred:i<st.paidInst};
+        changed=true;
       }
     }
   }
-  all[id]=ledger;writeObj74(ledgerKey74(),all);
+  // Leitura/renderização nunca deve regravar o ledger se ele não mudou.
+  if(changed){
+    all[id]=ledger;writeObj74(ledgerKey74(),all);
+  }
   return ledger;
 }
 function setLedger74(id,ledger){const all=readObj74(ledgerKey74());all[String(id)]=ledger;writeObj74(ledgerKey74(),all)}
@@ -22175,6 +22184,9 @@ function recompute74(d,ledger){
   savePatch74(String(d.id),{
     parcelasQuitadas:paidInst,quitado:paid,pendente:pending,
     status:pending<0.01?'Quitado':'Pendente',
+    // CT: uma quitação ou antecipação manual é definitiva; a contagem automática de meses
+    // não pode sobrescrevê-la no próximo render da página.
+    ...(d.isCreditWorker===true?{ctAutoPaid:false}:{}),
     ultimoPagamento:lastPaid?`${lastPaid}-01`:'',
     ultimoPagamentoHistorico:lastPaid?`${lastPaid}-01`:''
   });
@@ -26269,6 +26281,7 @@ setTimeout(patchAll105,120);
 
 window.ppCardCategoryV105={
   render:patchAll105,
+  refreshChips:renderGroups105,
   infer:inferCategory105,
   category:category105
 };
@@ -28159,7 +28172,7 @@ function ctDebts(){return debtList().filter(d=>!d.arquivado&&isCT(d)&&n(d.penden
   id:d.id,descricao:d.descricao||'Crédito do Trabalhador',credor:d.credor||'',pendente:r2(Math.max(0,n(d.pendente))),parcela:r2(n(d.parcela)),parcelasTotal:Math.max(1,parseInt(d.parcelasTotal,10)||1),parcelasQuitadas:Math.max(0,parseInt(d.parcelasQuitadas,10)||0),
   contract:d.ctContractNumber||'',date:d.ctContractDate||'',sevPct:clamp(n(d.ctGuaranteeSeverancePct),0,35),fgtsPct:clamp(n(d.ctGuaranteeFgtsPct),0,10),finePct:clamp(n(d.ctGuaranteeFinePct),0,100),confirmed:d.ctGuaranteeConfirmed===true||String(d.ctGuaranteeConfirmed||'').toLowerCase()==='true',rule:d.ctRuleLabel||''
 })).sort((a,b)=>String(a.date).localeCompare(String(b.date)))}
-function negotiatedPending(){return r2(debtList().filter(d=>!d.arquivado&&!isCT(d)&&n(d.pendente)>0&&String(d.negociado||'').toLowerCase()==='sim').reduce((a,d)=>a+n(d.pendente),0))}
+function negotiatedPending(){return r2(debtList().filter(d=>!d.arquivado&&!isCT(d)&&n(d.pendente)>0).reduce((a,d)=>a+n(d.pendente),0))}
 function futureCards(simDate){const d=parseDate(simDate)||new Date(),idx=d.getFullYear()*12+d.getMonth();let rows=[];try{rows=typeof window.getCardSchedules==='function'?window.getCardSchedules(false):[]}catch(e){}const total=(rows||[]).filter(r=>{const ridx=n(r.year)*12+(n(r.month)-1),paid=r.paid===true||String(r.status||'').toLowerCase()==='quitado',recurring=r.recurring===true||String(r.mode||'').toLowerCase()==='recorrente';return !paid&&!recurring&&ridx>=idx}).reduce((a,r)=>a+n(r.amount),0);return Math.max(0,r2(total))}
 function applyCTGuarantees(trctGross,fine,fired,f){
   const debts=ctDebts(),alloc=[];
@@ -28201,15 +28214,19 @@ function calc(c,scenario){
   let unemployment={avg:0,value:0,installments:0,months36:0,total:0};
   if(fired){try{const u=window.ppRgpsUnemploymentV45?.estimate?.();if(u&&n(u.total)>0)unemployment={avg:n(u.avg),value:n(u.value),installments:Math.max(0,parseInt(u.installments,10)||0),months36:Math.max(0,parseInt(u.months36,10)||0),total:r2(n(u.total))}}catch(e){}}
   const unemploymentIncome=fired?r2(unemployment.total):0;
-  const cards=futureCards(c.simulationDate),debts=negotiatedPending(),final=r2(afterCredit+unemploymentIncome-cards-debts);
-  return{scenario,fired,worked,noticeDays:nd,projected:iso(projected),payDate:iso(payDate),salary:sal,salaryBalance,av13,thirteenth,vacDays,fullVac,avVac,propVac,noticeInd,noticeDiscount,trctGross,fgts:f,fgtsFineBase:fineBase,fgtsFine:fine,ct,afterCredit,unemployment,unemploymentIncome,cards,debts,final};
+  const cards=futureCards(c.simulationDate),debts=negotiatedPending();
+  // CTs já consomem parte das verbas/multa; só o saldo não coberto é descontado
+  // adicionalmente, para não contabilizar a mesma obrigação duas vezes.
+  const ctUncovered=r2(Math.max(0,ct.totalPending-ct.totalGuarantee));
+  const final=r2(afterCredit+unemploymentIncome-cards-debts-ctUncovered);
+  return{scenario,fired,worked,noticeDays:nd,projected:iso(projected),payDate:iso(payDate),salary:sal,salaryBalance,av13,thirteenth,vacDays,fullVac,avVac,propVac,noticeInd,noticeDiscount,trctGross,fgts:f,fgtsFineBase:fineBase,fgtsFine:fine,ct,ctUncovered,afterCredit,unemployment,unemploymentIncome,cards,debts,final};
 }
 function ensureHost(){let h=document.getElementById(HOST_ID);if(h)return h;const s=document.getElementById('debtSummary');if(!s)return null;h=document.createElement('div');h.id=HOST_ID;s.insertAdjacentElement('beforebegin',h);return h}
 function fmtInput(v){return (Number(v)||0).toFixed(2).replace('.',',')}
 function warningState(x){return x.ct.unconfirmed||!x.ct.debts.length}
 function renderCard(){const h=ensureHost();if(!h)return;if(profile()!=='Marcos'){h.innerHTML='';return}const c=load(),x=calc(c,c.scenario),all=Object.keys(SCENARIOS).map(k=>calc(c,k)),partial=warningState(x);h.innerHTML=`<div class="rp38-card" role="button" tabindex="0" aria-label="Abrir memória de cálculo da rescisão">
   <div class="rp38-top"><div><div class="rp38-kicker"><i></i>Proteção em caso de rescisão</div><h3>Reserva de saída</h3><p class="rp38-sub">${attr(SCENARIOS[c.scenario].label)} · Rede Cidadã</p></div><div class="rp38-main"><span>Saldo após compromissos</span><b class="${x.final<0?'negative':'positive'}">${money(x.final)}</b><em class="rp38-badge">${partial?'garantias CT estimadas':'garantias CT confirmadas'}</em></div></div>
-  <div class="rp38-facts"><div class="rp38-fact"><span>Rescisão após garantia</span><b>${money(x.afterCredit)}</b></div><div class="rp38-fact"><span>Multa FGTS · 40%</span><b>${money(x.fgtsFine)}</b></div><div class="rp38-fact"><span>Seguro-desemprego${x.fired&&x.unemployment.installments?` · ${x.unemployment.installments}x`:''}</span><b>${money(x.unemploymentIncome)}</b></div><div class="rp38-fact"><span>Faturas futuras</span><b>${money(x.cards)}</b></div><div class="rp38-fact"><span>Dívidas negociadas</span><b>${money(x.debts)}</b></div><div class="rp38-fact"><span>${x.ct.debts.length} CT · saldo parcelado</span><b>${money(x.ct.totalPending)}</b></div></div>
+  <div class="rp38-facts"><div class="rp38-fact"><span>Rescisão após garantia</span><b>${money(x.afterCredit)}</b></div><div class="rp38-fact"><span>Multa FGTS · 40%</span><b>${money(x.fgtsFine)}</b></div><div class="rp38-fact"><span>Seguro-desemprego${x.fired&&x.unemployment.installments?` · ${x.unemployment.installments}x`:''}</span><b>${money(x.unemploymentIncome)}</b></div><div class="rp38-fact"><span>Faturas futuras</span><b>${money(x.cards)}</b></div><div class="rp38-fact"><span>Outras dívidas pendentes</span><b>${money(x.debts)}</b></div><div class="rp38-fact"><span>${x.ct.debts.length} CT · saldo parcelado</span><b>${money(x.ct.totalPending)}</b></div><div class="rp38-fact"><span>CT não coberto por garantias</span><b>${money(x.ctUncovered)}</b></div></div>
   <div class="rp38-scenarios">${all.map(z=>`<div class="rp38-scenario-mini ${z.scenario===c.scenario?'active':''}"><span>${attr(SCENARIOS[z.scenario].short)}</span><b>${money(z.final)}</b></div>`).join('')}</div>
   <div class="rp38-open">Ver memória, garantias de cada CT e cenários →</div></div>`;
 }
@@ -28232,7 +28249,7 @@ function renderModal(forced){const c=forced||load(),x=calc(c,c.scenario),body=do
    ${line('Saldo de salário',money(x.salaryBalance),'plus')}${line(`13º proporcional · ${x.av13}/12`,money(x.thirteenth),'plus')}${line(`Férias integrais/vencidas · ${x.vacDays} dias + 1/3`,money(x.fullVac),'plus')}${line(`Férias proporcionais · ${x.avVac}/12 + 1/3`,money(x.propVac),'plus')}${x.noticeInd?line(`Aviso indenizado · ${x.noticeDays} dias`,money(x.noticeInd),'plus'):''}${x.noticeDiscount?line('Desconto estimado por aviso não cumprido',`− ${money(x.noticeDiscount)}`,'minus'):''}${line('TRCT bruto estimado',money(x.trctGross))}${line('Saldo para fins rescisórios · página FGTS',money(x.fgts.rescision))}${line(`Multa rescisória · 40% de ${money(x.fgtsFineBase)}`,money(x.fgtsFine),x.fgtsFine?'plus':'')}${line('Saldo atual do FGTS',money(x.fgts.current))}${line('Saldo bloqueado do FGTS',money(x.fgts.blocked))}${line('Saldo livre informado',money(x.fgts.free))}${line('Saldo do FGTS sacável na demissão · saque-aniversário','R$ 0,00')}
   </div><div class="rp38-block"><h3>Garantias e compromissos</h3>
    ${x.fired?line(`Seguro-desemprego · ${x.unemployment.installments} parcelas de ${money(x.unemployment.value)}`,`+ ${money(x.unemploymentIncome)}`,'plus'):line('Seguro-desemprego','Não aplicável neste cenário')}
-   ${line(`CT · garantia em verbas · até ${String(x.ct.sevPctTotal.toFixed(2)).replace('.',',')}%`,`− ${money(x.ct.totalSev)}`,'minus')}${line(`CT · garantia FGTS · limite compartilhado ${money(x.ct.fgtsPoolStart)}`,`− ${money(x.ct.totalFgts)}`,'minus')}${line('CT · multa rescisória usada',`− ${money(x.ct.totalFine)}`,'minus')}${line('Faturas futuras do cartão',`− ${money(x.cards)}`,'minus')}${line('Parcelas pendentes de outras dívidas negociadas',`− ${money(x.debts)}`,'minus')}${line('Recursos após garantia do CT',money(x.afterCredit))}
+   ${line(`CT · garantia em verbas · até ${String(x.ct.sevPctTotal.toFixed(2)).replace('.',',')}%`,`− ${money(x.ct.totalSev)}`,'minus')}${line(`CT · garantia FGTS · limite compartilhado ${money(x.ct.fgtsPoolStart)}`,`− ${money(x.ct.totalFgts)}`,'minus')}${line('CT · multa rescisória usada',`− ${money(x.ct.totalFine)}`,'minus')}${line('Faturas futuras do cartão',`− ${money(x.cards)}`,'minus')}${line('Demais dívidas pendentes (não CT)',`− ${money(x.debts)}`,'minus')}${line('CT pendente sem cobertura de garantias',`− ${money(x.ctUncovered)}`,'minus')}${line('Recursos após garantia do CT',money(x.afterCredit))}
   </div></div>
  <div class="rp38-total ${x.final<0?'negative':''}"><div><span>Saldo estimado após todos os compromissos</span><small>${partial?'Há percentuais de garantia de CT ainda marcados como estimados; confirme-os no contrato/Emprega Brasil quando disponíveis.':'Garantias cadastradas como confirmadas.'} O saldo dos CTs é exibido como parcelas futuras; o valor de liquidação antecipada pode ser menor. Nos cenários de demissão sem justa causa, o total estimado do seguro-desemprego é somado como renda positiva.</small></div><b>${money(x.final)}</b></div>
  <div class="rp38-notes"><div class="rp38-note"><i>i</i><span>No saque-aniversário, o saldo integral do FGTS não é sacado na demissão; em dispensa sem justa causa, a multa rescisória continua devida. Isso é diferente da garantia do Crédito do Trabalhador: se contratada, ela pode alcançar até 10% do saldo do FGTS. O Hub usa um pool único e conservador, limitado também ao saldo livre informado, para não reutilizar valores já bloqueados.</span></div><div class="rp38-note"><i>i</i><span>O valor-base da multa é buscado diretamente em FGTS → “Saldo rescisão”. O Hub aplica 40% sobre esse valor e inclui a multa entre os recursos da rescisão; se parte da multa estiver vinculada como garantia de CT, somente o saldo remanescente fica disponível no resultado final.</span></div><div class="rp38-note"><i>i</i><span>As garantias de verbas, FGTS e multa são compartilhadas entre os CTs e nunca são contadas várias vezes. A prioridade real de apropriação entre bancos e o saldo de liquidação antecipada dependem do Emprega Brasil/FGTS e das instituições; o Hub faz uma simulação de planejamento.</span></div></div>`;
@@ -28280,6 +28297,14 @@ function monthsInclusive(first,through){if(!validYM(first)||!validYM(through))re
 function round(v){return Math.round((Number(v)||0)*100)/100}
 function seedAndSync(){
   if(profile()!=='Marcos')return false;
+  // Não recalcular automaticamente CTs que já têm parcelas quitadas/reabertas
+  // pelo usuário no histórico mensal. Mantém os valores que ele efetivamente registrou.
+  function hasManualLedger(id){
+    const key='planejador_debt_payment_ledger_v74_'+String(profile()).toLowerCase();
+    const ledger=(readObj(key)[String(id)]||{});
+    return Object.values(ledger).some(row=>row&&row.inferred===false&&
+      (row.paidAt||row.reopenedAt));
+  }
   const edits=readObj(EDIT_KEY),dates=readObj(DATE_KEY),now=ymNow();let changed=false;
   for(const z of CT_SEED){
     const legacy=edits[z.id];
@@ -28290,7 +28315,7 @@ function seedAndSync(){
       const paid=Math.min(z.totalInst,monthsInclusive(z.first,now)),total=round(z.parcela*z.totalInst),quitado=round(z.parcela*paid);
       edits[z.id]={descricao:z.descricao,credor:z.credor,banco:'',parcela:z.parcela,total,quitado,pendente:round(total-quitado),negociado:'Sim',parcelasTotal:z.totalInst,parcelasQuitadas:paid,primeiraParcelaMes:z.first,ultimaParcelaMes:addMonths(z.first,z.totalInst-1),status:paid>=z.totalInst?'Quitado':'Pendente',isCreditWorker:true,ctContractNumber:z.contract,ctContractDate:z.contractDate,ctGuaranteeSeverancePct:z.sevPct,ctGuaranteeFgtsPct:z.fgtsPct,ctGuaranteeFinePct:z.finePct,ctGuaranteeConfirmed:z.confirmed===true,ctAutoPaid:true,ctRuleLabel:z.rule,ctSeedV39:true,ctRulesVersion:'v40'};
       changed=true;
-    }else if(edits[z.id].isCreditWorker!==false && edits[z.id].ctAutoPaid!==false){
+    }else if(edits[z.id].isCreditWorker!==false && edits[z.id].ctAutoPaid!==false && !hasManualLedger(z.id)){
       const x=edits[z.id],first=validYM(x.primeiraParcelaMes)?x.primeiraParcelaMes:z.first,totalInst=Math.max(1,parseInt(x.parcelasTotal,10)||z.totalInst),parcela=Number(x.parcela)||z.parcela,paid=Math.min(totalInst,monthsInclusive(first,now)),total=round(parcela*totalInst),quitado=round(parcela*paid);
       if(x.parcelasQuitadas!==paid||Math.abs((Number(x.pendente)||0)-(total-quitado))>.009){x.parcelasQuitadas=paid;x.total=total;x.quitado=quitado;x.pendente=round(total-quitado);x.status=paid>=totalInst?'Quitado':'Pendente';changed=true}
     }
@@ -28298,7 +28323,7 @@ function seedAndSync(){
   }
   // Também aplica a regra de parcelas quitadas até o mês atual a qualquer dívida marcada manualmente como CT.
   for(const [id,x] of Object.entries(edits)){
-    if(!x||x.isCreditWorker!==true||x.ctAutoPaid===false||!validYM(x.primeiraParcelaMes))continue;
+    if(!x||x.isCreditWorker!==true||x.ctAutoPaid===false||hasManualLedger(id)||!validYM(x.primeiraParcelaMes))continue;
     const totalInst=Math.max(1,parseInt(x.parcelasTotal,10)||1),parcela=Number(x.parcela)||0;
     if(parcela<=0)continue;
     const paid=Math.min(totalInst,monthsInclusive(x.primeiraParcelaMes,now)),total=round(parcela*totalInst),quitado=round(parcela*paid),pendente=round(total-quitado);
@@ -30725,56 +30750,73 @@ window.ppLaunchCreditorV155={refresh,open,close};
 }
 </style>
 
-<script id="pp-v172-cards-filter-repair">
-/* V172: filtro de apresentação. Nenhum dado financeiro é escrito ou restaurado. */
+<style id="pp-v174-cancelled-no-data-style">
+#cartoes #v174CardsCancelledEmpty{display:inline-flex;align-items:center;color:#617083;font-size:11px;font-weight:700;white-space:nowrap;padding:4px 7px}
+@media(max-width:700px){#cartoes #v174CardsCancelledEmpty{white-space:normal}}
+</style>
+<script id="pp-v174-cards-cancelled-visibility">
+/* V174: um controlador somente para a visualização; jamais exclui compras/faturas. */
 (()=>{
  'use strict';
  const CANCEL_KEY='planejador_cartoes_cancelados_visiveis';
  const ARCHIVE_KEY='planejador_cartoes_arquivados_visiveis';
- let updating=false;
- function visibleCards(){
-   const state=window.__cardsCleanV9;
-   if(!state)return [];
-   return (typeof cards!=='undefined'?cards:[]).filter(c=>
-     c.status==='Cancelado'?state.showCancelled:
-     c.status==='Arquivado'?state.showArchived:true);
- }
- function regroup(){
-   try{window.ppV70?.refreshCardYears?.()}catch(e){console.warn('Agrupamento de faturas:',e)}
+ let busy=false;
+ const state=()=>window.__cardsCleanV9;
+ const list=()=>typeof cards!=='undefined'&&Array.isArray(cards)?cards:[];
+ const visible=()=>list().filter(c=>
+   c.status==='Cancelado'?!!state()?.showCancelled:
+   c.status==='Arquivado'?!!state()?.showArchived:true);
+ function afterRender(){
+   const c=state(),btn=document.getElementById('cleanCancelled');
+   if(!c||!btn)return;
+   const number=list().filter(x=>x.status==='Cancelado').length;
+   btn.type='button';
+   btn.setAttribute('aria-pressed',String(!!c.showCancelled));
+   btn.title=number?`${number} cartão(ões) cancelado(s) disponível(is) para consulta`:'Não há cartões cancelados';
+   let note=document.getElementById('v174CardsCancelledEmpty');
+   if(!number&&c.showCancelled){
+     if(!note){note=document.createElement('span');note.id='v174CardsCancelledEmpty';note.className='v174-cancelled-empty';btn.insertAdjacentElement('afterend',note)}
+     note.textContent='Nenhum cartão cancelado';
+   }else note?.remove();
  }
  function refresh(){
-   if(updating)return;
-   updating=true;
+   if(busy)return;
+   busy=true;
    try{
-     const state=window.__cardsCleanV9;
-     if(!state)return;
-     state.showCancelled=localStorage.getItem(CANCEL_KEY)==='1';
-     state.showArchived=localStorage.getItem(ARCHIVE_KEY)==='1';
-     const list=visibleCards();
-     if(!list.some(c=>String(c.id)===String(state.selectedId)))state.selectedId=list[0]?.id||null;
-     // Somente o renderizador atual, sem chamar wrappers antigos de renderCards.
+     const c=state();if(!c)return;
+     c.showCancelled=localStorage.getItem(CANCEL_KEY)==='1';
+     c.showArchived=localStorage.getItem(ARCHIVE_KEY)==='1';
+     const cardsShown=visible();
+     if(!cardsShown.some(x=>String(x.id)===String(c.selectedId)))c.selectedId=cardsShown[0]?.id||null;
+     // A função atual desenha cartões, controles e carrossel, uma única vez.
      window.__renderCardsPremiumFinal?.();
-     const selected=state.selectedId;
-     if(selected)window.ppInvoiceBoardV39?.selectCard?.(selected);
-     regroup();
-   }finally{updating=false}
+     afterRender();
+     const selected=c.selectedId;
+     if(selected && window.ppInvoiceBoardV39?.selected?.()!==String(selected)){
+       window.ppInvoiceBoardV39?.selectCard?.(selected);
+     }
+     // Preserva a seção de faturas agrupadas por ano da V173.
+     window.ppV70?.refreshCardYears?.();
+   }finally{busy=false}
  }
- window.addEventListener('click',e=>{
-   const el=e.target instanceof Element?e.target:null;
-   const cancel=el?.closest('#cleanCancelled,#toggleCancelledReal,#cancelledCardsBtn');
-   const archived=el?.closest('#cleanArchived,#toggleArchivedReal');
-   if(!cancel&&!archived)return;
-   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-   const key=cancel?CANCEL_KEY:ARCHIVE_KEY;
+ function toggle(which){
+   const key=which==='cancelled'?CANCEL_KEY:ARCHIVE_KEY;
    localStorage.setItem(key,localStorage.getItem(key)==='1'?'0':'1');
    refresh();
- },true);
- // Ao selecionar um cartão, o próprio controlador original atualiza seu estado;
- // reaplicar somente o agrupamento, sem renderizar novamente a lista.
+ }
  document.addEventListener('click',e=>{
-   if(e.target.closest?.('[data-clean-card]'))queueMicrotask(regroup);
+   const el=e.target instanceof Element?e.target:null;
+   const cancelled=el?.closest('#cleanCancelled,#toggleCancelledReal,#cancelledCardsBtn');
+   const archived=el?.closest('#cleanArchived,#toggleArchivedReal');
+   if(!cancelled&&!archived)return;
+   // Impede controladores antigos de alternarem o mesmo filtro uma segunda vez.
+   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+   toggle(cancelled?'cancelled':'archived');
+ },true);
+ document.addEventListener('click',e=>{
+   if(e.target.closest?.('[data-clean-card],[data-v105-card]'))queueMicrotask(()=>window.ppV70?.refreshCardYears?.());
  },false);
- window.ppCardRepairV172={refresh,regroup};
+ window.ppCardRepairV174={refresh,toggle,afterRender};
 })();
 </script>
 </body></html>
