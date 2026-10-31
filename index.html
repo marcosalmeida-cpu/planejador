@@ -27977,7 +27977,7 @@ function syncPurchaseVisibility(){
 function cleanCategoryDupes(){
   [['fCategory','v32-f-category'],['cpCategory','v32-cp-category']].forEach(([id])=>{
     const sel=$(id),f=sel?.closest('.field'); if(!sel||!f)return;
-    [...f.children].forEach(ch=>{if(ch!==sel&&ch.tagName!=='LABEL')ch.style.setProperty('display','none','important')});
+    [...f.children].forEach(ch=>{if(ch!==sel&&ch.tagName!=='LABEL'&&!ch.classList.contains('v178-select-trigger'))ch.style.setProperty('display','none','important')});
     sel.style.setProperty('display','block','important');
   });
 }
@@ -29992,8 +29992,21 @@ body:has(#previdencia.active) .hub-content{
      }
    }finally{fixing=false}
  }
- const obs=new MutationObserver(()=>setTimeout(fix,0));
- obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','disabled','readonly','inert','style']});
+ /* V178: observar exclusivamente a janela de troca de perfil; varredura global
+    a cada mudança de classe/estilo gerava milhares de tarefas desnecessárias. */
+ let observed=null;
+ const attach=()=>{
+   const ov=document.getElementById('profileSwitchV76');
+   if(!ov||observed===ov)return;
+   observed=ov;
+   const obs=new MutationObserver(()=>{if(ov.classList.contains('open'))fix()});
+   obs.observe(ov,{attributes:true,attributeFilter:['class'],childList:true});
+ };
+ attach();
+ const born=new MutationObserver(records=>{
+   if(records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&(n.id==='profileSwitchV76'||n.querySelector?.('#profileSwitchV76')))))attach();
+ });
+ born.observe(document.body,{childList:true});
  document.addEventListener('click',e=>{
    if(e.target.closest?.('#v76Switch,.v76-switch-option,[data-v62-profile],.profile-man')) setTimeout(fix,40);
  },true);
@@ -32680,5 +32693,195 @@ window.ppDeleteV162={open:openScope162};
   align();
   render();
   window.ppDebtViewV176={render,selected:()=>status};
+})();
+</script>
+
+<style id="pp-v177-debts-single-row">
+/* V177: somente alinhamento visual do cabeçalho de Dívidas. */
+#dividas .section-tools{
+  display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+  align-items:center!important;justify-content:space-between!important;
+  gap:12px!important;width:100%!important;min-width:0!important;margin:5px 0 13px!important
+}
+#dividas .section-tools>div:first-child{
+  display:block!important;width:auto!important;max-width:none!important;
+  min-width:max-content!important;flex:0 0 auto!important;margin:0!important
+}
+#dividas .section-tools>div:first-child h2{
+  margin:0!important;font-size:22px!important;line-height:1.2!important;white-space:nowrap!important
+}
+#dividas .section-tools .filterbar{
+  display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+  align-items:center!important;justify-content:flex-end!important;gap:9px!important;
+  flex:1 1 auto!important;width:auto!important;max-width:none!important;
+  min-width:0!important;margin:0!important;overflow-x:auto!important;overflow-y:hidden!important;
+  scrollbar-width:none!important
+}
+#dividas .section-tools .filterbar::-webkit-scrollbar{display:none!important}
+#dividas .section-tools .filterbar .debt-tabs-v176{
+  flex:0 0 auto!important;min-width:0!important;width:auto!important;height:40px!important
+}
+#dividas .section-tools .filterbar .debt-tabs-v176 button{
+  flex:0 0 auto!important;min-width:100px!important;white-space:nowrap!important
+}
+#dividas .section-tools .filterbar #debtSearch{
+  display:block!important;flex:0 1 250px!important;width:250px!important;
+  max-width:250px!important;min-width:145px!important;height:40px!important
+}
+#dividas .section-tools .filterbar #addDebtV67{
+  order:3!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  flex:0 0 auto!important;width:auto!important;max-width:none!important;min-width:max-content!important;
+  white-space:nowrap!important;height:40px!important;padding:0 13px!important;margin:0!important;
+  font-size:12px!important
+}
+@media(max-width:680px){
+  #dividas .section-tools{gap:8px!important}
+  #dividas .section-tools>div:first-child h2{font-size:18px!important}
+  #dividas .section-tools .filterbar{justify-content:flex-start!important}
+  #dividas .section-tools .filterbar .debt-tabs-v176{width:auto!important}
+  #dividas .section-tools .filterbar .debt-tabs-v176 button{min-width:85px!important;padding:0 10px!important}
+  #dividas .section-tools .filterbar #debtSearch{flex:0 0 155px!important;min-width:155px!important;max-width:155px!important}
+}
+</style>
+
+<style id="v178-card-purchase-selects-style">
+/* V178: listas exclusivas da janela de compra; seletores originais seguem no DOM para salvar. */
+#cardPurchaseModal .field:has(> .v178-select-trigger){position:relative!important}
+#cardPurchaseModal select.v178-source-select{
+  position:absolute!important;width:1px!important;height:1px!important;
+  min-width:1px!important;min-height:1px!important;opacity:0!important;
+  pointer-events:none!important;clip-path:inset(50%)!important;
+  overflow:hidden!important;padding:0!important;margin:0!important;border:0!important;
+}
+#cardPurchaseModal .v178-select-trigger{
+  display:flex!important;align-items:center;justify-content:space-between;
+  gap:12px;width:100%;min-width:0;min-height:43px;
+  padding:9px 13px;border:1px solid #c9d7eb;border-radius:13px;
+  background:#fff;color:#1d3457;text-align:left;cursor:pointer;
+  font:500 13px Roboto,Arial,sans-serif;box-sizing:border-box;
+}
+/* Sobrepõe a regra legada V35 que esconde filhos da área Categoria. */
+#cardPurchaseModal .v32-cp-category > .v178-select-trigger,
+#cardPurchaseModal .v32-cp-card > .v178-select-trigger,
+#cardPurchaseModal .v32-cp-status > .v178-select-trigger{display:flex!important}
+#cardPurchaseModal .v178-select-trigger:hover{border-color:#6ca0dd}
+#cardPurchaseModal .v178-select-trigger:focus-visible,#cardPurchaseModal .v178-select-trigger[aria-expanded="true"]{outline:2px solid #267af5;outline-offset:1px}
+#cardPurchaseModal .v178-select-trigger:disabled{opacity:.55;cursor:not-allowed}
+#cardPurchaseModal .v178-select-label{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#cardPurchaseModal .v178-select-chevron{font-size:18px;line-height:1;color:#355578}
+#v178CardSelectMenu{
+  position:fixed;z-index:100500;display:none;min-width:200px;max-height:min(370px,70vh);
+  flex-direction:column;overflow:hidden;padding:6px;border:1px solid #d6e0ed;
+  border-radius:14px;background:#fff;box-shadow:0 18px 45px rgba(18,33,61,.2);
+  box-sizing:border-box;
+}
+#v178CardSelectMenu.open{display:flex}
+#v178CardSelectMenu .v178-menu-search{width:100%;min-height:38px;margin-bottom:6px;padding:8px 10px;border-radius:9px;border:1px solid #d6e0ed;color:#24374e;box-sizing:border-box}
+#v178CardSelectMenu .v178-menu-options{overflow-y:auto;overscroll-behavior:contain;min-height:0}
+#v178CardSelectMenu .v178-menu-option{
+  display:block;width:100%;padding:10px 12px;min-height:38px;border:0;
+  border-radius:9px;background:transparent;color:#243750;text-align:left;
+  font:500 13px Roboto,Arial,sans-serif;cursor:pointer;
+}
+#v178CardSelectMenu .v178-menu-option:hover,#v178CardSelectMenu .v178-menu-option:focus-visible{background:#edf4ff}
+#v178CardSelectMenu .v178-menu-option[aria-selected="true"]{background:#e9f2ff;font-weight:800;color:#0b56ac}
+#v178CardSelectMenu .v178-menu-empty{padding:12px;color:#75859a;font-size:12px}
+</style>
+<script id="v178-card-purchase-selects-script">
+(()=>{'use strict';
+  const IDS=['cpCard','cpCategory','cpStatus'];
+  const modal=document.getElementById('cardPurchaseModal');if(!modal)return;
+  let menu=null,selected=null,trigger=null;
+  const byId=id=>document.getElementById(id);
+  const text=(s)=>String(s??'');
+  function buildMenu(){
+    if(menu)return;
+    menu=document.createElement('div');menu.id='v178CardSelectMenu';menu.setAttribute('role','listbox');
+    menu.innerHTML='<input class="v178-menu-search" type="search" placeholder="Buscar opção" aria-label="Buscar opção"><div class="v178-menu-options"></div>';
+    document.body.appendChild(menu);
+    menu.querySelector('input').addEventListener('input',()=>showOptions());
+    menu.querySelector('.v178-menu-options').addEventListener('click',e=>{
+      const item=e.target.closest('[data-v178-option]');if(!item||!selected)return;
+      const opts=[...selected.options];const option=opts[Number(item.dataset.v178Option)];
+      if(!option)return;
+      selected.value=option.value;
+      if(selected.id==='cpCategory')selected.dataset.v39Selected=selected.value;
+      selected.dispatchEvent(new Event('input',{bubbles:true}));
+      selected.dispatchEvent(new Event('change',{bubbles:true}));
+      updateLabel(selected);close();
+    });
+  }
+  function close(){menu?.classList.remove('open');trigger?.setAttribute('aria-expanded','false');trigger=null;selected=null;}
+  function showOptions(){
+    if(!menu||!selected)return;
+    const filter=menu.querySelector('input').value.trim().toLocaleLowerCase('pt-BR');
+    const area=menu.querySelector('.v178-menu-options');
+    area.replaceChildren();
+    const opts=[...selected.options];let found=0;
+    opts.forEach((o,i)=>{
+      if(o.disabled||o.hidden||!o.textContent.toLocaleLowerCase('pt-BR').includes(filter))return;
+      const b=document.createElement('button');b.type='button';b.className='v178-menu-option';
+      b.dataset.v178Option=String(i);b.setAttribute('role','option');
+      b.setAttribute('aria-selected',String(o.value===selected.value));b.textContent=o.textContent;
+      area.appendChild(b);found++;
+    });
+    if(!found){const div=document.createElement('div');div.className='v178-menu-empty';div.textContent='Nenhuma opção encontrada';area.appendChild(div)}
+  }
+  function updateLabel(sel){
+    const btn=sel.parentElement?.querySelector('.v178-select-trigger');if(!btn)return;
+    const option=sel.selectedOptions?.[0];const label=option?.textContent||'Selecione';
+    const span=btn.querySelector('.v178-select-label');if(span&&span.textContent!==label)span.textContent=label;
+    btn.disabled=sel.disabled||!sel.options.length;
+  }
+  function apply(){
+    IDS.forEach(id=>{
+      const sel=byId(id);if(!sel)return;
+      const field=sel.closest('.field');if(!field)return;
+      sel.classList.add('v178-source-select');
+      let btn=field.querySelector('.v178-select-trigger');
+      if(!btn){
+        btn=document.createElement('button');btn.type='button';btn.className='v178-select-trigger';
+        btn.dataset.v178For=id;btn.setAttribute('aria-haspopup','listbox');btn.setAttribute('aria-expanded','false');
+        btn.innerHTML='<span class="v178-select-label"></span><span class="v178-select-chevron" aria-hidden="true">⌄</span>';
+        sel.insertAdjacentElement('afterend',btn);
+      }
+      updateLabel(sel);
+    });
+  }
+  function position(){
+    if(!menu||!trigger)return;
+    const r=trigger.getBoundingClientRect(),w=Math.max(200,r.width),win=window.innerWidth;
+    const ww=Math.min(w,win-20),left=Math.max(10,Math.min(r.left,win-ww-10));
+    menu.style.width=ww+'px';menu.style.left=left+'px';
+    const h=Math.min(330,window.innerHeight*.55);
+    const bottom=r.bottom+5;
+    menu.style.top=(bottom+h<window.innerHeight-10?bottom:Math.max(10,r.top-h-5))+'px';
+  }
+  function open(sel,btn){
+    buildMenu();selected=sel;trigger=btn;
+    menu.querySelector('input').value='';showOptions();position();menu.classList.add('open');
+    btn.setAttribute('aria-expanded','true');
+    if(sel.options.length>10)menu.querySelector('input').focus({preventScroll:true});
+  }
+  modal.addEventListener('click',e=>{
+    const btn=e.target.closest('.v178-select-trigger');if(!btn)return;
+    e.preventDefault();e.stopPropagation();
+    const sel=byId(btn.dataset.v178For);if(!sel)return;
+    if(selected===sel&&menu?.classList.contains('open'))close();else open(sel,btn);
+  });
+  document.addEventListener('click',e=>{
+    if(!menu?.classList.contains('open'))return;
+    if(e.target.closest('#v178CardSelectMenu,#cardPurchaseModal .v178-select-trigger'))return;
+    close();
+  });
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menu?.classList.contains('open')){e.stopPropagation();close();trigger?.focus()}} ,true);
+  // Apenas a classe do modal, nunca observa todos os lançamentos ou a página inteira.
+  new MutationObserver(()=>{
+    if(modal.classList.contains('open'))apply();else close();
+  }).observe(modal,{attributes:true,attributeFilter:['class']});
+  modal.addEventListener('change',e=>{if(IDS.includes(e.target?.id))updateLabel(e.target)});
+  window.addEventListener('resize',()=>{if(menu?.classList.contains('open'))position()},{passive:true});
+  // Criar uma única vez. Não consulta nem grava lançamentos ou banco de dados.
+  apply();
 })();
 </script>
