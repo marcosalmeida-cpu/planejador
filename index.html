@@ -30716,59 +30716,56 @@ window.ppLaunchCreditorV155={refresh,open,close};
 }
 </style>
 
-<script id="pp-v165-cancelled-cards-definitive-repair">
+<script id="pp-v172-cards-filter-repair">
+/* V172: filtro de apresentação. Nenhum dado financeiro é escrito ou restaurado. */
 (()=>{
  'use strict';
- const key='planejador_cartoes_cancelados_visiveis';
- const archiveKey='planejador_cartoes_arquivados_visiveis';
- let processing=false;
- function years(){
-   for(const wait of [0,80,200])setTimeout(()=>{
-     try{window.ppV70?.refreshCardYears?.()}catch(err){console.warn('v165 years',err)}
-   },wait);
+ const CANCEL_KEY='planejador_cartoes_cancelados_visiveis';
+ const ARCHIVE_KEY='planejador_cartoes_arquivados_visiveis';
+ let updating=false;
+ function visibleCards(){
+   const state=window.__cardsCleanV9;
+   if(!state)return [];
+   return (typeof cards!=='undefined'?cards:[]).filter(c=>
+     c.status==='Cancelado'?state.showCancelled:
+     c.status==='Arquivado'?state.showArchived:true);
+ }
+ function regroup(){
+   try{window.ppV70?.refreshCardYears?.()}catch(e){console.warn('Agrupamento de faturas:',e)}
  }
  function refresh(){
-   if(processing)return;
-   processing=true;
+   if(updating)return;
+   updating=true;
    try{
-     const clean=window.__cardsCleanV9;
-     if(clean){
-       clean.showCancelled=localStorage.getItem(key)==='1';
-       clean.showArchived=localStorage.getItem(archiveKey)==='1';
-     }
-     // Call the real card renderer, not the many legacy wrappers that alternate
-     // between cancelled-only and active-only lists.
-     const core=window.__renderCardsPremiumFinal;
-     if(typeof core==='function')core();
-     else window.renderCards?.();
-     window.ppCardCategoryV105?.render?.();
-     const current=document.querySelector('#cardsCleanRoot [data-clean-card].selected')?.dataset.cleanCard;
-     if(current)window.ppInvoiceBoardV39?.selectCard?.(current);
-     years();
-   }catch(err){console.error('v165 cards refresh',err)}
-   finally{processing=false}
+     const state=window.__cardsCleanV9;
+     if(!state)return;
+     state.showCancelled=localStorage.getItem(CANCEL_KEY)==='1';
+     state.showArchived=localStorage.getItem(ARCHIVE_KEY)==='1';
+     const list=visibleCards();
+     if(!list.some(c=>String(c.id)===String(state.selectedId)))state.selectedId=list[0]?.id||null;
+     // Somente o renderizador atual, sem chamar wrappers antigos de renderCards.
+     window.__renderCardsPremiumFinal?.();
+     const selected=state.selectedId;
+     if(selected)window.ppInvoiceBoardV39?.selectCard?.(selected);
+     regroup();
+   }finally{updating=false}
  }
- // The window capture phase happens before the old document listeners. It is
- // essential: those listeners used to change the filter a second time.
  window.addEventListener('click',e=>{
-   const target=e.target instanceof Element?e.target:null;
-   const cancel=target?.closest('#cleanCancelled,#toggleCancelledReal,#cancelledCardsBtn');
-   const archive=target?.closest('#cleanArchived,#toggleArchivedReal');
-   if(!cancel&&!archive)return;
-   e.preventDefault();
-   e.stopPropagation();
-   e.stopImmediatePropagation();
-   const prop=cancel?key:archiveKey;
-   localStorage.setItem(prop,localStorage.getItem(prop)==='1'?'0':'1');
+   const el=e.target instanceof Element?e.target:null;
+   const cancel=el?.closest('#cleanCancelled,#toggleCancelledReal,#cancelledCardsBtn');
+   const archived=el?.closest('#cleanArchived,#toggleArchivedReal');
+   if(!cancel&&!archived)return;
+   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+   const key=cancel?CANCEL_KEY:ARCHIVE_KEY;
+   localStorage.setItem(key,localStorage.getItem(key)==='1'?'0':'1');
    refresh();
  },true);
- // Only regroup years after the native selection has updated the selected ID.
+ // Ao selecionar um cartão, o próprio controlador original atualiza seu estado;
+ // reaplicar somente o agrupamento, sem renderizar novamente a lista.
  document.addEventListener('click',e=>{
-   if(e.target.closest?.('[data-v105-card],[data-clean-card]'))years();
+   if(e.target.closest?.('[data-clean-card]'))queueMicrotask(regroup);
  },false);
- window.ppCardRepairV165={refresh,regroup:years};
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,500),{once:true});
- else setTimeout(refresh,300);
+ window.ppCardRepairV172={refresh,regroup};
 })();
 </script>
 </body></html>
