@@ -2,6 +2,90 @@
 
 <html lang="pt-BR">
 <head>
+<style id="pp-v183-early-unified-tabs-css">
+/* Stable toolbar siblings of the views: no page renderer replaces these nodes. */
+.main > .pp-unified-tabs-v183{display:none!important}
+.main:has(> #previdencia.active) > #ppPensionDualV183,
+.main:has(> #previdenciaPrivada.active) > #ppPensionDualV183,
+.main:has(> #patrimonio.active) > #ppAssetsDualV183,
+.main:has(> #investimentos.active) > #ppAssetsDualV183{
+ display:flex!important;visibility:visible!important;pointer-events:auto!important;
+}
+.main > .pp-unified-tabs-v183{
+ align-items:center;justify-content:space-between;gap:14px;
+ padding:12px 16px;margin:0 0 12px;
+ border:1px solid #dae4ef;border-radius:16px;background:#fff;
+ box-shadow:0 4px 15px rgba(14,39,74,.045);
+ position:relative;z-index:4;
+}
+.pp-unified-title-v183{min-width:0}
+.pp-unified-title-v183 small{display:block;color:#7688a1;font-size:9px;font-weight:800;letter-spacing:.07em}
+.pp-unified-title-v183 strong{display:block;color:#1b3049;font-size:18px;line-height:1.2;margin-top:3px}
+.pp-unified-switch-v183{display:grid;grid-template-columns:1fr 1fr;gap:3px;min-width:260px;padding:3px;background:#eaf1f8;border:1px solid #dbe5f0;border-radius:12px}
+.pp-unified-switch-v183 button{appearance:none;display:block;width:100%;border:0;border-radius:9px;padding:10px 14px;min-height:38px;background:transparent;color:#395471;font:800 12px Roboto,Arial,sans-serif;cursor:pointer;white-space:nowrap;pointer-events:auto!important}
+.main:has(> #previdencia.active) #ppPensionDualV183 button[data-unified-view-v183="previdencia"],
+.main:has(> #previdenciaPrivada.active) #ppPensionDualV183 button[data-unified-view-v183="previdenciaPrivada"],
+.main:has(> #patrimonio.active) #ppAssetsDualV183 button[data-unified-view-v183="patrimonio"],
+.main:has(> #investimentos.active) #ppAssetsDualV183 button[data-unified-view-v183="investimentos"]{background:#0b59b7;color:#fff;box-shadow:0 4px 12px rgba(15,87,181,.13)}
+.pp-unified-switch-v183 button:focus-visible{outline:3px solid #7eaffe;outline-offset:2px}
+@media(max-width:700px){
+ .main > .pp-unified-tabs-v183{flex-direction:column;align-items:stretch;padding:11px;gap:8px}
+ .pp-unified-switch-v183{min-width:0;width:100%}
+}
+</style>
+
+<script id="pp-v183-early-unified-tabs-controller">
+(()=>{'use strict';
+ const choices=new Set(['previdencia','previdenciaPrivada','patrimonio','investimentos']);
+ function sync(){
+   for(const nav of document.querySelectorAll('.pp-unified-tabs-v183')){
+     for(const btn of nav.querySelectorAll('[data-unified-view-v183]')){
+       const id=btn.dataset.unifiedViewV183;
+       const view=document.getElementById(id);
+       const active=!!view?.classList.contains('active');
+       if(btn.getAttribute('aria-selected')!==String(active))btn.setAttribute('aria-selected',String(active));
+       btn.tabIndex=active?0:-1;
+     }
+   }
+ }
+ function switchTab(id){
+   if(!choices.has(id)||!document.getElementById(id))return;
+   // Navigation preference only: do not touch ledgers or financial persistence.
+   window.__ppDualInteractionV183=true;
+   const router=window.ppFinanceRouterV138;
+   if(router&&typeof router.open==='function')router.open(id,{scroll:false,persist:false});
+   else if(typeof window.showView==='function')window.showView(id);
+   else document.querySelectorAll('.main > .view').forEach(v=>v.classList.toggle('active',v.id===id));
+   try{history.replaceState(null,'','#'+(id==='previdenciaPrivada'?'previdencia':id==='investimentos'?'patrimonio':id))}catch(e){}
+   sync();
+   try{window.scrollTo({top:0,behavior:'instant'})}catch(e){}
+ }
+ // Must run before the other capture listeners that touch Previdência when
+ // anything inside it is clicked. The old listeners never see tab clicks.
+ window.addEventListener('click',e=>{
+   const b=e.target?.closest?.('[data-unified-view-v183]');if(!b)return;
+   const id=b.dataset.unifiedViewV183;if(!choices.has(id))return;
+   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+   switchTab(id);
+ },true);
+ window.addEventListener('keydown',e=>{
+   const b=e.target?.closest?.('[data-unified-view-v183]');if(!b||!['ArrowLeft','ArrowRight'].includes(e.key))return;
+   const siblings=[...b.parentElement.querySelectorAll('[data-unified-view-v183]')];
+   const next=siblings[(siblings.indexOf(b)+(e.key==='ArrowRight'?1:siblings.length-1))%siblings.length];
+   if(next){e.preventDefault();switchTab(next.dataset.unifiedViewV183);next.focus({preventScroll:true})}
+ },true);
+ // One lightweight class watcher on four top-level screens; no subtree monitoring.
+ function init(){
+   const roots=['previdencia','previdenciaPrivada','patrimonio','investimentos'].map(x=>document.getElementById(x)).filter(Boolean);
+   const obs=new MutationObserver(sync);
+   for(const v of roots)obs.observe(v,{attributes:true,attributeFilter:['class']});
+   sync();
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+ window.ppUnifiedTabsV183={switchTab,sync};
+})();
+</script>
+
 <style id="pp-v110-stable-views-critical">
 /* V110 — primeiro frame estável em todos os hubs. O menu continua visível; só o conteúdo aguarda a montagem final. */
 html.pp-v110-boot main.main,
@@ -2009,27 +2093,22 @@ img,svg,canvas{max-width:100%}
 <div class="summary-strip" id="fgtsSummary"></div>
 <div class="tablewrap"><table><thead><tr><th>Contrato</th><th>Banco</th><th>Ano contratação</th><th>Valor no ano</th><th>Total</th><th>Quitado</th><th>Pendente</th><th>Status</th></tr></thead><tbody id="fgtsBody"></tbody></table></div>
 </section>
-<section class="view" id="previdencia">
-<div id="ppPensionDualV180" class="pp-pension-dual-v180" role="navigation" aria-label="Modalidade de previdência">
- <div class="pp-pension-dual-title-v180"><span>PLANEJAMENTO PREVIDENCIÁRIO</span><strong>Previdência</strong></div>
- <div class="pp-pension-dual-tabs-v180" role="tablist" aria-label="Selecione a modalidade">
-  <button type="button" role="tab" data-pension-tab-v180="previdencia" aria-selected="true" class="active">Pública</button>
-  <button type="button" role="tab" data-pension-tab-v180="previdenciaPrivada" aria-selected="false">Privada</button>
+<nav id="ppPensionDualV183" class="pp-unified-tabs-v183" aria-label="Modalidade de previdência">
+ <div class="pp-unified-title-v183"><small>PLANEJAMENTO PREVIDENCIÁRIO</small><strong>Previdência</strong></div>
+ <div class="pp-unified-switch-v183" role="tablist" aria-label="Escolher modalidade previdenciária">
+  <button type="button" role="tab" data-unified-view-v183="previdencia" aria-controls="previdencia" aria-selected="true">Pública</button>
+  <button type="button" role="tab" data-unified-view-v183="previdenciaPrivada" aria-controls="previdenciaPrivada" aria-selected="false">Privada</button>
  </div>
-</div>
+</nav>
+<section class="view" id="previdencia">
+
 <div class="rgps-loading-v51">
 <div class="rgps-loading-mark-v51">RGPS</div>
 <div><b>Previdência Social</b><span>Carregando seu histórico contributivo…</span></div>
 </div>
 </section>
 <section class="view" id="previdenciaPrivada">
-<div id="ppPensionDualPrivateV182" class="pp-pension-dual-v180" role="navigation" aria-label="Modalidade de previdência">
- <div class="pp-pension-dual-title-v180"><span>PLANEJAMENTO PREVIDENCIÁRIO</span><strong>Previdência</strong></div>
- <div class="pp-pension-dual-tabs-v180" role="tablist" aria-label="Selecione a modalidade">
-  <button type="button" role="tab" data-pension-tab-v180="previdencia" aria-selected="true" class="active">Pública</button>
-  <button type="button" role="tab" data-pension-tab-v180="previdenciaPrivada" aria-selected="false">Privada</button>
- </div>
-</div>
+
 <div class="ppv-wrap">
 <div class="ppv-head">
 <div>
@@ -2160,26 +2239,21 @@ img,svg,canvas{max-width:100%}
 </div>
 <datalist id="ppvBanks"><option>Banco Inter</option><option>Nubank</option><option>Itaú</option><option>Bradesco</option><option>Banco do Brasil</option><option>Caixa Econômica Federal</option><option>Santander</option><option>BTG Pactual</option><option>XP Investimentos</option><option>Icatu</option></datalist>
 </section>
+<nav id="ppAssetsDualV183" class="pp-unified-tabs-v183" aria-label="Patrimônio e investimentos">
+ <div class="pp-unified-title-v183"><small>GESTÃO PATRIMONIAL</small><strong>Patrimônio e Investimentos</strong></div>
+ <div class="pp-unified-switch-v183" role="tablist" aria-label="Escolher área patrimonial">
+  <button type="button" role="tab" data-unified-view-v183="patrimonio" aria-controls="patrimonio" aria-selected="false">Patrimônio</button>
+  <button type="button" role="tab" data-unified-view-v183="investimentos" aria-controls="investimentos" aria-selected="false">Investimentos</button>
+ </div>
+</nav>
 <section class="view" id="investimentos">
-<div id="ppAssetsDualInvestV182" class="pp-assets-dual-v181" role="navigation" aria-label="Patrimônio e investimentos">
-  <div class="pp-assets-title-v181"><span>GESTÃO PATRIMONIAL</span><strong>Patrimônio e Investimentos</strong></div>
-  <div class="pp-assets-tabs-v181" role="tablist" aria-label="Selecionar modalidade">
-    <button type="button" role="tab" class="active" data-assets-tab-v181="patrimonio" aria-selected="true">Patrimônio</button>
-    <button type="button" role="tab" data-assets-tab-v181="investimentos" aria-selected="false">Investimentos</button>
-  </div>
-</div>
+
 <div class="section-tools"><div><h2>Investimentos</h2></div><div class="filterbar"><select id="invYear"></select><select id="invType"><option value="all">Todos os tipos</option><option>CDB</option><option>LCI/LCA</option><option>Previdência privada</option><option>Tesouro Direto</option><option>Ações</option><option>Fundos</option><option>Caixinha / Reserva</option><option>A classificar</option></select><input class="search" id="invSearch" placeholder="Buscar produto ou banco"><button class="primary" id="addInvestmentBtn">+ Novo investimento</button></input></div></div>
 <div class="split"><article class="card panel ringbox"><div class="ring"><div class="pig">🐷</div></div><div class="yieldnote" style="text-align:center;margin-top:14px">Guarde com estratégia e acompanhe seu <b id="invYieldRate">0,00%</b><br/><span style="color:var(--muted)">rendimento sobre o capital exibido</span></div></article><div class="right-stack"><div class="summary-strip" id="invSummary"></div><article class="card panel"><div class="panelhead"><div><h2>Composição por tipo</h2><span>similar à visão de produto do banco</span></div></div><div class="list" id="invTypes"></div></article></div></div>
 <div class="invest-grid" id="invGrid" style="margin-top:12px"></div>
 </section>
 <section class="view" id="patrimonio">
-<div id="ppAssetsDualV181" class="pp-assets-dual-v181" role="navigation" aria-label="Patrimônio e investimentos">
-  <div class="pp-assets-title-v181"><span>GESTÃO PATRIMONIAL</span><strong>Patrimônio e Investimentos</strong></div>
-  <div class="pp-assets-tabs-v181" role="tablist" aria-label="Selecionar modalidade">
-    <button type="button" role="tab" class="active" data-assets-tab-v181="patrimonio" aria-selected="true">Patrimônio</button>
-    <button type="button" role="tab" data-assets-tab-v181="investimentos" aria-selected="false">Investimentos</button>
-  </div>
-</div>
+
 <div class="section-tools"><div><h2>Patrimônio</h2></div><div class="filterbar"><select id="assetYear"></select><select id="assetType"><option value="all">Todos os tipos</option><option>Investimento</option><option>Carro</option><option>Moto</option><option>Casa</option><option>Imóvel</option><option>Outro</option></select><button class="primary" id="addAsset">+ Novo patrimônio</button></div></div>
 <div class="summary-strip" id="assetSummary"></div>
 <div id="propertyHubV120"></div>
@@ -31061,7 +31135,16 @@ window.ppLaunchCreditorV155={refresh,open,close};
  const keyScope='planejador_dashboard_scope',keyYear='planejador_dashboard_year_v128',keyMonth='planejador_dashboard_month_v128',keyView='planejador_finance_last_view_v137';
  let state={scope:localStorage.getItem(keyScope)||'month',year:Number(localStorage.getItem(keyYear))||Number(window.year)||Number(window.currentYear)||new Date().getFullYear(),month:Number(localStorage.getItem(keyMonth))||Number(window.month)||Number(window.currentMonth)||new Date().getMonth()+1};
  function rowsAll(){try{return typeof allTx==='function'?allTx().filter(x=>x&&Number(x.ano)>=2000):[]}catch(e){return []}}
- function years(){const ys=[...new Set([...rowsAll().map(x=>+x.ano),Number(window.currentYear)||new Date().getFullYear()])].filter(Boolean).sort((a,b)=>b-a);return ys.length?ys:[new Date().getFullYear()]}
+ let cachedYears=null;
+ function years(){
+   if(cachedYears)return cachedYears;
+   const now=Number(window.currentYear)||new Date().getFullYear();
+   const ys=new Set([state.year,now]);
+   for(let y=now-10;y<=now+5;y++)ys.add(y);
+   try{rowsAll().forEach(x=>{const y=Number(x.ano);if(y>=1900&&y<=2200)ys.add(y)})}catch(e){}
+   cachedYears=[...ys].filter(y=>Number.isInteger(y)&&y>=1900&&y<=2200).sort((a,b)=>b-a);
+   return cachedYears;
+ }
  function periodRows(){const rows=rowsAll();if(state.scope==='month')return rows.filter(x=>+x.ano===state.year&&+x.mesNum===state.month);if(state.scope==='year')return rows.filter(x=>+x.ano===state.year);return rows}
  function periodText(){if(state.scope==='month')return `${months[state.month-1]} de ${state.year}`;if(state.scope==='year')return `Ano de ${state.year}`;return 'Todo o histórico registrado'}
  function debts(){try{return typeof getDebts==='function'?getDebts(false):[]}catch(e){return []}}
@@ -31078,18 +31161,104 @@ window.ppLaunchCreditorV155={refresh,open,close};
    if(Number.isFinite(Number(next.year)))state.year=Number(next.year);
    if(Number.isFinite(Number(next.month)))state.month=Number(next.month);
    syncLegacy();
+   // A Visão Geral V128 já calcula seu painel a partir do estado atual.
+   // Evita reconstruir outras versões do dashboard e renderizar novamente com atrasos.
    render();
-   // Update legacy calculations after our state is stable. Our dashboard never reads those DOM outputs.
-   setTimeout(()=>{try{window.renderDashboard?.()}catch(e){};setTimeout(render,30)},0);
  }
  function installControls(){
    const y=q('v128Year'),m=q('v128Month');if(!y||!m)return;
-   y.innerHTML=years().map(v=>`<option value="${v}">${v}</option>`).join('');
+   const available=years();
+   y.innerHTML=available.map(v=>`<option value="${v}">${v}</option>`).join('');
    m.innerHTML=months.map((v,i)=>`<option value="${i+1}">${v}</option>`).join('');
-   if(!years().includes(state.year))state.year=years()[0];
+   if(!available.includes(state.year))state.year=available[0];
    y.value=String(state.year);m.value=String(state.month);
    y.onchange=e=>setState({year:+e.target.value});m.onchange=e=>setState({month:+e.target.value,scope:'month'});
    q('v128Scope')?.querySelectorAll('button').forEach(b=>b.onclick=()=>setState({scope:b.dataset.v128Scope}));
+   installFastPickers();
+ }
+ const fastPickers={menu:null,button:null,kind:null};
+ function closeFastPicker(){
+   fastPickers.menu?.classList.remove('open');
+   if(fastPickers.button)fastPickers.button.setAttribute('aria-expanded','false');
+   fastPickers.button=null;fastPickers.kind=null;
+ }
+ function positionFastPicker(){
+   const menu=fastPickers.menu,button=fastPickers.button;
+   if(!menu||!button||!menu.classList.contains('open'))return;
+   const rect=button.getBoundingClientRect(),vw=document.documentElement.clientWidth,vh=window.innerHeight;
+   const width=Math.min(Math.max(150,rect.width),vw-20);
+   menu.style.width=width+'px';
+   const height=menu.offsetHeight;
+   const left=Math.max(10,Math.min(rect.left,vw-width-10));
+   const below=rect.bottom+5;
+   const top=below+height<=vh-8?below:Math.max(8,rect.top-height-5);
+   menu.style.left=left+'px';menu.style.top=top+'px';
+ }
+ function ensureFastPicker(){
+   if(fastPickers.menu)return fastPickers.menu;
+   const el=document.createElement('div');el.id='pp184PeriodPicker';el.className='pp184-period-popup';
+   el.setAttribute('role','listbox');document.body.appendChild(el);fastPickers.menu=el;
+   el.addEventListener('click',e=>{
+     const option=e.target.closest('[data-pp184-choice]');if(!option)return;
+     e.preventDefault();e.stopPropagation();
+     const kind=fastPickers.kind,btn=fastPickers.button,value=Number(option.dataset.pp184Choice);
+     closeFastPicker();
+     if(kind==='month'&&value>=1&&value<=12)setState({month:value,scope:'month'});
+     if(kind==='year'&&Number.isInteger(value))setState({year:value});
+     btn?.focus({preventScroll:true});
+   });
+   document.addEventListener('pointerdown',e=>{
+     if(!fastPickers.button)return;
+     if(e.target.closest?.('#pp184PeriodPicker,[data-pp184-picker]'))return;
+     closeFastPicker();
+   },true);
+   document.addEventListener('keydown',e=>{
+     if(!fastPickers.button)return;
+     if(e.key==='Escape'){e.preventDefault();const btn=fastPickers.button;closeFastPicker();btn?.focus({preventScroll:true});return}
+     if(!['ArrowDown','ArrowUp','Home','End'].includes(e.key))return;
+     if(!e.target.closest('#pp184PeriodPicker,[data-pp184-picker]'))return;
+     e.preventDefault();
+     const items=[...el.querySelectorAll('[data-pp184-choice]')];
+     if(!items.length)return;
+     const idx=Math.max(0,items.indexOf(document.activeElement));
+     const next=e.key==='Home'?0:e.key==='End'?items.length-1:e.key==='ArrowDown'?(idx+1)%items.length:(idx-1+items.length)%items.length;
+     items[next]?.focus({preventScroll:true});
+     items[next]?.scrollIntoView({block:'nearest'});
+   });
+   window.addEventListener('resize',positionFastPicker,{passive:true});
+   window.addEventListener('scroll',positionFastPicker,true);
+   return el;
+ }
+ function syncFastPickers(){
+   for(const kind of ['month','year']){
+     const btn=q(kind==='month'?'pp184MonthBtn':'pp184YearBtn');if(!btn)continue;
+     const value=kind==='month'?months[state.month-1]||months[0]:String(state.year);
+     const display=btn.querySelector('.pp184-picker-label');if(display)display.textContent=value;
+   }
+ }
+ function openFastPicker(kind,btn){
+   if(fastPickers.button===btn){closeFastPicker();return}
+   closeFastPicker();const menu=ensureFastPicker();
+   fastPickers.button=btn;fastPickers.kind=kind;
+   const options=kind==='month'?months.map((name,i)=>({name,value:i+1})):years().map(y=>({name:String(y),value:y}));
+   const chosen=kind==='month'?state.month:state.year;
+   menu.innerHTML=options.map(o=>`<button type="button" role="option" class="pp184-period-option${o.value===chosen?' active':''}" aria-selected="${o.value===chosen}" data-pp184-choice="${o.value}">${o.name}</button>`).join('');
+   menu.classList.add('open');btn.setAttribute('aria-expanded','true');positionFastPicker();
+   menu.querySelector('[aria-selected="true"]')?.scrollIntoView({block:'nearest'});
+ }
+ function installFastPickers(){
+   for(const [kind,id] of [['month','v128Month'],['year','v128Year']]){
+     const sel=q(id);if(!sel||q(kind==='month'?'pp184MonthBtn':'pp184YearBtn'))continue;
+     sel.classList.add('pp184-visually-hidden');sel.tabIndex=-1;sel.setAttribute('aria-hidden','true');
+     const btn=document.createElement('button');btn.type='button';btn.id=kind==='month'?'pp184MonthBtn':'pp184YearBtn';
+     btn.className='pp184-period-trigger';btn.dataset.pp184Picker=kind;
+     btn.setAttribute('aria-label',kind==='month'?'Selecionar mês':'Selecionar ano');
+     btn.setAttribute('aria-haspopup','listbox');btn.setAttribute('aria-expanded','false');
+     btn.innerHTML='<span class="pp184-picker-label"></span><span class="pp184-picker-chevron" aria-hidden="true">⌄</span>';
+     sel.insertAdjacentElement('afterend',btn);
+     btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openFastPicker(kind,btn)});
+   }
+   syncFastPickers();
  }
  function metric(label,value,sub,extraCls=''){return `<div class="v128-summary-item ${extraCls}"><span>${esc(label)}</span><b title="${esc(value)}">${value}</b><small>${esc(sub||'')}</small></div>`}
  function renderTrend(){
@@ -31106,7 +31275,7 @@ window.ppLaunchCreditorV155={refresh,open,close};
  function render(){
    const root=q(ROOT);if(!root)return;
    q('v128Scope')?.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.v128Scope===state.scope));
-   const y=q('v128Year'),m=q('v128Month'),mf=q('v128MonthField'),pl=q('v129PeriodLabel');if(y)y.value=String(state.year);if(m)m.value=String(state.month);if(mf)mf.classList.toggle('is-hidden',state.scope!=='month');if(pl)pl.textContent=periodText();
+   const y=q('v128Year'),m=q('v128Month'),mf=q('v128MonthField'),pl=q('v129PeriodLabel');if(y)y.value=String(state.year);if(m)m.value=String(state.month);if(mf)mf.classList.toggle('is-hidden',state.scope!=='month');if(pl)pl.textContent=periodText();syncFastPickers();
    const rows=periodRows(),inc=rows.filter(x=>x.tipo==='entrada').reduce((a,x)=>a+n(x.valor),0),out=rows.filter(x=>x.tipo==='saida').reduce((a,x)=>a+n(x.valor),0),rawBal=inc-out,bal=Math.abs(rawBal)<0.005?0:rawBal,status=bal>0?'Superávit':bal<0?'Déficit':'Equilíbrio';
    q('v128Balance').textContent=money(bal);
    const statusClass=bal>0?'state-positive':bal<0?'state-negative':'state-neutral';
@@ -31430,7 +31599,7 @@ body.pp-v138-view-ready .main{overflow-y:visible!important;height:auto!important
    open(id,{scroll:false,persist:false});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(restore,30),{once:true});else setTimeout(restore,30);
- setTimeout(restore,900);
+ setTimeout(()=>{if(!window.__ppDualInteractionV183)restore()},900);
 })();
 </script>
 <style id="pp-v140-launch-spacing-recovery-style">
@@ -33090,51 +33259,36 @@ window.ppDeleteV162={open:openScope162};
 </style>
 
 
-<script id="pp-v182-dual-tabs-in-views-js">
-(()=>{'use strict';
- const IDS=['previdencia','previdenciaPrivada','patrimonio','investimentos'];
- const pub=document.getElementById('previdencia');
- const pensionMenu=document.getElementById('ppPensionDualV180');
- if(!pub||!pensionMenu)return;
- // Previdência Pública pode reconstruir seu próprio HTML ao recalcular a simulação.
- // Recolocar apenas a barra, se for removida; não observar os dados internos.
- const pensionWatcher=new MutationObserver(()=>{
-   if(!pub.contains(pensionMenu))pub.insertBefore(pensionMenu,pub.firstChild);
- });
- pensionWatcher.observe(pub,{childList:true});
- function update(){
-   const current=IDS.find(id=>document.getElementById(id)?.classList.contains('active'))||'';
-   document.querySelectorAll('[data-pension-tab-v180],[data-assets-tab-v181]').forEach(btn=>{
-     const id=btn.dataset.pensionTabV180||btn.dataset.assetsTabV181;
-     const selected=id===current;
-     if(btn.classList.contains('active')!==selected)btn.classList.toggle('active',selected);
-     if(btn.getAttribute('aria-selected')!==String(selected))btn.setAttribute('aria-selected',String(selected));
-     btn.tabIndex=selected?0:-1;
-   });
-   if(current==='previdenciaPrivada')document.querySelectorAll('[data-v62-view="previdencia"]').forEach(b=>b.classList.add('active'));
-   if(current==='investimentos')document.querySelectorAll('[data-v62-view="patrimonio"]').forEach(b=>b.classList.add('active'));
- }
- document.addEventListener('click',e=>{
-   const b=e.target.closest?.('[data-pension-tab-v180],[data-assets-tab-v181]');if(!b)return;
-   e.preventDefault();e.stopPropagation();
-   const id=b.dataset.pensionTabV180||b.dataset.assetsTabV181;
-   if(!IDS.includes(id))return;
-   const target=document.getElementById(id);
-   if(!target)return;
-   const route=window.ppFinanceRouterV138;
-   if(!target.classList.contains('active')){
-     if(route&&typeof route.open==='function')route.open(id,{scroll:false,persist:false});
-     else if(typeof window.showView==='function')window.showView(id);
-   }
-   // Only save menu navigation preference, not financial records.
-   const base=id==='previdenciaPrivada'?'previdencia':id==='investimentos'?'patrimonio':id;
-   try{history.replaceState(null,'','#'+base)}catch(e){}
-   update();
-   target.scrollIntoView({block:'start',behavior:'instant'});
- },false);
- const watch=new MutationObserver(update);
- IDS.forEach(id=>{const v=document.getElementById(id);if(v)watch.observe(v,{attributes:true,attributeFilter:['class']})});
- document.addEventListener('pp:viewchange',update);
- update();
-})();
-</script>
+
+
+<style id="pp-v184-fast-period-css">
+/* Controladores locais da Visão Geral: o menu abre sem reconstruir o dashboard. */
+#dashboardV128 .v129-period-fields select.pp184-visually-hidden{
+  position:absolute!important;width:1px!important;height:1px!important;min-width:0!important;
+  opacity:0!important;pointer-events:none!important;overflow:hidden!important;
+  margin:-1px!important;padding:0!important;border:0!important;
+  clip-path:inset(50%)!important;
+}
+#dashboardV128 .v129-period-fields .pp184-period-trigger{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;
+  width:100%!important;height:31px!important;min-height:31px!important;
+  padding:0 4px 0 0!important;margin:0!important;
+  color:#17324e!important;border:0!important;border-bottom:1px solid #b9c8d8!important;
+  border-radius:0!important;background:transparent!important;
+  font:850 11px/1.3 Roboto,Arial,sans-serif!important;cursor:pointer!important;
+  text-align:left!important;box-shadow:none!important;outline:none!important;
+}
+#dashboardV128 .v129-period-fields .pp184-period-trigger:hover,
+#dashboardV128 .v129-period-fields .pp184-period-trigger:focus-visible{border-bottom-color:#0c62c7!important}
+#dashboardV128 .pp184-picker-chevron{font-size:15px;color:#233f62;flex:0 0 auto}
+.pp184-period-popup{position:fixed!important;z-index:2147483620!important;display:none;
+  max-height:min(320px,65vh);overflow:auto;overscroll-behavior:contain;
+  padding:5px;border:1px solid #d7e2ef;border-radius:12px;background:#fff;
+  box-shadow:0 18px 45px rgba(10,30,60,.2);box-sizing:border-box}
+.pp184-period-popup.open{display:block!important}
+.pp184-period-option{display:block;width:100%;padding:9px 11px;min-height:34px;border:0;
+  border-radius:8px;background:transparent;color:#203b5e;cursor:pointer;
+  text-align:left;font:700 12px/1.2 Roboto,Arial,sans-serif}
+.pp184-period-option:hover,.pp184-period-option:focus-visible{background:#eaf3ff;outline:none}
+.pp184-period-option.active{background:#e4efff;color:#0952a2;font-weight:900}
+</style>
