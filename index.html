@@ -3499,7 +3499,7 @@ function bindFgtsToggle(){
  paint();
 }
 const prevFgts=window.renderFgts;
-window.renderFgts=function(){if(typeof prevFgts==='function')prevFgts();const visible=localStorage.getItem('planejador_fgts_quitados_visiveis')==='1';setTimeout(()=>{applyFgtsRows(visible);bindFgtsToggle()},0)}
+window.renderFgts=function(){if(typeof prevFgts==='function')prevFgts();const visible=localStorage.getItem('planejador_fgts_quitados_visiveis')==='1';applyFgtsRows(visible);bindFgtsToggle()}
 function tuneLaunchModal(){
  const m=document.getElementById('txModal');if(!m)return;
  m.addEventListener('transitionend',()=>{}, {once:true});
@@ -3637,8 +3637,8 @@ setTimeout(init,50);
   card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openSaqueMemory()}};
  }
  const prior=window.renderFgts;
- if(typeof prior==='function')window.renderFgts=function(){const r=prior.apply(this,arguments);setTimeout(decorate,0);return r};
- const obs=new MutationObserver(()=>decorate());const s=document.getElementById('fgtsSummary');if(s)obs.observe(s,{childList:true,subtree:true});
+ if(typeof prior==='function')window.renderFgts=function(){const r=prior.apply(this,arguments);decorate();return r};
+ // V170: no observer required; the FGTS render function invokes decorate.
  setTimeout(decorate,0);
 })();
 </script>
@@ -7587,7 +7587,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
   const prevFgts = window.renderFgts;
   window.renderFgts = function(){
     const r = typeof prevFgts === 'function' ? prevFgts.apply(this, arguments) : undefined;
-    setTimeout(cleanFgtsCards, 0);
+    cleanFgtsCards();
     return r;
   };
 
@@ -7856,7 +7856,7 @@ window.__renderCardsPremiumFinal=renderParametricCarousel;window.renderCards=ren
   const oldRender=window.renderFgts;
   window.renderFgts=function(){
     const r=typeof oldRender==='function'?oldRender.apply(this,arguments):undefined;
-    setTimeout(updateSaqueCard,0);
+    updateSaqueCard();
     return r;
   };
 
@@ -9943,7 +9943,7 @@ Os dados atuais deste navegador serão substituídos.`);
   const oldRenderFgts49=window.renderFgts;
   window.renderFgts=function(){
     const r=typeof oldRenderFgts49==='function'?oldRenderFgts49.apply(this,arguments):undefined;
-    setTimeout(decorateFgts49,0);
+    decorateFgts49();
     return r;
   };
   try{renderFgts=window.renderFgts}catch(e){}
@@ -12171,7 +12171,7 @@ window.ppDebtBalanceV55={reconcile:reconcile55,reconcileAll:reconcileAll55};
   window.openSaqueMemory=window.openSaqueMemoryV56;
 
   const priorRenderV56=window.renderFgts;
-  window.renderFgts=function(){const r=typeof priorRenderV56==='function'?priorRenderV56.apply(this,arguments):undefined;setTimeout(()=>{decorateRows();decorateSummary()},0);return r};
+  window.renderFgts=function(){const r=typeof priorRenderV56==='function'?priorRenderV56.apply(this,arguments):undefined;decorateRows();decorateSummary();return r};
   try{renderFgts=window.renderFgts}catch(e){}
   setTimeout(()=>{decorateRows();decorateSummary()},120);
 })();
@@ -14177,7 +14177,7 @@ setTimeout(initEssence,0);
   const oldFgts=window.renderFgts;
   window.renderFgts=function(){
     const r=typeof oldFgts==='function'?oldFgts.apply(this,arguments):undefined;
-    setTimeout(decorateFgts,0);
+    decorateFgts();
     return r;
   };
 })();
@@ -31297,7 +31297,8 @@ body.pp-v138-view-ready .main{overflow-y:visible!important;height:auto!important
    const fn=renderers[id];
    try{fn?.()}catch(e){console.warn('V138 render',id,e)}
    requestAnimationFrame(()=>{
-     try{fn?.()}catch(e){}
+     // FGTS is expensive and its decorators are applied synchronously in V170.
+     if(id!=='fgts'){try{fn?.()}catch(e){}}
      try{window.dispatchEvent(new Event('resize'))}catch(e){}
      try{document.dispatchEvent(new CustomEvent('pp:viewchange',{detail:{view:id}}))}catch(e){}
    });
@@ -32471,18 +32472,16 @@ window.ppDeleteV162={open:openScope162};
    const s=document.getElementById('fgtsStatus');
    if(s&&s.value==='Pendente')s.value='all';
    const result=previous?.apply(this,arguments);
-   sync();setTimeout(sync,0);setTimeout(sync,90);
+   sync();
    return result;
  };
  try{renderFgts=window.renderFgts}catch(e){}
  function initialize(){
    const status=document.getElementById('fgtsStatus');
    if(status)status.value='all';
-   window.renderFgts?.();sync();
-   const body=table();
-   if(body){const observer=new MutationObserver(()=>{if(!painting)queueMicrotask(sync)});observer.observe(body,{childList:true});}
-   const summary=document.getElementById('fgtsSummary');
-   if(summary){const observer=new MutationObserver(()=>queueMicrotask(restoreMemory));observer.observe(summary,{childList:true});}
+   // Initial page load is already rendered by existing boot routines.
+   // Avoid render + observers which caused redundant work on every navigation.
+   sync();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});else initialize();
 })();
