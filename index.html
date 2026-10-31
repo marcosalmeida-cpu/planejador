@@ -32424,75 +32424,66 @@ window.ppDeleteV162={open:openScope162};
 })();
 </script>
 
-<script id="pp-v166-fgts-saques-quitados-fix">
-/* Correção isolada da apresentação: não altera registros nem chaves de armazenamento dos contratos. */
+<script id="pp-v167-fgts-stable">
+/* V167 — estabilização do filtro FGTS e do detalhamento; não altera dados armazenados */
 (function(){
  'use strict';
  const KEY='planejador_fgts_quitados_visiveis';
- const money=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
- const amount=v=>{if(typeof v==='number')return Number.isFinite(v)?v:0;let s=String(v??'').replace(/\s|R\$/gi,'');if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');return Number(s)||0};
- const profile=()=>localStorage.getItem('planejador_active_profile')||'Marcos';
- const showPaid=()=>localStorage.getItem(KEY)==='1';
- function getContracts(){try{return (window.getFgtsContracts?.()||[]).filter(c=>!c._deleted)}catch(e){return []}}
- function compute(){
-   const balance=Math.max(0,amount(typeof fgtsSummary!=='undefined'?fgtsSummary?.saldoAtual:0));
-   const brackets=[[500,.5,0],[1000,.4,50],[5000,.3,150],[10000,.2,650],[15000,.15,1150],[20000,.1,1900],[Infinity,.05,2900]];
-   const [max,rate,extra]=brackets.find(([cap])=>balance<=cap);
-   const month=profile()==='Christian'?1:7;
-   const today=new Date();const year=today.getFullYear()+(today.getMonth()+1>month?1:0);
-   const discounts={};
-   for(const c of getContracts()){
-     const statuses=c.parcelStatusV56||{};
-     for(const [key,value] of Object.entries(c.anos||{})){
-       const y=Number(key),v=Math.max(0,amount(value));if(!Number.isInteger(y)||v<=0)continue;
-       const manual=statuses[key];
-       const paid=manual==='Quitado'||(manual!=='Pendente'&&(c.quitadoManual===true||(c.status==='Quitado'&&amount(c.pendente)<=0)||y<=today.getFullYear()));
-       if(!paid)discounts[y]=(discounts[y]||0)+v;
+ const visible=()=>localStorage.getItem(KEY)==='1';
+ let painting=false;
+ function table(){return document.getElementById('fgtsBody')}
+ function paint(){
+   if(painting)return;painting=true;
+   try{
+     const btn=document.getElementById('fgtsPaidToggle');
+     if(btn){const on=visible();btn.type='button';btn.textContent=on?'Ocultar quitados':'Mostrar quitados';btn.classList.toggle('active',on);btn.setAttribute('aria-pressed',String(on));}
+     const body=table();
+     if(body)for(const tr of body.querySelectorAll('tr')){
+       if(!tr.cells||tr.cells.length<8)continue;
+       const status=tr.cells[7]?.textContent?.trim()||'';
+       tr.style.display=(!visible()&&/^quitad[oa]$/i.test(status))?'none':'';
      }
-   }
-   const gross=balance*rate+extra,discount=discounts[year]||0;
-   return{balance,max,rate,extra,gross,year,discount,discounts,net:Math.max(0,gross-discount),month};
+   }finally{painting=false}
  }
- function syncToggle(){
-   const btn=document.getElementById('fgtsPaidToggle');if(!btn)return;
-   const on=showPaid();
-   btn.type='button';btn.textContent=on?'Ocultar quitados':'Mostrar quitados';
-   btn.classList.toggle('active',on);btn.setAttribute('aria-pressed',String(on));
-   btn.onclick=function(e){e.preventDefault();e.stopPropagation();const next=!showPaid();localStorage.setItem(KEY,next?'1':'0');const status=document.getElementById('fgtsStatus');if(status)status.value=next?'all':'Pendente';window.renderFgts?.();};
+ // Interceptação no CAPTURE: nenhum controlador legado recebe este clique.
+ document.addEventListener('click',function(e){
+   const btn=e.target.closest?.('#fgtsPaidToggle');if(!btn)return;
+   e.preventDefault();e.stopImmediatePropagation();
+   localStorage.setItem(KEY,visible()?'0':'1');
+   paint();
+ },true);
+ function restoreMemory(){
+   const summary=document.getElementById('fgtsSummary');if(!summary)return;
+   const card=[...summary.querySelectorAll('.mini')].find(c=>/saque.anivers.rio/i.test(c.querySelector('span')?.textContent||''));
+   if(!card)return;
+   card.style.cursor='pointer';card.setAttribute('role','button');card.setAttribute('tabindex','0');
+   const open=()=>{
+     if(typeof window.openSaqueMemory==='function')window.openSaqueMemory();
+     else if(typeof window.openSaqueMemoryV56==='function')window.openSaqueMemoryV56();
+   };
+   card.onclick=e=>{e.preventDefault();e.stopPropagation();open()};
+   card.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}};
  }
- function syncSaque(){
-   const wrap=document.getElementById('fgtsSummary');if(!wrap)return;
-   const boxes=[...wrap.querySelectorAll('.mini')];
-   let card=boxes.find(c=>/saque.anivers.rio/i.test(c.textContent));
-   if(!card){card=boxes.find(c=>/posição do período/i.test(c.textContent))||boxes[3];if(!card)return;card.innerHTML='<span>Saque-aniversário</span><b class="saque-card-value"></b><small class="saque-card-note"></small>'}
-   const info=compute();card.querySelector('b').textContent=money(info.net);
-   let note=card.querySelector('small');if(!note){note=document.createElement('small');card.appendChild(note)}
-   note.className='saque-card-note';note.textContent=`Bruto ${money(info.gross)} − antecipações pendentes ${money(info.discount)} em ${info.year}`;
-   card.onclick=e=>{e.preventDefault();showMemory()};card.style.cursor='pointer';
- }
- function showMemory(){
-   const i=compute(),m=document.getElementById('saqueMemoryModal');
-   if(!m){return}
-   const body=m.querySelector('#saqueMemoryBody');if(!body)return;
-   body.innerHTML=`<div class="saque-highlight"><div><span>Saldo considerado</span><b>${money(i.balance)}</b></div><div><span>Perfil / aniversário</span><b>${profile()} · ${i.month===1?'janeiro':'julho'}</b></div></div><div class="saque-formula"><h3>Memória de cálculo</h3><div class="saque-formula-line"><span>Alíquota aplicável</span><b>${(i.rate*100).toLocaleString('pt-BR')}%</b></div><div class="saque-formula-line"><span>${money(i.balance)} × ${(i.rate*100).toLocaleString('pt-BR')}%</span><b>${money(i.balance*i.rate)}</b></div><div class="saque-formula-line"><span>Parcela adicional</span><b>${money(i.extra)}</b></div><div class="saque-formula-line"><span>Saque bruto estimado</span><b>${money(i.gross)}</b></div><div class="saque-formula-line"><span>Empréstimos anuais pendentes em ${i.year}</span><b>− ${money(i.discount)}</b></div></div><div class="saque-result"><span>Saque-aniversário líquido estimado em ${i.year}</span><b>${money(i.net)}</b></div>`;
-   document.querySelectorAll('.modalback.open').forEach(x=>{if(x!==m)x.classList.remove('open')});m.classList.add('open');
- }
- function update(){
-   const status=document.getElementById('fgtsStatus');const val=showPaid()?'all':'Pendente';
-   if(status&&status.value!==val){status.value=val;return true}
-   syncToggle();syncSaque();return false;
- }
- const prior=window.renderFgts;
+ // Os módulos antigos substituem as linhas e cartões após o render; reestabelecer sem chamar render novamente.
+ function sync(){paint();restoreMemory()}
+ const previous=window.renderFgts;
  window.renderFgts=function(){
-   const status=document.getElementById('fgtsStatus');if(status)status.value=showPaid()?'all':'Pendente';
-   const result=typeof prior==='function'?prior.apply(this,arguments):undefined;
-   syncToggle();syncSaque();
-   setTimeout(()=>{syncToggle();syncSaque()},35);
+   const s=document.getElementById('fgtsStatus');
+   if(s&&s.value==='Pendente')s.value='all';
+   const result=previous?.apply(this,arguments);
+   sync();setTimeout(sync,0);setTimeout(sync,90);
    return result;
  };
  try{renderFgts=window.renderFgts}catch(e){}
- // Os módulos antigos substituem os cartões em callbacks assíncronos; reaplicar só a apresentação.
- function start(){if(update())window.renderFgts?.();else window.renderFgts?.()}
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+ function initialize(){
+   const status=document.getElementById('fgtsStatus');
+   if(status)status.value='all';
+   window.renderFgts?.();sync();
+   const body=table();
+   if(body){const observer=new MutationObserver(()=>{if(!painting)queueMicrotask(sync)});observer.observe(body,{childList:true});}
+   const summary=document.getElementById('fgtsSummary');
+   if(summary){const observer=new MutationObserver(()=>queueMicrotask(restoreMemory));observer.observe(summary,{childList:true});}
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});else initialize();
 })();
 </script>
