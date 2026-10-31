@@ -2000,7 +2000,7 @@ img,svg,canvas{max-width:100%}
 <div class="tablewrap"><table><thead><tr><th>Cartão</th><th>Compra</th><th>Compra em</th><th>Tipo</th><th>Parcelas</th><th>Progresso</th><th>Total</th><th>Pendente</th><th>Ação</th></tr></thead><tbody id="cardPurchaseBody"></tbody></table></div>
 </section>
 <section class="view" id="dividas">
-<div class="section-tools"><div><h2>Dívidas</h2></div><div class="filterbar"><select id="debtFilter"><option value="all">Todas</option><option selected="" value="pending">Pendentes</option><option value="paid">Quitadas</option><option value="negotiated">Negociadas</option><option value="notnegotiated">Não negociadas</option><option value="archived">Arquivadas</option></select><input class="search" id="debtSearch" placeholder="Buscar dívida"/></div></div>
+<div class="section-tools"><div><h2>Dívidas</h2></div><div class="filterbar"><div id="debtTabsV176" class="debt-tabs-v176" role="tablist" aria-label="Status das dívidas"><button type="button" role="tab" aria-selected="true" class="active" data-v176-debt="pending">Pendentes</button><button type="button" role="tab" aria-selected="false" data-v176-debt="paid">Quitadas</button></div><select id="debtFilter"><option value="all">Todas</option><option selected="" value="pending">Pendentes</option><option value="paid">Quitadas</option><option value="negotiated">Negociadas</option><option value="notnegotiated">Não negociadas</option><option value="archived">Arquivadas</option></select><input class="search" id="debtSearch" placeholder="Buscar dívida"/></div></div>
 <div class="summary-strip" id="debtSummary"></div>
 <div class="tablewrap"><table><thead><tr><th>Descrição</th><th>Credor</th><th>Banco</th><th>Parcela</th><th>Andamento</th><th>Negociado</th><th>Status</th><th>Pendente</th><th>Ação</th></tr></thead><tbody id="debtBody"></tbody></table></div>
 </section>
@@ -21903,54 +21903,15 @@ function attachDebtLock73(){
   scheduleFinal73(0);
 }
 
-/* Os pontos abaixo são justamente os eventos em que os renderizadores antigos
-   costumavam disparar diretamente por closure. A checagem posterior garante
-   que a tabela final permaneça visível. */
-document.addEventListener('click',e=>{
-  if(
-    e.target.closest?.('#dividas') ||
-    e.target.closest?.('[data-page="dividas"]') ||
-    e.target.closest?.('[data-view="dividas"]')
-  ){
-    scheduleFinal73(30);
-    scheduleFinal73(180);
-  }
-},false);
-
-document.addEventListener('change',e=>{
-  if(e.target?.closest?.('#dividas'))scheduleFinal73(20);
-},false);
-
-document.addEventListener('input',e=>{
-  if(e.target?.closest?.('#dividas'))scheduleFinal73(20);
-},false);
-
-/* Alguns scripts antigos usam timeouts maiores depois de abrir a página/modal.
-   Esta verificação é apenas estrutural e não redesenha quando tudo está certo. */
-setInterval(()=>{
-  const section=document.getElementById('dividas');
-  if(!section)return;
-  if(!finalIsVisible73())forceFinal73();
-},1200);
-
+/* V176: removidas rechecagens de toda interação; controle de status/busca é dedicado. */
+/* V176: removida verificação periódica custosa; o observador da tabela permanece. */
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',()=>setTimeout(attachDebtLock73,250),{once:true});
 }else{
   setTimeout(attachDebtLock73,250);
 }
 
-/* Se a página for reconstruída por navegação, reconecta o observador. */
-const pageObserver73=new MutationObserver(()=>{
-  const section=document.getElementById('dividas');
-  if(section && (!observer73 || !finalIsVisible73())){
-    setTimeout(()=>{
-      attachDebtLock73();
-      scheduleFinal73(0);
-    },30);
-  }
-});
-if(document.body)pageObserver73.observe(document.body,{childList:true,subtree:true});
-
+/* V176: removida observação global do documento. A seção é estável na navegação. */
 window.ppDebtV73={
   repair:forceFinal73,
   check:finalIsVisible73,
@@ -22158,10 +22119,8 @@ function ensureLedger74(d){
       }
     }
   }
-  // Leitura/renderização nunca deve regravar o ledger se ele não mudou.
-  if(changed){
-    all[id]=ledger;writeObj74(ledgerKey74(),all);
-  }
+  // Consulta/renderização é apenas leitura. O ledger só é salvo por uma ação explícita
+  // de pagamento, antecipação, reabertura ou quitação (setLedger74).
   return ledger;
 }
 function setLedger74(id,ledger){const all=readObj74(ledgerKey74());all[String(id)]=ledger;writeObj74(ledgerKey74(),all)}
@@ -22371,14 +22330,14 @@ function renderDebts74(){
     const paidOff=st.pending<=.009||st.paidInst>=st.totalInst;
     const pct=st.total>0?Math.min(100,Math.max(0,st.paid/st.total*100)):0;
     return `<tr data-v74-debt="${esc(x.id)}">
-      <td><b>${esc(x.descricao||'Dívida')}</b></td>
+      <td><b>${esc(x.descricao||'Dívida')}</b>${x.isCreditWorker?'<span class="ct-tag-v39">CT</span>':''}</td>
       <td>${esc(x.credor||'—')}</td>
       <td><b>${Math.max(0,st.totalInst-st.paidInst)}</b></td>
       <td><b class="positive">${st.paidInst}</b></td>
       <td>${brl(st.installment)}</td>
       <td class="v72-date v72-last-paid">${fmt74(lastPaid)}</td>
       <td class="v72-date v72-last-installment">${fmt74(last74(x))}</td>
-      <td><div class="v74-progress"><div class="progress"><i style="width:${pct}%"></i></div><small>${pct.toFixed(0)}%</small></div></td>
+      <td class="v176-progress-cell"><b class="v176-progress-pct">${pct.toFixed(0)}%</b></td>
       <td><span class="tag ${String(x.negociado||'').toLowerCase()==='sim'?'green':'amber'}">${esc(x.negociado||'Não')}</span></td>
       <td><span class="tag ${paidOff?'green':'red'}">${paidOff?'Quitado':'Pendente'}</span></td>
       <td class="money ${paidOff?'positive':'negative'}">${brl(st.pending)}</td>
@@ -29927,9 +29886,20 @@ body:has(#previdencia.active) .hub-content{
    }).sort((a,b)=>b.endIndex-a.endIndex||a.startIndex-b.startIndex)
  }
  function render(){ const card=document.querySelector('#previdencia .rgps-career-v98'); if(!card) return; const periods=load(), groups=group(periods); const head=card.querySelector('.rgps-card-head-v51'); const note=card.querySelector('.rgps-career-note-v98'); let list=card.querySelector('.rgps-career-list-v98'); if(!list){list=document.createElement('div'); list.className='rgps-career-list-v98'; note?card.insertBefore(list,note):card.appendChild(list);} const pill=head?.querySelector('.rgps-pill-v51'); if(pill) pill.textContent=`${groups.length} ${groups.length===1?'empresa':'empresas'}`; list.innerHTML=groups.length?groups.map(g=>`<article class="rgps-career-company-v103"><h4>${esc(g.employer)}</h4><p>${esc(g.start)} — ${esc(g.end)} · ${g.roles.length} ${g.roles.length===1?'movimento de carreira':'movimentos de carreira'}</p><div class="rgps-career-badges-v103"><span>${g.validMonths} ${g.validMonths===1?'competência válida':'competências válidas'}</span><span>${g.roles.length} ${g.roles.length===1?'cargo':'cargos'}</span></div><div class="rgps-career-track-v103">${g.roles.map(r=>`<article class="rgps-career-step-v103"><small>${esc(r.start)} — ${esc(r.end)}</small><b>${esc(r.jobTitle)}</b><span>${r.validMonths?esc(r.validMonths+' competência'+(r.validMonths===1?'':'s')):'Período sincronizado'}</span></article>`).join('')}</div></article>`).join(''):'<div class="rgps-career-empty-v98">Nenhum vínculo identificado.</div>'; }
- const schedule=()=>setTimeout(render,30);
- new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});
- window.addEventListener('storage',e=>{if(!e.key||e.key===key()) render();});
+ /* V175: não observar o body inteiro. O render anterior escrevia dentro
+    da própria lista, disparando o observador de novo a cada 30 ms e
+    sobrecarregando inclusive os selects do modal de compra. */
+ let pending=false;
+ const schedule=()=>{if(pending)return;pending=true;setTimeout(()=>{pending=false;render()},60)};
+ const previdencia=document.getElementById('previdencia');
+ if(previdencia){
+   new MutationObserver(records=>{
+     // Desconsidera alterações internas criadas pelo próprio render().
+     if(records.some(r=>!r.target.closest?.('.rgps-career-v98')))schedule();
+   }).observe(previdencia,{childList:true,subtree:true});
+ }
+ document.addEventListener('pp:profile-changed',schedule);
+ window.addEventListener('storage',e=>{if(!e.key||e.key===key())schedule();});
  [0,400,1000].forEach(ms=>setTimeout(render,ms));
 })();
 </script>
@@ -32606,3 +32576,109 @@ window.ppDeleteV162={open:openScope162};
 /* Apenas o botão X permanece visível na memória do saque. */
 #saqueMemoryModal .saque-mem-head > div{display:none!important;}
 </style>
+
+<style id="pp-v176-debts-clean-style">
+/* V176: controles de Dívidas, sem mudar dados. */
+#dividas .section-tools .filterbar {display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:10px!important;flex-wrap:wrap!important}
+#dividas .section-tools .filterbar select,
+#dividas .section-tools .filterbar [id^="debtNegotiationFilter"],
+#dividas .section-tools .filterbar [id^="debtLastMonthFilter"] {display:none!important}
+#dividas .debt-tabs-v176 {display:inline-flex!important;align-items:stretch!important;overflow:hidden!important;background:#eaf0f7;border:1px solid #dbe3ee;border-radius:12px;height:40px;flex:0 0 auto}
+#dividas .debt-tabs-v176 button{min-width:108px;padding:0 19px;border:0!important;border-radius:0;background:transparent;color:#375171;font-size:12px;font-weight:750;white-space:nowrap;cursor:pointer;transition:background .12s,color .12s;outline-offset:-3px}
+#dividas .debt-tabs-v176 button + button {border-left:1px solid #dce5ef!important}
+#dividas .debt-tabs-v176 button.active, #dividas .debt-tabs-v176 button[aria-selected="true"]{background:#0c57a7!important;color:#fff!important;box-shadow:0 2px 8px rgba(12,87,167,.16)}
+#dividas .debt-tabs-v176 button:hover:not(.active){background:#dde8f6}
+#dividas #debtSearch{display:block!important;min-width:220px!important;max-width:320px!important;flex:0 1 280px!important;margin:0!important;height:40px!important;border-radius:12px!important}
+#dividas .tablewrap{overflow-x:auto!important;overflow-y:visible!important;max-height:none!important}
+#dividas .tablewrap table{width:100%!important;min-width:980px!important;table-layout:fixed!important}
+#dividas .tablewrap table th,#dividas .tablewrap table td{box-sizing:border-box!important;min-width:0!important;max-width:none!important;padding:10px 6px!important;overflow-wrap:normal;word-break:normal}
+#dividas .tablewrap table th:nth-child(1),#dividas .tablewrap table td:nth-child(1){width:23%!important;white-space:normal!important;overflow-wrap:anywhere}
+#dividas .tablewrap table th:nth-child(2),#dividas .tablewrap table td:nth-child(2){display:table-cell!important;width:12%!important;white-space:normal!important;overflow-wrap:anywhere}
+#dividas .tablewrap table th:nth-child(3),#dividas .tablewrap table td:nth-child(3){display:table-cell!important;width:6%!important;text-align:center}
+#dividas .tablewrap table th:nth-child(4),#dividas .tablewrap table td:nth-child(4){display:table-cell!important;width:6%!important;text-align:center}
+#dividas .tablewrap table th:nth-child(5),#dividas .tablewrap table td:nth-child(5){width:9%!important;white-space:nowrap!important}
+#dividas .tablewrap table th:nth-child(6),#dividas .tablewrap table td:nth-child(6){width:9%!important;white-space:nowrap!important}
+#dividas .tablewrap table th:nth-child(7),#dividas .tablewrap table td:nth-child(7){width:9%!important;white-space:nowrap!important}
+#dividas .tablewrap table th:nth-child(8),#dividas .tablewrap table td:nth-child(8){display:table-cell!important;width:7%!important;text-align:center}
+#dividas .tablewrap table th:nth-child(9),#dividas .tablewrap table td:nth-child(9){display:none!important}
+#dividas .tablewrap table th:nth-child(10),#dividas .tablewrap table td:nth-child(10){width:8%!important;text-align:center}
+#dividas .tablewrap table th:nth-child(11),#dividas .tablewrap table td:nth-child(11){width:7%!important;white-space:nowrap!important;text-align:right}
+#dividas .tablewrap table th:nth-child(12),#dividas .tablewrap table td:nth-child(12){width:4%!important;text-align:right}
+#dividas #debtBody .progress,#dividas #debtBody .v74-progress .progress{display:none!important}
+#dividas #debtBody .v74-progress, #dividas #debtBody .debt-progress-wrap{display:block!important;text-align:center!important}
+#dividas #debtBody .v74-progress small,#dividas #debtBody .debt-progress-wrap small{font-weight:900!important;color:#172a44!important;font-size:11px!important}
+#dividas #debtBody .v176-progress-pct{font-size:11px!important;font-weight:900!important;color:#172a44!important}
+#dividas #debtBody .ct-tag-v39{margin-left:6px}
+@media(max-width:680px){#dividas .section-tools .filterbar{justify-content:flex-start!important;width:100%!important}#dividas .debt-tabs-v176{width:100%!important}#dividas .debt-tabs-v176 button{flex:1!important;min-width:0!important}#dividas #debtSearch{max-width:none!important;flex:1 1 100%!important;width:100%!important}}
+</style>
+<script id="pp-v176-debt-tabs-fast">
+(()=>{
+  'use strict';
+  const tabs=document.getElementById('debtTabsV176');
+  const section=document.getElementById('dividas');
+  if(!tabs||!section)return;
+  let status='pending';
+  let searchDelay=null;
+  let painting=false;
+  function align(){
+    const canonical=document.getElementById('debtStatusFilterV76');
+    const legacy=document.getElementById('debtFilter');
+    if(canonical)canonical.value=status;
+    if(legacy)legacy.value=status;
+    const secondary=document.getElementById('debtNegotiationFilterV76');
+    if(secondary)secondary.value='all';
+    const old=document.getElementById('debtNegotiationFilter');
+    if(old)old.value='all';
+    tabs.querySelectorAll('button[data-v176-debt]').forEach(b=>{
+      const active=b.dataset.v176Debt===status;
+      b.classList.toggle('active',active);
+      b.setAttribute('aria-selected',String(active));
+      b.setAttribute('tabindex',active?'0':'-1');
+    });
+  }
+  function render(){
+    if(painting)return;
+    painting=true;
+    try{
+      align();
+      // Reaproveita o renderizador V74 existente, sem persistir dados, sem importar backup.
+      const fn=window.ppDebtV74?.render;
+      if(typeof fn==='function')fn();
+      else if(typeof window.renderDebts==='function')window.renderDebts();
+    }finally{painting=false}
+  }
+  tabs.addEventListener('click',e=>{
+    const b=e.target.closest('button[data-v176-debt]');
+    if(!b)return;
+    e.preventDefault();e.stopImmediatePropagation();
+    if(status===b.dataset.v176Debt)return;
+    status=b.dataset.v176Debt;
+    render();
+  },true);
+  tabs.addEventListener('keydown',e=>{
+    if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;
+    e.preventDefault();e.stopImmediatePropagation();
+    status=status==='pending'?'paid':'pending';
+    render();
+    tabs.querySelector('button.active')?.focus();
+  },true);
+  // Clona apenas a entrada da busca: os ouvintes antigos ficam no elemento descartado.
+  // Os lançamentos, os bancos e os filtros das demais páginas não são tocados.
+  const original=document.getElementById('debtSearch');
+  if(original){
+    const clean=original.cloneNode(true);
+    clean.value=original.value;
+    original.replaceWith(clean);
+    clean.addEventListener('input',e=>{
+      e.stopImmediatePropagation();
+      if(searchDelay!==null)clearTimeout(searchDelay);
+      searchDelay=setTimeout(()=>{searchDelay=null;render()},85);
+    },true);
+    clean.addEventListener('search',e=>{e.stopImmediatePropagation();if(searchDelay!==null)clearTimeout(searchDelay);searchDelay=null;render()},true);
+  }
+  // Deixa o status pendente como inicial, sem disparar eventos legados.
+  align();
+  render();
+  window.ppDebtViewV176={render,selected:()=>status};
+})();
+</script>
